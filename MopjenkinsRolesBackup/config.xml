@@ -1,0 +1,89 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Role in order to backup Jenkins Roles configurations (config.xml files)</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.4">
+      <projectUrl>git@github.com:fmoyen/MopjenkinsRolesBackup.git/</projectUrl>
+      <displayName></displayName>
+    </com.coravy.hudson.plugins.github.GithubProjectProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>BRANCH</name>
+          <description></description>
+          <defaultValue>master</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.9.3">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>git@github.com:fmoyen/MopjenkinsRolesBackup.git</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>*/master</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions/>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers>
+    <hudson.triggers.TimerTrigger>
+      <spec>H(0-59)/10 * * * *</spec>
+    </hudson.triggers.TimerTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>#!/bin/bash
+
+JobsDir=&quot;$HOME/jobs&quot;
+GitRepo=$PWD
+
+git checkout $BRANCH
+
+echo
+echo &quot;Jenkins jobs config $JobsDir&quot;
+ls -la $JobsDir/*/config.xml
+echo
+echo &quot;Git repository $GitRepo&quot;
+ls -la $GitRepo/*/config.xml
+
+echo
+echo &quot;--&gt; Copy jenkins jobs config.xml files to git repository&quot;
+for i in $(ls -d $JobsDir/*)
+do
+  dir=$(basename $i)
+  echo $dir
+  mkdir -p $GitRepo/$dir
+  cp --preserve=all $i/config.xml $GitRepo/$dir
+  git add $GitRepo/$dir
+done
+
+
+echo
+echo &quot;--&gt; Commit&quot;
+cd $GitRepo
+git commit -a --dry-run --porcelain &gt; $HOME/msg.txt
+git commit -a --file=$HOME/msg.txt
+
+echo
+echo &quot;--&gt; Push&quot;
+git push</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

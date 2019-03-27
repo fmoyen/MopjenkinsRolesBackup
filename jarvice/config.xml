@@ -1,0 +1,233 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<com.cloudbees.hudson.plugins.folder.Folder plugin="cloudbees-folder@6.7">
+  <actions/>
+  <properties>
+    <com.cloudbees.hudson.plugins.folder.properties.FolderCredentialsProvider_-FolderCredentialsProperty>
+      <domainCredentialsMap class="hudson.util.CopyOnWriteMap$Hash">
+        <entry>
+          <com.cloudbees.plugins.credentials.domains.Domain plugin="credentials@2.1.18">
+            <specifications/>
+          </com.cloudbees.plugins.credentials.domains.Domain>
+          <java.util.concurrent.CopyOnWriteArrayList>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE</id>
+              <description>JARVICE apikey</description>
+              <username>snap</username>
+              <password>{AQAAABAAAAAwtkJZyB2ICINuK9PQbox16HOZA3hWipxC+ehkVu7B28M/Iy7b9GH/QGvHUG5X2HL3/B5qAUW5E54sLdHIUfzJ8A==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>DockerHub</id>
+              <description>DockerHub login</description>
+              <username>capisnap</username>
+              <password>{AQAAABAAAAAgj7FXPRnOMN8Mmw7jMdcP5BovkI/SfMxo/3j5sGTz43UNifIhL6LWSSYw7ksucZbR}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-market</id>
+              <description>JARVICE API key for IBM market team</description>
+              <username>snaptest2</username>
+              <password>{AQAAABAAAAAwFO/Wq32SP3oLQcQkPgRqlJW05x/6/hAn2KbLvLQ0VtjwxPEcFCkQjdX+GjObfLrIriYKi8eekTK9KfzhAJJXag==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>IBMGitHub</id>
+              <description>IBM GitHub access token</description>
+              <username>bmesnet</username>
+              <password>{AQAAABAAAAAwglAbWINjke/OQWPATreTkZMVaY6IhkzGW7gBCtdd6OrKCIuI3PSVgz4HU0ztpWkB1mAmsReA46Ezg7nSE/X8+A==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-test</id>
+              <description>JARVICE API key for capidev test account</description>
+              <username>snapt</username>
+              <password>{AQAAABAAAAAwgEeMJ+DylUBaJ7aaZEmKjMKRvDBsiP1wbd6Krdqbqgxem++VwSMx/mQafQrSbFxDcnn18GpcNZHnXnGd0O0Fjg==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-h265</id>
+              <description>JARVICE API Key</description>
+              <username>h265_codec_apps</username>
+              <password>{AQAAABAAAAAwFRTb7mEcWnkVUZ+yU2yjb+fHHPP87CKrVXqpZdVvDPbXJ3lfXOTLAIumylkPingQQtBKDMvVl7xuGH0JbCTlgg==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-string</id>
+              <description>JARVICE API Key</description>
+              <username>string_match_apps</username>
+              <password>{AQAAABAAAAAwqTxzLxwAKy5Tq0e+3spFUqgIRdgrLalp9H4oJ2MXpLAOniQ5uzc6gVCEMf+5iTOBpQT6Sd6TUlgS7RRmRXoqrA==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-video</id>
+              <description>JARVICE API Key</description>
+              <username>video_apps</username>
+              <password>{AQAAABAAAAAwoFRsyB6SwsaIjihC4pAhVazHzzO9NFCm/SfID+Im61dX8cyKhPq1FGieDcWktHjcIDQ4E3mRKUqZ3g/UAI3GoQ==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-coral</id>
+              <description>JARVICE API Key</description>
+              <username>coral_2_apps</username>
+              <password>{AQAAABAAAAAwM8aQcAh4gn4GkRrWAmf4QUM1DwCxgqKlsSKoa3pmrx5bBpAPVnEhEA4n9wNVUktouUl9maEMZp1TXvSeD9Ljbg==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-block</id>
+              <description>JARVICE API Key</description>
+              <username>block_chain_apps</username>
+              <password>{AQAAABAAAAAwFn5gbUYK7d/lkrCM4ejVvz49+9bK7pcyu/wk0vT6LNYzJ+DYQMpyrbiKb+ZEK+fU+8955WQ+qnEWedFQ8kXNLw==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-ml</id>
+              <description>JARVICE API Key</description>
+              <username>ml_interface_apps</username>
+              <password>{AQAAABAAAAAw3GC4ZKOiev3odi4IAgTWP8MXzLMy4zN1dIuG1IeB+eDD1jLrweT/d+wOQYaw0d+5MrlIP9p/bTI0YSqIBEJyIA==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-mldl</id>
+              <description>JARVICE API Key</description>
+              <username>mldl_algo_apps</username>
+              <password>{AQAAABAAAAAwbKzKQBzyW5KKLj3I4ub/orC3J6LLPBLYnv+HKbtuJVGtdU/E5urnqMhp2uiafLU2Z37CitrwfWdIhxFWqvwFRw==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-compression</id>
+              <description>JARVICE API Key</description>
+              <username>compression_apps</username>
+              <password>{AQAAABAAAAAwo9C4V7EN/9I+sRkbGLffnPYxh3oicd/teu91Gda2k/1dEZAOAfpvsT0PIbXDer0pZn8WSdYhILdtdtdm/LQjZw==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-trading</id>
+              <description>JARVICE API Key</description>
+              <username>trading_apps</username>
+              <password>{AQAAABAAAAAwin1e4fffOzdCawna8tLVyTUYx5GYnF/cQ1FPrKe+kXvIFzCLxq+EKOl7evELHh0W6Ic3+yiw2jjBP79dvzm55Q==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-nvidia</id>
+              <description>JARVICE API Key</description>
+              <username>nvida_dl_apps</username>
+              <password>{AQAAABAAAAAwN2ds7Q4HiIpDBLI6EuXjsPtqk/jsQKCkixN//q3GZoSNRIZUPt5EYvjvNTPa67g1itZ1pPNWufQcEk7JSbDhew==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-h265-test</id>
+              <description>JARVICE API Key</description>
+              <username>h265_codec_test</username>
+              <password>{AQAAABAAAAAws7Xe4Fz+0fjoYYU6d/TWVeYNoajhuzLp2deOdeTxR7w8adADDoX0Tg0ZVF94+wrzLKMCAAjtfjhS1C5rSg+FHw==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-nvida-test</id>
+              <description>JARVICE API Key</description>
+              <username>nvida_dl_test</username>
+              <password>{AQAAABAAAAAwsaL5VNg68DSsftg+d5bHTvCNxvfCKFJOHfnu9vRrjX+ajOEX5UWP00KSxkQHEoYIPRsO70V5az893oPtUh15/A==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-string-test</id>
+              <description>JARVICE API Key</description>
+              <username>string_match_test</username>
+              <password>{AQAAABAAAAAwIrQcKADhBUvCqataEgTwFYHXqJHciDb6Fbpg+T8m/liy/fBSJ727VdYcqCdLsM0oefu1OQ+gWKByxsVk93CH9w==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-video-test</id>
+              <description>JARVICE API Key</description>
+              <username>video_test</username>
+              <password>{AQAAABAAAAAwbRvliRslCETgMl7hZiRg/Yeb0aOhj+h7XGnflLaFJRJ2geIAjzkPBlDFPdeM5MKedkP7syv2qo1NDndRbGQjGg==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-coral-test</id>
+              <description>JARVICE API Key</description>
+              <username>coral_2_test</username>
+              <password>{AQAAABAAAAAwODawEkVKAskoExFatbIB8+QC1TftyUbCUhkLPubT7FuxK+VvBaSvI7JVy/CVyVv5PlPwfWfiUrtHNxYlWoIkqw==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-block-test</id>
+              <description>JARVICE API Key</description>
+              <username>block_chain_test</username>
+              <password>{AQAAABAAAAAwLCDUXWqxZCxHjUg+BTR+Yy6WJyXGAsMzUZCcUtCABDyqcjOaeG0lNW3b2gFTuv5iAQBO/tJUE7ALCrIsikxMCQ==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-ml-test</id>
+              <description>JARVICE API Key</description>
+              <username>ml_interface_test</username>
+              <password>{AQAAABAAAAAwIbr2PuYejCSIuC4eXycqKgabGWRrZcKMgW4dgSkxngpLPWbooeSnm0cSkFcCspxflPxzR9weEjyy4LZohCi/Ew==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-mldl-test</id>
+              <description>JARVICE API Key</description>
+              <username>mldl_algo_test</username>
+              <password>{AQAAABAAAAAwCdJb6ROXRf4H7hzrGtwegdMidk/8DLtGq2XSL5On8QAceYlY2HSkDFdoLFiNuYpDf8Hk4mAUvsQ6jGgo+xHo2g==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-compression-test</id>
+              <description>JARVICE API Key</description>
+              <username>compression_test</username>
+              <password>{AQAAABAAAAAwFEZFiY1qM6C/vpn/V55jij0YWNafjPsjbODaxy/rK8HbKfj5Ga0JczZ8tnDPaBtsu0hTBQf1EGETAq3CSFt9fQ==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-trading-test</id>
+              <description>JARVICE API Key</description>
+              <username>trading_test</username>
+              <password>{AQAAABAAAAAwp/D1HzcVUQvR2a9Qn3HEbaKzeLAHLBie1k94CgPznoJQvez4IfdBI0mvBNBW34xg9lusVLUxotCoV+XYV7nHFw==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-IBMPDC</id>
+              <description>JARVICE API Key for IBM Marketplace</description>
+              <username>ibmpdc</username>
+              <password>{AQAAABAAAAAwknoo8keg5VYB5m7NXp8rVFYdZtddpGe/qoEGr7MViqacJ3JzwCygkq3ZmOdKAvxQtjBqtAFARc+BJAXAAkyoNQ==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-IBMMARKETPLACE</id>
+              <description>JARVICE API Key for IBM Marketplace Apps</description>
+              <username>capisnap_ibmmarket</username>
+              <password>{AQAAABAAAAAwaajgT0qp9z9xusiK1VyDUwwgz4ic8b0FL036VC9Vgp28R1UiVhStB/zBl2FRh3xemyz96/4Icm5yYrhmYyq+XQ==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl plugin="credentials@2.1.18">
+              <id>JARVICE-hackathon</id>
+              <description>JARVICE API Key</description>
+              <username>snap_hackathon</username>
+              <password>{AQAAABAAAAAwMFvRXvf+9EYvhmno4K5nqNQJw74/wVQh/ArqGDUcerSrWJeNlACyMDS2dVDYXWo3Ccos/Z6MGUJfJylkM7O6Sw==}</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+            <org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl plugin="plain-credentials@1.5">
+              <id>nimbix-key</id>
+              <description>nimbix signing key for SNAP</description>
+              <secret>{AQAAABAAAABQZmDouPWdTq1iqwSBWh+f/qEghlX8gSkmfgol/sNVUeG81KkGqV6fkGPqh3A7G6+GjooBCNfPkFYcGAT10G40gDotxbiSJFSsIY1QzKtP+TDAS0XVCo5KO0TZrrOcBlwf}</secret>
+            </org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl>
+          </java.util.concurrent.CopyOnWriteArrayList>
+        </entry>
+      </domainCredentialsMap>
+    </com.cloudbees.hudson.plugins.folder.properties.FolderCredentialsProvider_-FolderCredentialsProperty>
+  </properties>
+  <folderViews class="com.cloudbees.hudson.plugins.folder.views.DefaultFolderViewHolder">
+    <views>
+      <hudson.model.AllView>
+        <owner class="com.cloudbees.hudson.plugins.folder.Folder" reference="../../../.."/>
+        <name>All</name>
+        <filterExecutors>false</filterExecutors>
+        <filterQueue>false</filterQueue>
+        <properties class="hudson.model.View$PropertyList"/>
+      </hudson.model.AllView>
+      <hudson.model.ListView>
+        <owner class="com.cloudbees.hudson.plugins.folder.Folder" reference="../../../.."/>
+        <name>DISABLED</name>
+        <filterExecutors>false</filterExecutors>
+        <filterQueue>false</filterQueue>
+        <properties class="hudson.model.View$PropertyList"/>
+        <jobNames>
+          <comparator class="hudson.util.CaseInsensitiveComparator"/>
+          <string>hackathon-deploy</string>
+          <string>jarvice-deploy</string>
+        </jobNames>
+        <jobFilters/>
+        <columns>
+          <hudson.views.StatusColumn/>
+          <hudson.views.WeatherColumn/>
+          <hudson.views.JobColumn/>
+          <hudson.views.LastSuccessColumn/>
+          <hudson.views.LastFailureColumn/>
+          <hudson.views.LastDurationColumn/>
+          <hudson.views.BuildButtonColumn/>
+          <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.3.2"/>
+        </columns>
+        <recurse>false</recurse>
+        <statusFilter>false</statusFilter>
+      </hudson.model.ListView>
+    </views>
+    <tabBar class="hudson.views.DefaultViewsTabBar"/>
+  </folderViews>
+  <healthMetrics>
+    <com.cloudbees.hudson.plugins.folder.health.WorstChildHealthMetric>
+      <nonRecursive>false</nonRecursive>
+    </com.cloudbees.hudson.plugins.folder.health.WorstChildHealthMetric>
+  </healthMetrics>
+  <icon class="com.cloudbees.hudson.plugins.folder.icons.StockFolderIcon"/>
+</com.cloudbees.hudson.plugins.folder.Folder>
