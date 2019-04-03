@@ -55,33 +55,39 @@ GitRepo=$PWD
 git checkout $BRANCH
 
 echo
-echo &quot;Jenkins jobs config $JobsDir&quot;
-ls -la $JobsDir/*/config.xml
+echo &quot;--&gt; Jenkins jobs config $JobsDir&quot;
+find $JobsDir -name config.xml -ls
 echo
-echo &quot;Git repository $GitRepo&quot;
-ls -la $GitRepo/*/config.xml
+echo &quot;--&gt; Git repository $GitRepo&quot;
+find $GitRepo -name config.xml -ls
 
 echo
 echo &quot;--&gt; Copy jenkins jobs config.xml files to git repository&quot;
-for i in $(ls -d $JobsDir/*)
+cd $JobsDir
+for i in $(find . -name config.xml -print)
 do
-  dir=$(basename $i)
-  echo $dir
+  dir=$(dirname $i)
+  echo $dir | cut -c3-
   mkdir -p $GitRepo/$dir
-  cp --preserve=all $i/config.xml $GitRepo/$dir
+  cp --preserve=all $i $GitRepo/$dir
   git add $GitRepo/$dir
 done
 
+echo
+echo &quot;--&gt; Updated Git repository $GitRepo&quot;
+find $GitRepo -name config.xml -ls
 
 echo
 echo &quot;--&gt; Commit&quot;
 cd $GitRepo
-git commit -a --dry-run --porcelain &gt; $HOME/msg.txt
-git commit -a --file=$HOME/msg.txt
+git commit -a --dry-run --porcelain &gt; /tmp/msg.txt
+git commit -a --file=/tmp/msg.txt
+rm /tmp/msg.txt
 
 echo
 echo &quot;--&gt; Push&quot;
-git push</command>
+git push
+</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
