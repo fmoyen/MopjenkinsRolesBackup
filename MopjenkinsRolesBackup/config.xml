@@ -66,11 +66,10 @@ echo &quot;--&gt; Copy jenkins jobs config.xml files to git repository&quot;
 cd $JobsDir
 for i in $(find . -name config.xml -print)
 do
-  dir=$(dirname $i)
-  echo $dir | cut -c3-
+  dir=$(dirname $i | cut -c3-)
+  echo $dir
   mkdir -p $GitRepo/$dir
   cp --preserve=all $i $GitRepo/$dir
-  git add $GitRepo/$dir
 done
 
 echo
@@ -80,6 +79,7 @@ find $GitRepo -name config.xml -ls
 echo
 echo &quot;--&gt; Commit&quot;
 cd $GitRepo
+git add .
 git commit -a --dry-run --porcelain &gt; /tmp/msg.txt
 git commit -a --file=/tmp/msg.txt
 rm /tmp/msg.txt
