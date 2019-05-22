@@ -1,5 +1,5 @@
 <?xml version='1.1' encoding='UTF-8'?>
-<project>
+<matrix-project plugin="matrix-project@1.14">
   <keepDependencies>false</keepDependencies>
   <properties/>
   <scm class="hudson.scm.NullSCM"/>
@@ -9,7 +9,11 @@
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers/>
   <concurrentBuild>false</concurrentBuild>
+  <axes/>
   <builders/>
   <publishers/>
   <buildWrappers/>
-</project>
+  <executionStrategy class="hudson.matrix.DefaultMatrixExecutionStrategyImpl">
+    <runSequentially>false</runSequentially>
+  </executionStrategy>
+</matrix-project>
