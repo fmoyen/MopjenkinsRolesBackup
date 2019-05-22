@@ -194,6 +194,206 @@ echo &quot;***********************************************************&quot;</co
         <propertiesFilePath>export_props.properties</propertiesFilePath>
       </info>
     </EnvInjectBuilder>
+    <org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder plugin="conditional-buildstep@1.3.6">
+      <condition class="org.jenkins_ci.plugins.run_condition.core.BooleanCondition" plugin="run-condition@1.2">
+        <token>$SKIP</token>
+      </condition>
+      <buildStep class="org.jenkins_ci.plugins.fail_the_build.FixResultBuilder" plugin="fail-the-build-plugin@1.0">
+        <defaultResultName>ABORTED</defaultResultName>
+        <success></success>
+        <unstable></unstable>
+        <failure></failure>
+        <aborted></aborted>
+      </buildStep>
+      <runner class="org.jenkins_ci.plugins.run_condition.BuildStepRunner$Fail" plugin="run-condition@1.2"/>
+    </org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder>
+    <hudson.tasks.Shell>
+      <command>#!/bin/bash
+set +x                           # reduce Jenkins output
+#ulimit -c unlimited             # reduce core dumps from what .profile says (kB)
+ulimit -S -c 128000
+echo &quot;****************************************************************************************&quot;
+echo &quot;EXECUTING SECOND SHELL FROM OpenCAPI SIM JENKINS - V1.1 - 2019 march 06 - ...&quot;
+echo &quot;****************************************************************************************&quot;
+export PATH=$PATH:/usr/local/bin # python3 needs this path setup
+export USERHOME=`pwd`
+export SNAP_ROOT=$USERHOME/snap
+SIM=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 1)    # chars up to  first &apos;_&apos; identify Simulator
+VIV=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 2)    # chars behind first &apos;_&apos; identify Vivado version
+
+echo &quot;********************************************************************************&quot;
+echo &quot;LSF SETUP ...&quot;
+ulimit -c unlimited
+export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
+export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+export LSF_BINDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+export LSF_SUBMITTER_OSTYPE=Linux
+export LSF_ENVDIR=/home/lsfbb/prod/conf
+LSF=&apos;-P zsort -M 2 -C 2000 -I -n 4 -R type=X86_64 -R span[hosts=1]&apos;  # Project, GB_mem, KB_core, #_processors, type of processor
+
+echo &quot;*******************************************************************************&quot;
+rm -rf ocse
+case $CRD in 
+  #*) 		branch=&apos;issue26&apos;;;
+  *) 		branch=&apos;master&apos;;;
+esac
+echo &quot;Get OpenCAPI Simulation Environment branch=$branch for card=$CRD...&quot;
+git clone -b $branch git@github.ibm.com:lancet/ocse ocse;echo &quot;git clone RC=$?&quot;
+export OCSE_INSTALL_DIR=../ocse
+
+cd ${SNAP_ROOT}
+# AC debug restoring default pslse through Luyong dir
+#echo &quot;export PSLSE_ROOT=/afs/vlsilab.boeblingen.ibm.com/proj/fpga/framework/luyong/oc_snap/ocse&quot; &gt;snap_env.sh
+
+echo &quot;export OCSE_ROOT=${USERHOME}/ocse&quot; &gt;snap_env.sh
+#echo &quot;use local OCSE repo to get rid of undefined reference ocxl_afu_get_event_fd&quot;
+#echo &quot;export PSLSE_ROOT=/afs/bb/proj/fpga/framework/jkayser/ocse_issue26&quot; &gt;snap_env.sh
+#echo &quot;#PSL_DCP not included in Simulation, replaced anyhow by PSLSE&quot; &gt;&gt;snap_env.sh
+#echo &quot;#export PSL_DCP=/afs/bb/proj/fpga/framework/cards/$CRD/current/b_route_design.dcp&quot; &gt;&gt;snap_env.sh
+#echo &quot;#setup: XILINX_LOCAL_USER_DATA=${XILINX_LOCAL_USER_DATA}, overwrite=no to prevent write access error in XilincTclStore (tclapp:load_apps)&quot; &gt;&gt;snap_env.sh
+#echo &quot;export XILINX_LOCAL_USER_DATA=no&quot; &gt;&gt; snap_env.sh
+
+echo &quot;****************************************************************************************&quot;
+case $SIM:$VIV in    # test multiple Vivado versions in one build
+  xcelium:2018*)	# Xcelium needs Vivado 2018.1 or higher
+    export VIV_VERSION=$VIV; export IES_VERSION=&quot;17.10.002&quot;
+    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Xcelium/${IES_VERSION}
+    export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/xce${IES_VERSION};;
+  xcelium:*)
+    echo &quot;unsupported Vivado version $VIV for XCELIUM&quot;;exit 1;;
+  *:2016.4)
+    export VIV_VERSION=&quot;2016.4&quot;; export IES_VERSION=&quot;15.10.s19&quot;
+    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION} 
+	export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION};;
+  *2017.4|*2018.1|*2018.2)
+    export VIV_VERSION=$VIV; export IES_VERSION=&quot;15.20.s18&quot;
+    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION}
+#   export CDS_INST_DIR=/afs/apd/func/vlsi/cds/Incisive/${IES_VERSION}  # for 15.20.046 only
+	export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION};; 
+  *)
+    echo &quot;unsupported Vivado version $VIV&quot;;exit 1;;
+esac
+
+echo &quot;Vivado SETUP $VIV_VERSION ...&quot;
+export XILINX_ROOT=/afs/bb/proj/fpga/xilinx
+export XILINXD_LICENSE_FILE=2100@pokwinlic1.pok.ibm.com
+source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
+case $SIM:$VIV in
+  xcelium:2018.2 ) echo &quot;Cadence SETUP $IES_VERSION for Vivado 2018.2&quot;
+    export PATH=$CDS_INST_DIR/tools/bin:$PATH
+#   export CDS_LIC_FILE=5280@auslnxlic01.austin.ibm.com
+    export CDS_LIC_FILE=5280@cdsserv1.pok.ibm.com:5280@cdsserv2.pok.ibm.com
+    export LD_LIBRARY_PATH=$CDS_INST_DIR/tools/lib/64bit:$LD_LIBRARY_PATH
+    if [ -f &quot;$IES_LIBS/cds.lib&quot; ]; then echo &quot;IES_LIBS found in $IES_LIBS&quot;
+    else echo &quot;WARNING: cannot find IES_LIBS=$IES_LIBS, Cadence compilation won&apos;t work&quot;;exit 1;fi
+    ;;
+  irun:*|IRUN:*|xcelium:* ) echo &quot;Cadence SETUP $IES_VERSION for Vivado 2018.1&quot;
+    export PATH=$CDS_INST_DIR/tools/bin:$PATH
+    export CDS_LIC_FILE=5280@hdlic10.boeblingen.de.ibm.com:5280@hdlic11.boeblingen.de.ibm.com
+    export LD_LIBRARY_PATH=$CDS_INST_DIR/tools/lib/64bit:$LD_LIBRARY_PATH
+#   echo &quot;export LD_LIBRARY_PATH=$CDS_INST_DIR/tools/lib/64bit:$LD_LIBRARY_PATH&quot; &gt;&gt; snap_env.sh
+    if [ -f &quot;$IES_LIBS/cds.lib&quot; ]; then echo &quot;IES_LIBS found in $IES_LIBS&quot;
+    else echo &quot;WARNING: cannot find IES_LIBS=$IES_LIBS, Cadence compilation won&apos;t work&quot;;exit 1;fi
+    ;;
+esac
+
+echo &quot;********************************************************************************&quot;
+echo &quot;Build Simulation Model ...&quot;
+case $ACT in                    # select config &amp; compile action
+  &apos;test&apos;) 
+    echo &quot;test exit 0&quot;;exit 0;; # just exit 
+  &apos;hls_intersect_h&apos;)  
+    make $CRD.hls_intersect.defconfig
+    source ./snap_env.sh        # execute to exploit ACTION_ROOT
+    echo &quot;action compile intersect hash&quot;;
+    make -C ${ACTION_ROOT} clean config_h
+    ;;
+  &apos;hls_intersect_s&apos;)  
+    make $CRD.hls_intersect.defconfig
+    source ./snap_env.sh        # execute to exploit ACTION_ROOT
+    echo &quot;action compile intersect sort&quot;;
+    make -C ${ACTION_ROOT} clean config_s
+    ;;
+  *DENALI*)
+    act2=${ACT%.DENALI}
+    echo &quot;build action for ACT=$ACT act2=$act2&quot;
+    make $CRD.$act2.defconfig
+    ;;
+  *) 
+#   echo &quot;pwd:&quot;;pwd
+#   echo &quot;pwd content:&quot;;ls
+#   echo &quot;defconfig:&quot;;ls defconfig/
+    make $CRD.$ACT.defconfig
+    ;;
+esac
+case $SIM:$ACT in
+  &apos;xsim&apos;:*|&apos;XSIM&apos;:* )             echo &quot;export SIMULATOR=xsim&quot;     &gt;&gt; .snap_config.sh
+                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+                                  echo &quot;SIM_XSIM=y&quot;                &gt;&gt; .snap_config;;   # overwrite simulator
+  &apos;irun&apos;:*DENALI|&apos;IRUN&apos;:*DENALI ) echo &quot;ENABLE_DENALI=y&quot;           &gt;&gt; .snap_config;make -s oldconfig
+                                  echo &quot;export SIMULATOR=irun&quot;     &gt;&gt; .snap_config.sh
+                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+                                  echo &quot;SIM_IRUN=y&quot;                &gt;&gt; .snap_config;;   # overwrite simulator
+  &apos;irun&apos;:*|&apos;IRUN&apos;:* )             echo &quot;export SIMULATOR=irun&quot;     &gt;&gt; .snap_config.sh
+                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+                                  echo &quot;SIM_IRUN=y&quot;                &gt;&gt; .snap_config;;   # overwrite simulator
+  xcelium:*DENALI)                echo &quot;ENABLE_DENALI=y&quot;           &gt;&gt; .snap_config;make -s oldconfig
+  			                      echo &quot;export SIMULATOR=xcelium&quot;  &gt;&gt; .snap_config.sh
+                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+                                  echo &quot;SIM_XCELIUM=y&quot;             &gt;&gt; .snap_config;;   # overwrite simulator
+  xcelium:*)                      echo &quot;export SIMULATOR=xcelium&quot;  &gt;&gt; .snap_config.sh
+                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+                                  echo &quot;SIM_XCELIUM=y&quot;             &gt;&gt; .snap_config;;   # overwrite simulator
+  questa:*)                       echo &quot;export SIMULATOR=questa&quot;   &gt;&gt; .snap_config.sh
+                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+                                  echo &quot;SIM_QUESTA=y&quot;              &gt;&gt; .snap_config;;   # overwrite simulator
+  modelsim:*)                     echo &quot;export SIMULATOR=modelsim&quot; &gt;&gt; .snap_config.sh
+                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+                                  echo &quot;SIM_MODELSIM=y&quot;            &gt;&gt; .snap_config;;   # overwrite simulator
+  *) echo &quot;WARNING: unknown simulator=$SIM, continuing with default&quot;;;
+esac
+# execute with LSF, SNAP_ROOT must reside in AFS
+#echo &quot;PATH=$PATH&quot;
+#which irun
+
+#Added 2019 03 06
+git submodule init
+git submodule update
+
+bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}_model&quot; &quot;make model&quot;|| exit 1
+
+echo &quot;********************************************************************************&quot;
+echo &quot;Run $SIM Simulation ...&quot;
+cd ${SNAP_ROOT}/hardware/sim
+##### enable SW trace
+# export SNAP_TRACE=0xf
+##### execute locally
+ #./run_sim -list testlist.sh -noaet
+case &quot;$ACT&quot; in
+  hdl_example.NORAM )    test=../../actions/hdl_example/tests/10140000_test.sh;;
+  hdl_example.BRAM )     test=../../actions/hdl_example/tests/10140000_test.sh;;
+  hdl_example.SDRAM    ) test=../../actions/hdl_example/tests/10140000_ddr_test.sh;;
+  hls_helloworld )       test=../../actions/$ACT/tests/test_0x10141008.sh;;
+  hls_memcopy )          test=../../actions/$ACT/tests/test_0x10141000.sh;;
+  hls_memcopy_1024 )     test=../../actions/$ACT/tests/test_0x10141000.sh;;
+  hls_latency_eval_1024 )test=../../actions/$ACT/tests/test_0x10141009.sh;;
+esac
+
+ ./run_sim -list $test -noaet
+##### execute on AFS with LSF, report error as unstable build
+#case $SIM in
+#  &apos;xsim&apos;|&apos;XSIM&apos; ) bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;./run_sim -list testlist.sh -noaet&quot;||exit 100;;
+#  &apos;irun&apos;|&apos;IRUN&apos; ) bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;./run_sim -irun -list testlist.sh -noaet&quot;||exit 100;;
+#  *)              bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;./run_sim -list testlist.sh -noaet&quot;||exit 100;;
+#esac
+echo &quot;in case of success : cleaning hardware/ip/ directory to save space&quot;
+rm -rf ../ip/
+echo &quot;because disk size is only 8GB : cleaning also hardware/sim/ directory to save space&quot;
+rm -rf ../sim/
+</command>
+    </hudson.tasks.Shell>
   </builders>
   <publishers/>
   <buildWrappers>
