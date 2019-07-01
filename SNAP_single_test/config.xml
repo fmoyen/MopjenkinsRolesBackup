@@ -106,14 +106,14 @@ H 18-23/4 * * *</spec>
   <concurrentBuild>true</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>set +x                               # reduce Jenkins output
+      <command>set -x                               # reduce Jenkins output
 ulimit -c unlimited                  # limit core dumps
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Variables
 
 TESTBOXES=(${boeBoxes[*]} ${mopBoxes[*]}) # init array of systems
-CARDSList=($CARDS)
+# CARDSList=($CARDS)
 
 BoeIMGRootDir=&quot;/data/Images&quot;
 IMGFileName=$(basename $BoeIMGFile)
@@ -433,15 +433,15 @@ fi</command>
       <tokenCredentialId></tokenCredentialId>
       <botUser>false</botUser>
       <room></room>
-      <startNotification>true</startNotification>
-      <notifySuccess>true</notifySuccess>
-      <notifyAborted>true</notifyAborted>
-      <notifyNotBuilt>true</notifyNotBuilt>
-      <notifyUnstable>true</notifyUnstable>
+      <startNotification>false</startNotification>
+      <notifySuccess>false</notifySuccess>
+      <notifyAborted>false</notifyAborted>
+      <notifyNotBuilt>false</notifyNotBuilt>
+      <notifyUnstable>false</notifyUnstable>
       <notifyRegression>false</notifyRegression>
-      <notifyFailure>true</notifyFailure>
-      <notifyBackToNormal>true</notifyBackToNormal>
-      <notifyRepeatedFailure>true</notifyRepeatedFailure>
+      <notifyFailure>false</notifyFailure>
+      <notifyBackToNormal>false</notifyBackToNormal>
+      <notifyRepeatedFailure>false</notifyRepeatedFailure>
       <includeTestSummary>false</includeTestSummary>
       <includeFailedTests>false</includeFailedTests>
       <commitInfoChoice>NONE</commitInfoChoice>
