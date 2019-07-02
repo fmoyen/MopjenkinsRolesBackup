@@ -201,7 +201,7 @@ for box in &quot;${TESTBOXES[@]}&quot;;do
   then
      # $box is a Montpellier server
      bindir=&quot;/home/fpga/&quot;
-     RC=0;ssh $box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
+     RC=0;ssh fpga@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
   fi
 
   if [ &quot;$RC&quot; == &quot;0&quot; ]; then : 
@@ -253,7 +253,7 @@ for loop in `seq 1 $maxloop`;do
       [1234]:0)
         for cardid in $cards;do
           LOCK=&quot;jenkins_lock_card&quot;$cardid
-		      RC=0;ssh $box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
+		      RC=0;ssh fpga@$box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
 		      if [ $RC == &quot;0&quot; ]; then :
 		        echo &quot;`date` box=$box $LOCK lock RC=$RC&quot;; 
 		        trap finish EXIT  # register finish/unlock function, after lock is set
@@ -277,11 +277,11 @@ for loop in `seq 1 $maxloop`;do
           echo &quot;hours=$hours, nusers=$nusers, now lock &amp; notify &amp; test&quot;
 		      for cardid in $cards;do
       	    LOCK=&quot;jenkins_lock_card&quot;$cardid
-		        RC=0;ssh $box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
+		        RC=0;ssh fpga@$box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
 		        if [ $RC == &quot;0&quot; ]; then :
 	  	        echo &quot;`date` box=$box $LOCK lock RC=$RC&quot;; 
 	   	        trap finish EXIT  # register finish/unlock function, after lock is set
-              ssh $box wall &quot;WARNING: JENKINS TEST on FPGA CARD=$CRD ID=$cards&quot;
+              ssh fpga@$box wall &quot;WARNING: JENKINS TEST on FPGA CARD=$CRD ID=$cards&quot;
 		          break 3
 		        else 
 			        echo &quot;box=$box $LOCK already locked, try next card&quot;
@@ -302,7 +302,7 @@ ssh fpga@${box} &quot;echo Image     : /home/fpga/$IMGFileName &gt;&gt; jenkins.
 ssh fpga@${box} &quot;echo Project_name: ${PROJECT_NAME}   &gt;&gt; jenkins.log&quot;
 ssh fpga@${box} &quot;echo Build No  : ${BUILD_NUMBER}     &gt;&gt; jenkins.log&quot;
 ssh fpga@${box} &quot;echo Git Branch: ${GIT_BRANCH}       &gt;&gt; jenkins.log&quot;
-ssh $box tail -n8 jenkins.log
+ssh fpga@$box tail -n8 jenkins.log
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Copying Working directory TARGET_DIR into $box:/home/fpga
@@ -311,14 +311,14 @@ pwd=`pwd`
 echo &quot;pwd=$pwd&quot;
 TARGET_DIR=&quot;`basename $pwd`-${ReducedFileName}-${BUILD_NUMBER}&quot;
 RUN=&quot;./actions/scripts/snap_jenkins.sh&quot;
-echo &quot;create project dir, if not avail&quot;;      ssh $box mkdir -p ${TARGET_DIR}
+echo &quot;create project dir, if not avail&quot;;      ssh fpga@$box mkdir -p ${TARGET_DIR}
 echo &quot;Copy workspace ${TARGET_DIR} to ${box}&quot;;rsync -az snap/ ${box}:/home/fpga/${TARGET_DIR}
-#echo &quot;remote workspace content6:&quot;;           ssh $box ls -al ${TARGET_DIR}
+#echo &quot;remote workspace content6:&quot;;           ssh fpga@$box ls -al ${TARGET_DIR}
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Copying Image(s) into $box:/home/fpga/images
 
-echo &quot;mkdir ${ExecutorIMGRootDir}/$CRD, if not avail&quot;;            ssh $box mkdir -p ${ExecutorIMGRootDir}/$CRD
+echo &quot;mkdir ${ExecutorIMGRootDir}/$CRD, if not avail&quot;;            ssh fpga@$box mkdir -p ${ExecutorIMGRootDir}/$CRD
 
 if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
 	echo &quot;J: COPY Image $IMGPrimaryName   to $box:${ExecutorIMGRootDir}/$CRD&quot;;            rsync -az   $mopIMGDir/$IMGPrimaryName ${box}:${ExecutorIMGRootDir}/$CRD
@@ -337,10 +337,10 @@ fi
 
 echo &quot;***************************************************************************************&quot;
 echo &quot;Build the software and actions on $box in $TARGET_DIR...&quot;
-ssh $box make -C ${TARGET_DIR} clean software actions
+ssh fpga@$box make -C ${TARGET_DIR} clean software actions
 
 echo  &quot;copy new snap_find_card to homedir&quot;;  
-ssh $box cp ${TARGET_DIR}/software/tools/snap_find_card .
+ssh fpga@$box cp ${TARGET_DIR}/software/tools/snap_find_card .
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Execute the $RUN command on the $box
@@ -370,7 +370,7 @@ if [ &quot;$RC&quot; == &quot;0&quot; ]; then :
   echo &quot;   Moving Primary/secondary image file to good.* inside $box:$ExecutorIMGRootDir/$CRD&quot;
   echo &quot;     (needs to be done because SNAP github script does not manage Primary/Secondary files for the moment)&quot;
   echo
-  echo &quot;`date` Clean up ${TARGET_DIR} on ${box}&quot;;  ssh $box rm -rf ${TARGET_DIR}
+  echo &quot;`date` Clean up ${TARGET_DIR} on ${box}&quot;;  ssh fpga@$box rm -rf ${TARGET_DIR}
 
 # Fab for testing/debug
   echo &quot;`date` FABRICE- NOT Removing $mopIMGDir/$IMGPrimaryName (for debug)&quot;
