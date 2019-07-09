@@ -1,8 +1,8 @@
 <?xml version='1.1' encoding='UTF-8'?>
-<flow-definition plugin="workflow-job@2.20">
+<flow-definition plugin="workflow-job@2.32">
   <actions>
-    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.2.9"/>
-    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.2.9">
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.3.6"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.3.6">
       <jobProperties/>
       <triggers/>
       <parameters>
@@ -15,6 +15,7 @@
         <string>VIVADO_ADDITIONAL_VERSION_CHOICE</string>
         <string>ONLY_RUN_JARVICE_TEST</string>
       </parameters>
+      <options/>
     </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
   </actions>
   <keepDependencies>false</keepDependencies>
@@ -66,20 +67,20 @@
           <description>Choose the Vivado version to additionally add to the images</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
-              <string>none</string>
               <string>2018.3</string>
+              <string>none</string>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
-    <org.jenkinsci.plugins.workflow.multibranch.BranchJobProperty plugin="workflow-multibranch@2.18">
-      <branch plugin="branch-api@2.0.20">
+    <org.jenkinsci.plugins.workflow.multibranch.BranchJobProperty plugin="workflow-multibranch@2.21">
+      <branch plugin="branch-api@2.1.2">
         <sourceId>50d72715-7cad-4a40-abe8-e86a71094138</sourceId>
-        <head class="org.jenkinsci.plugins.github_branch_source.BranchSCMHead" plugin="github-branch-source@2.3.4">
+        <head class="org.jenkinsci.plugins.github_branch_source.BranchSCMHead" plugin="github-branch-source@2.4.2">
           <name>master</name>
         </head>
-        <scm class="hudson.plugins.git.GitSCM" plugin="git@3.8.0">
+        <scm class="hudson.plugins.git.GitSCM" plugin="git@3.9.3">
           <configVersion>2</configVersion>
           <userRemoteConfigs>
             <hudson.plugins.git.UserRemoteConfig>
@@ -107,20 +108,20 @@
         </scm>
         <properties/>
         <actions>
-          <org.jenkinsci.plugins.github__branch__source.GitHubLink plugin="github-branch-source@2.3.4">
+          <org.jenkinsci.plugins.github__branch__source.GitHubLink plugin="github-branch-source@2.4.2">
             <iconClassName>icon-github-branch</iconClassName>
             <url>https://github.ibm.com/nimbix-cloud/snap-dev-env/tree/master</url>
           </org.jenkinsci.plugins.github__branch__source.GitHubLink>
-          <jenkins.scm.api.metadata.ObjectMetadataAction plugin="scm-api@2.2.7">
+          <jenkins.scm.api.metadata.ObjectMetadataAction plugin="scm-api@2.3.0">
             <objectDisplayName>master</objectDisplayName>
             <objectUrl>https://github.ibm.com/nimbix-cloud/snap-dev-env/tree/master</objectUrl>
           </jenkins.scm.api.metadata.ObjectMetadataAction>
-          <jenkins.scm.api.metadata.PrimaryInstanceMetadataAction plugin="scm-api@2.2.7"/>
+          <jenkins.scm.api.metadata.PrimaryInstanceMetadataAction plugin="scm-api@2.3.0"/>
         </actions>
       </branch>
     </org.jenkinsci.plugins.workflow.multibranch.BranchJobProperty>
   </properties>
-  <definition class="org.jenkinsci.plugins.workflow.multibranch.SCMBinder" plugin="workflow-multibranch@2.18">
+  <definition class="org.jenkinsci.plugins.workflow.multibranch.SCMBinder" plugin="workflow-multibranch@2.21">
     <scriptPath>Jenkinsfile</scriptPath>
   </definition>
   <triggers/>
