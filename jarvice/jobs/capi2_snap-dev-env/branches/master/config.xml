@@ -1,0 +1,114 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.32">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.3.6"/>
+  </actions>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.BooleanParameterDefinition>
+          <name>MARKETPLACE</name>
+          <description>If set to False, skip stages (build, push, pull) for IBM Marketplace</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>SKIP_DOCKER_TEST</name>
+          <description>Skip docker tests (for repeat runs)</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>SKIP_JARVICE_TEST</name>
+          <description>Skip JARVICE tests (for repeat runs)</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>ONLY_RUN_JARVICE_TEST</name>
+          <description>Run JARVICE development test only</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>ADKU3</name>
+          <description>Run ADKU3 steps if true</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>N250S</name>
+          <description>Run N250S steps if true</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>VIVADO_VERSION_CHOICE</name>
+          <description>Choose the Vivado version to use</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>2018.1</string>
+              <string>2018.3</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>VIVADO_ADDITIONAL_VERSION_CHOICE</name>
+          <description>Choose the Vivado version to additionally add to the images</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>2018.3</string>
+              <string>none</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <org.jenkinsci.plugins.workflow.multibranch.BranchJobProperty plugin="workflow-multibranch@2.21">
+      <branch plugin="branch-api@2.1.2">
+        <sourceId>50d72715-7cad-4a40-abe8-e86a71094138</sourceId>
+        <head class="org.jenkinsci.plugins.github_branch_source.BranchSCMHead" plugin="github-branch-source@2.4.2">
+          <name>master</name>
+        </head>
+        <scm class="hudson.plugins.git.GitSCM" plugin="git@3.9.3">
+          <configVersion>2</configVersion>
+          <userRemoteConfigs>
+            <hudson.plugins.git.UserRemoteConfig>
+              <name>origin</name>
+              <refspec>+refs/heads/master:refs/remotes/origin/master</refspec>
+              <url>https://github.ibm.com/nimbix-cloud/capi2_snap-dev-env.git</url>
+              <credentialsId>IBMGitHub</credentialsId>
+            </hudson.plugins.git.UserRemoteConfig>
+          </userRemoteConfigs>
+          <branches class="singleton-list">
+            <hudson.plugins.git.BranchSpec>
+              <name>master</name>
+            </hudson.plugins.git.BranchSpec>
+          </branches>
+          <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+          <browser class="hudson.plugins.git.browser.GithubWeb">
+            <url>https://github.ibm.com/nimbix-cloud/capi2_snap-dev-env</url>
+          </browser>
+          <submoduleCfg class="empty-list"/>
+          <extensions>
+            <jenkins.plugins.git.GitSCMSourceDefaults>
+              <includeTags>false</includeTags>
+            </jenkins.plugins.git.GitSCMSourceDefaults>
+          </extensions>
+        </scm>
+        <properties/>
+        <actions>
+          <org.jenkinsci.plugins.github__branch__source.GitHubLink plugin="github-branch-source@2.4.2">
+            <iconClassName>icon-github-branch</iconClassName>
+            <url>https://github.ibm.com/nimbix-cloud/capi2_snap-dev-env/tree/master</url>
+          </org.jenkinsci.plugins.github__branch__source.GitHubLink>
+          <jenkins.scm.api.metadata.ObjectMetadataAction plugin="scm-api@2.3.0">
+            <objectDisplayName>master</objectDisplayName>
+            <objectUrl>https://github.ibm.com/nimbix-cloud/capi2_snap-dev-env/tree/master</objectUrl>
+          </jenkins.scm.api.metadata.ObjectMetadataAction>
+          <jenkins.scm.api.metadata.PrimaryInstanceMetadataAction plugin="scm-api@2.3.0"/>
+        </actions>
+      </branch>
+    </org.jenkinsci.plugins.workflow.multibranch.BranchJobProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.multibranch.SCMBinder" plugin="workflow-multibranch@2.21">
+    <scriptPath>Jenkinsfile</scriptPath>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
