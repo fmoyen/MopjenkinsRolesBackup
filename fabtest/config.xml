@@ -41,7 +41,9 @@
       <command>#!/bin/bash
 
 pwd
-ls -la</command>
+ls -la
+
+ssh -T -ai ~/.ssh/id_rsa git@github.ibm.com</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
