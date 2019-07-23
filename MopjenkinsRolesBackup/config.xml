@@ -60,41 +60,45 @@
 
 JobsDir=&quot;$HOME/jobs&quot;
 GitRepo=$PWD
+DisplayCount=20
 
 git checkout $BRANCH
 
-echo
-echo &quot;--&gt; Jenkins jobs config $JobsDir&quot;
-cd $JobsDir; find . -name config.xml -exec ls -latr {} +;
-echo
-echo &quot;--&gt; Git repository directory $GitRepo&quot;
-cd $GitRepo; find . -name config.xml -exec ls -latr {} +;
+echo; echo &quot;--&gt; Jenkins jobs config $JobsDir&quot;
+cd $JobsDir
+JobsCount=`find . -name config.xml -exec ls -latr {} + | wc -l`
+echo &quot;$JobsCount config files... The $DisplayCount last files are:&quot;
+echo &quot;...&quot;; find . -name config.xml -exec ls -latr {} + | tail -$DisplayCount
 
-echo
-echo &quot;--&gt; Copy jenkins jobs config.xml files to git repository directory&quot;
+echo; echo &quot;--&gt; Git repository directory $GitRepo&quot;
+cd $GitRepo
+GitCount=`find . -name config.xml -exec ls -latr {} + | wc -l`
+echo &quot;$GitCount config files... The $DisplayCount last files are:&quot;
+echo &quot;...&quot;; find . -name config.xml -exec ls -latr {} + | tail -$DisplayCount
+
+echo; echo &quot;--&gt; Copy jenkins jobs config.xml files to git repository directory&quot;
 cd $JobsDir
 for i in $(find . -name config.xml -print)
 do
   dir=$(dirname $i | cut -c3-)
-  echo $dir
+  #echo $dir
   mkdir -p $GitRepo/$dir
   cp --preserve=all $i $GitRepo/$dir
 done
 
-#echo
-#echo &quot;--&gt; Updated Git repository $GitRepo&quot;
-#find $GitRepo -name config.xml -exec ls -latr {} +;
-
 echo
-echo &quot;--&gt; Commit&quot;
+
+#echo; echo &quot;--&gt; Updated Git repository $GitRepo&quot;
+#cd $GitRepo; find . -name config.xml -exec ls -latr {} +;
+
+echo; echo &quot;--&gt; Commit&quot;
 cd $GitRepo
 git add .
 git commit -a --dry-run --porcelain &gt; /tmp/msg.txt
 git commit -a --file=/tmp/msg.txt
 rm /tmp/msg.txt
 
-echo
-echo &quot;--&gt; Push&quot;
+echo; echo &quot;--&gt; Push&quot;
 git push
 </command>
     </hudson.tasks.Shell>
