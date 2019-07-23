@@ -65,10 +65,10 @@ git checkout $BRANCH
 
 echo
 echo &quot;--&gt; Jenkins jobs config $JobsDir&quot;
-find $JobsDir -name config.xml -exec ls -latr {} +;
+cd $JobsDir; find . -name config.xml -exec ls -latr {} +;
 echo
 echo &quot;--&gt; Git repository directory $GitRepo&quot;
-find $GitRepo -name config.xml -exec ls -latr {} +;
+cd $GitRepo; find . -name config.xml -exec ls -latr {} +;
 
 echo
 echo &quot;--&gt; Copy jenkins jobs config.xml files to git repository directory&quot;
