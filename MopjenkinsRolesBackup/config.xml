@@ -63,6 +63,7 @@ GitRepo=$PWD
 DisplayCount=20
 
 git checkout $BRANCH
+git pull
 
 echo; echo &quot;--&gt; Jenkins jobs config $JobsDir&quot;
 cd $JobsDir
