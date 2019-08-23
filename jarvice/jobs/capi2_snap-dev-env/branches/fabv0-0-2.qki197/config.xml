@@ -49,13 +49,13 @@
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
-          <name>ADKU3</name>
-          <description>Run ADKU3 steps if true</description>
+          <name>AD9V3</name>
+          <description>Run AD9V3 steps if true</description>
           <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
-          <name>N250S</name>
-          <description>Run N250S steps if true</description>
+          <name>N250SP</name>
+          <description>Run N250SP steps if true</description>
           <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
