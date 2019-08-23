@@ -6,15 +6,16 @@
       <jobProperties/>
       <triggers/>
       <parameters>
+        <string>AD9V3</string>
         <string>SKIP_ALL_JARVICE</string>
-        <string>ADKU3</string>
         <string>SKIP_JARVICE_TEST</string>
         <string>SKIP_DOCKER_TEST</string>
-        <string>N250S</string>
         <string>VIVADO_VERSION_CHOICE</string>
         <string>MARKETPLACE</string>
+        <string>PARAMETERS_UPDATE</string>
         <string>VIVADO_ADDITIONAL_VERSION_CHOICE</string>
         <string>ONLY_RUN_JARVICE_TEST</string>
+        <string>N250SP</string>
       </parameters>
       <options/>
     </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
@@ -78,6 +79,11 @@
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>PARAMETERS_UPDATE</name>
+          <description>If set to True, the build will do nothing except updating jenkins knowledge about jenkinsfile global parameters</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <org.jenkinsci.plugins.workflow.multibranch.BranchJobProperty plugin="workflow-multibranch@2.21">
