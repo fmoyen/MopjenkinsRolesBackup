@@ -9,6 +9,7 @@
         <string>AD9V3</string>
         <string>SKIP_ALL_JARVICE</string>
         <string>SKIP_JARVICE_TEST</string>
+        <string>PR_CLOUD</string>
         <string>SKIP_DOCKER_TEST</string>
         <string>VIVADO_VERSION_CHOICE</string>
         <string>MARKETPLACE</string>
@@ -24,31 +25,6 @@
   <properties>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
-        <hudson.model.BooleanParameterDefinition>
-          <name>MARKETPLACE</name>
-          <description>If set to False, skip stages (build, push, pull) for IBM Marketplace</description>
-          <defaultValue>false</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>SKIP_ALL_JARVICE</name>
-          <description>Skip all Jarvice (Nimbix) operations (only local operations done)</description>
-          <defaultValue>true</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>SKIP_DOCKER_TEST</name>
-          <description>Skip docker tests (for repeat runs)</description>
-          <defaultValue>false</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>SKIP_JARVICE_TEST</name>
-          <description>Skip JARVICE tests (for repeat runs)</description>
-          <defaultValue>false</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>ONLY_RUN_JARVICE_TEST</name>
-          <description>Run JARVICE development test only</description>
-          <defaultValue>false</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>AD9V3</name>
           <description>Run AD9V3 steps if true</description>
@@ -79,6 +55,36 @@
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>MARKETPLACE</name>
+          <description>If set to False, skip stages (build, push, pull) for IBM Marketplace</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>SKIP_ALL_JARVICE</name>
+          <description>Skip all Jarvice (Nimbix) operations (only local operations done)</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>SKIP_DOCKER_TEST</name>
+          <description>Skip docker tests (for repeat runs)</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>SKIP_JARVICE_TEST</name>
+          <description>Skip JARVICE tests (for repeat runs)</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>ONLY_RUN_JARVICE_TEST</name>
+          <description>Run JARVICE development test only</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>PR_CLOUD</name>
+          <description>Decides whether to run PR &amp; Cloud test during Docker Run Test phase</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>PARAMETERS_UPDATE</name>
           <description>If set to True, the build will do nothing except updating jenkins knowledge about jenkinsfile global parameters</description>
