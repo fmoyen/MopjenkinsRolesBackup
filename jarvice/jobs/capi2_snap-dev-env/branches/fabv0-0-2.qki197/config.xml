@@ -81,10 +81,20 @@
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
-          <name>PR_CLOUD</name>
+          <name>PR_CLOUD_BAD</name>
           <description>Decides whether to run PR &amp; Cloud test during Docker Run Test phase</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>PR_CLOUD</name>
+          <description>Decides whether to run PR &amp; Cloud test during Docker Run Test phase</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>NO</string>
+              <string>YES</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>PARAMETERS_UPDATE</name>
           <description>If set to True, the build will do nothing except updating jenkins knowledge about jenkinsfile global parameters</description>
