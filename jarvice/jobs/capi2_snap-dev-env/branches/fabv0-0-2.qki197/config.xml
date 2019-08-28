@@ -9,10 +9,10 @@
         <string>AD9V3</string>
         <string>SKIP_ALL_JARVICE</string>
         <string>SKIP_JARVICE_TEST</string>
-        <string>PR_CLOUD</string>
         <string>SKIP_DOCKER_TEST</string>
         <string>VIVADO_VERSION_CHOICE</string>
         <string>MARKETPLACE</string>
+        <string>PR_CLOUD_CHOICE</string>
         <string>PARAMETERS_UPDATE</string>
         <string>VIVADO_ADDITIONAL_VERSION_CHOICE</string>
         <string>ONLY_RUN_JARVICE_TEST</string>
@@ -80,13 +80,8 @@
           <description>Run JARVICE development test only</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>PR_CLOUD_BAD</name>
-          <description>Decides whether to run PR &amp; Cloud test during Docker Run Test phase</description>
-          <defaultValue>false</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
-          <name>PR_CLOUD</name>
+          <name>PR_CLOUD_CHOICE</name>
           <description>Decides whether to run PR &amp; Cloud test during Docker Run Test phase</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
