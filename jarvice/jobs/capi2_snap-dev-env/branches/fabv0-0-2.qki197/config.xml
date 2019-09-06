@@ -40,7 +40,7 @@
           <description>Choose the Vivado version to use</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
-              <string>2018.1</string>
+              <string>2018.2</string>
               <string>2018.3</string>
             </a>
           </choices>
