@@ -16,6 +16,7 @@
         <string>PARAMETERS_UPDATE</string>
         <string>VIVADO_ADDITIONAL_VERSION_CHOICE</string>
         <string>ONLY_RUN_JARVICE_TEST</string>
+        <string>TIMING_LABLIMIT_CHOICE</string>
         <string>N250SP</string>
       </parameters>
       <options/>
@@ -87,6 +88,17 @@
             <a class="string-array">
               <string>NO</string>
               <string>YES</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>TIMING_LABLIMIT_CHOICE</name>
+          <description>Choose the TIMING_LABLIMIT parameter. If timing is higher than your choice when doing a make image test, the run will failed.</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>-200</string>
+              <string>-500</string>
+              <string>-1000</string>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
