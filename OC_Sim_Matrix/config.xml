@@ -299,7 +299,7 @@ export OCSE_INSTALL_DIR=../ocse
 
 cd ${SNAP_ROOT}
 
-echo &quot;J: export OCSE_ROOT=${USERHOME}/ocse&quot; &gt;snap_env.sh
+echo &quot;export OCSE_ROOT=${USERHOME}/ocse&quot; &gt;snap_env.sh
 #echo &quot;use local OCSE repo to get rid of undefined reference ocxl_afu_get_event_fd&quot;
 #echo &quot;export PSLSE_ROOT=/afs/bb/proj/fpga/framework/jkayser/ocse_issue26&quot; &gt;snap_env.sh
 #echo &quot;#PSL_DCP not included in Simulation, replaced anyhow by PSLSE&quot; &gt;&gt;snap_env.sh
@@ -387,29 +387,29 @@ case $ACT in                    # select config &amp; compile action
     ;;
 esac
 case $SIM:$ACT in
-  &apos;xsim&apos;:*|&apos;XSIM&apos;:* )             echo &quot;J: export SIMULATOR=xsim&quot;     &gt;&gt; .snap_config.sh
+  &apos;xsim&apos;:*|&apos;XSIM&apos;:* )             echo &quot;export SIMULATOR=xsim&quot;     &gt;&gt; .snap_config.sh
                                   sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
                                   echo &quot;SIM_XSIM=y&quot;                &gt;&gt; .snap_config;;   # overwrite simulator
-  &apos;irun&apos;:*DENALI|&apos;IRUN&apos;:*DENALI ) echo &quot;J: ENABLE_DENALI=y&quot;           &gt;&gt; .snap_config;make -s oldconfig
+  &apos;irun&apos;:*DENALI|&apos;IRUN&apos;:*DENALI ) echo &quot;ENABLE_DENALI=y&quot;           &gt;&gt; .snap_config;make -s oldconfig
                                   echo &quot;export SIMULATOR=irun&quot;     &gt;&gt; .snap_config.sh
                                   sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
-                                  echo &quot;J: SIM_IRUN=y&quot;                &gt;&gt; .snap_config;;   # overwrite simulator
+                                  echo &quot;SIM_IRUN=y&quot;                &gt;&gt; .snap_config;;   # overwrite simulator
   &apos;irun&apos;:*|&apos;IRUN&apos;:* )             echo &quot;export SIMULATOR=irun&quot;     &gt;&gt; .snap_config.sh
                                   sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
-                                  echo &quot;J: SIM_IRUN=y&quot;                &gt;&gt; .snap_config;;   # overwrite simulator
+                                  echo &quot;SIM_IRUN=y&quot;                &gt;&gt; .snap_config;;   # overwrite simulator
   xcelium:*DENALI)                echo &quot;ENABLE_DENALI=y&quot;           &gt;&gt; .snap_config;make -s oldconfig
   			                      echo &quot;export SIMULATOR=xcelium&quot;  &gt;&gt; .snap_config.sh
                                   sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
-                                  echo &quot;J: SIM_XCELIUM=y&quot;             &gt;&gt; .snap_config;;   # overwrite simulator
+                                  echo &quot;SIM_XCELIUM=y&quot;             &gt;&gt; .snap_config;;   # overwrite simulator
   xcelium:*)                      echo &quot;export SIMULATOR=xcelium&quot;  &gt;&gt; .snap_config.sh
                                   sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
-                                  echo &quot;J: SIM_XCELIUM=y&quot;             &gt;&gt; .snap_config;;   # overwrite simulator
+                                  echo &quot;SIM_XCELIUM=y&quot;             &gt;&gt; .snap_config;;   # overwrite simulator
   questa:*)                       echo &quot;export SIMULATOR=questa&quot;   &gt;&gt; .snap_config.sh
                                   sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
-                                  echo &quot;J: SIM_QUESTA=y&quot;              &gt;&gt; .snap_config;;   # overwrite simulator
+                                  echo &quot;SIM_QUESTA=y&quot;              &gt;&gt; .snap_config;;   # overwrite simulator
   modelsim:*)                     echo &quot;export SIMULATOR=modelsim&quot; &gt;&gt; .snap_config.sh
                                   sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
-                                  echo &quot;J: SIM_MODELSIM=y&quot;            &gt;&gt; .snap_config;;   # overwrite simulator
+                                  echo &quot;SIM_MODELSIM=y&quot;            &gt;&gt; .snap_config;;   # overwrite simulator
   *) echo &quot;J: WARNING: unknown simulator=$SIM, continuing with default&quot;;;
 esac
 # execute with LSF, SNAP_ROOT must reside in AFS
