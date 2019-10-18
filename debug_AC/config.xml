@@ -1,10 +1,8 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <matrix-project plugin="matrix-project@1.14">
   <actions/>
-  <description>builds and simulates many different configurations, automatic nightruns on master&#xd;
-in case of problems: please contact fmoyen@fr.ibm.com or alexandre.castellane@fr.ibm.com&#xd;
-=&gt; local ocse used (not repo)&#xd;
-=&gt; 2018.2 test on AD9V3 only</description>
+  <description>Debug configurations&#xd;
+in case of problems: please alexandre.castellane@fr.ibm.com</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.4">
@@ -112,12 +110,7 @@ H 18-23/4 * * *</spec>
     <hudson.matrix.TextAxis>
       <name>ACT</name>
       <values>
-        <string>hdl_example.noRAM</string>
-        <string>hdl_example.BRAM</string>
-        <string>hdl_example.DDR</string>
         <string>hls_helloworld</string>
-        <string>hls_memcopy_1024</string>
-        <string>hdl_single_engine</string>
         <string>test</string>
       </values>
     </hudson.matrix.TextAxis>
@@ -125,8 +118,6 @@ H 18-23/4 * * *</spec>
       <name>CRD</name>
       <values>
         <string>AD9V3</string>
-        <string>AD9H3</string>
-        <string>AD9H7</string>
       </values>
     </hudson.matrix.TextAxis>
     <hudson.matrix.TextAxis>
@@ -249,7 +240,7 @@ echo &quot;***********************************************************&quot;</co
       <runner class="org.jenkins_ci.plugins.run_condition.BuildStepRunner$Fail" plugin="run-condition@1.2"/>
     </org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder>
     <hudson.tasks.Shell>
-      <command>#!/bin/bash
+      <command>                                                                   #!/bin/bash
 set +x                           # reduce Jenkins output
 #ulimit -c unlimited             # reduce core dumps from what .profile says (kB)
 ulimit -S -c 128000
@@ -359,13 +350,13 @@ case $ACT in                    # select config &amp; compile action
     echo &quot;J: test exit 0&quot;;exit 0;; # just exit 
   &apos;hls_intersect_h&apos;)  
     make $CRD.hls_intersect.defconfig
-    source ./snap_env.sh        # execute to exploit ACTION_ROOT
+    . ./snap_env.sh        # execute to exploit ACTION_ROOT # AC MOP Specif
     echo &quot;action compile intersect hash&quot;;
     make -C ${ACTION_ROOT} clean config_h
     ;;
   &apos;hls_intersect_s&apos;)  
     make $CRD.hls_intersect.defconfig
-    source ./snap_env.sh        # execute to exploit ACTION_ROOT
+    . ./snap_env.sh        # execute to exploit ACTION_ROOT  # AC MOP Specif
     echo &quot;action compile intersect sort&quot;;
     make -C ${ACTION_ROOT} clean config_s
     ;;
@@ -381,9 +372,7 @@ case $ACT in                    # select config &amp; compile action
     
     # before rh7 issue we did : make $CRD.$ACT.defconfig
     # since we need RH7 we use LSF:
-    # bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}_defconfig&quot; &quot;hostname;lsb_release -a&quot;|| exit 1
-    make $CRD.$ACT.defconfig
-    
+    bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}_defconfig&quot; &quot;hostname;lsb_release -a&quot;|| exit 1
     ;;
 esac
 case $SIM:$ACT in
@@ -420,8 +409,7 @@ esac
 git submodule init
 git submodule update
 
-#bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}_model&quot; &quot;hostname;lsb_release -a;make model&quot;|| exit 1
-make model|| exit 1
+bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}_model&quot; &quot;hostname;lsb_release -a;make model&quot;|| exit 1
 
 echo &quot;********************************************************************************&quot;
 echo &quot;J: Run $SIM Simulation in LSF ...&quot;
@@ -434,7 +422,6 @@ cd ${SNAP_ROOT}/hardware/sim
 case $SIM in
 # run in the proper ${ACT} directory /tests/hw_test.sh
   &apos;xsim&apos;|&apos;XSIM&apos; ) bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;${SNAP_ROOT}/hardware/sim/run_sim -list ../../actions/${ACT}/tests/hw_test.sh -noaet&quot;||exit 100;;
-  ${SNAP_ROOT}/hardware/sim/run_sim -list ../../actions/${ACT}/tests/hw_test.sh -noaet&quot;||exit 100;;
 
 # older way to run with capi snap
 #  &apos;xsim&apos;|&apos;XSIM&apos; ) bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;./run_sim -list testlist.sh -noaet&quot;||exit 100;;
