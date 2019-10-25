@@ -290,8 +290,8 @@ LSF=&apos;-P zsort -M 2 -C 2000 -I -n 4 -R type=X86_64  -R osver=rh7 -R span[hos
 echo &quot;*******************************************************************************&quot;
 rm -rf ocse
 case $CRD in 
-  #*) 		branch=&apos;issue26&apos;;;
-  *) 		branch=&apos;master&apos;;;
+  *) 		branch=&apos;issue_2&apos;;;
+  #*) 		branch=&apos;master&apos;;;
 esac
 echo &quot;J: Get OpenCAPI Simulation Environment branch=$branch for card=$CRD...&quot;
 git clone -b $branch https://github.com/OpenCAPI/ocse ocse;echo &quot;git clone RC=$?&quot;
@@ -433,9 +433,9 @@ cd ${SNAP_ROOT}/hardware/sim
 ##### execute on AFS with LSF, report error as unstable build
 case $SIM in
 # run in the proper ${ACT} directory /tests/hw_test.sh
-  &apos;xsim&apos;|&apos;XSIM&apos; ) bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;${SNAP_ROOT}/hardware/sim/run_sim -list ../../actions/${ACT}/tests/hw_test.sh -noaet&quot;||exit 100;;
-  ${SNAP_ROOT}/hardware/sim/run_sim -list ../../actions/${ACT}/tests/hw_test.sh -noaet&quot;||exit 100;;
-
+#  &apos;xsim&apos;|&apos;XSIM&apos; ) bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;${SNAP_ROOT}/hardware/sim/run_sim -list ../../actions/${ACT}/tests/hw_test.sh -noaet&quot;||exit 100;;
+#  ${SNAP_ROOT}/hardware/sim/run_sim -list ../../actions/${ACT}/tests/hw_test.sh -noaet&quot;||exit 100;;
+./run_sim -list testlist_jenkins.sh -noaet||exit 100;;
 # older way to run with capi snap
 #  &apos;xsim&apos;|&apos;XSIM&apos; ) bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;./run_sim -list testlist.sh -noaet&quot;||exit 100;;
 #  &apos;irun&apos;|&apos;IRUN&apos; ) bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;./run_sim -irun -list testlist.sh -noaet&quot;||exit 100;;
@@ -450,7 +450,7 @@ esac
   <buildWrappers>
     <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.19">
       <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
-        <timeoutMinutes>300</timeoutMinutes>
+        <timeoutMinutes>60</timeoutMinutes>
       </strategy>
       <operationList>
         <hudson.plugins.build__timeout.operations.FailOperation/>
