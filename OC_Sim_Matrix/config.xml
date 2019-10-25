@@ -332,7 +332,7 @@ echo &quot;J: Vivado SETUP $VIV_VERSION ...&quot;
 # AC MOP Specif
 export XILINX_ROOT=/opt/Xilinx
 export XILINXD_LICENSE_FILE=2100@pokwinlic1.pok.ibm.com
-. $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh # AC MOP Specif
+source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
 case $SIM:$VIV in
   xcelium:2018.2 ) echo &quot;J: Cadence SETUP $IES_VERSION for Vivado 2018.2&quot;
     export PATH=$CDS_INST_DIR/tools/bin:$PATH
@@ -346,7 +346,7 @@ case $SIM:$VIV in
     export PATH=$CDS_INST_DIR/tools/bin:$PATH
     export CDS_LIC_FILE=5280@hdlic10.boeblingen.de.ibm.com:5280@hdlic11.boeblingen.de.ibm.com
     export LD_LIBRARY_PATH=$CDS_INST_DIR/tools/lib/64bit:$LD_LIBRARY_PATH
-#   echo &quot;J: export LD_LIBRARY_PATH=$CDS_INST_DIR/tools/lib/64bit:$LD_LIBRARY_PATH&quot; &gt;&gt; snap_env.sh
+#   echo &quot;export LD_LIBRARY_PATH=$CDS_INST_DIR/tools/lib/64bit:$LD_LIBRARY_PATH&quot; &gt;&gt; snap_env.sh
     if [ -f &quot;$IES_LIBS/cds.lib&quot; ]; then echo &quot;IES_LIBS found in $IES_LIBS&quot;
     else echo &quot;J: WARNING: cannot find IES_LIBS=$IES_LIBS, Cadence compilation won&apos;t work&quot;;exit 1;fi
     ;;
@@ -382,7 +382,7 @@ case $ACT in                    # select config &amp; compile action
     # before rh7 issue we did : make $CRD.$ACT.defconfig
     # since we need RH7 we use LSF:
     # bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}_defconfig&quot; &quot;hostname;lsb_release -a&quot;|| exit 1
-    make $CRD.$ACT.defconfig
+    make $CRD.$ACT.defconfig|| exit 1
     
     ;;
 esac
