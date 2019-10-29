@@ -4,7 +4,7 @@
   <description>builds and simulates many different configurations, automatic nightruns on master&#xd;
 in case of problems: please contact fmoyen@fr.ibm.com or alexandre.castellane@fr.ibm.com&#xd;
 =&gt; local ocse used (not repo)&#xd;
-=&gt; 2018.2 test on AD9V3 only</description>
+=&gt; 2019.1 test on AD9V3 only</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.4">
@@ -22,7 +22,7 @@ in case of problems: please contact fmoyen@fr.ibm.com or alexandre.castellane@fr
         <hudson.model.BooleanParameterDefinition>
           <name>HDL</name>
           <description></description>
-          <defaultValue>true</defaultValue>
+          <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>HLS</name>
@@ -52,7 +52,7 @@ in case of problems: please contact fmoyen@fr.ibm.com or alexandre.castellane@fr
         <hudson.model.BooleanParameterDefinition>
           <name>IRUN</name>
           <description></description>
-          <defaultValue>true</defaultValue>
+          <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
@@ -132,7 +132,7 @@ H 18-23/4 * * *</spec>
     <hudson.matrix.TextAxis>
       <name>SIM_VIV</name>
       <values>
-        <string>xsim_2018.3</string>
+        <string>xsim_2019.1</string>
       </values>
     </hudson.matrix.TextAxis>
   </axes>
