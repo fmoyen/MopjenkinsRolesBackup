@@ -16,42 +16,42 @@ in case of problems: please contact fmoyen@fr.ibm.com or alexandre.castellane@fr
         <hudson.model.StringParameterDefinition>
           <name>BRANCH</name>
           <description>Choose the branch you want to test</description>
-          <defaultValue>master</defaultValue>
+          <defaultValue>jenkins_mods</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>HDL</name>
-          <description></description>
+          <description>enable/disable HDL examples simulation</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>HLS</name>
-          <description></description>
+          <description>enable/disable HLS examples simulation</description>
           <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>AD9V3</name>
-          <description></description>
+          <description>enable/disable AD9V3 simulation</description>
           <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>AD9H3</name>
-          <description></description>
+          <description>enable/disable AD9H3 simulation</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>AD9H7</name>
-          <description></description>
+          <description>enable/disable AD9H7 simulation</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>XSIM</name>
-          <description></description>
+          <description>enable/disable model build with XSIM</description>
           <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>IRUN</name>
-          <description></description>
+          <description>enable/disable modelbuild with irun</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
@@ -115,9 +115,9 @@ H 18-23/4 * * *</spec>
         <string>hdl_example.noRAM</string>
         <string>hdl_example.BRAM</string>
         <string>hdl_example.DDR</string>
+        <string>hdl_single_engine</string>
         <string>hls_helloworld</string>
         <string>hls_memcopy_1024</string>
-        <string>hdl_single_engine</string>
         <string>test</string>
       </values>
     </hudson.matrix.TextAxis>
@@ -125,8 +125,6 @@ H 18-23/4 * * *</spec>
       <name>CRD</name>
       <values>
         <string>AD9V3</string>
-        <string>AD9H3</string>
-        <string>AD9H7</string>
       </values>
     </hudson.matrix.TextAxis>
     <hudson.matrix.TextAxis>
@@ -175,7 +173,7 @@ case &quot;$ACT&quot; in
   test )
     gitnames=`git ls-remote git@github.ibm.com:OC-Enablement/oc-snap.git|grep &quot;refs/heads/&quot;|awk &apos;{print $2}&apos;`;RC=$?
     echo &quot;RC=$RC gitnames=$gitnames&quot;
-    for dir in &quot;/afs/bb/proj/fpga/framework/CI_ws/OC_SIM_matrix&quot;/*;do
+    for dir in &quot;home/castella/OC_SIM_matrix&quot;/*;do
       if [ -d &quot;$dir&quot; ];then
         branch=&quot;refs/heads/&quot;`basename $dir`
         if [[ &quot;$gitnames&quot; =~ &quot;$branch&quot; ]];then echo &quot;branch=$branch found in gitnames, keep dir=$dir&quot;
@@ -188,7 +186,7 @@ case &quot;$ACT&quot; in
     done
     
     echo &quot;mail informing castella test triggered&quot;
-    mail -s &quot;*OpenCAPI Jenkins SIMULATION started with : branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX&quot; castella
+    #mail -s &quot;*OpenCAPI Jenkins SIMULATION started with : branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX&quot; castella
 
     date
     DSKIP=0;;
@@ -209,18 +207,19 @@ case &quot;$ACT&quot; in
 esac
 echo &quot;defconfig SKIP=$DSKIP&quot;
 
-AFSused=`fs lq /afs/bb/proj/fpga/framework/CI_ws/OC_SIM_matrix/|grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
-SSKIP=0;msg=&quot;AFS spaced currently used=${AFSused}%&quot;
-if   (( AFSused &gt; 90 ));then 
+#AFSused=`fs lq /afs/bb/proj/fpga/framework/CI_ws/OC_SIM_matrix/|grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
+diskused=`du -sh /home/castella/OC_SIM_matrix/|grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
+SSKIP=0;msg=&quot;diskused =${diskused}%&quot;
+if   (( diskused &gt; 90 ));then 
   msg=&quot;ERROR: $msg, stopping additional builds&quot;;SSKIP=1
-  echo &quot;mail sent to castella : ERROR OpenCAPI AFS space&quot;
-  mail -s &quot;ERROR: OpenCAPI AFS space SIMULATION is used up to ${AFSused}%, stopping additional builds&quot; castella
+  #echo &quot;mail sent to castella : ERROR OpenCAPI AFS space&quot;
+  #mail -s &quot;ERROR: OpenCAPI AFS space SIMULATION is used up to ${diskused}%, stopping additional builds&quot; castella
   #mail -s &quot;ERROR: AFS space SIMULATION is used up to ${AFSused}%, stopping additional builds&quot; mesnet
 
-elif (( AFSused &gt; 70 ));then
+elif (( diskused &gt; 70 ));then
    msg=&quot;WARNING: $msg&quot;
-   echo &quot;mail sent to castella : WARNING OpenCAPI AFS space&quot;
-   mail -s &quot;WARNING: OpenCAPI AFS space IMAGETEST is used up to ${AFSused}%&quot; castella
+   #echo &quot;mail sent to castella : WARNING OpenCAPI AFS space&quot;
+   #mail -s &quot;WARNING: OpenCAPI AFS space IMAGETEST is used up to ${diskused}%&quot; castella
    #mail -s &quot;WARNING: AFS space IMAGETEST is used up to ${AFSused}%&quot; mesnet
 fi;echo &quot;$msg&quot;
 
@@ -263,7 +262,7 @@ SIM=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 1)    # chars up to  first &apos;_&a
 VIV=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 2)    # chars behind first &apos;_&apos; identify Vivado version
 
 echo &quot;********************************************************************************&quot;
-echo &quot;J: LSF SETUP ...&quot;
+#echo &quot;J: LSF SETUP ...&quot;
 ulimit -c unlimited
 
 # older setup up to RH6
@@ -277,59 +276,54 @@ ulimit -c unlimited
 #LSF=&apos;-P zsort -M 2 -C 2000 -I -n 4 -R type=X86_64 -R span[hosts=1]&apos;  # Project, GB_mem, KB_core, #_processors, type of processor
 
 # new setup for RH7
-export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
-export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/etc
-export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
-export LSF_BINDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
-export LSF_SUBMITTER_OSTYPE=Linux
-export LSF_ENVDIR=/home/lsfbb/prod/conf
-LSF=&apos;-P zsort -M 2 -C 2000 -I -n 4 -R type=X86_64  -R osver=rh7 -R span[hosts=1]&apos;  # Project, GB_mem, KB_core, #_processors, type of processor
+#export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
+#export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/etc
+#export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
+#export LSF_BINDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
+#export LSF_SUBMITTER_OSTYPE=Linux
+#export LSF_ENVDIR=/home/lsfbb/prod/conf
+#LSF=&apos;-P zsort -M 2 -C 2000 -I -n 4 -R type=X86_64  -R osver=rh7 -R span[hosts=1]&apos;  # Project, GB_mem, KB_core, #_processors, type of processor
 
 
 echo &quot;*******************************************************************************&quot;
+echo &quot;current directory is&quot;
+pwd
+echo &quot;****&quot;
+ls -al
+echo &quot;deleting ocse&quot;
 rm -rf ocse
 case $CRD in 
   *) 		branch=&apos;issue_2&apos;;;
   #*) 		branch=&apos;master&apos;;;
 esac
 echo &quot;J: Get OpenCAPI Simulation Environment branch=$branch for card=$CRD...&quot;
-git clone -b $branch https://github.com/OpenCAPI/ocse ocse;echo &quot;git clone RC=$?&quot;
-export OCSE_INSTALL_DIR=../ocse
+git clone -b $branch https://github.com/OpenCAPI/ocse ocse;echo &quot;git clone OCSE RC=$?&quot;
+echo &quot;current directory is&quot;
+pwd
+echo &quot;****&quot;
+ls -al
+export OCSE_INSTALL_DIR=./ocse   # ca ne sert à rien on dirait !!
 
 cd ${SNAP_ROOT}
-
+echo &quot;exporting ocse dir as : ${USERHOME}/ocse into snap_env&quot;
 echo &quot;export OCSE_ROOT=${USERHOME}/ocse&quot; &gt;snap_env.sh
-#echo &quot;use local OCSE repo to get rid of undefined reference ocxl_afu_get_event_fd&quot;
-#echo &quot;export PSLSE_ROOT=/afs/bb/proj/fpga/framework/jkayser/ocse_issue26&quot; &gt;snap_env.sh
-#echo &quot;#PSL_DCP not included in Simulation, replaced anyhow by PSLSE&quot; &gt;&gt;snap_env.sh
-#echo &quot;#export PSL_DCP=/afs/bb/proj/fpga/framework/cards/$CRD/current/b_route_design.dcp&quot; &gt;&gt;snap_env.sh
 #echo &quot;#setup: XILINX_LOCAL_USER_DATA=${XILINX_LOCAL_USER_DATA}, overwrite=no to prevent write access error in XilincTclStore (tclapp:load_apps)&quot; &gt;&gt;snap_env.sh
-#echo &quot;export XILINX_LOCAL_USER_DATA=no&quot; &gt;&gt; snap_env.sh
+echo &quot;export XILINX_LOCAL_USER_DATA=no&quot; &gt;&gt; snap_env.sh
+ls -al
+cat snap_env.sh
 
 echo &quot;****************************************************************************************&quot;
 case $SIM:$VIV in    # test multiple Vivado versions in one build
-  xcelium:2018*)	# Xcelium needs Vivado 2018.1 or higher
-    export VIV_VERSION=$VIV; export IES_VERSION=&quot;17.10.002&quot;
-    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Xcelium/${IES_VERSION}
-    export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/xce${IES_VERSION};;
-  xcelium:*)
-    echo &quot;J: unsupported Vivado version $VIV for XCELIUM&quot;;exit 1;;
-  *:2016.4)
-    export VIV_VERSION=&quot;2016.4&quot;; export IES_VERSION=&quot;15.10.s19&quot;
-    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION} 
-	export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION};;
-  *2017.4|*2018.1|*2018.2|*2018.3|*2019.1)
-    export VIV_VERSION=$VIV; export IES_VERSION=&quot;15.20.s18&quot;
-    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION}
-#   export CDS_INST_DIR=/afs/apd/func/vlsi/cds/Incisive/${IES_VERSION}  # for 15.20.046 only
-	export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION};; 
+  #*2017.4|*2018.1|*2018.2|*2018.3|*2019.1)
+  *2018.2|*2019.1)
+    export VIV_VERSION=$VIV
+    ;; 
   *)
     echo &quot;J: unsupported Vivado version $VIV&quot;;exit 1;;
 esac
 
 echo &quot;J: Vivado SETUP $VIV_VERSION ...&quot;
-# AC MOP Specif
 export XILINX_ROOT=/opt/Xilinx
 export XILINXD_LICENSE_FILE=2100@pokwinlic1.pok.ibm.com
 source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
@@ -377,13 +371,13 @@ case $ACT in                    # select config &amp; compile action
   *) 
 #   echo &quot;J: pwd:&quot;;pwd
 #   echo &quot;J: pwd content:&quot;;ls
-#   echo &quot;J: defconfig:&quot;;ls defconfig/
+   echo &quot;J: defconfig:&quot;;ls defconfig/
     
     # before rh7 issue we did : make $CRD.$ACT.defconfig
     # since we need RH7 we use LSF:
-    # bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}_defconfig&quot; &quot;hostname;lsb_release -a&quot;|| exit 1
+    #bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}_defconfig&quot; &quot;hostname;lsb_release -a&quot;|| exit 1
+    echo &quot;making $CRD.$ACT.defconfig&quot;
     make $CRD.$ACT.defconfig|| exit 1
-    
     ;;
 esac
 case $SIM:$ACT in
@@ -419,9 +413,11 @@ esac
 #Added 2019 03 06
 git submodule init
 git submodule update
+#AC   XXXXXXXXXXXXXXXXXXXxx
+make model|| exit 1
+
 
 #bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}_model&quot; &quot;hostname;lsb_release -a;make model&quot;|| exit 1
-make model|| exit 1
 
 echo &quot;********************************************************************************&quot;
 echo &quot;J: Run $SIM Simulation in LSF ...&quot;
@@ -433,8 +429,8 @@ cd ${SNAP_ROOT}/hardware/sim
 ##### execute on AFS with LSF, report error as unstable build
 case $SIM in
 # run in the proper ${ACT} directory /tests/hw_test.sh
-#  &apos;xsim&apos;|&apos;XSIM&apos; ) bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;${SNAP_ROOT}/hardware/sim/run_sim -list ../../actions/${ACT}/tests/hw_test.sh -noaet&quot;||exit 100;;
-#  ${SNAP_ROOT}/hardware/sim/run_sim -list ../../actions/${ACT}/tests/hw_test.sh -noaet&quot;||exit 100;;
+  &apos;xsim&apos;|&apos;XSIM&apos; )
+  #bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;${SNAP_ROOT}/hardware/sim/run_sim -list ../../actions/${ACT}/tests/hw_test.sh -noaet&quot;||exit 100;;
 ./run_sim -list testlist_jenkins.sh -noaet||exit 100;;
 # older way to run with capi snap
 #  &apos;xsim&apos;|&apos;XSIM&apos; ) bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;./run_sim -list testlist.sh -noaet&quot;||exit 100;;
