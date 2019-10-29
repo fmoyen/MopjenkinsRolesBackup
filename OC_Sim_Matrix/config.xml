@@ -93,7 +93,7 @@ in case of problems: please contact fmoyen@fr.ibm.com or alexandre.castellane@fr
       <hudson.plugins.git.extensions.impl.CleanBeforeCheckout/>
     </extensions>
   </scm>
-  <assignedNode>X86_RH7</assignedNode>
+  <assignedNode>X86_UBUNTU</assignedNode>
   <canRoam>false</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
