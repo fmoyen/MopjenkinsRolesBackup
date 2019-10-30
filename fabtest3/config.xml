@@ -19,7 +19,7 @@
     </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
   </properties>
   <scm class="hudson.scm.NullSCM"/>
-  <assignedNode>X86_RH7</assignedNode>
+  <assignedNode>X86_UBUNTU</assignedNode>
   <canRoam>false</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
@@ -27,12 +27,17 @@
   <triggers/>
   <concurrentBuild>false</concurrentBuild>
   <axes>
+    <hudson.matrix.LabelAxis>
+      <name>label</name>
+      <values>
+        <string>X86_UBUNTU</string>
+      </values>
+    </hudson.matrix.LabelAxis>
     <hudson.matrix.TextAxis>
       <name>X</name>
       <values>
         <string>x1</string>
         <string>x2</string>
-        <string>x3</string>
       </values>
     </hudson.matrix.TextAxis>
     <hudson.matrix.TextAxis>
@@ -40,9 +45,6 @@
       <values>
         <string>y1</string>
         <string>y2</string>
-        <string>y3</string>
-        <string>y4</string>
-        <string>y5</string>
       </values>
     </hudson.matrix.TextAxis>
   </axes>
@@ -52,15 +54,17 @@
 
 echo &quot;FABTEST...&quot;
 
+echo &quot;Build Number: $BUILD_NUMBER&quot;
 echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot;
 echo &quot;Working dir is : `pwd`&quot;
 
-echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot; &gt; output.txt
+echo &quot;Build Number: $BUILD_NUMBER&quot; &gt; output.txt
+echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot; &gt;&gt; output.txt
 echo &quot;Working dir is : `pwd`&quot; &gt;&gt; output.txt
 
 echo &quot;X: $X, Y: $Y&quot;
 
-sleep 20</command>
+sleep 10</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
