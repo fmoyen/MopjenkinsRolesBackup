@@ -93,7 +93,7 @@ in case of problems: please contact fmoyen@fr.ibm.com or alexandre.castellane@fr
       <hudson.plugins.git.extensions.impl.CleanBeforeCheckout/>
     </extensions>
   </scm>
-  <assignedNode>X86_RH7</assignedNode>
+  <assignedNode>X86_UBUNTU</assignedNode>
   <canRoam>false</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
@@ -134,6 +134,12 @@ H 18-23/4 * * *</spec>
         <string>xsim_2019.1</string>
       </values>
     </hudson.matrix.TextAxis>
+    <hudson.matrix.LabelAxis>
+      <name>label</name>
+      <values>
+        <string>X86_UBUNTU</string>
+      </values>
+    </hudson.matrix.LabelAxis>
   </axes>
   <combinationFilter>(  ((ACT=~&quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;)||(ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; ))  &amp;&amp; ( (CRD=~&quot;AD9V3&quot;  &amp;&amp; AD9V3==&quot;true&quot;) || (CRD=~&quot;AD9H3&quot;   &amp;&amp; AD9H3==&quot;true&quot;) || (CRD=~&quot;AD9H7&quot; &amp;&amp; AD9H7==&quot;true&quot;) ) ) || (ACT==&quot;test&quot; &amp;&amp; CRD==&quot;AD9V3&quot;)</combinationFilter>
   <builders>
