@@ -93,7 +93,7 @@ in case of problems: please contact fmoyen@fr.ibm.com or alexandre.castellane@fr
       <hudson.plugins.git.extensions.impl.CleanBeforeCheckout/>
     </extensions>
   </scm>
-  <assignedNode>X86_UBUNTU</assignedNode>
+  <assignedNode>X86_RH7</assignedNode>
   <canRoam>false</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
@@ -139,6 +139,7 @@ H 18-23/4 * * *</spec>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
+echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot;; sleep 30
 echo &quot;Working dir is : &quot;
 pwd
 set +x                           # reduce Jenkins output
@@ -251,6 +252,7 @@ echo &quot;***********************************************************&quot;</co
     <hudson.tasks.Shell>
       <command>#!/bin/bash
 set +x                           # reduce Jenkins output
+echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot;
 #ulimit -c unlimited             # reduce core dumps from what .profile says (kB)
 ulimit -S -c 128000
 echo &quot;****************************************************************************************&quot;
