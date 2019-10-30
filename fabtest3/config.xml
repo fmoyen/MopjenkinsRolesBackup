@@ -1,7 +1,7 @@
 <?xml version='1.1' encoding='UTF-8'?>
-<project>
+<matrix-project plugin="matrix-project@1.14">
   <actions/>
-  <description>Testing pipeline for Fabrice</description>
+  <description>Testing multi-configuration matrix for Fabrice</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
@@ -11,17 +11,41 @@
       <throttleEnabled>false</throttleEnabled>
       <throttleOption>project</throttleOption>
       <limitOneJobWithMatchingParams>false</limitOneJobWithMatchingParams>
+      <matrixOptions>
+        <throttleMatrixBuilds>true</throttleMatrixBuilds>
+        <throttleMatrixConfigurations>false</throttleMatrixConfigurations>
+      </matrixOptions>
       <paramsToUseForLimit></paramsToUseForLimit>
     </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
   </properties>
   <scm class="hudson.scm.NullSCM"/>
-  <assignedNode>X86_UBUNTU</assignedNode>
+  <assignedNode>X86_RH7</assignedNode>
   <canRoam>false</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers/>
   <concurrentBuild>false</concurrentBuild>
+  <axes>
+    <hudson.matrix.TextAxis>
+      <name>X</name>
+      <values>
+        <string>x1</string>
+        <string>x2</string>
+        <string>x3</string>
+      </values>
+    </hudson.matrix.TextAxis>
+    <hudson.matrix.TextAxis>
+      <name>Y</name>
+      <values>
+        <string>y1</string>
+        <string>y2</string>
+        <string>y3</string>
+        <string>y4</string>
+        <string>y5</string>
+      </values>
+    </hudson.matrix.TextAxis>
+  </axes>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
@@ -34,9 +58,14 @@ echo &quot;Working dir is : `pwd`&quot;
 echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot; &gt; output.txt
 echo &quot;Working dir is : `pwd`&quot; &gt;&gt; output.txt
 
+echo &quot;X: $X, Y: $Y&quot;
+
 sleep 20</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
   <buildWrappers/>
-</project>
+  <executionStrategy class="hudson.matrix.DefaultMatrixExecutionStrategyImpl">
+    <runSequentially>false</runSequentially>
+  </executionStrategy>
+</matrix-project>
