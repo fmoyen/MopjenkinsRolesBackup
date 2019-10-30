@@ -4,6 +4,10 @@
   <description>Testing pipeline for Fabrice</description>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.4">
+      <projectUrl>git@github.com:fmoyen/boeblingentest.git/</projectUrl>
+      <displayName></displayName>
+    </com.coravy.hudson.plugins.github.GithubProjectProperty>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
       <maxConcurrentPerNode>0</maxConcurrentPerNode>
       <maxConcurrentTotal>0</maxConcurrentTotal>
@@ -14,7 +18,23 @@
       <paramsToUseForLimit></paramsToUseForLimit>
     </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
   </properties>
-  <scm class="hudson.scm.NullSCM"/>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.9.3">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>git@github.com:fmoyen/boeblingentest.git</url>
+        <credentialsId>mopjenkins_executor-user</credentialsId>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>*/master</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions/>
+  </scm>
   <assignedNode>X86_UBUNTU</assignedNode>
   <canRoam>false</canRoam>
   <disabled>false</disabled>
@@ -33,8 +53,7 @@ echo &quot;Working dir is : `pwd`&quot;
 
 echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot; &gt; output.txt
 echo &quot;Working dir is : `pwd`&quot; &gt;&gt; output.txt
-
-sleep 20</command>
+</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
