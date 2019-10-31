@@ -93,7 +93,7 @@ in case of problems: please contact fmoyen@fr.ibm.com or alexandre.castellane@fr
       <hudson.plugins.git.extensions.impl.CleanBeforeCheckout/>
     </extensions>
   </scm>
-  <assignedNode>X86_RH7</assignedNode>
+  <assignedNode>X86_UBUNTU</assignedNode>
   <canRoam>false</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
@@ -139,7 +139,7 @@ H 18-23/4 * * *</spec>
     <hudson.matrix.LabelAxis>
       <name>label</name>
       <values>
-        <string>X86_RH7</string>
+        <string>X86_UBUNTU</string>
       </values>
     </hudson.matrix.LabelAxis>
   </axes>
@@ -147,15 +147,18 @@ H 18-23/4 * * *</spec>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
-echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot;; sleep 30
-echo &quot;Working dir is : &quot;
-pwd
 set +x                           # reduce Jenkins output
+
+echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot;
+echo &quot;Working dir is : `pwd`&quot;
+
+
 echo &quot;****************************************************************************************&quot;
 echo &quot;`date` BUILD START&quot;
 echo &quot;****************************************************************************************&quot;
 echo &quot;EXECUTING FIRST SHELL FROM OpenCAPI SIM JENKINS - V1.1 - 2019 march 06 - ...&quot;
 echo &quot;****************************************************************************************&quot;
+
 NAME=$(echo $GIT_BRANCH| cut -d&apos;/&apos; -f 2 |tr &apos;[:upper:]&apos; &apos;[:lower:]&apos;) # remove origin/ from branch and translate to lowercase
 PREFIX=$(echo $NAME| cut -d&apos;_&apos; -f 1)    # chars up to first &apos;_&apos; identify need for test
 ACTION_TYPE=$(echo $ACT| cut -d&apos;_&apos; -f 1)
@@ -170,7 +173,8 @@ if [ &quot;$CRD&quot;         == &quot;AD9V3&quot;  ] &amp;&amp; [ &quot;$AD9V3&
 if [ &quot;$CRD&quot;         == &quot;AD9H3&quot;  ] &amp;&amp; [ &quot;$AD9H3&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
 if [ &quot;$CRD&quot;         == &quot;AD9H7&quot;  ] &amp;&amp; [ &quot;$AD9H7&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
 if [ &quot;$ACT&quot;         == &quot;test&quot;   ]; then BSKIP=0;fi
-echo &quot;examples(hdl,hls)=$HDL $HLS card_enabled(9v3,250SP)=$AD9V3 $N250SP BSKIP=$BSKIP&quot;
+echo &quot;action_types (hdl,hls)=$HDL,$HLS enabled_cards(AD9v3,AD9H3,AD9H7)=$AD9V3,$AD9H3,$AD9H7 BSKIP=$BSKIP&quot;
+echo
 
 case &quot;$CRD:$ACT:$SIM&quot; in
   *:hls_blowfish:* )         C=&quot;blow&quot;;ASKIP=1;; # no maintenance for blowfish
@@ -178,6 +182,7 @@ case &quot;$CRD:$ACT:$SIM&quot; in
   * )                        C=&quot;def&quot; ;ASKIP=0;;
 esac            
 echo &quot;card=$CRD action=$ACT Sim=$SIM VIV=$VIV case=$C ASKIP=$ASKIP&quot;
+echo
 
 case &quot;$ACT&quot; in
   test )
@@ -260,7 +265,10 @@ echo &quot;***********************************************************&quot;</co
     <hudson.tasks.Shell>
       <command>#!/bin/bash
 set +x                           # reduce Jenkins output
+
 echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot;
+echo &quot;Working dir is : `pwd`&quot;
+
 #ulimit -c unlimited             # reduce core dumps from what .profile says (kB)
 ulimit -S -c 128000
 echo &quot;****************************************************************************************&quot;
