@@ -23,7 +23,7 @@
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
         <url>git@github.com:fmoyen/boeblingentest.git</url>
-        <credentialsId>mopjenkins_executor-user</credentialsId>
+        <credentialsId>executor-user</credentialsId>
       </hudson.plugins.git.UserRemoteConfig>
     </userRemoteConfigs>
     <branches>
@@ -35,7 +35,7 @@
     <submoduleCfg class="list"/>
     <extensions/>
   </scm>
-  <assignedNode>X86_UBUNTU</assignedNode>
+  <assignedNode>X86</assignedNode>
   <canRoam>false</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
