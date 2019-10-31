@@ -419,7 +419,7 @@ esac
 
 
 #==============================================================================================
-# Build simulation model
+# Make with defconfig file or just exiting if ACT=test
 
 echo &quot;********************************************************************************&quot;
 echo &quot;J: Build Simulation Model ...&quot;
@@ -462,6 +462,12 @@ case $ACT in                    # select config &amp; compile action
     ;;
 esac
 
+#==============================================================================================
+# Build Simulation Model (make model)
+
+echo &quot;********************************************************************************&quot;
+echo &quot;J: Build Simulation Model (make model)...&quot;
+
 case $SIM:$ACT in
   &apos;xsim&apos;:*|&apos;XSIM&apos;:* )             echo &quot;export SIMULATOR=xsim&quot;     &gt;&gt; .snap_config.sh
                                   sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
@@ -488,6 +494,17 @@ case $SIM:$ACT in
                                   echo &quot;SIM_MODELSIM=y&quot;            &gt;&gt; .snap_config;;   # overwrite simulator
   *) echo &quot;J: WARNING: unknown simulator=$SIM, continuing with default&quot;;;
 esac
+
+echo &quot;.snap_config.sh&quot;
+echo &quot;---------------&quot;
+cat .snap_config.sh
+echo
+
+echo &quot;.snap_config&quot;
+echo &quot;------------&quot;
+cat .snap_config.sh
+echo
+
 # execute with LSF, SNAP_ROOT must reside in AFS
 #echo &quot;J: PATH=$PATH&quot;
 #which irun
@@ -501,19 +518,26 @@ make model|| exit 1
 
 #bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}_model&quot; &quot;hostname;lsb_release -a;make model&quot;|| exit 1
 
+#==============================================================================================
+# Run simulation
+
 echo &quot;********************************************************************************&quot;
 echo &quot;J: Run $SIM Simulation in LSF ...&quot;
 cd ${SNAP_ROOT}/hardware/sim
+
 ##### enable SW trace
 # export SNAP_TRACE=0xf
 ##### execute locally
 # ./run_sim -list testlist.sh -noaet
+
 ##### execute on AFS with LSF, report error as unstable build
 case $SIM in
 # run in the proper ${ACT} directory /tests/hw_test.sh
   &apos;xsim&apos;|&apos;XSIM&apos; )
-  #bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;${SNAP_ROOT}/hardware/sim/run_sim -list ../../actions/${ACT}/tests/hw_test.sh -noaet&quot;||exit 100;;
-./run_sim -list testlist_jenkins.sh -noaet||exit 100;;
+    #bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;${SNAP_ROOT}/hardware/sim/run_sim -list ../../actions/${ACT}/tests/hw_test.sh -noaet&quot;||exit 100
+    ./run_sim -list testlist_jenkins.sh -noaet||exit 100
+  ;;
+
 # older way to run with capi snap
 #  &apos;xsim&apos;|&apos;XSIM&apos; ) bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;./run_sim -list testlist.sh -noaet&quot;||exit 100;;
 #  &apos;irun&apos;|&apos;IRUN&apos; ) bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;./run_sim -irun -list testlist.sh -noaet&quot;||exit 100;;
