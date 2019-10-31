@@ -87,7 +87,7 @@ in case of problems: please contact fmoyen@fr.ibm.com or alexandre.castellane@fr
     <submoduleCfg class="list"/>
     <extensions>
       <hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
-        <relativeTargetDir>snap</relativeTargetDir>
+        <relativeTargetDir>${BRANCH}/snap</relativeTargetDir>
       </hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
       <hudson.plugins.git.extensions.impl.PruneStaleBranch/>
       <hudson.plugins.git.extensions.impl.CleanBeforeCheckout/>
