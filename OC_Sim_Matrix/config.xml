@@ -202,7 +202,7 @@ case &quot;$ACT&quot; in
     # gitnames=list of all remote branches
     gitnames=`git ls-remote git@github.ibm.com:OC-Enablement/oc-snap.git|grep &quot;refs/heads/&quot;|awk &apos;{print $2}&apos;`;RC=$?
     echo &quot;RC=$RC gitnames=$gitnames&quot;
-    for dir in &quot;home/castella/OC_SIM_matrix&quot;/*;do
+    for dir in &quot;/var/jenkins/workspace/OC_Sim_Matrix&quot;/*;do
       if [ -d &quot;$dir&quot; ];then
         branch=&quot;refs/heads/&quot;`basename $dir`
         if [[ &quot;$gitnames&quot; =~ &quot;$branch&quot; ]];then echo &quot;branch=$branch found in gitnames, keep dir=$dir&quot;
@@ -238,8 +238,11 @@ case &quot;$ACT&quot; in
 esac
 echo &quot;defconfig SKIP=$DSKIP&quot;
 
+#==============================================================================================
+# Checking enough space is available
+
 #AFSused=`fs lq /afs/bb/proj/fpga/framework/CI_ws/OC_SIM_matrix/|grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
-diskused=`du -sh /home/castella/OC_SIM_matrix/|grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
+diskused=`df -h /var/jenkins/workspace/OC_Sim_Matrix|grep -v Used|awk &apos;{print $5}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
 SSKIP=0;msg=&quot;diskused =${diskused}%&quot;
 if   (( diskused &gt; 90 ));then 
   msg=&quot;ERROR: $msg, stopping additional builds&quot;;SSKIP=1
@@ -252,7 +255,11 @@ elif (( diskused &gt; 70 ));then
    #echo &quot;mail sent to castella : WARNING OpenCAPI AFS space&quot;
    #mail -s &quot;WARNING: OpenCAPI AFS space IMAGETEST is used up to ${diskused}%&quot; castella
    #mail -s &quot;WARNING: AFS space IMAGETEST is used up to ${AFSused}%&quot; mesnet
-fi;echo &quot;$msg&quot;
+fi
+echo &quot;$msg&quot;
+
+#==============================================================================================
+# Any reason to abort ? If yes SKIP=1 used in next conditional step and passed to next script
 
 if (( ASKIP+DSKIP+BSKIP+SSKIP &gt; 0 ));then SKIP=1;else SKIP=0;fi
 echo &quot;SKIP=$SKIP&quot; &gt;export_props.properties
