@@ -75,7 +75,7 @@ in case of problems: please contact fmoyen@fr.ibm.com or alexandre.castellane@fr
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
         <url>git@github.ibm.com:OC-Enablement/oc-snap.git</url>
-        <credentialsId>a3a2487c-a814-42d6-9bca-c44fa09a09b5</credentialsId>
+        <credentialsId>executor-user</credentialsId>
       </hudson.plugins.git.UserRemoteConfig>
     </userRemoteConfigs>
     <branches>
@@ -93,7 +93,7 @@ in case of problems: please contact fmoyen@fr.ibm.com or alexandre.castellane@fr
       <hudson.plugins.git.extensions.impl.CleanBeforeCheckout/>
     </extensions>
   </scm>
-  <assignedNode>X86_UBUNTU</assignedNode>
+  <assignedNode>X86_RH7</assignedNode>
   <canRoam>false</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
@@ -139,7 +139,7 @@ H 18-23/4 * * *</spec>
     <hudson.matrix.LabelAxis>
       <name>label</name>
       <values>
-        <string>X86_UBUNTU</string>
+        <string>X86_RH7</string>
       </values>
     </hudson.matrix.LabelAxis>
   </axes>
