@@ -162,11 +162,13 @@ echo &quot;*********************************************************************
 #==============================================================================================
 # Variables
 
+&gt; export_props.properties
 NAME=$(echo $GIT_BRANCH| cut -d&apos;/&apos; -f 2 |tr &apos;[:upper:]&apos; &apos;[:lower:]&apos;) # remove origin/ from branch and translate to lowercase
 PREFIX=$(echo $NAME| cut -d&apos;_&apos; -f 1)    # chars up to first &apos;_&apos; identify need for test
 ACTION_TYPE=$(echo $ACT| cut -d&apos;_&apos; -f 1)
-SIM=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 1)    # chars up to  first &apos;_&apos; identify Simulator
-VIV=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 2)    # chars behind first &apos;_&apos; identify Vivado version
+SIM=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 1); echo &quot;SIM=$SIM&quot; &gt;&gt;export_props.properties    # chars up to  first &apos;_&apos; identify Simulator
+VIV=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 2); echo &quot;VIV=$VIV&quot; &gt;&gt;export_props.properties    # chars behind first &apos;_&apos; identify Vivado version
+
 echo &quot;Build with Card=$CRD Action=$ACT Action_type=$ACTION_TYPE branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX&quot;
 
 #==============================================================================================
@@ -262,7 +264,7 @@ echo &quot;$msg&quot;
 # Any reason to abort ? If yes SKIP=1 used in next conditional step and passed to next script
 
 if (( ASKIP+DSKIP+BSKIP+SSKIP &gt; 0 ));then SKIP=1;else SKIP=0;fi
-echo &quot;SKIP=$SKIP&quot; &gt;export_props.properties
+echo &quot;SKIP=$SKIP&quot; &gt;&gt;export_props.properties
 echo &quot;properties passed to next shell:&quot;
 cat export_props.properties
 echo &quot;***********************************************************&quot;</command>
@@ -290,22 +292,27 @@ echo &quot;***********************************************************&quot;</co
 set +x                           # reduce Jenkins output
 
 echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot;
-echo &quot;Working dir is : `pwd`&quot;
 
-#ulimit -c unlimited             # reduce core dumps from what .profile says (kB)
+
+ulimit -c unlimited             # reduce core dumps from what .profile says (kB)
 ulimit -S -c 128000
 echo &quot;****************************************************************************************&quot;
 echo &quot;EXECUTING SECOND SHELL FROM OpenCAPI SIM JENKINS - V1.1 - 2019 march 21 - ...&quot;
 echo &quot;****************************************************************************************&quot;
+
+
+#==============================================================================================
+# Variables
+
 export PATH=$PATH:/usr/local/bin # python3 needs this path setup
 export USERHOME=`pwd`
 export SNAP_ROOT=$USERHOME/snap
-SIM=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 1)    # chars up to  first &apos;_&apos; identify Simulator
-VIV=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 2)    # chars behind first &apos;_&apos; identify Vivado version
 
-echo &quot;********************************************************************************&quot;
+#==============================================================================================
+# LSF Variables setup
+
+#echo &quot;********************************************************************************&quot;
 #echo &quot;J: LSF SETUP ...&quot;
-ulimit -c unlimited
 
 # older setup up to RH6
 #export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
@@ -329,9 +336,8 @@ ulimit -c unlimited
 
 
 echo &quot;*******************************************************************************&quot;
-echo &quot;current directory is&quot;
-pwd
-echo &quot;****&quot;
+echo &quot;Working dir is : `pwd`&quot;
+echo &quot;*****&quot;
 ls -al
 echo &quot;deleting ocse&quot;
 rm -rf ocse
