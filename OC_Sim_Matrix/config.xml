@@ -159,12 +159,18 @@ echo &quot;*********************************************************************
 echo &quot;EXECUTING FIRST SHELL FROM OpenCAPI SIM JENKINS - V1.1 - 2019 march 06 - ...&quot;
 echo &quot;****************************************************************************************&quot;
 
+#==============================================================================================
+# Variables
+
 NAME=$(echo $GIT_BRANCH| cut -d&apos;/&apos; -f 2 |tr &apos;[:upper:]&apos; &apos;[:lower:]&apos;) # remove origin/ from branch and translate to lowercase
 PREFIX=$(echo $NAME| cut -d&apos;_&apos; -f 1)    # chars up to first &apos;_&apos; identify need for test
 ACTION_TYPE=$(echo $ACT| cut -d&apos;_&apos; -f 1)
 SIM=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 1)    # chars up to  first &apos;_&apos; identify Simulator
 VIV=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 2)    # chars behind first &apos;_&apos; identify Vivado version
 echo &quot;Build with Card=$CRD Action=$ACT Action_type=$ACTION_TYPE branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX&quot;
+
+#==============================================================================================
+# Do not run non-desired cases (action types, actions, cards)
 
 BSKIP=0
 if [ &quot;$ACTION_TYPE&quot; == &quot;hdl&quot;    ] &amp;&amp; [ &quot;$HDL&quot;    == &quot;false&quot; ]; then BSKIP=1;fi
@@ -176,6 +182,9 @@ if [ &quot;$ACT&quot;         == &quot;test&quot;   ]; then BSKIP=0;fi
 echo &quot;action_types (hdl,hls)=$HDL,$HLS enabled_cards(AD9v3,AD9H3,AD9H7)=$AD9V3,$AD9H3,$AD9H7 BSKIP=$BSKIP&quot;
 echo
 
+#==============================================================================================
+# Case hls_blowfish ???
+
 case &quot;$CRD:$ACT:$SIM&quot; in
   *:hls_blowfish:* )         C=&quot;blow&quot;;ASKIP=1;; # no maintenance for blowfish
 # *:test:* )                 C=&quot;test&quot;;ASKIP=0;;
@@ -184,8 +193,13 @@ esac
 echo &quot;card=$CRD action=$ACT Sim=$SIM VIV=$VIV case=$C ASKIP=$ASKIP&quot;
 echo
 
+#==============================================================================================
+# Checking defconfig file linked to $ACT Action exists
+
 case &quot;$ACT&quot; in
   test )
+    # What for ???
+    # gitnames=list of all remote branches
     gitnames=`git ls-remote git@github.ibm.com:OC-Enablement/oc-snap.git|grep &quot;refs/heads/&quot;|awk &apos;{print $2}&apos;`;RC=$?
     echo &quot;RC=$RC gitnames=$gitnames&quot;
     for dir in &quot;home/castella/OC_SIM_matrix&quot;/*;do
@@ -205,6 +219,7 @@ case &quot;$ACT&quot; in
 
     date
     DSKIP=0;;
+    
   *&quot;hls_intersect&quot;* ) 
     if [ -f snap/defconfig/$CRD.hls_intersect.defconfig ];then DSKIP=0
     else 
@@ -212,6 +227,7 @@ case &quot;$ACT&quot; in
       ls snap/defconfig/
       DSKIP=1
     fi;;  
+    
   * )          
     if [ -f snap/defconfig/$CRD.$ACT.defconfig ];then DSKIP=0
     else 
