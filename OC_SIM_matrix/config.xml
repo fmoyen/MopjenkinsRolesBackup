@@ -336,10 +336,11 @@ ls -al
 echo &quot;deleting ocse (OpenCAPI Simulation Engine) directory&quot;
 rm -rf ocse
 
-#???
+# When Lance Thomson makes a mod in his OCSE, we might use a specific branch for test
+# 2019 Nov 04 he merged the issue_2 into master (removing the debug messages)
 case $CRD in 
-  *) 		branch=&apos;issue_2&apos;;;
-  #*) 		branch=&apos;master&apos;;;
+  #*) 		branch=&apos;issue_2&apos;;;
+  *) 		branch=&apos;master&apos;;;
 esac
 
 echo &quot;J: Get OpenCAPI Simulation Environment (ocse) branch=$branch for card=$CRD...&quot;
