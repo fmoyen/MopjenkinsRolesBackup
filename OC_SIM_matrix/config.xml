@@ -143,7 +143,7 @@ H 18-23/4 * * *</spec>
       </values>
     </hudson.matrix.LabelAxis>
   </axes>
-  <combinationFilter>(  ((ACT=~&quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;)||(ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; ))  &amp;&amp; ( (CRD=~&quot;AD9V3&quot;  &amp;&amp; AD9V3==&quot;true&quot;) || (CRD=~&quot;AD9H3&quot;   &amp;&amp; AD9H3==&quot;true&quot;) || (CRD=~&quot;AD9H7&quot; &amp;&amp; AD9H7==&quot;true&quot;) ) ) || (ACT==&quot;test&quot; &amp;&amp; CRD==&quot;AD9V3&quot;)</combinationFilter>
+  <combinationFilter>(  ((ACT=~&quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;)||(ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; ))  &amp;&amp; ( (CRD=~&quot;AD9V3&quot;  &amp;&amp; AD9V3==&quot;true&quot;) || ( CRD=~&quot;AD9H&quot; &amp;&amp; (AD9H3==&quot;true&quot;|| AD9H7==&quot;true&quot;) &amp;&amp; !(ACT=~&quot;DDR&quot;) ) )  ) || (ACT==&quot;test&quot; &amp;&amp; CRD==&quot;AD9V3&quot;)</combinationFilter>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
@@ -182,17 +182,6 @@ if [ &quot;$CRD&quot;         == &quot;AD9H3&quot;  ] &amp;&amp; [ &quot;$AD9H3&
 if [ &quot;$CRD&quot;         == &quot;AD9H7&quot;  ] &amp;&amp; [ &quot;$AD9H7&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
 if [ &quot;$ACT&quot;         == &quot;test&quot;   ]; then BSKIP=0;fi
 echo &quot;action_types (hdl,hls)=$HDL,$HLS enabled_cards(AD9v3,AD9H3,AD9H7)=$AD9V3,$AD9H3,$AD9H7 BSKIP=$BSKIP&quot;
-echo
-
-#==============================================================================================
-# Case hls_blowfish ???
-
-case &quot;$CRD:$ACT:$SIM&quot; in
-  *:hls_blowfish:* )         C=&quot;blow&quot;;ASKIP=1;; # no maintenance for blowfish
-# *:test:* )                 C=&quot;test&quot;;ASKIP=0;;
-  * )                        C=&quot;def&quot; ;ASKIP=0;;
-esac            
-echo &quot;card=$CRD action=$ACT Sim=$SIM VIV=$VIV case=$C ASKIP=$ASKIP&quot;
 echo
 
 #==============================================================================================
