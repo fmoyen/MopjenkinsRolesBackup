@@ -1,0 +1,584 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<matrix-project plugin="matrix-project@1.14">
+  <actions/>
+  <description>builds and simulates many different configurations, automatic nightruns on master&#xd;
+in case of problems: please contact fmoyen@fr.ibm.com or alexandre.castellane@fr.ibm.com&#xd;
+=&gt; local ocse used (not repo)&#xd;
+=&gt; 2019.1 test on AD9V3 only</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.4">
+      <projectUrl>https://github.ibm.com/OC_Enablement/oc-snap/</projectUrl>
+      <displayName></displayName>
+    </com.coravy.hudson.plugins.github.GithubProjectProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>BRANCH</name>
+          <description>Choose the branch you want to test</description>
+          <defaultValue>jenkins_mods</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>HDL</name>
+          <description>enable/disable HDL examples simulation</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>HLS</name>
+          <description>enable/disable HLS examples simulation</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>AD9V3</name>
+          <description>enable/disable AD9V3 simulation</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>AD9H3</name>
+          <description>enable/disable AD9H3 simulation</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>AD9H7</name>
+          <description>enable/disable AD9H7 simulation</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>XSIM</name>
+          <description>enable/disable model build with XSIM</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>IRUN</name>
+          <description>enable/disable modelbuild with irun</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
+      <maxConcurrentPerNode>0</maxConcurrentPerNode>
+      <maxConcurrentTotal>0</maxConcurrentTotal>
+      <categories class="java.util.concurrent.CopyOnWriteArrayList"/>
+      <throttleEnabled>true</throttleEnabled>
+      <throttleOption>category</throttleOption>
+      <limitOneJobWithMatchingParams>true</limitOneJobWithMatchingParams>
+      <matrixOptions>
+        <throttleMatrixBuilds>false</throttleMatrixBuilds>
+        <throttleMatrixConfigurations>true</throttleMatrixConfigurations>
+      </matrixOptions>
+      <paramsToUseForLimit></paramsToUseForLimit>
+    </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.9.3">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>git@github.ibm.com:OC-Enablement/oc-snap.git</url>
+        <credentialsId>executor-user</credentialsId>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>${BRANCH}</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions>
+      <hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
+        <relativeTargetDir>snap</relativeTargetDir>
+      </hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
+      <hudson.plugins.git.extensions.impl.PruneStaleBranch/>
+      <hudson.plugins.git.extensions.impl.CleanBeforeCheckout/>
+    </extensions>
+  </scm>
+  <assignedNode>X86_UBUNTU</assignedNode>
+  <canRoam>false</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers>
+    <com.cloudbees.jenkins.GitHubPushTrigger plugin="github@1.29.4">
+      <spec></spec>
+    </com.cloudbees.jenkins.GitHubPushTrigger>
+    <hudson.triggers.SCMTrigger>
+      <spec>H 0-8/4 * * *
+H 18-23/4 * * *</spec>
+      <ignorePostCommitHooks>false</ignorePostCommitHooks>
+    </hudson.triggers.SCMTrigger>
+  </triggers>
+  <concurrentBuild>true</concurrentBuild>
+  <axes>
+    <hudson.matrix.TextAxis>
+      <name>ACT</name>
+      <values>
+        <string>hdl_example.noRAM</string>
+        <string>hdl_example.BRAM</string>
+        <string>hdl_example.DDR</string>
+        <string>hdl_single_engine</string>
+        <string>hls_helloworld</string>
+        <string>hls_memcopy_1024</string>
+        <string>test</string>
+      </values>
+    </hudson.matrix.TextAxis>
+    <hudson.matrix.TextAxis>
+      <name>CRD</name>
+      <values>
+        <string>AD9V3</string>
+        <string>AD9H3</string>
+        <string>AD9H7</string>
+      </values>
+    </hudson.matrix.TextAxis>
+    <hudson.matrix.TextAxis>
+      <name>SIM_VIV</name>
+      <values>
+        <string>xsim_2019.1</string>
+      </values>
+    </hudson.matrix.TextAxis>
+    <hudson.matrix.LabelAxis>
+      <name>label</name>
+      <values>
+        <string>X86_UBUNTU</string>
+      </values>
+    </hudson.matrix.LabelAxis>
+  </axes>
+  <combinationFilter>(  ((ACT=~&quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;)||(ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; ))  &amp;&amp; ( (CRD=~&quot;AD9V3&quot;  &amp;&amp; AD9V3==&quot;true&quot;) || (CRD=~&quot;AD9H3&quot;   &amp;&amp; AD9H3==&quot;true&quot;) || (CRD=~&quot;AD9H7&quot; &amp;&amp; AD9H7==&quot;true&quot;) ) ) || (ACT==&quot;test&quot; &amp;&amp; CRD==&quot;AD9V3&quot;)</combinationFilter>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>#!/bin/bash
+set +x                           # reduce Jenkins output
+
+echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot;
+echo &quot;Working dir is : $PWD&quot;
+
+
+echo &quot;****************************************************************************************&quot;
+echo &quot;`date` BUILD START&quot;
+echo &quot;****************************************************************************************&quot;
+echo &quot;EXECUTING FIRST SHELL FROM OpenCAPI SIM JENKINS - V1.1 - 2019 march 06 - ...&quot;
+echo &quot;****************************************************************************************&quot;
+
+#==============================================================================================
+# Variables
+
+&gt; export_props.properties
+NAME=$(echo $GIT_BRANCH| cut -d&apos;/&apos; -f 2 |tr &apos;[:upper:]&apos; &apos;[:lower:]&apos;) # remove origin/ from branch and translate to lowercase
+PREFIX=$(echo $NAME| cut -d&apos;_&apos; -f 1)    # chars up to first &apos;_&apos; identify need for test
+ACTION_TYPE=$(echo $ACT| cut -d&apos;_&apos; -f 1)
+SIM=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 1); echo &quot;SIM=$SIM&quot; &gt;&gt;export_props.properties    # chars up to  first &apos;_&apos; identify Simulator
+VIV=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 2); echo &quot;VIV=$VIV&quot; &gt;&gt;export_props.properties    # chars behind first &apos;_&apos; identify Vivado version
+
+echo &quot;Build with Card=$CRD Action=$ACT Action_type=$ACTION_TYPE branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX&quot;
+
+#==============================================================================================
+# Do not run non-desired cases (action types, actions, cards)
+
+BSKIP=0
+if [ &quot;$ACTION_TYPE&quot; == &quot;hdl&quot;    ] &amp;&amp; [ &quot;$HDL&quot;    == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$ACTION_TYPE&quot; == &quot;hls&quot;    ] &amp;&amp; [ &quot;$HLS&quot;    == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$CRD&quot;         == &quot;AD9V3&quot;  ] &amp;&amp; [ &quot;$AD9V3&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$CRD&quot;         == &quot;AD9H3&quot;  ] &amp;&amp; [ &quot;$AD9H3&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$CRD&quot;         == &quot;AD9H7&quot;  ] &amp;&amp; [ &quot;$AD9H7&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$ACT&quot;         == &quot;test&quot;   ]; then BSKIP=0;fi
+echo &quot;action_types (hdl,hls)=$HDL,$HLS enabled_cards(AD9v3,AD9H3,AD9H7)=$AD9V3,$AD9H3,$AD9H7 BSKIP=$BSKIP&quot;
+echo
+
+#==============================================================================================
+# Case hls_blowfish ???
+
+case &quot;$CRD:$ACT:$SIM&quot; in
+  *:hls_blowfish:* )         C=&quot;blow&quot;;ASKIP=1;; # no maintenance for blowfish
+# *:test:* )                 C=&quot;test&quot;;ASKIP=0;;
+  * )                        C=&quot;def&quot; ;ASKIP=0;;
+esac            
+echo &quot;card=$CRD action=$ACT Sim=$SIM VIV=$VIV case=$C ASKIP=$ASKIP&quot;
+echo
+
+#==============================================================================================
+# Checking defconfig file linked to $ACT Action exists
+
+case &quot;$ACT&quot; in
+  test )
+    # What for ???
+    # gitnames=list of all remote branches
+    gitnames=`git ls-remote git@github.ibm.com:OC-Enablement/oc-snap.git|grep &quot;refs/heads/&quot;|awk &apos;{print $2}&apos;`;RC=$?
+    echo &quot;RC=$RC&quot;
+    echo &quot;gitnames= $gitnames&quot;
+    echo
+    
+    for dir in &quot;/var/jenkins/workspace/OC_Sim_Matrix&quot;/*;do
+      if [ -d &quot;$dir&quot; ];then
+        branch=&quot;refs/heads/&quot;`basename $dir`
+        if [[ &quot;$gitnames&quot; =~ &quot;$branch&quot; ]];then echo &quot;branch=$branch found in gitnames, keep dir=$dir&quot;
+        else 
+          echo &quot;branch=$branch not found in gitnames, delete dir=\&apos;$dir\&apos;&quot;
+          rm -rf &quot;$dir&quot;     # put in quotes to work for directories with blanks
+        fi
+      else echo &quot;$dir is not a directory, continuing&quot;
+      fi
+    done
+    
+    #echo &quot;mail informing castella test triggered&quot;
+    #mail -s &quot;*OpenCAPI Jenkins SIMULATION started with : branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX&quot; castella
+
+    date
+    DSKIP=0;;
+    
+  *&quot;hls_intersect&quot;* ) 
+    if [ -f snap/defconfig/$CRD.hls_intersect.defconfig ];then DSKIP=0
+    else 
+      echo &quot;$CRD.hls_intersect.defconfig does not exist&quot;
+      ls snap/defconfig/
+      DSKIP=1
+    fi;;  
+    
+  * )          
+    if [ -f snap/defconfig/$CRD.$ACT.defconfig ];then DSKIP=0
+    else 
+      echo &quot;$CRD.$ACT.defconfig does not exist&quot;
+      ls snap/defconfig/
+      DSKIP=1
+    fi;;  
+esac
+echo &quot;defconfig SKIP=$DSKIP&quot;
+
+#==============================================================================================
+# Checking enough space is available
+
+#AFSused=`fs lq /afs/bb/proj/fpga/framework/CI_ws/OC_SIM_matrix/|grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
+diskused=`df -h /var/jenkins/workspace/OC_Sim_Matrix|grep -v Used|awk &apos;{print $5}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
+SSKIP=0;msg=&quot;diskused =${diskused}%&quot;
+if   (( diskused &gt; 90 ));then 
+  msg=&quot;ERROR: $msg, stopping additional builds&quot;;SSKIP=1
+  #echo &quot;mail sent to castella : ERROR OpenCAPI AFS space&quot;
+  #mail -s &quot;ERROR: OpenCAPI AFS space SIMULATION is used up to ${diskused}%, stopping additional builds&quot; castella
+  #mail -s &quot;ERROR: AFS space SIMULATION is used up to ${AFSused}%, stopping additional builds&quot; mesnet
+
+elif (( diskused &gt; 70 ));then
+   msg=&quot;WARNING: $msg&quot;
+   #echo &quot;mail sent to castella : WARNING OpenCAPI AFS space&quot;
+   #mail -s &quot;WARNING: OpenCAPI AFS space IMAGETEST is used up to ${diskused}%&quot; castella
+   #mail -s &quot;WARNING: AFS space IMAGETEST is used up to ${AFSused}%&quot; mesnet
+fi
+echo &quot;$msg&quot;
+
+#==============================================================================================
+# Any reason to abort ? If yes SKIP=1 used in next conditional step and passed to next script
+
+if (( ASKIP+DSKIP+BSKIP+SSKIP &gt; 0 ));then SKIP=1;else SKIP=0;fi
+pwd
+echo &quot;SKIP=$SKIP&quot; &gt;&gt;export_props.properties
+echo &quot;properties passed to next shell:&quot;
+cat export_props.properties
+echo &quot;***********************************************************&quot;</command>
+    </hudson.tasks.Shell>
+    <EnvInjectBuilder plugin="envinject@2.1.6">
+      <info>
+        <propertiesFilePath>export_props.properties</propertiesFilePath>
+      </info>
+    </EnvInjectBuilder>
+    <org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder plugin="conditional-buildstep@1.3.6">
+      <condition class="org.jenkins_ci.plugins.run_condition.core.BooleanCondition" plugin="run-condition@1.2">
+        <token>$SKIP</token>
+      </condition>
+      <buildStep class="org.jenkins_ci.plugins.fail_the_build.FixResultBuilder" plugin="fail-the-build-plugin@1.0">
+        <defaultResultName>ABORTED</defaultResultName>
+        <success></success>
+        <unstable></unstable>
+        <failure></failure>
+        <aborted></aborted>
+      </buildStep>
+      <runner class="org.jenkins_ci.plugins.run_condition.BuildStepRunner$Fail" plugin="run-condition@1.2"/>
+    </org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder>
+    <hudson.tasks.Shell>
+      <command>#!/bin/bash
+set +x                           # reduce Jenkins output
+
+echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot;
+
+ulimit -S -c 128000
+echo &quot;****************************************************************************************&quot;
+echo &quot;EXECUTING SECOND SHELL FROM OpenCAPI SIM JENKINS - V1.1 - 2019 march 21 - ...&quot;
+echo &quot;****************************************************************************************&quot;
+
+
+#==============================================================================================
+# Variables
+
+export PATH=$PATH:/usr/local/bin # python3 needs this path setup
+export USERHOME=$PWD
+export SNAP_ROOT=$USERHOME/snap
+
+#==============================================================================================
+# LSF Variables setup
+
+ulimit -c unlimited             # reduce core dumps from what .profile says (kB)
+#echo &quot;********************************************************************************&quot;
+#echo &quot;J: LSF SETUP ...&quot;
+
+# older setup up to RH6
+#export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+#export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
+#export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+#export LSF_BINDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+#export LSF_SUBMITTER_OSTYPE=Linux
+#export LSF_ENVDIR=/home/lsfbb/prod/conf
+#LSF=&apos;-P zsort -M 2 -C 2000 -I -n 4 -R type=X86_64 -R span[hosts=1]&apos;  # Project, GB_mem, KB_core, #_processors, type of processor
+
+# new setup for RH7
+#export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
+#export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/etc
+#export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
+#export LSF_BINDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
+#export LSF_SUBMITTER_OSTYPE=Linux
+#export LSF_ENVDIR=/home/lsfbb/prod/conf
+#LSF=&apos;-P zsort -M 2 -C 2000 -I -n 4 -R type=X86_64  -R osver=rh7 -R span[hosts=1]&apos;  # Project, GB_mem, KB_core, #_processors, type of processor
+
+#==============================================================================================
+# OpenCAPI Simulation Engine (ocse) setup
+
+echo &quot;*******************************************************************************&quot;
+echo &quot;Current directory is : $PWD&quot;
+echo &quot;*****&quot;
+ls -al
+echo &quot;deleting ocse (OpenCAPI Simulation Engine) directory&quot;
+rm -rf ocse
+
+#???
+case $CRD in 
+  *) 		branch=&apos;issue_2&apos;;;
+  #*) 		branch=&apos;master&apos;;;
+esac
+
+echo &quot;J: Get OpenCAPI Simulation Environment (ocse) branch=$branch for card=$CRD...&quot;
+git clone -b $branch https://github.com/OpenCAPI/ocse ocse;echo &quot;git clone OCSE RC=$?&quot;
+
+export OCSE_INSTALL_DIR=${USERHOME}/ocse   # ca ne sert à rien on dirait !!
+
+cd ${SNAP_ROOT}
+echo &quot;exporting ocse directory as : ${USERHOME}/ocse into snap_env&quot;
+echo &quot;export OCSE_ROOT=${USERHOME}/ocse&quot; &gt;snap_env.sh
+#echo &quot;#setup: XILINX_LOCAL_USER_DATA=${XILINX_LOCAL_USER_DATA}, overwrite=no to prevent write access error in XilincTclStore (tclapp:load_apps)&quot; &gt;&gt;snap_env.sh
+echo &quot;export XILINX_LOCAL_USER_DATA=no&quot; &gt;&gt; snap_env.sh
+
+echo
+echo &quot;snap_env.sh&quot;
+echo &quot;-----------&quot;
+cat snap_env.sh
+
+#==============================================================================================
+# Check Vivado version ($VIV) is supported
+
+
+echo &quot;****************************************************************************************&quot;
+case $VIV in    # test multiple Vivado versions in one build
+
+  2018.2|2019.1)
+    export VIV_VERSION=$VIV
+    echo &quot;J: Vivado Version is OK: $VIV_VERSION&quot;
+    ;; 
+    
+  *)
+    echo &quot;J: unsupported Vivado version $VIV&quot;;exit 1;;
+esac
+
+#==============================================================================================
+# Vivado setup
+# pas de test pour SIM=xsim ???
+
+echo &quot;J: Vivado SETUP $VIV_VERSION ...&quot;
+export XILINX_ROOT=/opt/Xilinx
+export XILINXD_LICENSE_FILE=2100@pokwinlic1.pok.ibm.com
+source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
+
+case $SIM:$VIV in
+
+  xcelium:2018.2 )
+    echo &quot;J: Cadence SETUP $IES_VERSION for Vivado 2018.2&quot;
+    export PATH=$CDS_INST_DIR/tools/bin:$PATH
+#   export CDS_LIC_FILE=5280@auslnxlic01.austin.ibm.com
+    export CDS_LIC_FILE=5280@cdsserv1.pok.ibm.com:5280@cdsserv2.pok.ibm.com
+    export LD_LIBRARY_PATH=$CDS_INST_DIR/tools/lib/64bit:$LD_LIBRARY_PATH
+    if [ -f &quot;$IES_LIBS/cds.lib&quot; ]
+      then echo &quot;J: IES_LIBS found in $IES_LIBS&quot;
+      else echo &quot;J: WARNING: cannot find IES_LIBS=$IES_LIBS, Cadence compilation won&apos;t work&quot;;exit 1
+    fi
+    ;;
+    
+  irun:*|IRUN:*|xcelium:* )
+    echo &quot;Cadence SETUP $IES_VERSION for Vivado 2018.1&quot;
+    export PATH=$CDS_INST_DIR/tools/bin:$PATH
+    export CDS_LIC_FILE=5280@hdlic10.boeblingen.de.ibm.com:5280@hdlic11.boeblingen.de.ibm.com
+    export LD_LIBRARY_PATH=$CDS_INST_DIR/tools/lib/64bit:$LD_LIBRARY_PATH
+#   echo &quot;export LD_LIBRARY_PATH=$CDS_INST_DIR/tools/lib/64bit:$LD_LIBRARY_PATH&quot; &gt;&gt; snap_env.sh
+    if [ -f &quot;$IES_LIBS/cds.lib&quot; ]
+      then echo &quot;IES_LIBS found in $IES_LIBS&quot;
+      else echo &quot;J: WARNING: cannot find IES_LIBS=$IES_LIBS, Cadence compilation won&apos;t work&quot;;exit 1
+    fi
+    ;;
+esac
+
+
+#==============================================================================================
+# Make with defconfig file or just exiting if ACT=test
+
+echo &quot;********************************************************************************&quot;
+echo &quot;J: Build Simulation Model ...&quot;
+
+case $ACT in                    # select config &amp; compile action
+
+  &apos;test&apos;) 
+    echo &quot;J: ACT=test ==&gt; just exit 0&quot;;exit 0;; # just exit 
+    
+  &apos;hls_intersect_h&apos;)  
+    make $CRD.hls_intersect.defconfig
+    source ./snap_env.sh        # execute to exploit ACTION_ROOT
+    echo &quot;action compile intersect hash&quot;;
+    make -C ${ACTION_ROOT} clean config_h
+    ;;
+    
+  &apos;hls_intersect_s&apos;)  
+    make $CRD.hls_intersect.defconfig
+    source ./snap_env.sh        # execute to exploit ACTION_ROOT
+    echo &quot;action compile intersect sort&quot;;
+    make -C ${ACTION_ROOT} clean config_s
+    ;;
+    
+  *DENALI*)
+    act2=${ACT%.DENALI}
+    echo &quot;build action for ACT=$ACT act2=$act2&quot;
+    make $CRD.$act2.defconfig
+    ;;
+    
+  *) 
+   echo &quot;J: Current directory:$PWD&quot;
+   echo &quot;defconfig directory content:&quot;
+   ls defconfig/
+    
+    # before rh7 issue we did : make $CRD.$ACT.defconfig
+    # since we need RH7 we use LSF:
+    #bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}_defconfig&quot; &quot;hostname;lsb_release -a&quot;|| exit 1
+    echo &quot;making $CRD.$ACT.defconfig&quot;
+    make $CRD.$ACT.defconfig|| exit 1
+    ;;
+esac
+
+#==============================================================================================
+# Build Simulation Model (make model)
+
+echo &quot;********************************************************************************&quot;
+echo &quot;J: Build Simulation Model (make model)...&quot;
+
+case $SIM:$ACT in
+  &apos;xsim&apos;:*|&apos;XSIM&apos;:* )             echo &quot;export SIMULATOR=xsim&quot;     &gt;&gt; .snap_config.sh
+                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+                                  echo &quot;SIM_XSIM=y&quot;                &gt;&gt; .snap_config;;   # overwrite simulator
+  &apos;irun&apos;:*DENALI|&apos;IRUN&apos;:*DENALI ) echo &quot;ENABLE_DENALI=y&quot;           &gt;&gt; .snap_config;make -s oldconfig
+                                  echo &quot;export SIMULATOR=irun&quot;     &gt;&gt; .snap_config.sh
+                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+                                  echo &quot;SIM_IRUN=y&quot;                &gt;&gt; .snap_config;;   # overwrite simulator
+  &apos;irun&apos;:*|&apos;IRUN&apos;:* )             echo &quot;export SIMULATOR=irun&quot;     &gt;&gt; .snap_config.sh
+                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+                                  echo &quot;SIM_IRUN=y&quot;                &gt;&gt; .snap_config;;   # overwrite simulator
+  xcelium:*DENALI)                echo &quot;ENABLE_DENALI=y&quot;           &gt;&gt; .snap_config;make -s oldconfig
+  			                      echo &quot;export SIMULATOR=xcelium&quot;  &gt;&gt; .snap_config.sh
+                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+                                  echo &quot;SIM_XCELIUM=y&quot;             &gt;&gt; .snap_config;;   # overwrite simulator
+  xcelium:*)                      echo &quot;export SIMULATOR=xcelium&quot;  &gt;&gt; .snap_config.sh
+                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+                                  echo &quot;SIM_XCELIUM=y&quot;             &gt;&gt; .snap_config;;   # overwrite simulator
+  questa:*)                       echo &quot;export SIMULATOR=questa&quot;   &gt;&gt; .snap_config.sh
+                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+                                  echo &quot;SIM_QUESTA=y&quot;              &gt;&gt; .snap_config;;   # overwrite simulator
+  modelsim:*)                     echo &quot;export SIMULATOR=modelsim&quot; &gt;&gt; .snap_config.sh
+                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+                                  echo &quot;SIM_MODELSIM=y&quot;            &gt;&gt; .snap_config;;   # overwrite simulator
+  *) echo &quot;J: WARNING: unknown simulator=$SIM, continuing with default&quot;;;
+esac
+
+echo &quot;.snap_config.sh&quot;
+echo &quot;---------------&quot;
+cat .snap_config.sh
+echo
+
+echo &quot;.snap_config&quot;
+echo &quot;------------&quot;
+cat .snap_config.sh
+echo
+
+# execute with LSF, SNAP_ROOT must reside in AFS
+#echo &quot;J: PATH=$PATH&quot;
+#which irun
+
+#Added 2019 03 06
+git submodule init
+git submodule update
+#AC   XXXXXXXXXXXXXXXXXXXxx
+make model|| exit 1
+
+
+#bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}_model&quot; &quot;hostname;lsb_release -a;make model&quot;|| exit 1
+
+#==============================================================================================
+# Run simulation
+
+echo &quot;********************************************************************************&quot;
+echo &quot;J: Run $SIM Simulation in LSF ...&quot;
+cd ${SNAP_ROOT}/hardware/sim
+
+##### enable SW trace
+# export SNAP_TRACE=0xf
+##### execute locally
+# ./run_sim -list testlist.sh -noaet
+
+##### execute on AFS with LSF, report error as unstable build
+case $SIM in
+# run in the proper ${ACT} directory /tests/hw_test.sh
+  &apos;xsim&apos;|&apos;XSIM&apos; )
+    #bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;${SNAP_ROOT}/hardware/sim/run_sim -list ../../actions/${ACT}/tests/hw_test.sh -noaet&quot;||exit 100
+    ./run_sim -list testlist_jenkins.sh -noaet||exit 100
+  ;;
+
+# older way to run with capi snap
+#  &apos;xsim&apos;|&apos;XSIM&apos; ) bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;./run_sim -list testlist.sh -noaet&quot;||exit 100;;
+#  &apos;irun&apos;|&apos;IRUN&apos; ) bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;./run_sim -irun -list testlist.sh -noaet&quot;||exit 100;;
+#  *)              bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;./run_sim -list testlist.sh -noaet&quot;||exit 100;;
+
+esac
+
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.19">
+      <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
+        <timeoutMinutes>60</timeoutMinutes>
+      </strategy>
+      <operationList>
+        <hudson.plugins.build__timeout.operations.FailOperation/>
+      </operationList>
+    </hudson.plugins.build__timeout.BuildTimeoutWrapper>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
+    <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.1">
+      <template>#${BUILD_NUMBER}-${GIT_BRANCH}</template>
+      <descriptionTemplate></descriptionTemplate>
+      <runAtStart>true</runAtStart>
+      <runAtEnd>true</runAtEnd>
+    </org.jenkinsci.plugins.buildnamesetter.BuildNameSetter>
+  </buildWrappers>
+  <executionStrategy class="hudson.matrix.DefaultMatrixExecutionStrategyImpl">
+    <runSequentially>false</runSequentially>
+    <touchStoneCombinationFilter>CRD==&quot;AD9V3&quot;  &amp;&amp; ACT==&quot;test&quot; &amp;&amp; SIM_VIV==&quot;xsim_2018.3&quot;</touchStoneCombinationFilter>
+    <touchStoneResultCondition>
+      <name>UNSTABLE</name>
+      <ordinal>1</ordinal>
+      <color>YELLOW</color>
+      <completeBuild>true</completeBuild>
+    </touchStoneResultCondition>
+  </executionStrategy>
+  <childCustomWorkspace>${BRANCH}/${COMBINATION}</childCustomWorkspace>
+</matrix-project>
