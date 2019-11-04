@@ -3,8 +3,7 @@
   <actions/>
   <description>builds and simulates many different configurations, automatic nightruns on master&#xd;
 in case of problems: please contact fmoyen@fr.ibm.com or alexandre.castellane@fr.ibm.com&#xd;
-=&gt; local ocse used (not repo)&#xd;
-=&gt; 2019.1 test on AD9V3 only</description>
+=&gt; 2019.1 test</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.4">
@@ -492,7 +491,7 @@ echo
 git submodule init
 git submodule update
 #AC   XXXXXXXXXXXXXXXXXXXxx
-make model|| exit 1
+make image|| exit 1
 
 
 #bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}_model&quot; &quot;hostname;lsb_release -a;make model&quot;|| exit 1

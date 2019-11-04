@@ -64,7 +64,7 @@ brahma marennes lewen05</description>
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
-        <url>git@github.com:open-power/snap.git</url>
+        <url>https://github.com/OpenCAPI/oc-accel.git</url>
       </hudson.plugins.git.UserRemoteConfig>
     </userRemoteConfigs>
     <branches>
