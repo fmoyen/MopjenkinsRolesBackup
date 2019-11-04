@@ -8,7 +8,7 @@ in case of problems: please contact fmoyen@fr.ibm.com or alexandre.castellane@fr
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.4">
-      <projectUrl>https://github.ibm.com/OC_Enablement/oc-snap/</projectUrl>
+      <projectUrl>https://github.com/OpenCAPI/oc-accel/</projectUrl>
       <displayName></displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
     <hudson.model.ParametersDefinitionProperty>
@@ -515,7 +515,7 @@ make model|| exit 1
 # Run simulation
 
 echo &quot;********************************************************************************&quot;
-echo &quot;J: Run $SIM Simulation in LSF ...&quot;
+echo &quot;J: Run $SIM Simulation (formerly using LSF, but now on local executors) ...&quot;
 cd ${SNAP_ROOT}/hardware/sim
 
 ##### enable SW trace
