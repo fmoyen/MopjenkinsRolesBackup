@@ -494,7 +494,7 @@ echo
 
 echo &quot;.snap_config&quot;
 echo &quot;------------&quot;
-cat .snap_config.sh
+cat .snap_config
 echo
 
 # execute with LSF, SNAP_ROOT must reside in AFS
