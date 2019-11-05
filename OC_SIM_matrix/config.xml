@@ -15,10 +15,27 @@ in case of problems: please contact fmoyen@fr.ibm.com or alexandre.castellane@fr
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
           <name>BRANCH</name>
-          <description>Choose the branch you want to test</description>
+          <description>Choose the branch for https://github.com/OpenCAPI/oc-accel you want to test.</description>
           <defaultValue>master</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>OCSE_BRANCH</name>
+          <description>Choose the branch for https://github.com/OpenCAPI/ocse you want to test.
+(OpenCapi Simulation Engine)</description>
+          <defaultValue>master</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>VIVADO_CHOICE</name>
+          <description>Choose the Vivado version to use</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>2019.1</string>
+              <string>2018.3</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>HDL</name>
           <description>enable/disable HDL examples simulation</description>
@@ -334,13 +351,9 @@ rm -rf ocse
 
 # When Lance Thomson makes a mod in his OCSE, we might use a specific branch for test
 # 2019 Nov 04 he merged the issue_2 into master (removing the debug messages)
-case $CRD in 
-  #*) 		branch=&apos;issue_2&apos;;;
-  *) 		branch=&apos;master&apos;;;
-esac
 
-echo &quot;J: Get OpenCAPI Simulation Environment (ocse) branch=$branch for card=$CRD...&quot;
-git clone -b $branch https://github.com/OpenCAPI/ocse ocse;echo &quot;git clone OCSE RC=$?&quot;
+echo &quot;J: Get OpenCAPI Simulation Environment (ocse) branch=$OCSE_BRANCH for card=$CRD...&quot;
+git clone -b $OCSE_BRANCH https://github.com/OpenCAPI/ocse ocse;echo &quot;git clone OCSE RC=$?&quot;
 
 export OCSE_INSTALL_DIR=${USERHOME}/ocse   # ca ne sert à rien on dirait !!
 
@@ -362,7 +375,7 @@ cat snap_env.sh
 echo &quot;****************************************************************************************&quot;
 case $VIV in    # test multiple Vivado versions in one build
 
-  2018.2|2019.1)
+  2019.1)
     export VIV_VERSION=$VIV
     echo &quot;J: Vivado Version is OK: $VIV_VERSION&quot;
     ;; 
@@ -373,7 +386,7 @@ esac
 
 #==============================================================================================
 # Vivado setup
-# pas de test pour SIM=xsim ???
+# SIM=xsim =&gt; no need for specific licensing configuration
 # here we setup the parameters for Cadence simulators
 # for the moment I run only xsim (from Xilinx, but Bruno would like to setup irun too)
 # xcelium ??? we cannot support all simulators anyway.
