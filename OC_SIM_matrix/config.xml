@@ -547,7 +547,7 @@ esac
   </buildWrappers>
   <executionStrategy class="hudson.matrix.DefaultMatrixExecutionStrategyImpl">
     <runSequentially>false</runSequentially>
-    <touchStoneCombinationFilter>CRD==&quot;AD9V3&quot;  &amp;&amp; ACT==&quot;test&quot; &amp;&amp; SIM_VIV==&quot;xsim_2018.3&quot;</touchStoneCombinationFilter>
+    <touchStoneCombinationFilter>CRD==&quot;AD9V3&quot;  &amp;&amp; ACT==&quot;test&quot; &amp;&amp; SIM_VIV==&quot;xsim_2019.1&quot;</touchStoneCombinationFilter>
     <touchStoneResultCondition>
       <name>UNSTABLE</name>
       <ordinal>1</ordinal>
