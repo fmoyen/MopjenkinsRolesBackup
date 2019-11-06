@@ -527,7 +527,7 @@ case $SIM in
 # run in the proper ${ACT} directory /tests/hw_test.sh
   &apos;xsim&apos;|&apos;XSIM&apos; )
     #bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;${SNAP_ROOT}/hardware/sim/run_sim -list ../../actions/${ACT}/tests/hw_test.sh -noaet&quot;||exit 100
-    ./run_sim -list ../../actions/scripts/testlist_simple.sh -noaet||exit 100
+    ./run_sim -list testlist_simple.sh -noaet||exit 100
   ;;
 
 # older way to run with capi snap
