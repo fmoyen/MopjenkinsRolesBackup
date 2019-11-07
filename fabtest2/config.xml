@@ -35,8 +35,7 @@
     <submoduleCfg class="list"/>
     <extensions/>
   </scm>
-  <assignedNode>X86_UBUNTU</assignedNode>
-  <canRoam>false</canRoam>
+  <canRoam>true</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
@@ -51,9 +50,10 @@ echo &quot;FABTEST...&quot;
 echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot;
 echo &quot;Working dir is : `pwd`&quot;
 
-echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot; &gt; output.txt
-echo &quot;Working dir is : `pwd`&quot; &gt;&gt; output.txt
-</command>
+#echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot; &gt; output.txt
+#echo &quot;Working dir is : `pwd`&quot; &gt;&gt; output.txt
+
+ssh executor-user@jtagx86 uname -a</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
