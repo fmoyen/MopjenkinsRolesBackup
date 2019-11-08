@@ -387,8 +387,8 @@ cd ${SNAP_ROOT}
 export VIV_VERSION=&quot;$VIVADO_CHOICE&quot;
 echo &quot;VIVADO version initially set to $VIV_VERSION (check if we change this later for some card specificity)&quot;
 # FAB à mettre en variable
-echo &quot;export TIMING_LABLIMIT=\&quot;-300\&quot;&quot; &gt;&gt; snap_env.sh
-echo &quot;TIMING LIMIT set to -300&quot;
+echo &quot;export TIMING_LABLIMIT=\&quot;-500\&quot;&quot; &gt;&gt; snap_env.sh
+echo &quot;TIMING LIMIT set to -500&quot;
 echo &quot;****************************************************************************************&quot;
 echo &quot;J:Vivado PATHES SETUP ...&quot;
 export XILINX_ROOT=/opt/Xilinx
