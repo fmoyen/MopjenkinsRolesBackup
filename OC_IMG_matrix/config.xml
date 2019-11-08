@@ -162,7 +162,7 @@ Main Issues : &#xd;
       </values>
     </hudson.matrix.LabelAxis>
   </axes>
-  <combinationFilter>(  ((ACT=~&quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;)||(ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; ))  &amp;&amp; ( (CRD_CL=~&quot;AD9V3&quot;  &amp;&amp; AD9V3==&quot;true&quot;) || ( CRD_CL=~&quot;AD9H&quot; &amp;&amp; (AD9H3==&quot;true&quot;|| AD9H7==&quot;true&quot;) &amp;&amp; !(ACT=~&quot;DDR&quot;) ) )  ) || (ACT==&quot;test&quot; &amp;&amp; CRD==&quot;AD9V3&quot;) </combinationFilter>
+  <combinationFilter>(  ((ACT=~&quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;)||(ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; ))  &amp;&amp; ( (CRD_CL=~&quot;AD9V3&quot;  &amp;&amp; AD9V3==&quot;true&quot;) || ( CRD_CL=~&quot;AD9H&quot; &amp;&amp; (AD9H3==&quot;true&quot;|| AD9H7==&quot;true&quot;) &amp;&amp; !(ACT=~&quot;DDR&quot;) ) )  ) || (ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;AD9V3&quot;) </combinationFilter>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
@@ -392,8 +392,9 @@ echo &quot;TIMING LIMIT set to -300&quot;
 echo &quot;****************************************************************************************&quot;
 echo &quot;J:Vivado PATHES SETUP ...&quot;
 export XILINX_ROOT=/opt/Xilinx
-export XILINX_ROOT=/afs/bb/proj/fpga/xilinx
+#export XILINX_ROOT=/afs/bb/proj/fpga/xilinx
 export XILINXD_LICENSE_FILE=2100@pokwinlic1.pok.ibm.com
+echo &quot;FABRICE: $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh&quot;
 source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
 
 # No cadence setup at MOP
@@ -462,7 +463,8 @@ if [ &quot;$CL&quot; == &quot;nCL&quot; ]; then
     maxloop=5;
     for loop in `seq 1 $maxloop`;do  
       echo &quot;J:`date` Build Non_Cloud Image for $CRD, Loop $loop&quot;
-      RC=0; bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot; &amp;&amp; break || RC=$?
+#      RC=0; bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot; &amp;&amp; break || RC=$?
+		RC=0; make image &amp;&amp; break || RC=$?
     done
     if [ $RC = &quot;0&quot; ] &amp;&amp; [ $loop -gt 1 ]; then mail -s &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot; castella;  fi
     if [ $RC != &quot;0&quot; ]; then mail -s &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot; castella; exit 1;  fi
