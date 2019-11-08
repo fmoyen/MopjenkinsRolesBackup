@@ -3,7 +3,8 @@
   <actions/>
   <description>builds and simulates many different configurations, automatic nightruns on master&#xd;
 in case of problems: please contact fmoyen@fr.ibm.com or alexandre.castellane@fr.ibm.com&#xd;
-=&gt; 2019.1 test</description>
+=&gt; local ocse used (not repo)&#xd;
+=&gt; 2019.1 test on AD9V3 only</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.4">
@@ -14,10 +15,27 @@ in case of problems: please contact fmoyen@fr.ibm.com or alexandre.castellane@fr
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
           <name>BRANCH</name>
-          <description>Choose the branch you want to test</description>
+          <description>Choose the branch for https://github.com/OpenCAPI/oc-accel you want to test.</description>
+          <defaultValue>jenkins_mods</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>OCSE_BRANCH</name>
+          <description>Choose the branch for https://github.com/OpenCAPI/ocse you want to test.
+(OpenCapi Simulation Engine)</description>
           <defaultValue>master</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>VIVADO_CHOICE</name>
+          <description>Choose the Vivado version to use</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>2019.1</string>
+              <string>2018.3</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>HDL</name>
           <description>enable/disable HDL examples simulation</description>
@@ -130,9 +148,9 @@ H 18-23/4 * * *</spec>
       </values>
     </hudson.matrix.TextAxis>
     <hudson.matrix.TextAxis>
-      <name>SIM_VIV</name>
+      <name>SIM</name>
       <values>
-        <string>xsim_2019.1</string>
+        <string>xsim</string>
       </values>
     </hudson.matrix.TextAxis>
     <hudson.matrix.LabelAxis>
@@ -165,8 +183,8 @@ echo &quot;*********************************************************************
 NAME=$(echo $GIT_BRANCH| cut -d&apos;/&apos; -f 2 |tr &apos;[:upper:]&apos; &apos;[:lower:]&apos;) # remove origin/ from branch and translate to lowercase
 PREFIX=$(echo $NAME| cut -d&apos;_&apos; -f 1)    # chars up to first &apos;_&apos; identify need for test
 ACTION_TYPE=$(echo $ACT| cut -d&apos;_&apos; -f 1)
-SIM=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 1); echo &quot;SIM=$SIM&quot; &gt;&gt;export_props.properties    # chars up to  first &apos;_&apos; identify Simulator
-VIV=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 2); echo &quot;VIV=$VIV&quot; &gt;&gt;export_props.properties    # chars behind first &apos;_&apos; identify Vivado version
+echo &quot;SIM=$SIM&quot; &gt;&gt;export_props.properties    # chars up to  first &apos;_&apos; identify Simulator
+VIV=$VIVADO_CHOICE; echo &quot;VIV=$VIV&quot; &gt;&gt;export_props.properties    # chars behind first &apos;_&apos; identify Vivado version
 
 echo &quot;Build with Card=$CRD Action=$ACT Action_type=$ACTION_TYPE branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX&quot;
 
@@ -282,7 +300,7 @@ set +x                           # reduce Jenkins output
 echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot;
 
 ulimit -S -c 128000
-echo &quot;****************************************************************************************&quot;
+echo;echo &quot;****************************************************************************************&quot;
 echo &quot;EXECUTING SECOND SHELL FROM OpenCAPI SIM JENKINS - V1.1 - 2019 march 21 - ...&quot;
 echo &quot;****************************************************************************************&quot;
 
@@ -298,7 +316,7 @@ export SNAP_ROOT=$USERHOME/snap
 # LSF Variables setup
 
 ulimit -c unlimited             # reduce core dumps from what .profile says (kB)
-#echo &quot;********************************************************************************&quot;
+#echo;echo &quot;********************************************************************************&quot;
 #echo &quot;J: LSF SETUP ...&quot;
 
 # older setup up to RH6
@@ -324,7 +342,7 @@ ulimit -c unlimited             # reduce core dumps from what .profile says (kB)
 #==============================================================================================
 # OpenCAPI Simulation Engine (ocse) setup
 
-echo &quot;*******************************************************************************&quot;
+echo;echo &quot;*******************************************************************************&quot;
 echo &quot;Current directory is : $PWD&quot;
 echo &quot;*****&quot;
 ls -al
@@ -333,13 +351,9 @@ rm -rf ocse
 
 # When Lance Thomson makes a mod in his OCSE, we might use a specific branch for test
 # 2019 Nov 04 he merged the issue_2 into master (removing the debug messages)
-case $CRD in 
-  #*) 		branch=&apos;issue_2&apos;;;
-  *) 		branch=&apos;master&apos;;;
-esac
 
-echo &quot;J: Get OpenCAPI Simulation Environment (ocse) branch=$branch for card=$CRD...&quot;
-git clone -b $branch https://github.com/OpenCAPI/ocse ocse;echo &quot;git clone OCSE RC=$?&quot;
+echo &quot;J: Get OpenCAPI Simulation Environment (ocse) branch=$OCSE_BRANCH for card=$CRD...&quot;
+git clone -b $OCSE_BRANCH https://github.com/OpenCAPI/ocse ocse;echo &quot;git clone OCSE RC=$?&quot;
 
 export OCSE_INSTALL_DIR=${USERHOME}/ocse   # ca ne sert à rien on dirait !!
 
@@ -358,12 +372,11 @@ cat snap_env.sh
 # Check Vivado version ($VIV) is supported
 
 
-echo &quot;****************************************************************************************&quot;
+echo;echo &quot;****************************************************************************************&quot;
 case $VIV in    # test multiple Vivado versions in one build
 
-  2018.2|2019.1)
-    export VIV_VERSION=$VIV
-    echo &quot;J: Vivado Version is OK: $VIV_VERSION&quot;
+  2019.1)
+    echo &quot;J: Vivado Version is OK: $VIV&quot;
     ;; 
     
   *)
@@ -372,15 +385,15 @@ esac
 
 #==============================================================================================
 # Vivado setup
-# pas de test pour SIM=xsim ???
+# SIM=xsim =&gt; no need for specific licensing configuration
 # here we setup the parameters for Cadence simulators
 # for the moment I run only xsim (from Xilinx, but Bruno would like to setup irun too)
 # xcelium ??? we cannot support all simulators anyway.
 
-echo &quot;J: Vivado SETUP $VIV_VERSION ...&quot;
+echo &quot;J: Vivado SETUP $VIV ...&quot;
 export XILINX_ROOT=/opt/Xilinx
 export XILINXD_LICENSE_FILE=2100@pokwinlic1.pok.ibm.com
-source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
+source $XILINX_ROOT/Vivado/${VIV}/settings64.sh
 
 case $SIM:$VIV in
 
@@ -413,8 +426,8 @@ esac
 #==============================================================================================
 # Make with defconfig file or just exiting if ACT=test
 
-echo &quot;********************************************************************************&quot;
-echo &quot;J: Build Simulation Model ...&quot;
+echo;echo &quot;********************************************************************************&quot;
+echo &quot;J: Build defconfig File (make $CRD.action.defconfig) ...&quot;
 
 case $ACT in                    # select config &amp; compile action
 
@@ -430,21 +443,22 @@ case $ACT in                    # select config &amp; compile action
   *) 
    echo &quot;J: Current directory:$PWD&quot;
    echo &quot;defconfig directory content:&quot;
+   echo &quot;----------------------------&quot;
    ls defconfig/
     
     # before rh7 issue we did : make $CRD.$ACT.defconfig
     # since we need RH7 we use LSF:
     #bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}_defconfig&quot; &quot;hostname;lsb_release -a&quot;|| exit 1
-    echo &quot;making $CRD.$ACT.defconfig&quot;
+    echo;echo &quot;J: making $CRD.$ACT.defconfig&quot;
     make $CRD.$ACT.defconfig|| exit 1
     ;;
 esac
 
 #==============================================================================================
-# Build Simulation Model (make model)
+# Build Image (make image)
 
-echo &quot;********************************************************************************&quot;
-echo &quot;J: Build Simulation Model (make model)...&quot;
+echo;echo &quot;********************************************************************************&quot;
+echo &quot;J: Build Image (make image)...&quot;
 
 case $SIM:$ACT in
   &apos;xsim&apos;:*|&apos;XSIM&apos;:* )             echo &quot;export SIMULATOR=xsim&quot;     &gt;&gt; .snap_config.sh
@@ -480,7 +494,7 @@ echo
 
 echo &quot;.snap_config&quot;
 echo &quot;------------&quot;
-cat .snap_config.sh
+cat .snap_config
 echo
 
 # execute with LSF, SNAP_ROOT must reside in AFS
@@ -494,12 +508,12 @@ git submodule update
 make image|| exit 1
 
 
-#bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}_model&quot; &quot;hostname;lsb_release -a;make model&quot;|| exit 1
+#bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}_model&quot; &quot;hostname;lsb_release -a;make image&quot;|| exit 1
 
 #==============================================================================================
 # Run simulation
 
-echo &quot;********************************************************************************&quot;
+echo;echo &quot;********************************************************************************&quot;
 echo &quot;J: Run $SIM Simulation (formerly using LSF, but now on local executors) ...&quot;
 cd ${SNAP_ROOT}/hardware/sim
 
@@ -513,7 +527,7 @@ case $SIM in
 # run in the proper ${ACT} directory /tests/hw_test.sh
   &apos;xsim&apos;|&apos;XSIM&apos; )
     #bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;${SNAP_ROOT}/hardware/sim/run_sim -list ../../actions/${ACT}/tests/hw_test.sh -noaet&quot;||exit 100
-    ./run_sim -list testlist_jenkins.sh -noaet||exit 100
+    ./run_sim -list testlist_simple.sh -noaet||exit 100
   ;;
 
 # older way to run with capi snap
@@ -529,9 +543,7 @@ esac
   <publishers/>
   <buildWrappers>
     <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.19">
-      <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
-        <timeoutMinutes>60</timeoutMinutes>
-      </strategy>
+      <strategy class="hudson.plugins.build_timeout.impl.LikelyStuckTimeOutStrategy"/>
       <operationList>
         <hudson.plugins.build__timeout.operations.FailOperation/>
       </operationList>
@@ -546,7 +558,7 @@ esac
   </buildWrappers>
   <executionStrategy class="hudson.matrix.DefaultMatrixExecutionStrategyImpl">
     <runSequentially>false</runSequentially>
-    <touchStoneCombinationFilter>CRD==&quot;AD9V3&quot;  &amp;&amp; ACT==&quot;test&quot; &amp;&amp; SIM_VIV==&quot;xsim_2018.3&quot;</touchStoneCombinationFilter>
+    <touchStoneCombinationFilter>CRD==&quot;AD9V3&quot;  &amp;&amp; ACT==&quot;test&quot; &amp;&amp; SIM==&quot;xsim&quot;</touchStoneCombinationFilter>
     <touchStoneResultCondition>
       <name>UNSTABLE</name>
       <ordinal>1</ordinal>
