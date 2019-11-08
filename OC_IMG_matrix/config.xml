@@ -154,6 +154,12 @@ Main Issues : &#xd;
         <string>AD9H7_nCL</string>
       </values>
     </hudson.matrix.TextAxis>
+    <hudson.matrix.LabelAxis>
+      <name>label</name>
+      <values>
+        <string>X86_UBUNTU</string>
+      </values>
+    </hudson.matrix.LabelAxis>
   </axes>
   <combinationFilter>(  ((ACT=~&quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;)||(ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; ))  &amp;&amp; ( (CRD_CL=~&quot;AD9V3&quot;  &amp;&amp; AD9V3==&quot;true&quot;) || ( CRD_CL=~&quot;AD9H&quot; &amp;&amp; (AD9H3==&quot;true&quot;|| AD9H7==&quot;true&quot;) &amp;&amp; !(ACT=~&quot;DDR&quot;) ) )  ) || (ACT==&quot;test&quot; &amp;&amp; CRD==&quot;AD9V3&quot;) </combinationFilter>
   <builders>
@@ -461,6 +467,7 @@ if [ &quot;$CL&quot; == &quot;nCL&quot; ]; then
     if [ $RC != &quot;0&quot; ]; then mail -s &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot; castella; exit 1;  fi
 
 else # case of Cloud Build
+# FAB never for the moment but if needed, needs to adapt (BSUB, etc)
   mkdir -p ${SNAP_ROOT}/hardware/DCPs
   echo &quot;J:`date` Build Cloud Image ...&quot;
   echo &quot;export DCP_ROOT=${SNAP_ROOT}/hardware/DCPs/&quot;              &gt;&gt; snap_env.sh
@@ -494,22 +501,22 @@ do
   # if (( size &lt; 100000 ));then echo &quot;ERROR: image is too small to burn&quot;;exit 1;fi  
     (( size &lt; 100000 )) &amp;&amp; die 1 &quot;image $f is too small $size to burn&quot;
     # We assign IMAGE for log purpose, it eventually takes the name of secondary if SPI8
-    IMAGE=&quot;/home/fpga/images/${CRD}/${ACT}/&quot;`basename $f` 
+    IMAGE=&quot;/home/capimop/images/${CRD}/${ACT}/&quot;`basename $f` 
 done
 
 # In FACTORY MODE : We save hdl_example and hls_helloworld bin for cards files for future .mcs generation
-case ${ACT}:$FACTORY in
-     hdl_example.NORAM:true ) 
-			FACTBINFILES=`ls -t $SNAP_ROOT/hardware/build/Images/oc_*[0-9]_FACTORY*.bin`  # take FACTORY bin files
+#case ${ACT}:$FACTORY in
+#     hdl_example.NORAM:true ) 
+#			FACTBINFILES=`ls -t $SNAP_ROOT/hardware/build/Images/oc_*[0-9]_FACTORY*.bin`  # take FACTORY bin files
           # Copy hdl_ex Factory files if any
-            if [ &quot;$FACTBINFILES&quot; == &quot;&quot; ] ; then echo &quot;Cannot find Factory binfile $FACTBINFILES although FACTORY REQUESTED !!&quot;;exit 1
-            fi
-            DIR=${CRD}_OC_FACTORY_MCS
-            mkdir -p /data/Images/${DIR}
-			SAVE=&quot;/data/Images/${CRD}_OC_FACTORY_MCS&quot;;   echo &quot;J:FACTORY was requested : copy ${CRD} hdl_example.noram bin files to $SAVE&quot;;cp -rp $FACTBINFILES $SAVE;;
-	hls_helloworld:true )
-			SAVE=&quot;/data/Images/${CRD}_OC_FACTORY_MCS&quot;;   echo &quot;J:FACTORY was requested : copy ${CRD} hls_helloworld    bin files to $SAVE&quot;;cp -rp $BINFILES $SAVE;;
-esac
+#            if [ &quot;$FACTBINFILES&quot; == &quot;&quot; ] ; then echo &quot;Cannot find Factory binfile $FACTBINFILES although FACTORY REQUESTED !!&quot;;exit 1
+#            fi
+#            DIR=${CRD}_OC_FACTORY_MCS
+#            mkdir -p /data/Images/${DIR}
+#			SAVE=&quot;/data/Images/${CRD}_OC_FACTORY_MCS&quot;;   echo &quot;J:FACTORY was requested : copy ${CRD} hdl_example.noram bin files to $SAVE&quot;;cp -rp $FACTBINFILES $SAVE;;
+#	hls_helloworld:true )
+#			SAVE=&quot;/data/Images/${CRD}_OC_FACTORY_MCS&quot;;   echo &quot;J:FACTORY was requested : copy ${CRD} hls_helloworld    bin files to $SAVE&quot;;cp -rp $BINFILES $SAVE;;
+#esac
 
 echo &quot;****************************************************************************************&quot;
 echo &quot;test_on_hw=${TEST_ON_HW} for card=$CRD&quot;
@@ -528,6 +535,8 @@ case $CRD:${TEST_ON_HW} in
   INNOVA2:* )  SAVE=&quot;/data/Images/INNOVA2_oc_missing&quot;;   echo &quot;no test required, copy image to $SAVE&quot;;cp -rp $BINFILES $SAVE;exit 0;;    
   *:false )    SAVE=&quot;/data/Images/no_test_required&quot;;     echo &quot;no test required, copy image to $SAVE&quot;;cp -rp $BINFILES $SAVE;exit 0;;
 esac
+
+# FAB exit 0 before
 
 #
 # Set unique target directory such that parallel builds do not disturb each other.
