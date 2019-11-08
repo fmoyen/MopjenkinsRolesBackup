@@ -394,7 +394,6 @@ echo &quot;J:Vivado PATHES SETUP ...&quot;
 export XILINX_ROOT=/opt/Xilinx
 #export XILINX_ROOT=/afs/bb/proj/fpga/xilinx
 export XILINXD_LICENSE_FILE=2100@pokwinlic1.pok.ibm.com
-echo &quot;FABRICE: $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh&quot;
 source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
 
 # No cadence setup at MOP
