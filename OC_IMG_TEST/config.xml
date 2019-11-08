@@ -543,9 +543,7 @@ esac
   <publishers/>
   <buildWrappers>
     <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.19">
-      <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
-        <timeoutMinutes>60</timeoutMinutes>
-      </strategy>
+      <strategy class="hudson.plugins.build_timeout.impl.LikelyStuckTimeOutStrategy"/>
       <operationList>
         <hudson.plugins.build__timeout.operations.FailOperation/>
       </operationList>

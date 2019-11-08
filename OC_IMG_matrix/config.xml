@@ -4,7 +4,7 @@
   <description>Builds bitstreams with different configurations and tests images on real HW if possible.&#xd;
 In case of problems: please contact alexandre.castellane@fr.ibm.com&#xd;
 Only AD9V3 card is available for test&#xd;
-Vivado version used : 2018.3 so far, tests on goiing for 2019.1 (issue with lsf / RH7)&#xd;
+Vivado version used : 2018.3 so far, tests on going for 2019.1 (issue with lsf / RH7)&#xd;
 &#xd;
 WARNING : local P9 snap_find_card is used with OC-$CRD prefix&#xd;
 &#xd;
@@ -25,6 +25,16 @@ Main Issue : after flashing the oc-reset doesn&apos;t cut the power supply, and 
           <defaultValue>jenkins_mods</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>VIVADO_CHOICE</name>
+          <description>Choose the Vivado version to use</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>2019.1</string>
+              <string>2018.3</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>TEST_ON_HW</name>
           <description>Disabled by default as oc-flash + oc-reset does&apos;t work yet =&gt; need to reboot to get the code !
