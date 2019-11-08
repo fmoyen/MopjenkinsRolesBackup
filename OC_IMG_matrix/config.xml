@@ -311,6 +311,7 @@ TESTBOXES=( ${boeBoxes[*]} ${mopBoxes[*]}) # init array of systems
 
 echo &quot;testboxes1=${TESTBOXES[@]}&quot;
 
+# FAB RH6 et RH7 a ajouter
 echo &quot;****************************************************************************************&quot;
 echo &quot;J:LSF SETUP ...&quot;
 export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
@@ -333,10 +334,9 @@ LSF+=&quot; -I -n 8&quot;
 echo &quot;J:Checking Build with Card=$CRD Action=$ACT CLOUD=$CL&quot;
 
 
-
-
 #==============================================================================================
 # OpenCAPI Simulation Engine (ocse) setup
+# Should not be used but may be required by ??
 
 echo;echo &quot;*******************************************************************************&quot;
 echo &quot;J:Get OpenCAPI Simulation Environment (ocse)...&quot;
@@ -356,37 +356,43 @@ export OCSE_INSTALL_DIR=${USERHOME}/ocse   # ca ne sert à rien on dirait !!
 echo &quot;exporting ocse directory as : ${USERHOME}/ocse into snap_env&quot;
 echo &quot;export OCSE_ROOT=${USERHOME}/ocse&quot; &gt;snap_env.sh
 
-echo &quot;****************************************************************************************&quot;
-echo &quot;J:cleaning any previous TL/DL and getting TL/DL zip files&quot;
-cd ${SNAP_ROOT}
-make clean                    # to make sure we restart from a blank snap
-rm -rf hardware/oc-bip        # to make sure we restart from a blank capi-bsp
-echo &quot;J:git cloning oc-bip&quot;
-git submodule init            # to get the oc-bip
-git submodule update
+# FAB a vérifier si encore nécessaire
+#echo &quot;****************************************************************************************&quot;
+#echo &quot;J:cleaning any previous TL/DL and getting TL/DL zip files&quot;
+#cd ${SNAP_ROOT}
+#make clean                    # to make sure we restart from a blank snap
+#rm -rf hardware/oc-bip        # to make sure we restart from a blank capi-bsp
+#echo &quot;J:git cloning oc-bip&quot;
+#git submodule init            # to get the oc-bip
+#git submodule update
 # collecting the TL/DL definition
-echo &quot;J:Getting the zip file for tlx and dlx&quot;
-cp -r /afs/bb/proj/fpga/framework/cards/$CRD/tlx ./hardware/oc-bip/
-cp -r /afs/bb/proj/fpga/framework/cards/$CRD/dlx ./hardware/oc-bip/
+#echo &quot;J:Getting the zip file for tlx and dlx&quot;
+#cp -r /afs/bb/proj/fpga/framework/cards/$CRD/tlx ./hardware/oc-bip/
+#cp -r /afs/bb/proj/fpga/framework/cards/$CRD/dlx ./hardware/oc-bip/
 
 echo &quot;****************************************************************************************&quot;
 echo &quot;J:Setting up Vivado and timing value&quot;
 echo &quot;#setup: XILINX_LOCAL_USER_DATA=${XILINX_LOCAL_USER_DATA}, overwrite=no to prevent write access error in XilincTclStore (tclapp:load_apps)&quot; &gt;&gt;snap_env.sh
 echo &quot;export XILINX_LOCAL_USER_DATA=no&quot; &gt;&gt; snap_env.sh
 echo &quot;J:For all OPENCAPI cards we run $VIVADO_CHOICE and extend Timing trials to 5 runs until we optimise placement&quot;
+# FAB echo &quot;sauf si clairement indiqué autrement&quot;
 cd ${SNAP_ROOT}
 export VIV_VERSION=&quot;$VIVADO_CHOICE&quot;
 echo &quot;VIVADO version initially set to $VIV_VERSION (check if we change this later for some card specificity)&quot;
+# FAB à mettre en variable
 echo &quot;export TIMING_LABLIMIT=\&quot;-300\&quot;&quot; &gt;&gt; snap_env.sh
 echo &quot;TIMING LIMIT set to -300&quot;
 echo &quot;****************************************************************************************&quot;
 echo &quot;J:Vivado PATHES SETUP ...&quot;
+export XILINX_ROOT=/opt/Xilinx
 export XILINX_ROOT=/afs/bb/proj/fpga/xilinx
 export XILINXD_LICENSE_FILE=2100@pokwinlic1.pok.ibm.com
 source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
-echo &quot;J:Cadence SETUP ...&quot;
-echo &quot;IES_LIBS=$IES_LIBS&quot;
-echo &quot;CDS_LIC_FILE=$CDS_LIC_FILE&quot;
+
+# No cadence setup at MOP
+#echo &quot;J:Cadence SETUP ...&quot;
+#echo &quot;IES_LIBS=$IES_LIBS&quot;
+#echo &quot;CDS_LIC_FILE=$CDS_LIC_FILE&quot;
 
 echo &quot;****************************************************************************************&quot;
 
@@ -395,9 +401,8 @@ case $ACT in          # select config &amp; compile action
   &quot;test&quot;)
     echo &quot;*T E S T  **skip image build /test&quot;
     
+    # FAB à adapter ping sur mopboxes
   	if [ &quot;$TEST_ON_HW&quot; == &quot;true&quot; ]; then 
-      RC=0;ssh dim1 ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 ||RC=$?
-      if [ $RC == &quot;0&quot; ]; then echo &quot;dim1 ping ok&quot;; else echo &quot;dim1 not reachable&quot;;exit 1;fi
 
         # Cleaning will occur at this step, remote fw*.bin* files older than $days will be removed
         days=90;srch=&quot;&apos;fw*.bin*&apos;&quot;
@@ -407,11 +412,13 @@ case $ACT in          # select config &amp; compile action
         if [[ ${mopBoxes[*]} =~ $box ]]
         then
           # $box is a Montpellier server
-          bindir=&quot;/home/fpga/&quot;
-          RC=0;ssh $box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
+          # FAB remplacer fpga par capimop et créer le scompte sur orpington
+          bindir=&quot;/home/capimop/&quot;
+          RC=0;ssh capimop@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
         else
+          # FAB Austin boxes à ajouter hawklp10.aus.stglabs.ibm.com à la place de boeblingen
           # $box is a Boeblingen server, accessible through dim1 system
-          bindir=&quot;/opt/fpga/&quot;
+          bindir=&quot;/home/capimop/&quot;
           RC=0;ssh dim1 ping $box -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
         fi
       
@@ -419,7 +426,7 @@ case $ACT in          # select config &amp; compile action
         
         echo &quot;CLEANING Process : ssh $box find &amp; delete $srch in $bindir older than $days days&quot;
         ssh $box &quot;find $bindir -type f -name $srch -mtime +$days -ls -delete&quot;
-        nusers=`ssh fpga@${box} who|grep -v root|grep -v fpga|wc -l`
+        nusers=`ssh capimop@${box} who|grep -v root|grep -v capimop|wc -l`
         echo &quot;`date` box=$box nusers=$nusers&quot;
       done
     fi                          
