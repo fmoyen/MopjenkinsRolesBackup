@@ -2,15 +2,18 @@
 <matrix-project plugin="matrix-project@1.14">
   <actions/>
   <description>Builds bitstreams with different configurations and tests images on real HW if possible.&#xd;
-In case of problems: please contact alexandre.castellane@fr.ibm.com&#xd;
-Only AD9V3 card is available for test&#xd;
-Vivado version used : 2018.3 so far, tests on going for 2019.1 (issue with lsf / RH7)&#xd;
+In case of problems: please contact fabrice_moyen@fr.ibm.com or alexandre.castellane@fr.ibm.com&#xd;
+Only AD9V3 card is available for test on Orpington&#xd;
+Vivado version used : tests on going for 2019.1 (issue with lsf / RH7)&#xd;
 &#xd;
-WARNING : local P9 snap_find_card is used with OC-$CRD prefix&#xd;
+WARNING : local P9 ocaccel_find_card is used with OC-$CRD prefix&#xd;
 &#xd;
-Main Issue : after flashing the oc-reset doesn&apos;t cut the power supply, and FPGA is not refreshed !! Need &quot;Power9 reload routine&quot;&#xd;
+Main Issues : &#xd;
+- oc-flash not operational&#xd;
+- after flashing the oc-reset doesn&apos;t cut the power supply, and FPGA is not refreshed !! Need &quot;Power9 reload routine&quot;&#xd;
 &#xd;
-=&gt; hdl_example.NORAM had an issue at config level (same as for CAPI2) to be confirmed</description>
+=&gt; hdl_example.NORAM had an issue at config level (same as for CAPI2) to be confirmed&#xd;
+=&gt; ID are not coherent with SNAP IDs</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.4">
@@ -74,21 +77,10 @@ Main Issue : after flashing the oc-reset doesn&apos;t cut the power supply, and 
           <description>enable/disable the AD9H7 card</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>INNOVA2</name>
-          <description>enable/disable the INNOVA2 card</description>
-          <defaultValue>false</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>FACTORY</name>
-          <description>Used to generate a FACTORY image for hdl_example.NORAM cases. Files are copied in /data/Images/card_FACTORY_MCS directory
-=&gt; Bug: it prevents proper test of SPI dual bin configurations</description>
-          <defaultValue>false</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>mopBoxes</name>
           <description>List of Montpellier systems available for testing :
-  - orpington: AC922 8335-GTH with two CAPI2 and OC AD9V3s</description>
+  - orpington: AC922 8335-GTH with two AD9V3s 1 in CAPI2 and 1 OC</description>
           <defaultValue>orpington</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
@@ -176,7 +168,7 @@ echo &quot;Working dir is : $PWD&quot;
 echo &quot;****************************************************************************************&quot;
 echo &quot;`date` BUILD START&quot;
 echo &quot;****************************************************************************************&quot;
-echo &quot;EXECUTING OpenCAPI IMG FIRST SHELL FROM JENKINS ...&quot;
+echo &quot;EXECUTING OpenCAPI IMG FIRST SHELL FROM MOPJENKINS ...&quot;
 echo &quot;****************************************************************************************&quot;
 
 #==============================================================================================
@@ -205,33 +197,14 @@ echo &quot;examples(hdl,hls)=$HDL $HLS card_enabled(AD9V3,INNOVA2)=$AD9V3 $INNOV
 echo &quot;action_types (hdl,hls)=$HDL,$HLS enabled_cards(AD9v3,AD9H3,AD9H7)=$AD9V3,$AD9H3,$AD9H7 BSKIP=$BSKIP&quot;
 echo
 
-#debug AC
-  case &quot;$BSKIP&quot; in
-    1 )
-#        echo &quot;mail sent to castella informing BSKIPPING&quot;
-#        mail -s &quot;DEBUG! BSKIP SET TO 1 build(nCL,CL)= examples(hdl,hls)=$HDL $HLS card_enabled(N250SP,AD9V3,S241,FX609,U200,RCXVUP)=$N250SP $AD9V3 $S241 $FX609 $U200 $RCXVUP&quot; castella
-        ;;
-  esac
-#debug AC  
-
 
 # Following filtering will stop the current test if not required or not possible
 # This will lead to a brown colored result meaning : aborted
 # ASKIP may stand for ACTION skip
 case &quot;$CRD:$ACT&quot; in
-# *:hdl_example* )       C=&quot;exmp&quot;;ASKIP=0;;
-# *:hls_memcopy )        C=&quot;memc&quot;;ASKIP=0;;
-# *:hls_bfs )            C=&quot;bfs &quot;;ASKIP=0;;
-# *:hls_hashjoin )       C=&quot;join&quot;;ASKIP=0;;
-  *:hls_intersect_h )    C=&quot;inth&quot;;ASKIP=1;;
-  *:hls_intersect_s )    C=&quot;ints&quot;;ASKIP=1;;
-# *:hls_search )         C=&quot;srch&quot;;ASKIP=0;;
-# *:hls_sponge )         C=&quot;spng&quot;;ASKIP=0;;
-  *:hls_blowfish )       C=&quot;blow&quot;;ASKIP=1;; # no maintenance for blowfish
-# *:hls_helloworld )     C=&quot;helw&quot;;ASKIP=0;;
-# *:test )               C=&quot;test&quot;;ASKIP=0;;
-  * )                      C=&quot;def &quot;;ASKIP=0;;
-esac            
+  * )                      C=&quot;def &quot;;ASKIP=0;; # def=default
+esac        
+
 echo &quot;card=$CRD action=$ACT case=$C ASKIP=$ASKIP&quot;
 
 if [ $ASKIP -eq 0 ]
@@ -239,6 +212,7 @@ then
 
  case &quot;$ACT&quot; in
   test )
+  # FAB à adapter
       gitnames=`git ls-remote git@github.ibm.com:OC-Enablement/oc-snap.git|grep &quot;refs/heads/&quot;|awk &apos;{print $2}&apos;`;RC=$?
     echo &quot;RC=$RC gitnames=$gitnames&quot;
     for dir in &quot;/afs/bb/proj/fpga/framework/CI_ws/OC_IMG_OC_matrix&quot;/*;do    
@@ -252,33 +226,21 @@ then
       else echo &quot;$dir is not a directory, continuing&quot;
       fi
     done
-    echo &quot;mail informing castella test triggered&quot;
-    mail -s &quot;Jenkins Test on going : CLOUD_build=$CL branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX test_on_hw=$TEST_ON_HW&quot; castella
     DSKIP=0;;
-  *&quot;hls_intersect&quot;* )     
-    if [ -f snap/defconfig/$CRD.hls_intersect.defconfig ];then DSKIP=0
-    else 
-      echo &quot;$CRD.hls_intersect.defconfig does not exist&quot;
-      ls snap/defconfig/
-      # automated mail
-      echo &quot;mail sent to castella Initial Test Failure&quot;
-      mail -s &quot;Initial Test Failure : $CRD.hls_intersect.defconfig does not exist&quot; castella
-      DSKIP=1
-    fi;;
 
   * )    
     if [ -f snap/defconfig/$CRD.$ACT.defconfig ];then DSKIP=0
     else 
+      echo;echo &quot;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!&quot;
       echo &quot;$CRD.$ACT.defconfig does not exist&quot;
+      echo &quot;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!&quot;;echo
       ls snap/defconfig/
-      # automated mail
-         echo &quot;mail sent to castella Initial Test Failure&quot;
-      mail -s &quot;Initial Test Failure : $CRD.$ACT.defconfig does not exist&quot; castella
       DSKIP=1
     fi;;  
 esac
 echo &quot;defconfig SKIP=$DSKIP&quot;
 
+# FAB diskusage
 AFSused=`fs lq /afs/bb/proj/fpga/framework/CI_ws/OC_SNAP_IMG_matrix/|grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
 echo &quot;OC IMG TEST AFS spaced currently used=${AFSused}%&quot;
 	if [ &quot;$AFSused&quot; -gt &quot;90&quot; ];then
@@ -344,13 +306,7 @@ export PATH=$PATH:/usr/local/bin  # python3 needs this path setup
 export USERHOME=`pwd`
 export SNAP_ROOT=$USERHOME/snap
 
-# Marennes (P8) hosts a 8k5 card in IBM Montpellier (requires a vpn access)
-# Brahma (Boston P9 9006-22p) hosts a N250SP card in IBM Montpellier (requires a vpn access)
-# Brahma (newell/whiterspoon P9 AC922) host a AD9V3 card in IBM Montpellier (requires a vpn access)
-# yob594 (newell/whiterspoon P9 AC922) host a AD9V3 card in IBM Montpellier (requires a vpn access)
-# boeBoxes=( tul3 tul2 )
-# mopBoxes=( brahma marennes lewen05 lewen5 yob594 )
-
+# FAB supprimer boeboxes
 TESTBOXES=( ${boeBoxes[*]} ${mopBoxes[*]}) # init array of systems
 
 echo &quot;testboxes1=${TESTBOXES[@]}&quot;
