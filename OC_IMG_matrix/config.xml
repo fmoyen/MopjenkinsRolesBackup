@@ -560,11 +560,11 @@ then
   if [ $RC -eq 0 ] &amp;&amp; [ $loop -eq 1 ]; then 
     echo &quot;OK : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED at the first try (loop=$loop)&quot;
 
-  elsif [ $RC -eq 0 ] &amp;&amp; [ $loop -gt 1 ]; then 
+  elsif [ $RC -eq 0 ] &amp;&amp; [ $loop -gt 1 ]
     echo &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot;
     #mail -s &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot; castella
 
-  elsif [ $RC -ne 0 ]; then
+  elsif [ $RC -ne 0 ]
     echo &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot;
     #mail -s &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot; castella
     exit 1
@@ -638,20 +638,49 @@ done
 echo;echo &quot;****************************************************************************************&quot;
 echo &quot;J: Testing on POWER Hardware generated binaries (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot;
 
-DIR=${CRD}_oc_missing
-mkdir -p /data/Images/${DIR}
+SaveDir=/data/Images/${CRD}_oc_missing
+mkdir -p $SaveDir
+NoTestSaveDir=/data/Images/no_test_required
+mkdir -p $NoTestSaveDir
 
 # leave uncommented the following line if there is not hardware available at all for the selected card
 # FAB: Supprimer toute référence de carte en dure dans le script car ajouter une nouvelle carte devient alors hard
+
 case $CRD:${TEST_ON_HW} in
-  AD9V3:* )    SAVE=&quot;/data/Images/AD9V3_oc_missing&quot;;     echo &quot;no test required, copy image to $SAVE&quot;;cp -rp $BINFILES $SAVE;exit 0;;
-  AD9V3:* )    SAVE=&quot;/data/Images/AD9V3_oc_missing&quot;;     echo &quot;no test required, copy bitfile to $SAVE&quot;;cp -rp $BITFILES $SAVE;exit 0;;
-  AD9H3:* )    SAVE=&quot;/data/Images/AD9H3_oc_missing&quot;;     echo &quot;no test required, copy image to $SAVE&quot;;cp -rp $BINFILES $SAVE;exit 0;;
-  AD9H3:* )    SAVE=&quot;/data/Images/AD9H3_oc_missing&quot;;     echo &quot;no test required, copy bitfile to $SAVE&quot;;cp -rp $BITFILES $SAVE;exit 0;;
-  AD9H7:* )    SAVE=&quot;/data/Images/AD9H7_oc_missing&quot;;     echo &quot;no test required, copy image to $SAVE&quot;;cp -rp $BINFILES $SAVE;exit 0;;
-  AD9H7:* )    SAVE=&quot;/data/Images/AD9H7_oc_missing&quot;;     echo &quot;no test required, copy bitfile to $SAVE&quot;;cp -rp $BITFILES $SAVE;exit 0;;
-  INNOVA2:* )  SAVE=&quot;/data/Images/INNOVA2_oc_missing&quot;;   echo &quot;no test required, copy image to $SAVE&quot;;cp -rp $BINFILES $SAVE;exit 0;;    
-  *:false )    SAVE=&quot;/data/Images/no_test_required&quot;;     echo &quot;no test required, copy image to $SAVE&quot;;cp -rp $BINFILES $SAVE;exit 0;;
+
+  AD9V3:* )    
+    echo &quot;  -&gt; No test required, copying $CRD image &amp; bitfile to $SaveDir&quot;
+    cp -rp $BINFILES $SaveDir
+    cp -rp $BITFILES $SaveDir
+    exit 0
+  ;;
+  
+  AD9H3:* )    
+    echo &quot;  -&gt; No test required, copying $CRD image &amp; bitfile to $SaveDir&quot;
+    cp -rp $BINFILES $SaveDir
+    cp -rp $BITFILES $SaveDir
+    exit 0
+  ;;
+
+  AD9H7:* )
+    echo &quot;  -&gt; No test required, copying $CRD image &amp; bitfile to $SaveDir&quot;
+    cp -rp $BINFILES $SaveDir
+    cp -rp $BITFILES $SaveDir
+    exit 0
+  ;;
+
+  INNOVA2:* )
+    echo &quot;  -&gt; No test required, copying $CRD image to $SaveDir&quot;
+    cp -rp $BINFILES $SaveDir
+    exit 0
+  ;;
+  
+  *:false )
+    echo &quot;  -&gt; No test required, copying image to $NoTestSaveDir&quot;
+    cp -rp $BINFILES $NoTestSaveDir
+    exit 0
+  ;;
+
 esac
 
 # FAB: exit 0 before so END OF JOB !
