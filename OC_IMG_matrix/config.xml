@@ -427,38 +427,36 @@ source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
 #echo &quot;IES_LIBS=$IES_LIBS&quot;
 #echo &quot;CDS_LIC_FILE=$CDS_LIC_FILE&quot;
 
-echo &quot;****************************************************************************************&quot;
-
+echo;echo &quot;****************************************************************************************&quot;
 echo &quot;J:Configure Image ...&quot;
 case $ACT in          # select config &amp; compile action
   &quot;test&quot;)
-    echo &quot;*T E S T  **skip image build /test&quot;
+    echo &quot;ACT=$ACT ==&gt; skip image building&quot;
     
-    # FAB à adapter ping sur mopboxes
   	if [ &quot;$TEST_ON_HW&quot; == &quot;true&quot; ]; then 
 
+        echo; echo &quot;Test on Hardware selected. So testing POWER servers accessibility:&quot;
         # Cleaning will occur at this step, remote fw*.bin* files older than $days will be removed
         days=90;srch=&quot;&apos;fw*.bin*&apos;&quot;
       
       for box in &quot;${TESTBOXES[@]}&quot;;do
-      
+        echo &quot;----------------------------------------------------&quot;
         if [[ ${mopBoxes[*]} =~ $box ]]
         then
           # $box is a Montpellier server
-          # FAB remplacer fpga par capimop et créer le scompte sur orpington
+          echo -e &quot;MOP   : $box -&gt; \c&quot;
           bindir=&quot;/home/capimop/&quot;
           RC=0;ssh capimop@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
         else
-          # FAB Austin boxes à ajouter hawklp10.aus.stglabs.ibm.com à la place de boeblingen
-          # $box is a Boeblingen server, accessible through dim1 system
+          echo -e &quot;AUSTIN: $box -&gt; \c&quot;
           bindir=&quot;/home/capimop/&quot;
-          RC=0;ssh dim1 ping $box -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
+          RC=0;ssh capimop@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
         fi
       
         if [ $RC == &quot;0&quot; ]; then echo &quot;$box ping ok&quot;; else echo &quot;$box not reachable&quot;;continue;fi
         
-        echo &quot;CLEANING Process : ssh $box find &amp; delete $srch in $bindir older than $days days&quot;
-        ssh $box &quot;find $bindir -type f -name $srch -mtime +$days -ls -delete&quot;
+        echo &quot;Cleaning process : ssh capimop@$box find &amp; delete $srch in $bindir older than $days days&quot;
+        ssh capimop@$box &quot;find $bindir -type f -name $srch -mtime +$days -ls -delete&quot;
         nusers=`ssh capimop@${box} who|grep -v root|grep -v capimop|wc -l`
         echo &quot;`date` box=$box nusers=$nusers&quot;
       done
