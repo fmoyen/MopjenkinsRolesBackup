@@ -96,15 +96,17 @@ Main Issues : &#xd;
         <hudson.model.StringParameterDefinition>
           <name>mopBoxes</name>
           <description>List of Montpellier systems available for testing :
-  - orpington: AC922 8335-GTH with two AD9V3s 1 in CAPI2 and 1 OC</description>
+  - orpington: AC922 8335-GTH with two AD9V3s 1 in CAPI2 and 1 OC
+(it needs defined capimop user with authorized_keys)</description>
           <defaultValue>orpington</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>austinBoxes</name>
           <description>List of Austin systems available for testing :
-(Assuming no VPN or jump server is needed to access Austin servers, 9.X.X.X addresses)</description>
-          <defaultValue></defaultValue>
+(Assuming no VPN or jump server is needed to access Austin servers, 9.X.X.X addresses)
+(it needs defined capimop user with authorized_keys</description>
+          <defaultValue>hawklp10.aus.stglabs.ibm.com</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
@@ -338,7 +340,6 @@ export PATH=$PATH:/usr/local/bin  # python3 needs this path setup
 export USERHOME=`pwd`
 export SNAP_ROOT=$USERHOME/snap
 
-# FAB supprimer boeboxes
 TESTBOXES=( ${austinBoxes[*]} ${mopBoxes[*]}) # init array of systems
 
 echo &quot;testboxes1=${TESTBOXES[@]}&quot;
