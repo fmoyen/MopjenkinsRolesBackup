@@ -359,6 +359,7 @@ then
   echo &quot;SKIP=$SKIP ==&gt; Exiting...&quot;
   exit 0  #&quot;temporarily setting not available as success !
 fi
+echo &quot;Building with Card=$CRD Action=$ACT CLOUD=$CL&quot;
 
 #==============================================================================================
 # Variables
@@ -371,27 +372,28 @@ TESTBOXES=( ${austinBoxes[*]} ${mopBoxes[*]}) # init array of systems
 
 echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
 
-# FAB RH6 et RH7 a ajouter
-echo &quot;****************************************************************************************&quot;
-echo &quot;J:LSF SETUP ...&quot;
-export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
-export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
-export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
-export LSF_BINDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
-export LSF_SUBMITTER_OSTYPE=Linux
-export LSF_ENVDIR=/home/lsfbb/prod/conf
-LSF=&quot;-P zsort&quot;
-LSF+=&quot; -M 6&quot;                      # 12GB memory
-LSF+=&quot; -C 2000&quot;                   # 2MB core file
-LSF+=&apos; -R type=X86_64 -R span[hosts=1]&apos;
-LSF+=&quot; -I -n 8&quot;
+#echo;echo &quot;********************************************************************************&quot;
+#echo &quot;J: LSF SETUP ...&quot;
 
-# Fabrice: CRD and CL now passed from first script thanks to export_props.properties file
-# CRD=$(echo $CRD_CL| cut -d&apos;_&apos; -f 1)    # chars up to  first &apos;_&apos; identify card
-# CL=$(echo $CRD_CL| cut -d&apos;_&apos; -f 2)     # chars behind first &apos;_&apos; identify Cloud build
+# older setup up to RH6
+#export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+#export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
+#export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+#export LSF_BINDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+#export LSF_SUBMITTER_OSTYPE=Linux
+#export LSF_ENVDIR=/home/lsfbb/prod/conf
+#LSF=&apos;-P zsort -M 2 -C 2000 -I -n 4 -R type=X86_64 -R span[hosts=1]&apos;  # Project, GB_mem, KB_core, #_processors, type of processor
 
-echo &quot;J:Checking Build with Card=$CRD Action=$ACT CLOUD=$CL&quot;
+# new setup for RH7
+#export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
+#export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/etc
+#export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
+#export LSF_BINDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
+#export LSF_SUBMITTER_OSTYPE=Linux
+#export LSF_ENVDIR=/home/lsfbb/prod/conf
+#LSF=&apos;-P zsort -M 2 -C 2000 -I -n 4 -R type=X86_64  -R osver=rh7 -R span[hosts=1]&apos;  # Project, GB_mem, KB_core, #_processors, type of processor
 
 
 #==============================================================================================
@@ -399,39 +401,40 @@ echo &quot;J:Checking Build with Card=$CRD Action=$ACT CLOUD=$CL&quot;
 # Should not be used but may be required by ??
 
 echo;echo &quot;*******************************************************************************&quot;
-echo &quot;J:Get OpenCAPI Simulation Environment (ocse)...&quot;
-echo &quot;Current directory is : $PWD&quot;
-echo &quot;*****&quot;
+echo &quot;J: Getting OpenCAPI Simulation Environment (ocse)...&quot;
+
+echo;echo &quot;Current directory is : $PWD&quot;
 ls -al
-echo &quot;deleting old ocse (OpenCAPI Simulation Engine) directory&quot;
+
+echo;echo &quot;Deleting old ./ocse (OpenCAPI Simulation Engine) directory&quot;
 rm -rf ocse
 
 # When Lance Thomson makes a mod in his OCSE, we might use a specific branch for test
 # 2019 Nov 04 he merged the issue_2 into master (removing the debug messages)
 
-echo &quot;J: Get OpenCAPI Simulation Environment (ocse) branch=$OCSE_BRANCH for card=$CRD...&quot;
+echo;echo &quot;Getting (git clone) OpenCAPI Simulation Environment (ocse) branch=$OCSE_BRANCH for card=$CRD...&quot;
 git clone -b $OCSE_BRANCH https://github.com/OpenCAPI/ocse ocse;echo &quot;git clone OCSE RC=$?&quot;
 
 export OCSE_INSTALL_DIR=${USERHOME}/ocse   # ca ne sert à rien on dirait !!
-echo &quot;exporting ocse directory as : ${USERHOME}/ocse into snap_env&quot;
+echo;echo &quot;Exporting ocse directory as : ${USERHOME}/ocse into snap_env&quot;
 echo &quot;export OCSE_ROOT=${USERHOME}/ocse&quot; &gt;snap_env.sh
 
 # FAB a vérifier si encore nécessaire
-#echo &quot;****************************************************************************************&quot;
-#echo &quot;J:cleaning any previous TL/DL and getting TL/DL zip files&quot;
+#echo;echo &quot;****************************************************************************************&quot;
+#echo &quot;J: Cleaning any previous TL/DL and getting TL/DL zip files&quot;
 #cd ${SNAP_ROOT}
 #make clean                    # to make sure we restart from a blank snap
 #rm -rf hardware/oc-bip        # to make sure we restart from a blank capi-bsp
-#echo &quot;J:git cloning oc-bip&quot;
+#echo &quot;J: git cloning oc-bip&quot;
 #git submodule init            # to get the oc-bip
 #git submodule update
 # collecting the TL/DL definition
-#echo &quot;J:Getting the zip file for tlx and dlx&quot;
+#echo &quot;J: Getting the zip file for tlx and dlx&quot;
 #cp -r /afs/bb/proj/fpga/framework/cards/$CRD/tlx ./hardware/oc-bip/
 #cp -r /afs/bb/proj/fpga/framework/cards/$CRD/dlx ./hardware/oc-bip/
 
-echo &quot;****************************************************************************************&quot;
-echo &quot;J:Setting up Vivado and timing value&quot;
+echo;echo &quot;****************************************************************************************&quot;
+echo &quot;J: Setting up Vivado and timing value&quot;
 echo &quot;#setup: XILINX_LOCAL_USER_DATA=${XILINX_LOCAL_USER_DATA}, overwrite=no to prevent write access error in XilincTclStore (tclapp:load_apps)&quot; &gt;&gt;snap_env.sh
 echo &quot;export XILINX_LOCAL_USER_DATA=no&quot; &gt;&gt; snap_env.sh
 echo &quot;J:For all OPENCAPI cards we run $VIVADO_CHOICE and extend Timing trials to 5 runs until we optimise placement&quot;
