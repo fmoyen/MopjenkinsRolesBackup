@@ -230,10 +230,10 @@ then
 
  case &quot;$ACT&quot; in
   test )
-  # FAB à adapter
-      gitnames=`git ls-remote git@github.ibm.com:OC-Enablement/oc-snap.git|grep &quot;refs/heads/&quot;|awk &apos;{print $2}&apos;`;RC=$?
+    gitnames=`git ls-remote git@github.com:OpenCAPI/oc-accel.git|grep &quot;refs/heads/&quot;|awk &apos;{print $2}&apos;`;RC=$?
     echo &quot;RC=$RC gitnames=$gitnames&quot;
-    for dir in &quot;/afs/bb/proj/fpga/framework/CI_ws/OC_IMG_OC_matrix&quot;/*;do    
+
+    for dir in &quot;/var/jenkins/workspace/OC_IMG_matrix&quot;/*;do    
       if [ -d &quot;$dir&quot; ];then
         branch=&quot;refs/heads/&quot;`basename $dir`
         if [[ &quot;$gitnames&quot; =~ &quot;$branch&quot; ]];then echo &quot;branch=$branch found in gitnames, keep dir=$dir&quot;
@@ -853,5 +853,5 @@ fi </command>
       <completeBuild>true</completeBuild>
     </touchStoneResultCondition>
   </executionStrategy>
-  <childCustomWorkspace>${COMBINATION}</childCustomWorkspace>
+  <childCustomWorkspace>${BRANCH}/${COMBINATION}</childCustomWorkspace>
 </matrix-project>
