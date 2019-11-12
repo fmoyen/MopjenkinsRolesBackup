@@ -476,6 +476,9 @@ if [ &quot;$CL&quot; == &quot;nCL&quot; ]; then
 #      RC=0; bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot; &amp;&amp; break || RC=$?
 		RC=0; make image &amp;&amp; break || RC=$?
     done
+
+    
+
     if [ $RC = &quot;0&quot; ] &amp;&amp; [ $loop -gt 1 ]; then mail -s &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot; castella;  fi
     if [ $RC != &quot;0&quot; ]; then mail -s &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot; castella; exit 1;  fi
 
@@ -504,9 +507,12 @@ fi
   #BINFILES contains binary name (In SPI : &quot;primary and secondary&quot; names)
   BINFILES=`ls $SNAP_ROOT/hardware/build/Images/oc_[0-9]*.bin|grep -v FACTORY|head -n2`
     BITFILES=`ls $SNAP_ROOT/hardware/build/Images/oc_[0-9]*.bit|grep -v FACTORY|head -n2`
+    
   
   if [ &quot;$BINFILES&quot; == &quot;&quot; ]; then echo &quot;cannot find binfile $BINFILES&quot;;exit 1
   fi
+ 
+BINFILESWithPicoSec=&quot;&quot; 
 for  f in $BINFILES
 do                   
     size=`ls -al $f | awk &apos;{print $5}&apos;`
