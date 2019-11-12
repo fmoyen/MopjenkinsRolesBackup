@@ -468,17 +468,18 @@ source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
 #echo &quot;CDS_LIC_FILE=$CDS_LIC_FILE&quot;
 
 #==============================================================================================
-# Setting up Vivado and Timing value
+# Testing POWER servers accessibility if ACT=test and TEST_ON_HW=true,
+# else making $CRD.$ACT.defconfig 
 
 echo;echo &quot;****************************************************************************************&quot;
-echo &quot;J: Configure Image ...&quot;
+
 case $ACT in          # select config &amp; compile action
   &quot;test&quot;)
-    echo &quot;ACT=$ACT ==&gt; skiping image building&quot;
+    echo &quot;J: ACT=$ACT ==&gt; skiping image building&quot;;echo
     
   	if [ &quot;$TEST_ON_HW&quot; == &quot;true&quot; ]; then 
 
-        echo; echo &quot;Test on Hardware selected. So testing POWER servers accessibility:&quot;
+        echo &quot;Test on Hardware selected ==&gt; testing POWER servers accessibility:&quot;
         # Cleaning will occur at this step, remote fw*.bin* files older than $days will be removed
         days=90;srch=&quot;&apos;fw*.bin*&apos;&quot;
       
@@ -506,20 +507,27 @@ case $ACT in          # select config &amp; compile action
     fi                          
     exit 0                     
     ;;
+    
   *&quot;nvme&quot;*|*&quot;NVME&quot;*)
+    echo &quot;J: ACT=*NVME* ==&gt; SIMULATOR=nosim &amp; Configure image thanks to $CRD.$ACT.defconfig file ...&quot;;echo
     echo &quot;export SIMULATOR=nosim&quot; &gt;&gt; snap_env.sh
     make -s $CRD.$ACT.defconfig
     ;;
     
 # In case we would like a FACTORY, we build it using hdl_example.NORAM to ease debug
   *&quot;hdl_example.NORAM&quot;*)
+    echo &quot;J: ACT=*hdl_example.NORAM* ==&gt; Factory case ?? ...&quot;
     if [ &quot;$FACTORY&quot;  == &quot;true&quot; ];then
-        echo &quot;Doing hdl_example.NORAM with FACTORY ENABLED&quot;
-        echo &quot;ENABLE_FACTORY=y&quot; &gt;&gt; ./defconfig/$CRD.$ACT.defconfig
-        make -s $CRD.$ACT.defconfig      
-    fi;;
+       echo &quot;J: FACTORY=true ==&gt; ENABLE_FACTORY=y &amp; Configure image thanks to $CRD.$ACT.defconfig file...&quot;;echo
+       echo &quot;ENABLE_FACTORY=y&quot; &gt;&gt; ./defconfig/$CRD.$ACT.defconfig
+       make -s $CRD.$ACT.defconfig
+    else
+       echo &quot;J: FACTORY=false ==&gt; Doing NOTHING...&quot;;echo
+    fi
+    ;;
     
   *)
+    echo &quot;J: Generic case ==&gt; Just configure image thanks to $CRD.$ACT.defconfig file...&quot;;echo
     make -s $CRD.$ACT.defconfig
     ;;
 esac
