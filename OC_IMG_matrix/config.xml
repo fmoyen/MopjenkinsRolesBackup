@@ -82,9 +82,9 @@ Main Issues : &#xd;
           <description>Choose the TIMING_LABLIMIT parameter. If timing is higher than your choice when doing a make image, the run will failed.</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
+              <string>-1000</string>
               <string>-300</string>
               <string>-600</string>
-              <string>-1000</string>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
@@ -258,28 +258,30 @@ then
 esac
 echo &quot;defconfig SKIP=$DSKIP&quot;
 
-# FAB diskusage
-AFSused=`fs lq /afs/bb/proj/fpga/framework/CI_ws/OC_SNAP_IMG_matrix/|grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
-echo &quot;OC IMG TEST AFS spaced currently used=${AFSused}%&quot;
-	if [ &quot;$AFSused&quot; -gt &quot;90&quot; ];then
-  		echo &quot;ERROR: AFS space IMAGETEST is used up to ${AFSused}%, stopping additional builds&quot;
-  		echo &quot;mail sent to castella : ERROR AFS space&quot;
-  		mail -s &quot;ERROR: urgent AFS space IMAGETEST is used up to ${AFSused}%, stopping additional builds&quot; castella
-  		exit 1
-	else if(( AFSused &gt; 70 ));then
-  		echo &quot;WARNING: AFS space is used up ${AFSused}%&quot;
-  		case &quot;$ACT&quot; in
-    		test )
-        		echo &quot;mail sent to castella : WARNING AFS space&quot;
-        		mail -s &quot;WARNING: urgent AFS space IMAGETEST is used up to ${AFSused}%&quot; castella
-        		;;
-  		esac      
-  	fi # end of AFS test
+#==============================================================================================
+# Checking enough space is available
+
+#AFSused=`fs lq /afs/bb/proj/fpga/framework/CI_ws/OC_SNAP_IMG_matrix/|grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
+diskused=`df -h /var/jenkins/workspace/OC_IMG_matrix|grep -v Used|awk &apos;{print $5}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
+SSKIP=0;msg=&quot;diskused =${diskused}%&quot;
+
+if   (( diskused &gt; 90 ));then 
+  msg=&quot;ERROR: $msg, stopping additional builds&quot;;SSKIP=1
+  #echo &quot;mail sent to castella : ERROR OpenCAPI AFS space&quot;
+  #mail -s &quot;ERROR: OpenCAPI AFS space SIMULATION is used up to ${diskused}%, stopping additional builds&quot; castella
+  #mail -s &quot;ERROR: AFS space SIMULATION is used up to ${AFSused}%, stopping additional builds&quot; mesnet
+
+elif (( diskused &gt; 70 ));then
+   msg=&quot;WARNING: $msg&quot;
+   #echo &quot;mail sent to castella : WARNING OpenCAPI AFS space&quot;
+   #mail -s &quot;WARNING: OpenCAPI AFS space IMAGETEST is used up to ${diskused}%&quot; castella
+   #mail -s &quot;WARNING: AFS space IMAGETEST is used up to ${AFSused}%&quot; mesnet
 fi
+echo &quot;$msg&quot;
 
 fi # end of if ASKIP
 
-if [ &quot;$ASKIP&quot; == &quot;1&quot; ] || [ &quot;$DSKIP&quot; == &quot;1&quot; ] || [ &quot;$BSKIP&quot; == &quot;1&quot; ];then SKIP=1;else SKIP=0;fi
+if [ &quot;$ASKIP&quot; == &quot;1&quot; ] || [ &quot;$DSKIP&quot; == &quot;1&quot; ] || [ &quot;$BSKIP&quot; == &quot;1&quot; ] || [ &quot;$SSKIP&quot; == &quot;1&quot; ];then SKIP=1;else SKIP=0;fi
 
 # Passing parameters to next script
 echo &quot;SKIP=$SKIP&quot; &gt; export_props.properties
