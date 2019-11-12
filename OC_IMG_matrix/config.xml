@@ -204,6 +204,7 @@ echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot;
 echo &quot;Working dir is : $PWD&quot;
 echo
 
+
 #==============================================================================================
 # Variables
 
@@ -215,6 +216,7 @@ CRD=$(echo $CRD_CL| cut -d&apos;_&apos; -f 1)    # chars up to  first &apos;_&ap
 CL=$(echo $CRD_CL| cut -d&apos;_&apos; -f 2)     # chars behind first &apos;_&apos; identify Cloud build
 
 echo &quot;Build with Card=$CRD Action=$ACT Action_type=$ACTION_TYPE CLOUD_build=$CL branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX test_on_hw=$TEST_ON_HW&quot;
+
 
 #==============================================================================================
 # Do not run non-desired cases (action types, actions, cards)
@@ -236,6 +238,7 @@ case &quot;$CRD:$ACT&quot; in
 esac        
 
 echo &quot;card=$CRD action=$ACT case=$C ASKIP=$ASKIP&quot;
+
 
 #==============================================================================================
 # Cleaning directories if ACT=test,
@@ -284,6 +287,7 @@ then
 esac
 echo;echo &quot;defconfig DSKIP=$DSKIP&quot;
 
+
 #==============================================================================================
 # Checking enough space is available
 
@@ -312,6 +316,7 @@ echo &quot;$msg&quot;
 fi # end of if ASKIP
 
 if [ &quot;$ASKIP&quot; == &quot;1&quot; ] || [ &quot;$DSKIP&quot; == &quot;1&quot; ] || [ &quot;$BSKIP&quot; == &quot;1&quot; ] || [ &quot;$SSKIP&quot; == &quot;1&quot; ];then SKIP=1;else SKIP=0;fi
+
 
 #==============================================================================================
 # Passing parameters to next script
@@ -360,6 +365,7 @@ then
   exit 0  #&quot;temporarily setting not available as success !
 fi
 echo &quot;Building with Card=$CRD Action=$ACT CLOUD=$CL&quot;
+
 
 #==============================================================================================
 # Variables
@@ -419,6 +425,7 @@ export OCSE_INSTALL_DIR=${USERHOME}/ocse   # ca ne sert à rien on dirait !!
 echo;echo &quot;Exporting ocse directory as : ${USERHOME}/ocse into snap_env.sh&quot;
 echo &quot;export OCSE_ROOT=${USERHOME}/ocse&quot; &gt;snap_env.sh
 
+
 #==============================================================================================
 # Cleaning previous TL/DL &amp; getting TL:DL zip files
 
@@ -435,6 +442,7 @@ echo &quot;export OCSE_ROOT=${USERHOME}/ocse&quot; &gt;snap_env.sh
 #echo &quot;J: Getting the zip file for tlx and dlx&quot;
 #cp -r /afs/bb/proj/fpga/framework/cards/$CRD/tlx ./hardware/oc-bip/
 #cp -r /afs/bb/proj/fpga/framework/cards/$CRD/dlx ./hardware/oc-bip/
+
 
 #==============================================================================================
 # Setting up Vivado and Timing value
@@ -466,6 +474,7 @@ source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
 #echo &quot;J: Cadence SETUP ...&quot;
 #echo &quot;IES_LIBS=$IES_LIBS&quot;
 #echo &quot;CDS_LIC_FILE=$CDS_LIC_FILE&quot;
+
 
 #==============================================================================================
 # Testing POWER servers accessibility if ACT=test and TEST_ON_HW=true,
@@ -532,17 +541,34 @@ case $ACT in          # select config &amp; compile action
     ;;
 esac
 
-echo &quot;****************************************************************************************&quot;
-if [ &quot;$CL&quot; == &quot;nCL&quot; ]; then
-    maxloop=5;
-    for loop in `seq 1 $maxloop`;do  
-      echo &quot;J: `date` Build Non_Cloud Image for $CRD, Loop $loop&quot;
-#      RC=0; bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot; &amp;&amp; break || RC=$?
-		RC=0; make image &amp;&amp; break || RC=$?
-    done
 
-    if [ $RC -eq 0 ] &amp;&amp; [ $loop -gt 1 ]; then mail -s &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot; castella;  fi
-    if [ $RC -ne 0 ]; then mail -s &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot; castella; exit 1;  fi
+#==============================================================================================
+# Building image (make image/ make cloud...)
+
+if [ &quot;$CL&quot; == &quot;nCL&quot; ]
+then
+
+  maxloop=5;
+  for loop in `seq 1 $maxloop`
+  do  
+    echo;echo &quot;****************************************************************************************&quot;
+    echo &quot;J: `date` Build Non_Cloud Image (make image) for $CRD, Loop ${loop}/$maxloop&quot;
+    #RC=0; bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot; &amp;&amp; break || RC=$?
+	RC=0; make image &amp;&amp; break || RC=$?
+  done
+
+  if [ $RC -eq 0 ] &amp;&amp; [ $loop -eq 1 ]; then 
+    echo &quot;OK : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED at the first try (loop=$loop)&quot;
+
+  elsif [ $RC -eq 0 ] &amp;&amp; [ $loop -gt 1 ]; then 
+    echo &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot;
+    #mail -s &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot; castella
+
+  elsif [ $RC -ne 0 ]; then
+    echo &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot;
+    #mail -s &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot; castella
+    exit 1
+  fi
 
 else # case of Cloud Build
 # FAB never for the moment but if needed, needs to adapt (BSUB, etc)
@@ -563,24 +589,30 @@ else # case of Cloud Build
   bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_merge&quot; || exit
 fi
 
+
+#==============================================================================================
+# Checking generated binaries
+
 # when using a parallel flash we have only 1 binary file
 # when using a SPI8 flash we have 2 binary files to deal with
 
-  #BINFILES contains binary name (In SPI : &quot;primary and secondary&quot; names)
-  BINFILES=`ls $SNAP_ROOT/hardware/build/Images/oc_[0-9]*.bin|grep -v FACTORY|head -n2`
-    BITFILES=`ls $SNAP_ROOT/hardware/build/Images/oc_[0-9]*.bit|grep -v FACTORY|head -n2`
+echo;echo &quot;****************************************************************************************&quot;
+echo &quot;J: `date` Checking generated $ACT binaries for $CRD...&quot;
+
+
+#BINFILES contains binary name (In SPI : &quot;primary and secondary&quot; names)
+BINFILES=`ls $SNAP_ROOT/hardware/build/Images/oc_[0-9]*.bin|grep -v FACTORY|head -n2`
+BITFILES=`ls $SNAP_ROOT/hardware/build/Images/oc_[0-9]*.bit|grep -v FACTORY|head -n2`
     
   
-  if [ &quot;$BINFILES&quot; == &quot;&quot; ]; then echo &quot;cannot find binfile $BINFILES&quot;;exit 1
-  fi
+if [ &quot;$BINFILES&quot; == &quot;&quot; ]; then echo &quot;  --&gt; cannot find binary files&quot;;exit 1
+fi
  
-BINFILESWithPicoSec=&quot;&quot; 
 for  f in $BINFILES
 do                   
     size=`ls -al $f | awk &apos;{print $5}&apos;`
     echo &quot;binfile=$f size=$size&quot;
-  # if (( size &lt; 100000 ));then echo &quot;ERROR: image is too small to burn&quot;;exit 1;fi  
-    (( size &lt; 100000 )) &amp;&amp; die 1 &quot;image $f is too small $size to burn&quot;
+    (( size &lt; 100000 )) &amp;&amp; die 1 &quot;  --&gt; image $f is too small $size to burn&quot;
     # We assign IMAGE for log purpose, it eventually takes the name of secondary if SPI8
     IMAGE=&quot;/home/capimop/images/${CRD}/${ACT}/&quot;`basename $f` 
 done
@@ -599,9 +631,13 @@ done
 #			SAVE=&quot;/data/Images/${CRD}_OC_FACTORY_MCS&quot;;   echo &quot;J: FACTORY was requested : copy ${CRD} hls_helloworld    bin files to $SAVE&quot;;cp -rp $BINFILES $SAVE;;
 #esac
 
-echo &quot;****************************************************************************************&quot;
-echo &quot;test_on_hw=${TEST_ON_HW} for card=$CRD&quot;
-#AC : in case directory is not existing (case of a new card)
+
+#==============================================================================================
+# Testing on POWER Hardware generated binaries
+
+echo;echo &quot;****************************************************************************************&quot;
+echo &quot;J: Testing on POWER Hardware generated binaries (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot;
+
 DIR=${CRD}_oc_missing
 mkdir -p /data/Images/${DIR}
 
