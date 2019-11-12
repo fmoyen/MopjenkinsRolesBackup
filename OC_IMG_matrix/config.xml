@@ -206,11 +206,20 @@ echo &quot;Build with Card=$CRD Action=$ACT Action_type=$ACTION_TYPE CLOUD_build
 # BSKIP stands for board skip
 
 BSKIP=0
-if [ &quot;$ACTION_TYPE&quot; == &quot;hdl&quot;    ] &amp;&amp; [ &quot;$HDL&quot;    == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$ACTION_TYPE&quot; == &quot;hls&quot;    ] &amp;&amp; [ &quot;$HLS&quot;    == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$CRD&quot;         == &quot;AD9V3&quot;  ] &amp;&amp; [ &quot;$AD9V3&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$CRD&quot;         == &quot;INNOVA2&quot;] &amp;&amp; [ &quot;$INNOVA2&quot;== &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$ACT&quot;         == &quot;test&quot;   ]                            ; then BSKIP=0;fi
+echo &quot;###&quot;
+echo &quot;$ACTION_TYPE&quot;
+echo &quot;$HDL&quot;
+echo &quot;$HLS&quot;
+echo &quot;$CRD&quot;
+echo &quot;$INNOVA2&quot;
+echo &quot;$ACT&quot;
+echo &quot;###&quot;
+
+if [ &quot;$ACTION_TYPE&quot; == &quot;hdl&quot;     ] &amp;&amp; [ &quot;$HDL&quot;    == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$ACTION_TYPE&quot; == &quot;hls&quot;     ] &amp;&amp; [ &quot;$HLS&quot;    == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$CRD&quot;         == &quot;AD9V3&quot;   ] &amp;&amp; [ &quot;$AD9V3&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$CRD&quot;         == &quot;INNOVA2&quot; ] &amp;&amp; [ &quot;$INNOVA2&quot;== &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$ACT&quot;         == &quot;test&quot;    ]                            ; then BSKIP=0;fi
 echo &quot;examples(hdl,hls)=$HDL $HLS card_enabled(AD9V3,INNOVA2)=$AD9V3 $INNOVA2 BSKIP=$BSKIP&quot;
 echo &quot;action_types (hdl,hls)=$HDL,$HLS enabled_cards(AD9v3,AD9H3,AD9H7)=$AD9V3,$AD9H3,$AD9H7 BSKIP=$BSKIP&quot;
 echo
