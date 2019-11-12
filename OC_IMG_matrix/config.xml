@@ -105,7 +105,7 @@ Main Issues : &#xd;
           <name>austinBoxes</name>
           <description>List of Austin systems available for testing :
 (Assuming no VPN or jump server is needed to access Austin servers, 9.X.X.X addresses)
-(it needs defined capimop user with authorized_keys</description>
+(it needs defined capimop user with authorized_keys)</description>
           <defaultValue>hawklp10.aus.stglabs.ibm.com</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
@@ -141,7 +141,7 @@ Main Issues : &#xd;
     <submoduleCfg class="list"/>
     <extensions>
       <hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
-        <relativeTargetDir>snap</relativeTargetDir>
+        <relativeTargetDir>oc-accel</relativeTargetDir>
       </hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
       <hudson.plugins.git.extensions.impl.SubmoduleOption>
         <disableSubmodules>false</disableSubmodules>
@@ -268,8 +268,8 @@ then
     DSKIP=0;;
 
   * )
-    echo &quot;Checking snap/defconfig/$CRD.$ACT.defconfig existence&quot;
-    if [ -f snap/defconfig/$CRD.$ACT.defconfig ]
+    echo &quot;Checking oc-accel/defconfig/$CRD.$ACT.defconfig existence&quot;
+    if [ -f oc-accel/defconfig/$CRD.$ACT.defconfig ]
     then
       echo &quot; --&gt; OK&quot;
       DSKIP=0
@@ -278,7 +278,7 @@ then
       echo &quot;$CRD.$ACT.defconfig does not exist&quot;
       echo &quot;Aborting...&quot;
       echo &quot;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!&quot;;echo
-      echo; ls snap/defconfig/
+      echo; ls oc-accel/defconfig/
       DSKIP=1
     fi;;  
 esac
@@ -365,7 +365,7 @@ fi
 
 export PATH=$PATH:/usr/local/bin  # python3 needs this path setup
 export USERHOME=`pwd`
-export SNAP_ROOT=$USERHOME/snap
+export SNAP_ROOT=$USERHOME/oc-accel
 
 TESTBOXES=( ${austinBoxes[*]} ${mopBoxes[*]}) # init array of systems
 
@@ -443,7 +443,7 @@ echo &quot;VIVADO version initially set to $VIV_VERSION (check if we change this
 echo &quot;export TIMING_LABLIMIT=\&quot;${TIMING_LABLIMIT_CHOICE}\&quot;&quot; &gt;&gt; snap_env.sh
 echo &quot;TIMING LIMIT set to ${TIMING_LABLIMIT_CHOICE}&quot;
 echo &quot;****************************************************************************************&quot;
-echo &quot;J:Vivado PATHS SETUP ...&quot;
+echo &quot;J: Vivado PATHS SETUP ...&quot;
 export XILINX_ROOT=/opt/Xilinx
 #export XILINX_ROOT=/afs/bb/proj/fpga/xilinx
 export XILINXD_LICENSE_FILE=2100@pokwinlic1.pok.ibm.com
@@ -517,10 +517,8 @@ if [ &quot;$CL&quot; == &quot;nCL&quot; ]; then
 		RC=0; make image &amp;&amp; break || RC=$?
     done
 
-    
-
-    if [ $RC = &quot;0&quot; ] &amp;&amp; [ $loop -gt 1 ]; then mail -s &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot; castella;  fi
-    if [ $RC != &quot;0&quot; ]; then mail -s &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot; castella; exit 1;  fi
+    if [ $RC -eq 0 ] &amp;&amp; [ $loop -gt 1 ]; then mail -s &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot; castella;  fi
+    if [ $RC -ne 0 ]; then mail -s &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot; castella; exit 1;  fi
 
 else # case of Cloud Build
 # FAB never for the moment but if needed, needs to adapt (BSUB, etc)
