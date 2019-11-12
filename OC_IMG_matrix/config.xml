@@ -77,6 +77,11 @@ Main Issues : &#xd;
           <description>enable/disable the AD9H7 card</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>INNOVA2</name>
+          <description>enable/disable the INNOVA2 card</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>TIMING_LABLIMIT_CHOICE</name>
           <description>Choose the TIMING_LABLIMIT parameter. If timing is higher than your choice when doing a make image, the run will failed.</description>
@@ -195,7 +200,7 @@ echo &quot;*********************************************************************
 &gt; export_props.properties
 NAME=$(echo $GIT_BRANCH| cut -d&apos;/&apos; -f 2 |tr &apos;[:upper:]&apos; &apos;[:lower:]&apos;) # remove origin/ from branch and translate to lowercase
 PREFIX=$(echo $NAME| cut -d&apos;_&apos; -f 1)    # chars up to first &apos;_&apos; identify need for test
-ACTION_TYPE=$(echo $ACT| cut -d&apos;_&apos; -f 1)
+ACTION_TYPE=$(echo $ACT| cut -d&apos;_&apos; -f 1 |tr &apos;[:lower:]&apos; &apos;[:upper:]&apos;) # get ACTION_TYPE (hls, hld) and translate to uppercase
 CRD=$(echo $CRD_CL| cut -d&apos;_&apos; -f 1)    # chars up to  first &apos;_&apos; identify card
 CL=$(echo $CRD_CL| cut -d&apos;_&apos; -f 2)     # chars behind first &apos;_&apos; identify Cloud build
 
@@ -206,22 +211,12 @@ echo &quot;Build with Card=$CRD Action=$ACT Action_type=$ACTION_TYPE CLOUD_build
 # BSKIP stands for board skip
 
 BSKIP=0
-echo &quot;###&quot;
-echo &quot;$ACTION_TYPE&quot;
-echo &quot;$HDL&quot;
-echo &quot;$HLS&quot;
-echo &quot;$CRD&quot;
-echo &quot;$INNOVA2&quot;
-echo &quot;$ACT&quot;
-echo &quot;###&quot;
 
-if [ &quot;$ACTION_TYPE&quot; == &quot;hdl&quot;     ] &amp;&amp; [ &quot;$HDL&quot;    == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$ACTION_TYPE&quot; == &quot;hls&quot;     ] &amp;&amp; [ &quot;$HLS&quot;    == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$CRD&quot;         == &quot;AD9V3&quot;   ] &amp;&amp; [ &quot;$AD9V3&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$CRD&quot;         == &quot;INNOVA2&quot; ] &amp;&amp; [ &quot;$INNOVA2&quot;== &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$ACT&quot;         == &quot;test&quot;    ]                            ; then BSKIP=0;fi
-echo &quot;examples(hdl,hls)=$HDL $HLS card_enabled(AD9V3,INNOVA2)=$AD9V3 $INNOVA2 BSKIP=$BSKIP&quot;
-echo &quot;action_types (hdl,hls)=$HDL,$HLS enabled_cards(AD9v3,AD9H3,AD9H7)=$AD9V3,$AD9H3,$AD9H7 BSKIP=$BSKIP&quot;
+if [ &quot;${!ACTION_TYPE}&quot; == &quot;false&quot; ]; then BSKIP=1;fi # if ACTION_TYPE=&quot;HLS&quot;, ${!ACTION_TYPE} is identical to $HLS
+if [ &quot;${!CRD}&quot;         == &quot;false&quot; ]; then BSKIP=1;fi # if CRD=&quot;AD9V3&quot;, ${!CRD} is identical to $AD9V3
+if [ &quot;$ACT&quot;            == &quot;test&quot;  ]; then BSKIP=0;fi
+
+echo &quot;action_types (hdl,hls)=$ACTION_TYPE enabled_cards=$CRD BSKIP=$BSKIP&quot;
 echo
 
 
