@@ -194,15 +194,15 @@ Main Issues : &#xd;
       <command>#!/bin/bash
 set +x                           # reduce Jenkins output
 
-echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot;
-echo &quot;Working dir is : $PWD&quot;
-
-
+echo
 echo &quot;****************************************************************************************&quot;
 echo &quot;`date` BUILD START&quot;
 echo &quot;****************************************************************************************&quot;
 echo &quot;EXECUTING OpenCAPI IMG FIRST SHELL FROM MOPJENKINS ...&quot;
 echo &quot;****************************************************************************************&quot;
+echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot;
+echo &quot;Working dir is : $PWD&quot;
+echo
 
 #==============================================================================================
 # Variables
@@ -227,8 +227,6 @@ if [ &quot;${!CRD}&quot;         == &quot;false&quot; ]; then BSKIP=1;fi # if CR
 if [ &quot;$ACT&quot;            == &quot;test&quot;  ]; then BSKIP=0;fi
 
 echo &quot;action_types (hdl,hls)=$ACTION_TYPE enabled_cards=$CRD BSKIP=$BSKIP&quot;
-echo
-
 
 # Following filtering will stop the current test if not required or not possible
 # This will lead to a brown colored result meaning : aborted
@@ -239,20 +237,29 @@ esac
 
 echo &quot;card=$CRD action=$ACT case=$C ASKIP=$ASKIP&quot;
 
+#==============================================================================================
+# Cleaning directories if ACT=test,
+# else checking $CRD.$ACT.defconfig file existence
+
+echo;echo &quot;***********************************************************&quot;
+
 if [ $ASKIP -eq 0 ]
 then 
 
  case &quot;$ACT&quot; in
   test )
+    echo &quot;ACT=test&quot;
+    echo
     gitnames=`git ls-remote git@github.com:OpenCAPI/oc-accel.git|grep &quot;refs/heads/&quot;|awk &apos;{print $2}&apos;`;RC=$?
-    echo &quot;RC=$RC gitnames=$gitnames&quot;
+    echo &quot;gitnames= $gitnames&quot;
 
+    echo
     for dir in &quot;/var/jenkins/workspace/OC_IMG_matrix&quot;/*;do    
       if [ -d &quot;$dir&quot; ];then
         branch=&quot;refs/heads/&quot;`basename $dir`
-        if [[ &quot;$gitnames&quot; =~ &quot;$branch&quot; ]];then echo &quot;branch=$branch found in gitnames, keep dir=$dir&quot;
+        if [[ &quot;$gitnames&quot; =~ &quot;$branch&quot; ]];then echo &quot;branch=$branch found in gitnames, keeping dir=$dir&quot;
         else 
-          echo &quot;branch=$branch not found in gitnames, delete dir=\&apos;$dir\&apos;&quot;
+          echo &quot;branch=$branch not found in gitnames, deleting dir=\&apos;$dir\&apos;&quot;
           rm -rf &quot;$dir&quot;     # put in quotes to work for directories with blanks
         fi        
       else echo &quot;$dir is not a directory, continuing&quot;
@@ -260,24 +267,31 @@ then
     done
     DSKIP=0;;
 
-  * )    
-    if [ -f snap/defconfig/$CRD.$ACT.defconfig ];then DSKIP=0
+  * )
+    echo &quot;Checking snap/defconfig/$CRD.$ACT.defconfig existence&quot;
+    if [ -f snap/defconfig/$CRD.$ACT.defconfig ]
+    then
+      echo &quot; --&gt; OK&quot;
+      DSKIP=0
     else 
       echo;echo &quot;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!&quot;
       echo &quot;$CRD.$ACT.defconfig does not exist&quot;
+      echo &quot;Aborting...&quot;
       echo &quot;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!&quot;;echo
-      ls snap/defconfig/
+      echo; ls snap/defconfig/
       DSKIP=1
     fi;;  
 esac
-echo &quot;defconfig SKIP=$DSKIP&quot;
+echo;echo &quot;defconfig DSKIP=$DSKIP&quot;
 
 #==============================================================================================
 # Checking enough space is available
 
+echo;echo &quot;***********************************************************&quot;
+echo &quot;J: Checking enough space is available&quot;
 #AFSused=`fs lq /afs/bb/proj/fpga/framework/CI_ws/OC_SNAP_IMG_matrix/|grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
 diskused=`df -h /var/jenkins/workspace/OC_IMG_matrix|grep -v Used|awk &apos;{print $5}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
-SSKIP=0;msg=&quot;diskused =${diskused}%&quot;
+SSKIP=0;msg=&quot;disk usage =${diskused}%&quot;
 
 if   (( diskused &gt; 90 ));then 
   msg=&quot;ERROR: $msg, stopping additional builds&quot;;SSKIP=1
@@ -290,6 +304,8 @@ elif (( diskused &gt; 70 ));then
    #echo &quot;mail sent to castella : WARNING OpenCAPI AFS space&quot;
    #mail -s &quot;WARNING: OpenCAPI AFS space IMAGETEST is used up to ${diskused}%&quot; castella
    #mail -s &quot;WARNING: AFS space IMAGETEST is used up to ${AFSused}%&quot; mesnet
+else
+   msg=&quot;OK: $msg&quot;
 fi
 echo &quot;$msg&quot;
 
@@ -297,13 +313,18 @@ fi # end of if ASKIP
 
 if [ &quot;$ASKIP&quot; == &quot;1&quot; ] || [ &quot;$DSKIP&quot; == &quot;1&quot; ] || [ &quot;$BSKIP&quot; == &quot;1&quot; ] || [ &quot;$SSKIP&quot; == &quot;1&quot; ];then SKIP=1;else SKIP=0;fi
 
+#==============================================================================================
 # Passing parameters to next script
+
+echo;echo &quot;***********************************************************&quot;
+echo &quot;J: Forwarding parameters to next script&quot;
 echo &quot;SKIP=$SKIP&quot; &gt; export_props.properties
 echo &quot;CRD=$CRD&quot; &gt;&gt; export_props.properties
 echo &quot;CL=$CL&quot; &gt;&gt; export_props.properties
-echo &quot;properties passed to next shell:&quot;
+echo &quot;properties forwarded to next shell:&quot;
 cat export_props.properties
-echo &quot;***********************************************************&quot;</command>
+echo &quot;***********************************************************&quot;
+echo</command>
     </hudson.tasks.Shell>
     <EnvInjectBuilder plugin="envinject@2.1.6">
       <info>
@@ -325,24 +346,30 @@ echo &quot;***********************************************************&quot;</co
     </org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
-echo &quot;SKIP PASSED = $SKIP&quot;
-if [ $SKIP -eq 1 ]
-then 
-exit 0  #&quot;temporarily setting not available as success !
-fi
 
 set +x                            # reduce Jenkins output
 ulimit -c unlimited               # limit core dumps
+
+echo;echo &quot;****************************************************************************************&quot;
+echo &quot;EXECUTING SECOND OpenCAPI SHELL FROM MOPJENKINS ...&quot;
 echo &quot;****************************************************************************************&quot;
-echo &quot;EXECUTING SECOND OpenCAPI SHELL FROM JENKINS - V1.0 - 2019 june 27th - ...&quot;
-echo &quot;****************************************************************************************&quot;
+echo &quot;SKIP forwarded from previous script = $SKIP&quot;
+if [ $SKIP -eq 1 ]
+then
+  echo &quot;SKIP=$SKIP ==&gt; Exiting...&quot;
+  exit 0  #&quot;temporarily setting not available as success !
+fi
+
+#==============================================================================================
+# Variables
+
 export PATH=$PATH:/usr/local/bin  # python3 needs this path setup
 export USERHOME=`pwd`
 export SNAP_ROOT=$USERHOME/snap
 
 TESTBOXES=( ${austinBoxes[*]} ${mopBoxes[*]}) # init array of systems
 
-echo &quot;testboxes1=${TESTBOXES[@]}&quot;
+echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
 
 # FAB RH6 et RH7 a ajouter
 echo &quot;****************************************************************************************&quot;
