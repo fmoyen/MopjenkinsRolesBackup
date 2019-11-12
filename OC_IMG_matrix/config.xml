@@ -538,7 +538,9 @@ case $CRD:${TEST_ON_HW} in
   *:false )    SAVE=&quot;/data/Images/no_test_required&quot;;     echo &quot;no test required, copy image to $SAVE&quot;;cp -rp $BINFILES $SAVE;exit 0;;
 esac
 
-# FAB exit 0 before
+# FAB: exit 0 before so END OF JOB !
+######################################################################################################################################
+######################################################################################################################################
 
 #
 # Set unique target directory such that parallel builds do not disturb each other.
