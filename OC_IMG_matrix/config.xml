@@ -100,6 +100,13 @@ Main Issues : &#xd;
           <defaultValue>orpington</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>austinBoxes</name>
+          <description>List of Austin systems available for testing :
+(Assuming no VPN or jump server is needed to access Austin servers, 9.X.X.X addresses)</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
@@ -169,6 +176,7 @@ Main Issues : &#xd;
         <string>AD9V3_nCL</string>
         <string>AD9H3_nCL</string>
         <string>AD9H7_nCL</string>
+        <string>INNOVA2_nCL</string>
       </values>
     </hudson.matrix.TextAxis>
     <hudson.matrix.LabelAxis>
@@ -178,7 +186,7 @@ Main Issues : &#xd;
       </values>
     </hudson.matrix.LabelAxis>
   </axes>
-  <combinationFilter>(  ((ACT=~&quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;)||(ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; ))  &amp;&amp; ( (CRD_CL=~&quot;AD9V3&quot;  &amp;&amp; AD9V3==&quot;true&quot;) || ( CRD_CL=~&quot;AD9H&quot; &amp;&amp; (AD9H3==&quot;true&quot;|| AD9H7==&quot;true&quot;) &amp;&amp; !(ACT=~&quot;DDR&quot;) ) )  ) || (ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;AD9V3&quot;) </combinationFilter>
+  <combinationFilter>(  ((ACT=~&quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;)||(ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; ))  &amp;&amp; ( (CRD_CL=~&quot;AD9V3&quot;  &amp;&amp; AD9V3==&quot;true&quot;) || (CRD_CL=~&quot;INNOVA2&quot;  &amp;&amp; INNOVA2==&quot;true&quot;) || ( CRD_CL=~&quot;AD9H&quot; &amp;&amp; (AD9H3==&quot;true&quot;|| AD9H7==&quot;true&quot;) &amp;&amp; !(ACT=~&quot;DDR&quot;) ) )  ) || (ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;AD9V3&quot;) </combinationFilter>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
@@ -331,7 +339,7 @@ export USERHOME=`pwd`
 export SNAP_ROOT=$USERHOME/snap
 
 # FAB supprimer boeboxes
-TESTBOXES=( ${boeBoxes[*]} ${mopBoxes[*]}) # init array of systems
+TESTBOXES=( ${austinBoxes[*]} ${mopBoxes[*]}) # init array of systems
 
 echo &quot;testboxes1=${TESTBOXES[@]}&quot;
 
@@ -550,6 +558,7 @@ DIR=${CRD}_oc_missing
 mkdir -p /data/Images/${DIR}
 
 # leave uncommented the following line if there is not hardware available at all for the selected card
+# FAB: Supprimer toute référence de carte en dure dans le script car ajouter une nouvelle carte devient alors hard
 case $CRD:${TEST_ON_HW} in
   AD9V3:* )    SAVE=&quot;/data/Images/AD9V3_oc_missing&quot;;     echo &quot;no test required, copy image to $SAVE&quot;;cp -rp $BINFILES $SAVE;exit 0;;
   AD9V3:* )    SAVE=&quot;/data/Images/AD9V3_oc_missing&quot;;     echo &quot;no test required, copy bitfile to $SAVE&quot;;cp -rp $BITFILES $SAVE;exit 0;;
