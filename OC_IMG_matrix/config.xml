@@ -552,7 +552,7 @@ then
   for loop in `seq 1 $maxloop`
   do  
     echo;echo &quot;****************************************************************************************&quot;
-    echo &quot;J: `date` Build Non_Cloud Image (make image) for $CRD, Loop ${loop}/$maxloop&quot;
+    echo &quot;J: `date` Build Non-Cloud Image (make image) for $CRD, Loop ${loop}/$maxloop&quot;
     #RC=0; bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot; &amp;&amp; break || RC=$?
 	RC=0; make image &amp;&amp; break || RC=$?
   done
@@ -560,11 +560,11 @@ then
   if [ $RC -eq 0 ] &amp;&amp; [ $loop -eq 1 ]; then 
     echo &quot;OK : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED at the first try (loop=$loop)&quot;
 
-  elsif [ $RC -eq 0 ] &amp;&amp; [ $loop -gt 1 ]
+  elif [ $RC -eq 0 ] &amp;&amp; [ $loop -gt 1 ]; then
     echo &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot;
     #mail -s &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot; castella
 
-  elsif [ $RC -ne 0 ]
+  elif [ $RC -ne 0 ]; then
     echo &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot;
     #mail -s &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot; castella
     exit 1
@@ -941,13 +941,7 @@ if [ 0 -ne $RC ]; then
 fi </command>
     </hudson.tasks.Shell>
   </builders>
-  <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.23">
-      <recipients>fabrice_moyen@fr.ibm.com</recipients>
-      <dontNotifyEveryUnstableBuild>true</dontNotifyEveryUnstableBuild>
-      <sendToIndividuals>false</sendToIndividuals>
-    </hudson.tasks.Mailer>
-  </publishers>
+  <publishers/>
   <buildWrappers>
     <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.37">
       <deleteDirs>false</deleteDirs>
