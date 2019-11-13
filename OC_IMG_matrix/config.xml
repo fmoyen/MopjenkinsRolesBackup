@@ -82,6 +82,13 @@ Main Issues : &#xd;
           <description>enable/disable the INNOVA2 card</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>CARDS_CHOICE</name>
+          <description>list of chosen OpenCAPI cards
+Example: AD9V3 AD9H3 ADH7 INNOVA2</description>
+          <defaultValue>AD9V3</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>TIMING_LABLIMIT_CHOICE</name>
           <description>Choose the TIMING_LABLIMIT parameter. If timing is higher than your choice when doing a make image, the run will failed.</description>
@@ -225,8 +232,18 @@ echo &quot;Build with Card=$CRD Action=$ACT Action_type=$ACTION_TYPE CLOUD_build
 BSKIP=0
 
 if [ &quot;${!ACTION_TYPE}&quot; == &quot;false&quot; ]; then BSKIP=1;fi # if ACTION_TYPE=&quot;HLS&quot;, ${!ACTION_TYPE} is identical to $HLS
-if [ &quot;${!CRD}&quot;         == &quot;false&quot; ]; then BSKIP=1;fi # if CRD=&quot;AD9V3&quot;, ${!CRD} is identical to $AD9V3
-if [ &quot;$ACT&quot;            == &quot;test&quot;  ]; then BSKIP=0;fi
+
+Found=0
+for c in &quot;${CARDS_CHOICE[@]}&quot;
+do
+  if [ &quot;$CRD&quot; == &quot;$c&quot; ]; then
+    Found=1
+  fi
+done
+if [ $Found -eq 0 ]; then BSKIP=1; fi # $CRD not in the list $CARDS_CHOICE of chosen cards ==&gt; not running $CRD case
+#if [ &quot;${!CRD}&quot;         == &quot;false&quot; ]; then BSKIP=1;fi # if CRD=&quot;AD9V3&quot;, ${!CRD} is identical to $AD9V3
+
+if [ &quot;$ACT&quot; == &quot;test&quot;  ]; then BSKIP=0;fi
 
 echo &quot;action_types (hdl,hls)=$ACTION_TYPE enabled_cards=$CRD BSKIP=$BSKIP&quot;
 
