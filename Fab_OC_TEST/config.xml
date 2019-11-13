@@ -4,10 +4,6 @@
   <description>Just Fabrice test</description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.4">
-      <projectUrl>https://github.com/OpenCAPI/oc-accel/</projectUrl>
-      <displayName></displayName>
-    </com.coravy.hudson.plugins.github.GithubProjectProperty>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
@@ -120,33 +116,7 @@ Example: AD9V3 AD9H3 ADH7 INNOVA2</description>
       <paramsToUseForLimit></paramsToUseForLimit>
     </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.9.3">
-    <configVersion>2</configVersion>
-    <userRemoteConfigs>
-      <hudson.plugins.git.UserRemoteConfig>
-        <url>git@github.com:OpenCAPI/oc-accel.git</url>
-      </hudson.plugins.git.UserRemoteConfig>
-    </userRemoteConfigs>
-    <branches>
-      <hudson.plugins.git.BranchSpec>
-        <name>${BRANCH}</name>
-      </hudson.plugins.git.BranchSpec>
-    </branches>
-    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
-    <submoduleCfg class="list"/>
-    <extensions>
-      <hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
-        <relativeTargetDir>oc-accel</relativeTargetDir>
-      </hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
-      <hudson.plugins.git.extensions.impl.SubmoduleOption>
-        <disableSubmodules>false</disableSubmodules>
-        <recursiveSubmodules>true</recursiveSubmodules>
-        <trackingSubmodules>false</trackingSubmodules>
-        <reference></reference>
-        <parentCredentials>false</parentCredentials>
-      </hudson.plugins.git.extensions.impl.SubmoduleOption>
-    </extensions>
-  </scm>
+  <scm class="hudson.scm.NullSCM"/>
   <assignedNode>X86_UBUNTU</assignedNode>
   <canRoam>false</canRoam>
   <disabled>false</disabled>
@@ -187,7 +157,7 @@ Example: AD9V3 AD9H3 ADH7 INNOVA2</description>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
-echo &quot;CRD=$CRD&quot;</command>
+echo &quot;RUNNING --&gt; CRD=$CRD_CL&quot;</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
