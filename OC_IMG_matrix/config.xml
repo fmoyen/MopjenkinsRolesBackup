@@ -652,6 +652,7 @@ case $CRD:${TEST_ON_HW} in
     echo &quot;  -&gt; No test required, copying $CRD image &amp; bitfile to $SaveDir&quot;
     cp -rp $BINFILES $SaveDir
     cp -rp $BITFILES $SaveDir
+    echo &quot;  -&gt; Copying $CRD image to jtagx86:$SaveDir&quot;
     ssh capimop@jtagx86 &quot;mkdir -p $SaveDir&quot;
     scp -rp $BINFILES capimop@jtagx86:$SaveDir
     exit 0
@@ -661,6 +662,7 @@ case $CRD:${TEST_ON_HW} in
     echo &quot;  -&gt; No test required, copying $CRD image &amp; bitfile to $SaveDir&quot;
     cp -rp $BINFILES $SaveDir
     cp -rp $BITFILES $SaveDir
+    echo &quot;  -&gt; Copying $CRD image to jtagx86:$SaveDir&quot;
     ssh capimop@jtagx86 &quot;mkdir -p $SaveDir&quot;
     scp -rp $BINFILES capimop@jtagx86:$SaveDir
     exit 0
@@ -670,6 +672,7 @@ case $CRD:${TEST_ON_HW} in
     echo &quot;  -&gt; No test required, copying $CRD image &amp; bitfile to $SaveDir&quot;
     cp -rp $BINFILES $SaveDir
     cp -rp $BITFILES $SaveDir
+    echo &quot;  -&gt; Copying $CRD image to jtagx86:$SaveDir&quot;
     ssh capimop@jtagx86 &quot;mkdir -p $SaveDir&quot;
     scp -rp $BINFILES capimop@jtagx86:$SaveDir
     exit 0
@@ -678,6 +681,7 @@ case $CRD:${TEST_ON_HW} in
   INNOVA2:* )
     echo &quot;  -&gt; No test required, copying $CRD image to $SaveDir&quot;
     cp -rp $BINFILES $SaveDir
+    echo &quot;  -&gt; Copying $CRD image to jtagx86:$SaveDir&quot;
     ssh capimop@jtagx86 &quot;mkdir -p $SaveDir&quot;
     scp -rp $BINFILES capimop@jtagx86:$SaveDir
     exit 0
@@ -686,6 +690,7 @@ case $CRD:${TEST_ON_HW} in
   *:false )
     echo &quot;  -&gt; No test required, copying image to $NoTestSaveDir&quot;
     cp -rp $BINFILES $NoTestSaveDir
+    echo &quot;  -&gt; Copying $CRD image to jtagx86:$SaveDir&quot;
     ssh capimop@jtagx86 &quot;mkdir -p $NoTestSaveDir&quot;
     scp -rp $BINFILES capimop@jtagx86:$NoTestSaveDir
     exit 0
