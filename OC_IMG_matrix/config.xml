@@ -734,20 +734,21 @@ echo &quot;J: --&gt; GIT_Commit:      ${GIT_COMMIT}&quot;
 #echo &quot;J: --&gt; MY_IMAGE:        ${MY_IMAGE}&quot;
 #echo &quot;J: --&gt; MY_CARD:         ${MY_CARD}&quot;
 
-echo &quot;***************************************************************************************&quot;
-RC=0;ssh dim1 ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 ||RC=$?
-if [ $RC == &quot;0&quot; ]; then echo &quot;dim1 ping ok&quot;; else echo &quot;dim1 not pingable&quot;;exit 100;fi
-
-echo &quot;testboxes2=${TESTBOXES[@]}&quot;
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Testing TestBoxes reachability&quot;
+echo &quot;  -&gt; testboxes now = ${TESTBOXES[@]}&quot;
 
 for box in &quot;${TESTBOXES[@]}&quot;;do
+  echo &quot;----------------------------------------------------&quot;
   if [[ ${mopBoxes[*]} =~ $box ]]
   then
     # $box is a Montpellier server
-    RC=0;ssh $box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
+    echo -e &quot;MOP   : $box -&gt; \c&quot;
+    RC=0;ssh capimop$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
   else
-    # $Box is a Boeblingen server, accessible through dim1 system
-    RC=0;ssh dim1 ping $box -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
+    # $box is an Austin server
+    echo -e &quot;AUSTIN: $box -&gt; \c&quot;
+    RC=0;ssh capimop@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
   fi
 
 if [ &quot;$RC&quot; == &quot;0&quot; ]; then : 
@@ -755,24 +756,33 @@ if [ &quot;$RC&quot; == &quot;0&quot; ]; then :
   else
     for i in &quot;${TESTBOXES[@]}&quot;; do [[ $i != $box ]] &amp;&amp; new+=($i);done   # generate new test array without unreachable box
     unset TESTBOXES;TESTBOXES=(&quot;${new[@]}&quot;);unset new                   # reassign to original array name
-    echo &quot;$box not pingable, remove from testing, remaining=${TESTBOXES[@]}&quot;
-    if [[ &quot;${TESTBOXES[@]}&quot; == &quot;&quot; ]];then echo &quot;no test machines avail anymore&quot;;exit 1;fi
+    echo &quot;$box not reachable =&gt; removed from testing&quot;
+    echo &quot;testboxes remaining = ${TESTBOXES[@]}&quot;
+    if [[ &quot;${TESTBOXES[@]}&quot; == &quot;&quot; ]];then echo &quot;no test machines available anymore&quot;;exit 1;fi
   fi
 done # for box
 
-echo &quot;testboxes3=${TESTBOXES[@]}&quot;
+echo;echo &quot;----------------------------------------------------&quot;
+echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
 
-function finish {  # define function to unlock in case of error, executed after registering with &quot;trap finish EXIT&quot;
-    echo &quot;RC=$?, now unlock ${LOCK} and end&quot;
-	SSH_RC=0;ssh fpga@$box rmdir ${LOCK} || SSH_RC=$?
-	echo &quot;`date` box=$box $LOCK unlock RC=$SSH_RC&quot;
-}
-echo &quot;testboxes4=${TESTBOXES[@]}&quot;
-maxloop=60; echo &quot;Wait (max $maxloop min) for free card=$CRD in ${TESTBOXES[@]}, Iam `whoami`(whoami answer)&quot;
+function finish # define function to unlock in case of error, executed after registering with &quot;trap finish EXIT&quot;
+  {
+  echo &quot;RC=$?, now unlock ${LOCK} and end&quot;
+  SSH_RC=0;ssh fpga@$box rmdir ${LOCK} || SSH_RC=$?
+  echo &quot;`date` box=$box $LOCK unlock RC=$SSH_RC&quot;
+  }
+
+
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;Wait (max $maxloop min) for free card=$CRD in ${TESTBOXES[@]}, I am `whoami`(whoami answer)&quot;
+
+maxloop=60
+
+# Fab: J&apos;en suis là
+
 for loop in `seq 1 $maxloop`;do
   for box in &quot;${TESTBOXES[@]}&quot;;do
-    nusers=`ssh fpga@${box} who|grep -v root|grep -v fpga|wc -l`
-#   echo &quot;remote homespace content:&quot;; ssh $box ls -al /home/fpga
+    nusers=`ssh fpga@${box} who|grep -v root|grep -v capimop|wc -l`
     find_card=snap_find_card.${GIT_COMMIT}.`date +%H%M%S`.`basename $BINFILES`
     
 # Potential issue to be solved :
