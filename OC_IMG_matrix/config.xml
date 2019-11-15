@@ -84,7 +84,7 @@ Main Issues : &#xd;
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>LIST_TEST_CARDS</name>
-          <description>List of the cards available for hardware testing</description>
+          <description>List of the cards available for HW testing</description>
           <defaultValue>AD9V3</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
@@ -647,9 +647,6 @@ case ${TEST_ON_HW} in
     echo;echo &quot;****************************************************************************************&quot;
     echo &quot;J: Checking if we can test the generated binaries on POWER Hardware (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot;
 
-    SaveDir=/data/Images/${CRD}_oc_missing
-    mkdir -p $SaveDir
-
     TestCardAvailable=0
     for i in ${LIST_TEST_CARDS[@]}
     do
@@ -658,10 +655,13 @@ case ${TEST_ON_HW} in
 
     if [ $TestCardAvailable -eq 0 ]
     then
+      SaveDir=/data/Images/${CRD}_oc_missing
       echo &quot;  -&gt; No test CARD $CRD available, copying $CRD bin-file(s) &amp; bit-file(s) images to $SaveDir&quot;
+      mkdir -p $SaveDir
       cp -rp $BINFILES $SaveDir
-      if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; fi
-      echo &quot;  -&gt; Copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
+      echo $BINFILES
+      if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; echo $BITFILES; fi
+      echo;echo &quot;  -&gt; Copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
       ssh capimop@jtagx86 &quot;mkdir -p $SaveDir&quot;
       scp -rp $BINFILES capimop@jtagx86:$SaveDir
       exit 0
@@ -671,15 +671,16 @@ case ${TEST_ON_HW} in
   false )
     echo;echo &quot;****************************************************************************************&quot;
     echo &quot;J: No test on POWER Hardware requested (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot; 
-    NoTestSaveDir=/data/Images/no_test_required
-    mkdir -p $NoTestSaveDir
+    SaveDir=/data/Images/no_test_required
+    mkdir -p $SaveDir
 
-    echo &quot;  -&gt; No test required, copying image to $NoTestSaveDir&quot;
-    cp -rp $BINFILES $NoTestSaveDir
-    if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $NoTestSaveDir; fi
-    echo &quot;  -&gt; Copying $CRD image to jtagx86:$NoTestSaveDir&quot;
-    ssh capimop@jtagx86 &quot;mkdir -p $NoTestSaveDir&quot;
-    scp -rp $BINFILES capimop@jtagx86:$NoTestSaveDir
+    echo &quot;  -&gt; No test required, copying image to $SaveDir&quot;
+    cp -rp $BINFILES $SaveDir
+    echo $BINFILES
+    if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; echo $BITFILES; fi
+    echo;echo &quot;  -&gt; Copying $CRD image to jtagx86:$SaveDir&quot;
+    ssh capimop@jtagx86 &quot;mkdir -p $SaveDir&quot;
+    scp -rp $BINFILES capimop@jtagx86:$SaveDir
     exit 0
   ;;
 
@@ -688,11 +689,27 @@ esac
 
 #==============================================================================================
 # FAB: POWER hardware test is not yet ready, and below end of script is not yet ready too
+# =&gt; Copying and exiting !
 
 echo;echo &quot;****************************************************************************************&quot;
 echo &quot;J: Testing the generated binaries on POWER Hardware (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot;
-echo &quot;J: NOT YET READY ! =&gt; Exiting !&quot;
+SaveDir=/data/Images/${CRD}_oc_for_test
+echo &quot;  -&gt; Hardware test for CARD $CRD not yet working, copying $CRD bin-file(s) &amp; bit-file(s) images to $SaveDir&quot;
+mkdir -p $SaveDir
+cp -rp $BINFILES $SaveDir
+echo $BINFILES
+if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; echo $BITFILES; fi
+echo;echo &quot;  -&gt; Copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
+ssh capimop@jtagx86 &quot;mkdir -p $SaveDir&quot;
+scp -rp $BINFILES capimop@jtagx86:$SaveDir
+
+echo;echo &quot;J: HW TEST NOT YET READY TO WORK ! =&gt; Exiting !&quot;
 exit 0
+
+#==============================================================================================
+#==============================================================================================
+#==============================================================================================
+
 
 #==============================================================================================
 # Testing the generated binaries on POWER Hardware
