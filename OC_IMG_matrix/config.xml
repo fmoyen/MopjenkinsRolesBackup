@@ -46,13 +46,6 @@ Main Issues : &#xd;
           </choices>
         </hudson.model.ChoiceParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
-          <name>TEST_ON_HW</name>
-          <description>Enable/disable testing on HW
-(Disabled by default as oc-flash + oc-reset does&apos;t work yet =&gt; need to reboot to get the code !)
-</description>
-          <defaultValue>false</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
           <name>HDL</name>
           <description>enable/disable the HDL examples</description>
           <defaultValue>false</defaultValue>
@@ -82,6 +75,19 @@ Main Issues : &#xd;
           <description>enable/disable the INNOVA2 card</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>TEST_ON_HW</name>
+          <description>Enable/disable testing on HW
+(Disabled by default as oc-flash + oc-reset does&apos;t work yet =&gt; need to reboot to get the code !)
+</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>LIST_TEST_CARDS</name>
+          <description>List of the cards available for hardware testing</description>
+          <defaultValue>AD9V3</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>TIMING_LABLIMIT_CHOICE</name>
           <description>Choose the TIMING_LABLIMIT parameter. If timing is higher than your choice when doing a make image, the run will failed.</description>
@@ -633,64 +639,45 @@ done
 
 
 #==============================================================================================
-# Testing on POWER Hardware generated binaries
+# Checking if we can test the generated binaries on POWER Hardware
 
-echo;echo &quot;****************************************************************************************&quot;
-echo &quot;J: Testing on POWER Hardware generated binaries (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot;
+case ${TEST_ON_HW} in
 
-SaveDir=/data/Images/${CRD}_oc_missing
-mkdir -p $SaveDir
-NoTestSaveDir=/data/Images/no_test_required
-mkdir -p $NoTestSaveDir
+  true )
+    echo;echo &quot;****************************************************************************************&quot;
+    echo &quot;J: Checking if we can test the generated binaries on POWER Hardware (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot;
 
-# leave uncommented the following line if there is not hardware available at all for the selected card
-# FAB: Supprimer toute référence de carte en dure dans le script car ajouter une nouvelle carte devient alors hard
+    SaveDir=/data/Images/${CRD}_oc_missing
+    mkdir -p $SaveDir
 
-case $CRD:${TEST_ON_HW} in
+    TestCardAvailable=0
+    for i in ${LIST_TEST_CARDS[@]}
+    do
+      if [ &quot;$CRD&quot; == &quot;$i&quot; ];then TestCardAvailable=1;fi
+    done
 
-  AD9V3:* )    
-    echo &quot;  -&gt; No test required, copying $CRD image &amp; bitfile to $SaveDir&quot;
-    cp -rp $BINFILES $SaveDir
-    cp -rp $BITFILES $SaveDir
-    echo &quot;  -&gt; Copying $CRD image to jtagx86:$SaveDir&quot;
-    ssh capimop@jtagx86 &quot;mkdir -p $SaveDir&quot;
-    scp -rp $BINFILES capimop@jtagx86:$SaveDir
-    exit 0
+    if [ $TestCardAvailable -eq 0 ]
+    then
+      echo &quot;  -&gt; No test CARD $CRD available, copying $CRD bin-file(s) &amp; bit-file(s) images to $SaveDir&quot;
+      cp -rp $BINFILES $SaveDir
+      if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; fi
+      echo &quot;  -&gt; Copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
+      ssh capimop@jtagx86 &quot;mkdir -p $SaveDir&quot;
+      scp -rp $BINFILES capimop@jtagx86:$SaveDir
+      exit 0
+    fi
   ;;
   
-  AD9H3:* )    
-    echo &quot;  -&gt; No test required, copying $CRD image &amp; bitfile to $SaveDir&quot;
-    cp -rp $BINFILES $SaveDir
-    cp -rp $BITFILES $SaveDir
-    echo &quot;  -&gt; Copying $CRD image to jtagx86:$SaveDir&quot;
-    ssh capimop@jtagx86 &quot;mkdir -p $SaveDir&quot;
-    scp -rp $BINFILES capimop@jtagx86:$SaveDir
-    exit 0
-  ;;
+  false )
+    echo;echo &quot;****************************************************************************************&quot;
+    echo &quot;J: No test on POWER Hardware requested (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot; 
+    NoTestSaveDir=/data/Images/no_test_required
+    mkdir -p $NoTestSaveDir
 
-  AD9H7:* )
-    echo &quot;  -&gt; No test required, copying $CRD image &amp; bitfile to $SaveDir&quot;
-    cp -rp $BINFILES $SaveDir
-    cp -rp $BITFILES $SaveDir
-    echo &quot;  -&gt; Copying $CRD image to jtagx86:$SaveDir&quot;
-    ssh capimop@jtagx86 &quot;mkdir -p $SaveDir&quot;
-    scp -rp $BINFILES capimop@jtagx86:$SaveDir
-    exit 0
-  ;;
-
-  INNOVA2:* )
-    echo &quot;  -&gt; No test required, copying $CRD image to $SaveDir&quot;
-    cp -rp $BINFILES $SaveDir
-    echo &quot;  -&gt; Copying $CRD image to jtagx86:$SaveDir&quot;
-    ssh capimop@jtagx86 &quot;mkdir -p $SaveDir&quot;
-    scp -rp $BINFILES capimop@jtagx86:$SaveDir
-    exit 0
-  ;;
-  
-  *:false )
     echo &quot;  -&gt; No test required, copying image to $NoTestSaveDir&quot;
     cp -rp $BINFILES $NoTestSaveDir
-    echo &quot;  -&gt; Copying $CRD image to jtagx86:$SaveDir&quot;
+    if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $NoTestSaveDir; fi
+    echo &quot;  -&gt; Copying $CRD image to jtagx86:$NoTestSaveDir&quot;
     ssh capimop@jtagx86 &quot;mkdir -p $NoTestSaveDir&quot;
     scp -rp $BINFILES capimop@jtagx86:$NoTestSaveDir
     exit 0
@@ -698,14 +685,22 @@ case $CRD:${TEST_ON_HW} in
 
 esac
 
-# FAB: exit 0 before so END OF JOB !
-######################################################################################################################################
-######################################################################################################################################
 
-#
+#==============================================================================================
+# FAB: POWER hardware test is not yet ready, and below end of script is not yet ready too
+
+echo;echo &quot;****************************************************************************************&quot;
+echo &quot;J: Testing the generated binaries on POWER Hardware (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot;
+echo &quot;J: NOT YET READY ! =&gt; Exiting !&quot;
+exit 0
+
+#==============================================================================================
+# Testing the generated binaries on POWER Hardware
+# (if $TEST_ON_HW==true and $CRD into $LIST_TEST_CARDS[*])
+
 # Set unique target directory such that parallel builds do not disturb each other.
 # Well, we might to clean up those from time to time ...
-#
+
 TARGET_DIR=&quot;${JOB_NAME}-${BUILD_NUMBER}-${GIT_BRANCH}&quot;
 export TARGET_DIR=`echo $TARGET_DIR | sed -e &apos;s/[=,\/]/-/g&apos;`
 echo &quot;J: TARGET_DIR=${TARGET_DIR}&quot;
