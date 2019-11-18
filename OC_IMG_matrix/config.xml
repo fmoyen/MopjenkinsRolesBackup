@@ -838,8 +838,6 @@ echo &quot;Wait (max $maxloop min) for free card=$CRD in ${TESTBOXES[@]}, I am `
 
 maxloop=60
 
-# Fab: J&apos;en suis là
-
 FindCardTool=&quot;oc-accell_find_card&quot;
 
 for loop in `seq 1 $maxloop`;do
@@ -871,9 +869,10 @@ for loop in `seq 1 $maxloop`;do
       echo &quot;    -&gt; Delete $find_card to $box FAILED, continuing anyway...&quot;;
     fi
 
-    hours=`date +%H`
 	echo;echo &quot;J: `date` loop=$loop box=$box nusers=$nusers card=$CRD $FindCardTool found=$found&quot;
     echo
+
+    hours=`date +%H`
 
     case $found:$nusers in
 
@@ -901,29 +900,35 @@ for loop in `seq 1 $maxloop`;do
 		done
       ;;
       
+      # found something else than 1,2,3 or 4 cards, meaning found return code is wrong
       *:0)      
         echo &quot;  --&gt; unknown found_RC=$found from $FindCardTool=$cards. EXITING...&quot;
         exit 100
       ;;
       
+      # card avail but user(s) connected...
       *)      
       	if (( 9&lt;=hours &amp;&amp; hours&lt;=19 ));then
-      	  echo &quot;J: hours=$hours, nusers=$nusers, try other box&quot;
-          if [ $box == ${TESTBOXES[*]:(-1)} ];then echo &quot;wait...&quot;;sleep 60;fi
+      	  echo &quot;  --&gt; hours=$hours, nusers=$nusers, try other box&quot;
+          if [ $box == ${TESTBOXES[*]:(-1)} ];then
+            echo &quot;  --&gt; $box is the last system to test; Waiting for 60s...&quot;
+            sleep 60
+          fi
           continue
+
         else
-          ssh fpga@${box} who|grep -v root|grep -v fpga
-      	  echo &quot;J: hours=$hours, nusers=$nusers, now lock &amp; notify &amp; test&quot;
+          ssh capimop@${box} who|grep -v root|grep -v capimop
+      	  echo &quot;  --&gt; hours=$hours, nusers=$nusers, now lock &amp; notify &amp; test&quot;
 		  for cardid in $cards;do
-      	    LOCK=&quot;jenkins_lock_card&quot;$cardid
-		    RC=0;ssh $box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
+      	    LOCK=&quot;jenkins_lock_card$cardid&quot;
+		    RC=0;ssh capimop@$box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
 		    if [ $RC == &quot;0&quot; ]; then :
-	  	      echo &quot;J: `date` box=$box $LOCK lock RC=$RC&quot;; 
+	  	      echo &quot;  --&gt; `date` box=$box $LOCK lock RC=$RC&quot;; 
 	   	      trap finish EXIT  # register finish/unlock function, after lock is set
-              ssh $box wall &quot;WARNING: JENKINS TEST on FPGA CARD=$CRD ID=$cards&quot;
+              ssh capimop$box wall &quot;WARNING: JENKINS OPENCAPI TEST on FPGA CARD=$CRD ID=$cards&quot;
 		      break 3
 			else 
-			  echo &quot;J: box=$box $LOCK already locked, try next card&quot;
+			  echo &quot;  --&gt; box=$box $LOCK already locked, try next card&quot;
 			fi    
           done
         fi
@@ -935,7 +940,9 @@ for loop in `seq 1 $maxloop`;do
   
 done #for loop
 
-if [ &quot;$loop&quot; == &quot;$maxloop&quot; ];then
+# Fab: J&apos;en suis là
+
+if [ $loop -eq $maxloop ];then
   DIR=${CRD}_oc_card_not_avail
   mkdir -p /data/Images/${DIR}
   SAVE=&quot;/data/Images/${CRD}_card_not_avail&quot;
