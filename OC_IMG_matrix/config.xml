@@ -381,8 +381,9 @@ export USERHOME=`pwd`
 export SNAP_ROOT=$USERHOME/oc-accel
 
 TESTBOXES=( ${austinBoxes[*]} ${mopBoxes[*]}) # init array of systems
-
 echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
+
+MailList= ( fabrice_moyen@fr.ibm.com fabricepb@free.fr )
 
 #echo;echo &quot;********************************************************************************&quot;
 #echo &quot;J: LSF SETUP ...&quot;
@@ -407,6 +408,32 @@ echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
 #export LSF_ENVDIR=/home/lsfbb/prod/conf
 #LSF=&apos;-P zsort -M 2 -C 2000 -I -n 4 -R type=X86_64  -R osver=rh7 -R span[hosts=1]&apos;  # Project, GB_mem, KB_core, #_processors, type of processor
 
+
+#==============================================================================================
+# Functions
+
+# Function for sending alerting emails
+# Ex: SendAnEmail -s &quot;This is the subject/alert&quot; -d firstDest@gmail.com -d SecondDest@free.fr
+function SendAnEmail
+{
+  local OPTIND opt DestinationList
+  while getopts &quot;s:d:&quot; opt
+  do 
+    case $opt in
+      s)
+        Subject=&quot;$OPTARG&quot;
+      ;;
+      d)
+        DestinationList+=(&quot;$OPTARG&quot;)
+      ;;
+    esac
+  done
+  
+  for i in ${DestinationList[@]}
+  do
+    echo &quot;&quot; | mail -s &quot;$Subject&quot; $i
+  done
+}
 
 #==============================================================================================
 # OpenCAPI Simulation Engine (ocse) setup
@@ -568,11 +595,11 @@ then
 
   elif [ $RC -eq 0 ] &amp;&amp; [ $loop -gt 1 ]; then
     echo &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot;
-    #mail -s &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot; castella
+    SendAnEmail -s &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot; -d fabrice_moyen@fr.ibm.com
 
   elif [ $RC -ne 0 ]; then
     echo &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot;
-    #mail -s &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot; castella
+    SendAnEmail -s &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot; -d fabrice_moyen@fr.ibm.com
     exit 1
   fi
 
