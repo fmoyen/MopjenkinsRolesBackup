@@ -25,7 +25,7 @@ Main Issues : &#xd;
         <hudson.model.StringParameterDefinition>
           <name>BRANCH</name>
           <description>Choose the branch for https://github.com/OpenCAPI/oc-accel you want to test.</description>
-          <defaultValue>jenkins_mods2</defaultValue>
+          <defaultValue>jenkins_mods</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
