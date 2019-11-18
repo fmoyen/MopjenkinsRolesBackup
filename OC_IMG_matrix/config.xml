@@ -840,10 +840,17 @@ maxloop=60
 
 # Fab: J&apos;en suis là
 
+    FindCardTool=&quot;oc-accell_find_card&quot;
+
 for loop in `seq 1 $maxloop`;do
   for box in &quot;${TESTBOXES[@]}&quot;;do
     nusers=`ssh fpga@${box} who|grep -v root|grep -v capimop|wc -l`
-    find_card=snap_find_card.${GIT_COMMIT}.`date +%H%M%S`.`basename $BINFILES`
+    find_card=$FindCardTool.${GIT_COMMIT}.`date +%H%M%S`.`basename $BINFILES`
+    echo  &quot;J: copying $find_card to $box:/home/capimop&quot;
+    RC=0;scp ./software/tools/$FindCardTool capimop@$box:/home/capimop/$find_card ; RC=$?
+    if [ $RC -gt 0 ];then
+      echo &quot;copy $find_card to $box result : RC=$RC, continue anyway&quot;;
+    fi
     
 # Potential issue to be solved :
 #  for some reason Joerg was coping the snap_find_card, for the moment, we rely on the local P9 server one (I did ln -s to the local oc-snap dir) 
@@ -856,6 +863,11 @@ for loop in `seq 1 $maxloop`;do
 #      [ &quot;$RC&quot; -gt &quot;0&quot; ];then echo &quot;copy $find_card to $box result : RC=$RC, continue anyway&quot;;
 #    fi
 # end of older manner
+
+    found=0;cards=`ssh -ttq capimop@${box} /home/capimop/$find_card -A ${CRD}`||found=$?
+    SSH_RC=0;ssh -ttq capimop@${box} rm /home/capimop/$find_card || SSH_RC=$?
+    echo &quot;J: `date` removed $find_card ./from $box RC=$SSH_RC&quot;
+
 
     # Checking with local linked (to ~fpga/oc-snap/software/tools/) snap_find_card if we have a $CRD available
      found=0;cards=`ssh -ttq fpga@${box} /home/fpga/snap_find_card -A OC-${CRD}`||found=$?
