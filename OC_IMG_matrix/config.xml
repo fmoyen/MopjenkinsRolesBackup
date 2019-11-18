@@ -840,63 +840,72 @@ maxloop=60
 
 # Fab: J&apos;en suis là
 
-    FindCardTool=&quot;oc-accell_find_card&quot;
+FindCardTool=&quot;oc-accell_find_card&quot;
 
 for loop in `seq 1 $maxloop`;do
+
+  echo;echo &quot;#################################################&quot;
+  echo &quot;J: LOOP $loop/$maxloop&quot;
+
   for box in &quot;${TESTBOXES[@]}&quot;;do
-    nusers=`ssh fpga@${box} who|grep -v root|grep -v capimop|wc -l`
+
+    echo;echo &quot;-------------------------------------------------&quot;
+    echo &quot;J: $box&quot;
+
+    nusers=`ssh capimop@${box} who|grep -v root|grep -v capimop|wc -l`
+
     find_card=$FindCardTool.${GIT_COMMIT}.`date +%H%M%S`.`basename $BINFILES`
-    echo  &quot;J: copying $find_card to $box:/home/capimop&quot;
+
+    echo  &quot;  --&gt; Copying $find_card to $box:/home/capimop&quot;
     RC=0;scp ./software/tools/$FindCardTool capimop@$box:/home/capimop/$find_card ; RC=$?
     if [ $RC -gt 0 ];then
-      echo &quot;copy $find_card to $box result : RC=$RC, continue anyway&quot;;
+      echo &quot;     -&gt; copy $find_card to $box FAILED, continuing anyway...&quot;;
     fi
     
-# Potential issue to be solved :
-#  for some reason Joerg was coping the snap_find_card, for the moment, we rely on the local P9 server one (I did ln -s to the local oc-snap dir) 
-#  if it has been updated, then we miss the update though !!!
-#
-# older CAPI2 manner :
-#    echo  &quot;J: copy $find_card to $box:/home/fpga&quot;;  # watch out &quot;single_test&quot; need to have this cp done before!
-#    RC=0;scp ./software/tools/snap_find_card fpga@$box:/home/fpga/$find_card ; RC=$?
-#    if
-#      [ &quot;$RC&quot; -gt &quot;0&quot; ];then echo &quot;copy $find_card to $box result : RC=$RC, continue anyway&quot;;
-#    fi
-# end of older manner
+    echo  &quot;  --&gt; Looking for OC-$CRD inside $box&quot;
+    found=0;cards=`ssh -ttq capimop@${box} /home/capimop/$find_card -A OC-${CRD}`||found=$?
 
-    found=0;cards=`ssh -ttq capimop@${box} /home/capimop/$find_card -A ${CRD}`||found=$?
+    echo &quot;  --&gt; Removing $find_card from $box RC=$SSH_RC&quot;
     SSH_RC=0;ssh -ttq capimop@${box} rm /home/capimop/$find_card || SSH_RC=$?
-    echo &quot;J: `date` removed $find_card ./from $box RC=$SSH_RC&quot;
+    if [ $SSH_RC -gt 0 ];then
+      echo &quot;    -&gt; Delete $find_card to $box FAILED, continuing anyway...&quot;;
+    fi
 
-
-    # Checking with local linked (to ~fpga/oc-snap/software/tools/) snap_find_card if we have a $CRD available
-     found=0;cards=`ssh -ttq fpga@${box} /home/fpga/snap_find_card -A OC-${CRD}`||found=$?
-    #found=0;cards=`ssh -ttq fpga@${box} /home/fpga/$find_card -A ${CRD}`||found=$?
-    #SSH_RC=0;ssh -ttq fpga@${box} rm /home/fpga/$find_card || SSH_RC=$?
-    #echo &quot;J: `date` removed $find_card ./from $box RC=$SSH_RC&quot;
     hours=`date +%H`
-	echo &quot;J: `date` loop=$loop box=$box nusers=$nusers card=$CRD snap_find_card found=$found&quot;
+	echo;echo &quot;J: `date` loop=$loop box=$box nusers=$nusers card=$CRD $FindCardTool found=$found&quot;
+    echo
+
     case $found:$nusers in
-      0:*)      
-#       echo &quot;no card avail, try other box&quot;;
-        if [ $box == ${TESTBOXES[*]:(-1)} ];then echo &quot;wait...&quot;;sleep 60;fi
-        continue;;
-      [1234]:0) 
-#	    echo &quot;card avail, no user, now lock &amp; test&quot;
+
+      # no card avail, try other box
+      0:*)
+        if [ $box == ${TESTBOXES[*]:(-1)} ];then
+          echo &quot;  --&gt; $box is the last system to test; Waiting for 60s...&quot;
+          sleep 60
+        fi
+        continue
+      ;;
+        
+      # card avail, no user, now lock &amp; test
+      [1234]:0)
 		for cardid in $cards;do
-      	  LOCK=&quot;jenkins_lock_card&quot;$cardid
-		  RC=0;ssh $box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
+      	  LOCK=&quot;jenkins_lock_card$cardid&quot;
+		  RC=0;ssh capimop@$box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
 		  if [ $RC == &quot;0&quot; ]; then :
-		    echo &quot;J: `date` box=$box $LOCK lock RC=$RC&quot;; 
+		    echo &quot;  --&gt; `date` box=$box $LOCK lock RC=$RC&quot;; 
 		    trap finish EXIT  # register finish/unlock function, after lock is set
 		    break 3
 	      else 
-		    echo &quot;J: box=$box $LOCK already locked, try next card&quot;
+		    echo &quot;  --&gt; box=$box $LOCK already locked, try next card&quot;
 		  fi    
-		done;;
+		done
+      ;;
+      
       *:0)      
-        echo &quot;J: unknown found_RC=$found from snap_find_card=$cards&quot;; 
-        exit 100;;
+        echo &quot;  --&gt; unknown found_RC=$found from $FindCardTool=$cards. EXITING...&quot;
+        exit 100
+      ;;
+      
       *)      
       	if (( 9&lt;=hours &amp;&amp; hours&lt;=19 ));then
       	  echo &quot;J: hours=$hours, nusers=$nusers, try other box&quot;
@@ -917,10 +926,15 @@ for loop in `seq 1 $maxloop`;do
 			  echo &quot;J: box=$box $LOCK already locked, try next card&quot;
 			fi    
           done
-        fi;;
+        fi
+      ;;
+      
     esac
+    
   done # for box
+  
 done #for loop
+
 if [ &quot;$loop&quot; == &quot;$maxloop&quot; ];then
   DIR=${CRD}_oc_card_not_avail
   mkdir -p /data/Images/${DIR}
