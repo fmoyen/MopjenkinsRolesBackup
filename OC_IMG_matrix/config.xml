@@ -223,6 +223,36 @@ CL=$(echo $CRD_CL| cut -d&apos;_&apos; -f 2)     # chars behind first &apos;_&ap
 
 echo &quot;Build with Card=$CRD Action=$ACT Action_type=$ACTION_TYPE CLOUD_build=$CL branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX test_on_hw=$TEST_ON_HW&quot;
 
+EmailDestinationList=( fabrice_moyen@fr.ibm.com fabricepb@free.fr )
+
+
+#==============================================================================================
+# Functions
+
+# Function for sending alerting emails
+# Example 1: SendAnEmail -s &quot;This is the subject/alert&quot; -d firstDest@gmail.com -d SecondDest@free.fr
+# Example 2: SendAnEmail -s &quot;This is the subject/alert&quot; -d &quot;${EmailDestinationList[*]}&quot;
+function SendAnEmail
+{
+  local OPTIND opt DestList
+  while getopts &quot;s:d:&quot; opt
+  do 
+    case $opt in
+      s)
+        Subject=&quot;$OPTARG&quot;
+      ;;
+      d)
+        DestList+=(&quot;$OPTARG&quot;)
+      ;;
+    esac
+  done
+  
+  for i in ${DestList[@]}
+  do
+    echo &quot;&quot; | mail -s &quot;$Subject&quot; $i
+  done
+}
+
 
 #==============================================================================================
 # Do not run non-desired cases (action types, actions, cards)
@@ -332,6 +362,8 @@ echo &quot;J: Forwarding parameters to next script&quot;
 echo &quot;SKIP=$SKIP&quot; &gt; export_props.properties
 echo &quot;CRD=$CRD&quot; &gt;&gt; export_props.properties
 echo &quot;CL=$CL&quot; &gt;&gt; export_props.properties
+echo &quot;EmailDestinationList=( ${EmailDestinationList[*]} )&quot; &gt;&gt; export_props.properties
+
 echo &quot;properties forwarded to next shell:&quot;
 cat export_props.properties
 echo &quot;***********************************************************&quot;
@@ -383,7 +415,6 @@ export SNAP_ROOT=$USERHOME/oc-accel
 TESTBOXES=( ${austinBoxes[*]} ${mopBoxes[*]}) # init array of systems
 echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
 
-MailList= ( fabrice_moyen@fr.ibm.com fabricepb@free.fr )
 
 #echo;echo &quot;********************************************************************************&quot;
 #echo &quot;J: LSF SETUP ...&quot;
@@ -413,10 +444,11 @@ MailList= ( fabrice_moyen@fr.ibm.com fabricepb@free.fr )
 # Functions
 
 # Function for sending alerting emails
-# Ex: SendAnEmail -s &quot;This is the subject/alert&quot; -d firstDest@gmail.com -d SecondDest@free.fr
+# Example 1: SendAnEmail -s &quot;This is the subject/alert&quot; -d firstDest@gmail.com -d SecondDest@free.fr
+# Example 2: SendAnEmail -s &quot;This is the subject/alert&quot; -d &quot;${EmailDestinationList[*]}&quot;
 function SendAnEmail
 {
-  local OPTIND opt DestinationList
+  local OPTIND opt DestList
   while getopts &quot;s:d:&quot; opt
   do 
     case $opt in
@@ -424,12 +456,12 @@ function SendAnEmail
         Subject=&quot;$OPTARG&quot;
       ;;
       d)
-        DestinationList+=(&quot;$OPTARG&quot;)
+        DestList+=(&quot;$OPTARG&quot;)
       ;;
     esac
   done
   
-  for i in ${DestinationList[@]}
+  for i in ${DestList[@]}
   do
     echo &quot;&quot; | mail -s &quot;$Subject&quot; $i
   done
@@ -595,11 +627,13 @@ then
 
   elif [ $RC -eq 0 ] &amp;&amp; [ $loop -gt 1 ]; then
     echo &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot;
-    SendAnEmail -s &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot; -d fabrice_moyen@fr.ibm.com
+    echo &quot;  -&gt; Sending an email to ${EmailDestinationList[*]}&quot;
+    SendAnEmail -s &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot; -d &quot;${EmailDestinationList[*]}&quot;
 
   elif [ $RC -ne 0 ]; then
     echo &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot;
-    SendAnEmail -s &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot; -d fabrice_moyen@fr.ibm.com
+    echo &quot;  -&gt; Sending an email to ${EmailDestinationList[*]}&quot;    
+    SendAnEmail -s &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot; -d &quot;${EmailDestinationList[*]}&quot;
     exit 1
   fi
 
