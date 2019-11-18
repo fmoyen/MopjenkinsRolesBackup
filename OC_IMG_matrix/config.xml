@@ -413,7 +413,7 @@ export SNAP_ROOT=$USERHOME/oc-accel
 
 TESTBOXES=( ${austinBoxes[*]} ${mopBoxes[*]}) # init array of systems
 echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
-
+RootSaveDir=/data/Images
 
 #echo;echo &quot;********************************************************************************&quot;
 #echo &quot;J: LSF SETUP ...&quot;
@@ -715,7 +715,7 @@ case ${TEST_ON_HW} in
 
     if [ $TestCardAvailable -eq 0 ]
     then
-      SaveDir=/data/Images/${CRD}_oc_missing
+      SaveDir=$RootSaveDir/${CRD}_oc_missing
       echo &quot;  -&gt; No test CARD $CRD available, copying $CRD bin-file(s) &amp; bit-file(s) images to $SaveDir&quot;
       mkdir -p $SaveDir
       cp -rp $BINFILES $SaveDir
@@ -731,7 +731,7 @@ case ${TEST_ON_HW} in
   false )
     echo;echo &quot;****************************************************************************************&quot;
     echo &quot;J: No test on POWER Hardware requested (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot; 
-    SaveDir=/data/Images/no_test_required
+    SaveDir=$RootSaveDir/no_test_required
     mkdir -p $SaveDir
 
     echo &quot;  -&gt; No test required, copying image to $SaveDir&quot;
@@ -753,7 +753,7 @@ esac
 
 echo;echo &quot;****************************************************************************************&quot;
 echo &quot;J: Testing the generated binaries on POWER Hardware (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot;
-SaveDir=/data/Images/${CRD}_oc_for_test
+SaveDir=$RootSaveDir/${CRD}_oc_for_test
 echo &quot;  -&gt; Hardware test for CARD $CRD not yet working, copying $CRD bin-file(s) &amp; bit-file(s) images to $SaveDir&quot;
 mkdir -p $SaveDir
 cp -rp $BINFILES $SaveDir
@@ -944,8 +944,8 @@ done #for loop
 
 if [ $loop -eq $maxloop ];then
   DIR=${CRD}_oc_card_not_avail
-  mkdir -p /data/Images/${DIR}
-  SAVE=&quot;/data/Images/${CRD}_card_not_avail&quot;
+  mkdir -p $RootSaveDir/${DIR}
+  SAVE=&quot;$RootSaveDir/${CRD}_card_not_avail&quot;
   echo &quot;no card avail, copy image to $SAVE&quot;
   cp -rp $BINFILES $SAVE            
   exit 100
@@ -983,7 +983,7 @@ RC=0; ssh fpga@${box} &quot;git clone git@github.ibm.com:OC-Enablement/oc-snap.g
 #Fab #fi
 
 if [ &quot;$RC&quot; -gt &quot;0&quot; ];then 
-	SAVE=&quot;/data/Images/rsync_error&quot;;echo &quot;git clone git@github.ibm.com:OC-Enablement/oc-snap.git ${TARGET_DIR} failed at ${box}, copy image to $SAVE&quot;;
+	SAVE=&quot;$RootSaveDir/rsync_error&quot;;echo &quot;git clone git@github.ibm.com:OC-Enablement/oc-snap.git ${TARGET_DIR} failed at ${box}, copy image to $SAVE&quot;;
 	cp -rp $BINFILES $SAVE
 	echo &quot;=&gt;exit with RC=100&quot;
 	exit 100
@@ -999,7 +999,7 @@ do
   echo &quot;J: COPY Image $f to ${IMAGE[$COUNT_IMAGE]} on fpga@$box&quot;
   RC=0;rsync -tvh $f fpga@$box:${IMAGE[$COUNT_IMAGE]} ; RC=$?
   if [ &quot;$RC&quot; -gt &quot;0&quot; ];then 
-    SAVE=&quot;/data/Images/rsync_error&quot;;echo &quot;rsync error, copy image to $SAVE&quot;;
+    SAVE=&quot;$RootSaveDir/rsync_error&quot;;echo &quot;rsync error, copy image to $SAVE&quot;;
     cp -rp $f $SAVE
     exit 100
   fi
