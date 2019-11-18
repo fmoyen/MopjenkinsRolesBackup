@@ -16,7 +16,7 @@ in case of problems: please contact fmoyen@fr.ibm.com or alexandre.castellane@fr
         <hudson.model.StringParameterDefinition>
           <name>BRANCH</name>
           <description>Choose the branch for https://github.com/OpenCAPI/oc-accel you want to test.</description>
-          <defaultValue>jenkins_mods2</defaultValue>
+          <defaultValue>master</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
