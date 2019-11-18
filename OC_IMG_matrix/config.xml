@@ -335,15 +335,14 @@ SSKIP=0;msg=&quot;disk usage =${diskused}%&quot;
 
 if   (( diskused &gt; 90 ));then 
   msg=&quot;ERROR: $msg, stopping additional builds&quot;;SSKIP=1
-  #echo &quot;mail sent to castella : ERROR OpenCAPI AFS space&quot;
-  #mail -s &quot;ERROR: OpenCAPI AFS space SIMULATION is used up to ${diskused}%, stopping additional builds&quot; castella
-  #mail -s &quot;ERROR: AFS space SIMULATION is used up to ${AFSused}%, stopping additional builds&quot; mesnet
+  #SendAnEmail -s &quot;ERROR: OpenCAPI AFS space SIMULATION is used up to ${diskused}%, stopping additional builds&quot; -d &quot;${EmailDestinationList[*]}&quot;
+  #SendAnEmail -s &quot;ERROR: AFS space SIMULATION is used up to ${AFSused}%, stopping additional builds&quot; -d &quot;${EmailDestinationList[*]}&quot;  
 
 elif (( diskused &gt; 70 ));then
    msg=&quot;WARNING: $msg&quot;
-   #echo &quot;mail sent to castella : WARNING OpenCAPI AFS space&quot;
-   #mail -s &quot;WARNING: OpenCAPI AFS space IMAGETEST is used up to ${diskused}%&quot; castella
-   #mail -s &quot;WARNING: AFS space IMAGETEST is used up to ${AFSused}%&quot; mesnet
+  #SendAnEmail -s &quot;WARNING: OpenCAPI space IMAGETEST is used up to ${diskused}%&quot; -d &quot;${EmailDestinationList[*]}&quot;
+  #SendAnEmail -s &quot;WARNING: AFS space IMAGETEST is used up to ${AFSused}%&quot; -d &quot;${EmailDestinationList[*]}&quot;  
+
 else
    msg=&quot;OK: $msg&quot;
 fi
