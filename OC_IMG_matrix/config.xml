@@ -828,7 +828,7 @@ echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
 function finish # define function to unlock in case of error, executed after registering with &quot;trap finish EXIT&quot;
   {
   echo &quot;RC=$?, now unlock ${LOCK} and end&quot;
-  SSH_RC=0;ssh fpga@$box rmdir ${LOCK} || SSH_RC=$?
+  SSH_RC=0;ssh ${HWUser}@$box rmdir ${LOCK} || SSH_RC=$?
   echo &quot;`date` box=$box $LOCK unlock RC=$SSH_RC&quot;
   }
 
@@ -950,13 +950,13 @@ if [ $loop -eq $maxloop ];then
   exit 100
 fi
 
-ssh fpga@${box} &quot;echo ------ START of JOB on $box ----&gt;&gt; jenkins.log&quot;
-ssh fpga@${box} &quot;date                                 &gt;&gt; jenkins.log&quot;
-ssh fpga@${box} &quot;echo JOB_NAME  : $JOB_NAME           &gt;&gt; jenkins.log&quot;
-ssh fpga@${box} &quot;echo Card      : $CRD[$cardid]       &gt;&gt; jenkins.log&quot;
-ssh fpga@${box} &quot;echo Image     : $IMAGE              &gt;&gt; jenkins.log&quot;
-ssh fpga@${box} &quot;echo Build No  : ${BUILD_NUMBER}     &gt;&gt; jenkins.log&quot;
-ssh fpga@${box} &quot;echo Git Branch: ${GIT_BRANCH}       &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;echo ------ START of JOB on $box ----&gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;date                                 &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;echo JOB_NAME  : $JOB_NAME           &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;echo Card      : $CRD[$cardid]       &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;echo Image     : $IMAGE              &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;echo Build No  : ${BUILD_NUMBER}     &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;echo Git Branch: ${GIT_BRANCH}       &gt;&gt; jenkins.log&quot;
 
 trap finish EXIT  # register finish/unlock function, after lock is set
 
@@ -968,7 +968,7 @@ ssh $box ls -al
 #RC=0;rsync -az --delete . fpga@${box}:${TARGET_DIR} ; RC=$?
 
 echo &quot;J: Preparing oc-snap workspace by cloning git@github.ibm.com:OC-Enablement/oc-snap.git into ${TARGET_DIR} at ${box} and selecting ${GIT_BRANCH} as a branch&quot;
-RC=0; ssh fpga@${box} &quot;git clone git@github.ibm.com:OC-Enablement/oc-snap.git ${TARGET_DIR};cd ${TARGET_DIR};git checkout ${GIT_BRANCH}&quot; || RC=$?
+RC=0; ssh ${HWUser}@${box} &quot;git clone git@github.ibm.com:OC-Enablement/oc-snap.git ${TARGET_DIR};cd ${TARGET_DIR};git checkout ${GIT_BRANCH}&quot; || RC=$?
 
 #Fab #RC=0
 #Fab #ssh $box ls -a |grep -Fx snap
@@ -989,14 +989,14 @@ if [ &quot;$RC&quot; -gt &quot;0&quot; ];then
 fi
 
 echo &quot;J: COPY Image(s) $BINFILES to $IMAGE on $box&quot;
-ssh $box mkdir -p /home/fpga/images/${CRD}/${ACT}    # create subdirectory, if not avail yet
+ssh $box mkdir -p /home/${HWUser}/images/${CRD}/${ACT}    # create subdirectory, if not avail yet
 
 COUNT_IMAGE=0                         # Modification to support SPI dual files cases
 for f in $BINFILES
 do
-  IMAGE[$COUNT_IMAGE]=&quot;/home/fpga/images/${CRD}/${ACT}/&quot;`basename $f`
-  echo &quot;J: COPY Image $f to ${IMAGE[$COUNT_IMAGE]} on fpga@$box&quot;
-  RC=0;rsync -tvh $f fpga@$box:${IMAGE[$COUNT_IMAGE]} ; RC=$?
+  IMAGE[$COUNT_IMAGE]=&quot;/home/${HWUser}/images/${CRD}/${ACT}/&quot;`basename $f`
+  echo &quot;J: COPY Image $f to ${IMAGE[$COUNT_IMAGE]} on ${HWUser}@$box&quot;
+  RC=0;rsync -tvh $f ${HWUser}@$box:${IMAGE[$COUNT_IMAGE]} ; RC=$?
   if [ &quot;$RC&quot; -gt &quot;0&quot; ];then 
     SaveDir=&quot;$RootSaveDir/rsync_error&quot;;echo &quot;rsync error, copy image to $SaveDir&quot;;
     cp -rp $f $SaveDir
@@ -1045,7 +1045,7 @@ echo &quot;*********************************************************************
 echo &quot;&quot;
 echo &quot;J: `date` Executing this SNAP JENKINS TEST on $box from ${TARGET_DIR} directory:&quot;
 echo &quot;J: =&gt;$RUN&quot;
-RC=0;ssh -T fpga@${box} &lt;&lt; EOF || RC=$?
+RC=0;ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?
 	export TERM=xterm
 	cd ${TARGET_DIR}
     pwd
@@ -1055,14 +1055,14 @@ EOF
 
 # Write short log only, Clean workspace
 # Note: this lines in the log file and the lines above can be 
-ssh fpga@${box} &quot;echo Exit: $JOB_NAME RC = $RC at:\       &gt;&gt; jenkins.log&quot;
-ssh fpga@${box} &quot;date                                     &gt;&gt; jenkins.log&quot;
-ssh fpga@${box} &quot;echo ----------- EXIT -------------------&gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;echo Exit: $JOB_NAME RC = $RC at:\       &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;date                                     &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;echo ----------- EXIT -------------------&gt;&gt; jenkins.log&quot;
 
 #DEBUG !!
 #echo &quot;J: `date` Clean up ${TARGET_DIR} on ${box}&quot;
 echo &quot;J: `date` DEBUG : DO NOT Clean up ${TARGET_DIR} on ${box}&quot;
-#ssh -T fpga@${box} rm -rf ${TARGET_DIR}
+#ssh -T ${HWUser}@${box} rm -rf ${TARGET_DIR}
   
 if [ 0 -ne $RC ]; then
   echo &quot;J: `date` Test failed RC = $RC, exit UNSTABLE&quot;
