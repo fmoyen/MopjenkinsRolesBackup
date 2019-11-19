@@ -103,7 +103,7 @@ Main Issues : &#xd;
           <name>mopBoxes</name>
           <description>List of Montpellier systems available for testing :
   - orpington: AC922 8335-GTH with two AD9V3s 1 in CAPI2 and 1 OC
-(it needs defined capimop user with authorized_keys)</description>
+(it needs to define capimop user with authorized_keys)</description>
           <defaultValue>orpington</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
@@ -111,7 +111,7 @@ Main Issues : &#xd;
           <name>austinBoxes</name>
           <description>List of Austin systems available for testing :
 (Assuming no VPN or jump server is needed to access Austin servers, 9.X.X.X addresses)
-(it needs defined capimop user with authorized_keys)</description>
+(it needs to define capimop user with authorized_keys)</description>
           <defaultValue>hawklp10.aus.stglabs.ibm.com</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
@@ -224,6 +224,7 @@ CL=$(echo $CRD_CL| cut -d&apos;_&apos; -f 2)     # chars behind first &apos;_&ap
 echo &quot;Build with Card=$CRD Action=$ACT Action_type=$ACTION_TYPE CLOUD_build=$CL branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX test_on_hw=$TEST_ON_HW&quot;
 
 EmailDestinationList=( fabrice_moyen@fr.ibm.com fabricepb@free.fr )
+HWUser=&quot;capimop&quot;
 
 
 #==============================================================================================
@@ -362,6 +363,7 @@ echo &quot;SKIP=$SKIP&quot; &gt; export_props.properties
 echo &quot;CRD=$CRD&quot; &gt;&gt; export_props.properties
 echo &quot;CL=$CL&quot; &gt;&gt; export_props.properties
 echo &quot;EmailDestinationList=( ${EmailDestinationList[*]} )&quot; &gt;&gt; export_props.properties
+echo &quot;HWUser=${HWUser}&quot; &gt;&gt; export_props.properties
 
 echo &quot;properties forwarded to next shell:&quot;
 cat export_props.properties
@@ -562,19 +564,17 @@ case $ACT in          # select config &amp; compile action
         then
           # $box is a Montpellier server
           echo -e &quot;MOP   : $box -&gt; \c&quot;
-          bindir=&quot;/home/capimop/&quot;
-          RC=0;ssh capimop@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
+          RC=0;ssh ${HWUser}@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
         else
           echo -e &quot;AUSTIN: $box -&gt; \c&quot;
-          bindir=&quot;/home/capimop/&quot;
-          RC=0;ssh capimop@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
+          RC=0;ssh ${HWUser}@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
         fi
       
         if [ $RC == &quot;0&quot; ]; then echo &quot;$box ping ok&quot;; else echo &quot;$box not reachable&quot;;continue;fi
         
-        echo &quot;Cleaning process : ssh capimop@$box find &amp; delete $srch in $bindir older than $days days&quot;
-        ssh capimop@$box &quot;find $bindir -type f -name $srch -mtime +$days -ls -delete&quot;
-        nusers=`ssh capimop@${box} who|grep -v root|grep -v capimop|wc -l`
+        echo &quot;Cleaning process : ssh ${HWUser}@$box find &amp; delete $srch in /home/$HWUser older than $days days&quot;
+        ssh ${HWUser}@$box &quot;find /home/$HWUser -type f -name $srch -mtime +$days -ls -delete&quot;
+        nusers=`ssh ${HWUser}@${box} who|grep -v root|grep -v ${HWUser}|wc -l`
         echo &quot;`date` box=$box nusers=$nusers&quot;
       done
     fi                          
@@ -680,7 +680,7 @@ do
     echo &quot;binfile=$f size=$size&quot;
     (( size &lt; 100000 )) &amp;&amp; die 1 &quot;  --&gt; image $f is too small $size to burn&quot;
     # We assign IMAGE for log purpose, it eventually takes the name of secondary if SPI8
-    IMAGE=&quot;/home/capimop/images/${CRD}/${ACT}/&quot;`basename $f` 
+    IMAGE=&quot;/home/${HWUser}/images/${CRD}/${ACT}/&quot;`basename $f` 
 done
 
 # In FACTORY MODE : We save hdl_example and hls_helloworld bin for cards files for future .mcs generation
@@ -722,8 +722,8 @@ case ${TEST_ON_HW} in
       echo $BINFILES
       if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; echo $BITFILES; fi
       echo;echo &quot;  -&gt; Copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
-      ssh capimop@jtagx86 &quot;mkdir -p $SaveDir&quot;
-      scp -rp $BINFILES capimop@jtagx86:$SaveDir
+      ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
+      scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
       exit 0
     fi
   ;;
@@ -739,8 +739,8 @@ case ${TEST_ON_HW} in
     echo $BINFILES
     if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; echo $BITFILES; fi
     echo;echo &quot;  -&gt; Copying $CRD image to jtagx86:$SaveDir&quot;
-    ssh capimop@jtagx86 &quot;mkdir -p $SaveDir&quot;
-    scp -rp $BINFILES capimop@jtagx86:$SaveDir
+    ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
+    scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
     exit 0
   ;;
 
@@ -760,8 +760,8 @@ cp -rp $BINFILES $SaveDir
 echo $BINFILES
 if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; echo $BITFILES; fi
 echo;echo &quot;  -&gt; Copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
-ssh capimop@jtagx86 &quot;mkdir -p $SaveDir&quot;
-scp -rp $BINFILES capimop@jtagx86:$SaveDir
+ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
+scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
 
 echo;echo &quot;J: HW TEST NOT YET READY TO WORK ! =&gt; Exiting !&quot;
 exit 0
@@ -804,11 +804,11 @@ for box in &quot;${TESTBOXES[@]}&quot;;do
   then
     # $box is a Montpellier server
     echo -e &quot;MOP   : $box -&gt; \c&quot;
-    RC=0;ssh capimop$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
+    RC=0;ssh ${HWUser}@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
   else
     # $box is an Austin server
     echo -e &quot;AUSTIN: $box -&gt; \c&quot;
-    RC=0;ssh capimop@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
+    RC=0;ssh ${HWUser}@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
   fi
 
 if [ &quot;$RC&quot; == &quot;0&quot; ]; then : 
@@ -850,21 +850,21 @@ for loop in `seq 1 $maxloop`;do
     echo;echo &quot;-------------------------------------------------&quot;
     echo &quot;J: $box&quot;
 
-    nusers=`ssh capimop@${box} who|grep -v root|grep -v capimop|wc -l`
+    nusers=`ssh ${HWUser}@${box} who|grep -v root|grep -v ${HWUser}|wc -l`
 
     find_card=$FindCardTool.${GIT_COMMIT}.`date +%H%M%S`.`basename $BINFILES`
 
-    echo  &quot;  --&gt; Copying $find_card to $box:/home/capimop&quot;
-    RC=0;scp ./software/tools/$FindCardTool capimop@$box:/home/capimop/$find_card ; RC=$?
+    echo  &quot;  --&gt; Copying $find_card to $box:/home/${HWUser}&quot;
+    RC=0;scp ./software/tools/$FindCardTool ${HWUser}@$box:/home/${HWUser}/$find_card ; RC=$?
     if [ $RC -gt 0 ];then
       echo &quot;     -&gt; copy $find_card to $box FAILED, continuing anyway...&quot;;
     fi
     
     echo  &quot;  --&gt; Looking for OC-$CRD inside $box&quot;
-    found=0;cards=`ssh -ttq capimop@${box} /home/capimop/$find_card -A OC-${CRD}`||found=$?
+    found=0;cards=`ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A OC-${CRD}`||found=$?
 
     echo &quot;  --&gt; Removing $find_card from $box RC=$SSH_RC&quot;
-    SSH_RC=0;ssh -ttq capimop@${box} rm /home/capimop/$find_card || SSH_RC=$?
+    SSH_RC=0;ssh -ttq ${HWUser}@${box} rm /home/${HWUser}/$find_card || SSH_RC=$?
     if [ $SSH_RC -gt 0 ];then
       echo &quot;    -&gt; Delete $find_card to $box FAILED, continuing anyway...&quot;;
     fi
@@ -876,7 +876,7 @@ for loop in `seq 1 $maxloop`;do
 
     case $found:$nusers in
 
-      # no card avail, try other box
+      # no card available =&gt; try other box
       0:*)
         if [ $box == ${TESTBOXES[*]:(-1)} ];then
           echo &quot;  --&gt; $box is the last system to test; Waiting for 60s...&quot;
@@ -885,11 +885,11 @@ for loop in `seq 1 $maxloop`;do
         continue
       ;;
         
-      # card avail, no user, now lock &amp; test
+      # card available &amp; no user =&gt; now lock &amp; test
       [1234]:0)
 		for cardid in $cards;do
       	  LOCK=&quot;jenkins_lock_card$cardid&quot;
-		  RC=0;ssh capimop@$box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
+		  RC=0;ssh ${HWUser}@$box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
 		  if [ $RC == &quot;0&quot; ]; then :
 		    echo &quot;  --&gt; `date` box=$box $LOCK lock RC=$RC&quot;; 
 		    trap finish EXIT  # register finish/unlock function, after lock is set
@@ -900,13 +900,13 @@ for loop in `seq 1 $maxloop`;do
 		done
       ;;
       
-      # found something else than 1,2,3 or 4 cards, meaning found return code is wrong
+      # found something else than 1,2,3 or 4 cards =&gt; meaning BAD $found return code
       *:0)      
         echo &quot;  --&gt; unknown found_RC=$found from $FindCardTool=$cards. EXITING...&quot;
         exit 100
       ;;
       
-      # card avail but user(s) connected...
+      # card available but user(s) connected...
       *)      
       	if (( 9&lt;=hours &amp;&amp; hours&lt;=19 ));then
       	  echo &quot;  --&gt; hours=$hours, nusers=$nusers, try other box&quot;
@@ -917,15 +917,15 @@ for loop in `seq 1 $maxloop`;do
           continue
 
         else
-          ssh capimop@${box} who|grep -v root|grep -v capimop
+          ssh ${HWUser}@${box} who|grep -v root|grep -v ${HWUser}
       	  echo &quot;  --&gt; hours=$hours, nusers=$nusers, now lock &amp; notify &amp; test&quot;
 		  for cardid in $cards;do
       	    LOCK=&quot;jenkins_lock_card$cardid&quot;
-		    RC=0;ssh capimop@$box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
+		    RC=0;ssh ${HWUser}@$box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
 		    if [ $RC == &quot;0&quot; ]; then :
 	  	      echo &quot;  --&gt; `date` box=$box $LOCK lock RC=$RC&quot;; 
 	   	      trap finish EXIT  # register finish/unlock function, after lock is set
-              ssh capimop$box wall &quot;WARNING: JENKINS OPENCAPI TEST on FPGA CARD=$CRD ID=$cards&quot;
+              ssh ${HWUser}@$box wall &quot;WARNING: JENKINS OPENCAPI TEST on FPGA CARD=$CRD ID=$cards&quot;
 		      break 3
 			else 
 			  echo &quot;  --&gt; box=$box $LOCK already locked, try next card&quot;
