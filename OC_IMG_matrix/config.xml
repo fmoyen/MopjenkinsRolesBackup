@@ -954,7 +954,7 @@ if [ $loop -eq $maxloop ];then
 fi
 
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Testing $CRD card onto $box system&quot;
+echo &quot;J: Preparing $CRD card image(s) test onto $box system&quot;
 
 ssh ${HWUser}@${box} &quot;echo ------ START of JOB on $box ----&gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;date                                 &gt;&gt; jenkins.log&quot;
@@ -1005,27 +1005,30 @@ fi
 
 # FAB: J&apos;en suis là
 
-echo &quot;J: BIN Files Transfered to $box ...&quot;
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Testing $CRD card image(s) onto $box system&quot;
+echo
 
-echo &quot;***************************************************************************************&quot;
-echo &quot;&quot;
 # ssh fpga@${box} lsb_release -a
 
-echo &quot;J: Preparing command ...&quot;
-RUN=&quot;sudo ./actions/scripts/oc_snap_jenkins.sh&quot;  #sudo used to get access to /dev/ocxl/IBM,oc-snap.... directory
+echo &quot;  -&gt; Preparing command ...&quot;
+RUN=&quot;./actions/scripts/oc_snap_jenkins.sh&quot;
 if [ ! -f $RUN ];then 
-  echo &quot;J: `date` Shell Script $RUN not found,Exit UNSTABLE&quot;;
+  echo &quot;  -&gt; Shell Script $RUN not found =&gt; EXITING !&quot;
   exit 100
 fi
+
+RUN=&quot;sudo $RUN&quot; #sudo used to get access to /dev/ocxl directory
 RUN+=&quot; -D ${TARGET_DIR}&quot;
 
-#AC adding SPI8 Variable
-SPI8=0
-case $CRD in
-  &quot;AD9V3&quot;)  SPI8=1;;            
-  *)        SPI8=0;;
-esac   
-#AC adding SPI8 Variable
+BinFilesList=( $BINFILES )
+if [ ${#BinFilesList[@]} -gt 1 ]; then
+  # More than 1 image file (like with AD9V3 which will have 2)
+  SPI8=1
+else
+  # Only 1 image file
+  SPI8=0
+fi
 
 echo &quot;J: Card=$CRD and SPI8=$SPI8&quot;
 if [ $SPI8 -eq 0 ];then
