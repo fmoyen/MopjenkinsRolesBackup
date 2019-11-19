@@ -1039,7 +1039,6 @@ else
   if [ $SPI8 -eq 1 ]; then RUN+=&quot; -F ${IMAGE[0]} -f ${IMAGE[1]} -A ${CRD} -C $cardid&quot;;fi
 fi
 
-# FAB: J&apos;en suis là
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Building the software and actions on $box in $TARGET_DIR ...&quot;
@@ -1058,7 +1057,7 @@ RC=0;ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?
 	export TERM=xterm
 	cd ${TARGET_DIR}
     pwd
-	set -f
+	set -f  # the set -f command disables file name generation (&quot;path name expansion&quot;)
     ${RUN}
 EOF
 
@@ -1068,13 +1067,14 @@ ssh ${HWUser}@${box} &quot;echo Exit: $JOB_NAME RC = $RC at:\       &gt;&gt; jen
 ssh ${HWUser}@${box} &quot;date                                     &gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;echo ----------- EXIT -------------------&gt;&gt; jenkins.log&quot;
 
-#DEBUG !!
-#echo &quot;J: `date` Clean up ${TARGET_DIR} on ${box}&quot;
-echo &quot;J: `date` DEBUG : DO NOT Clean up ${TARGET_DIR} on ${box}&quot;
-#ssh -T ${HWUser}@${box} rm -rf ${TARGET_DIR}
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: `date` Cleaning up ${box}:${TARGET_DIR}&quot;
+ssh -T ${HWUser}@${box} rm -rf ${TARGET_DIR}
   
-if [ 0 -ne $RC ]; then
-  echo &quot;J: `date` Test failed RC = $RC, exit UNSTABLE&quot;
+if [ $RC -ne 0 ]; then
+  echo;echo &quot;***************************************************************************************&quot;
+  echo &quot;J: `date` Test FAILED RC= $RC&quot;
+  echo &quot;  -&gt; EXITING !&quot;
   exit 100
 fi </command>
     </hudson.tasks.Shell>
