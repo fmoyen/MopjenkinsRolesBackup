@@ -838,7 +838,7 @@ echo &quot;Wait (max $maxloop min) for free card=$CRD in ${TESTBOXES[@]}, I am `
 
 maxloop=60
 
-FindCardTool=&quot;oc-accell_find_card&quot;
+FindCardTool=&quot;oc-accel_find_card&quot;
 
 for loop in `seq 1 $maxloop`;do
 
