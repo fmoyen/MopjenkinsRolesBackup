@@ -834,7 +834,7 @@ function finish # define function to unlock in case of error, executed after reg
 
 
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;Wait (max $maxloop min) for free card=$CRD in ${TESTBOXES[@]}, I am `whoami`(whoami answer)&quot;
+echo &quot;J: Searching (max $maxloop min) for free card=$CRD in ${TESTBOXES[@]}&quot;
 
 maxloop=60
 
@@ -949,12 +949,18 @@ done #for loop
 # FAB: J&apos;en suis là
 
 if [ $loop -eq $maxloop ];then
+  echo;echo &quot;***************************************************************************************&quot;
+  echo &quot;J: J: No card $CRD available with TESTBOXES= ${TESTBOXES[*]}&quot;
   SaveDir=&quot;$RootSaveDir/${CRD}_oc_card_not_avail&quot;
   mkdir -p $SaveDir
-  echo &quot;no card avail, copy image to $SaveDir&quot;
-  cp -rp $BINFILES $SaveDir            
+  echo &quot;  -&gt; Copying image to $SaveDir&quot;
+  cp -rp $BINFILES $SaveDir
+  echo &quot;  -&gt; EXITING !&quot;
   exit 100
 fi
+
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Testing $CRD card onto $box system&quot;
 
 ssh ${HWUser}@${box} &quot;echo ------ START of JOB on $box ----&gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;date                                 &gt;&gt; jenkins.log&quot;
@@ -966,15 +972,13 @@ ssh ${HWUser}@${box} &quot;echo Git Branch: ${GIT_BRANCH}       &gt;&gt; jenkins
 
 trap finish EXIT  # register finish/unlock function, after lock is set
 
-echo &quot;Running on $box :ls -al&quot;
-ssh $box ls -al
 
 # CAPI2 for memory :
 #echo &quot;J: Copy workspace ${TARGET_DIR} to ${box}&quot;
 #RC=0;rsync -az --delete . fpga@${box}:${TARGET_DIR} ; RC=$?
 
-echo &quot;J: Preparing oc-snap workspace by cloning git@github.ibm.com:OC-Enablement/oc-snap.git into ${TARGET_DIR} at ${box} and selecting ${GIT_BRANCH} as a branch&quot;
-RC=0; ssh ${HWUser}@${box} &quot;git clone git@github.ibm.com:OC-Enablement/oc-snap.git ${TARGET_DIR};cd ${TARGET_DIR};git checkout ${GIT_BRANCH}&quot; || RC=$?
+echo &quot;  -&gt; Preparing oc-accel workspace by cloning git@github.com:OpenCAPI/oc-accel.git into ${box}:${TARGET_DIR} using branch= ${GIT_BRANCH}&quot;
+RC=0; ssh ${HWUser}@${box} &quot;git clone git@github.com:OpenCAPI/oc-accel.git ${TARGET_DIR};cd ${TARGET_DIR};git checkout ${GIT_BRANCH}&quot; || RC=$?
 
 #Fab #RC=0
 #Fab #ssh $box ls -a |grep -Fx snap
@@ -988,7 +992,7 @@ RC=0; ssh ${HWUser}@${box} &quot;git clone git@github.ibm.com:OC-Enablement/oc-s
 #Fab #fi
 
 if [ &quot;$RC&quot; -gt &quot;0&quot; ];then 
-	SaveDir=&quot;$RootSaveDir/rsync_error&quot;;echo &quot;git clone git@github.ibm.com:OC-Enablement/oc-snap.git ${TARGET_DIR} failed at ${box}, copy image to $SaveDir&quot;
+	SaveDir=&quot;$RootSaveDir/rsync_error&quot;;echo &quot;git clone git@github.com:OpenCAPI/oc-accel.git ${TARGET_DIR} failed at ${box}, copy image to $SaveDir&quot;
 	cp -rp $BINFILES $SaveDir
 	echo &quot;=&gt;exit with RC=100&quot;
 	exit 100
