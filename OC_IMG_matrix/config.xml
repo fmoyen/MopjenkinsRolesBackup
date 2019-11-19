@@ -822,9 +822,11 @@ echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
 
 function finish # define function to unlock in case of error, executed after registering with &quot;trap finish EXIT&quot;
   {
-  echo &quot;RC=$?, now unlock ${LOCK} and end&quot;
-  SSH_RC=0;ssh ${HWUser}@$box rmdir ${LOCK} || SSH_RC=$?
-  echo &quot;`date` box=$box $LOCK unlock RC=$SSH_RC&quot;
+  echo &quot;RC=$?, now unlocking ${LOCK}, cleaning ${box}@$TARGET_DIR and ending&quot;
+  UNLOCK_RC=0;ssh ${HWUser}@$box rmdir ${LOCK} || UNLOCK_RC=$?
+  echo &quot;`date` box=$box $LOCK unlock RC=$UNLOCK_RC&quot;
+  CLEAN_RC=0;ssh -T ${HWUser}@$box rm -rf ${TARGET_DIR} || CLEAN_RC=$?
+  echo &quot;`date` box=$box clean target_dir=$TARGET_DIR RC=$CLEAN_RC&quot;
   }
 
 
@@ -1053,13 +1055,20 @@ fi
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: `date` Executing this below SNAP JENKINS TEST on $box from ${TARGET_DIR} directory:&quot;
 echo &quot;  -&gt; $RUN&quot;
+
+# FAB: For debugging purpose, and because it is not functional for OpenCapi (capi-reset)
+# not running the following but just displaying...
+echo &quot;
 RC=0;ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?
 	export TERM=xterm
 	cd ${TARGET_DIR}
     pwd
-	set -f  # the set -f command disables file name generation (&quot;path name expansion&quot;)
+	set -f  # the set -f command disables file name generation (&quot;path name expansion&quot;), meaning &quot;*.zip&quot; stays &quot;*.zip&quot;
     ${RUN}
 EOF
+&quot;
+# End of debug: remove &apos;echo &quot;&apos; and &apos;&quot;&apos; lines above when OK
+
 
 # Write short log only, Clean workspace
 # Note: this lines in the log file and the lines above can be 
