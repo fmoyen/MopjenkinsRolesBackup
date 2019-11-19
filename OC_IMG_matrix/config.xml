@@ -411,7 +411,7 @@ echo &quot;Building with Card=$CRD Action=$ACT CLOUD=$CL&quot;
 
 export PATH=$PATH:/usr/local/bin  # python3 needs this path setup
 export USERHOME=`pwd`
-export SNAP_ROOT=$USERHOME/oc-accel
+export OCACCEL_ROOT=$USERHOME/oc-accel
 
 TESTBOXES=( ${austinBoxes[*]} ${mopBoxes[*]}) # init array of systems
 echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
@@ -498,7 +498,7 @@ echo &quot;export OCSE_ROOT=${USERHOME}/ocse&quot; &gt;snap_env.sh
 # FAB a vérifier si encore nécessaire. A priori non
 #echo;echo &quot;****************************************************************************************&quot;
 #echo &quot;J: Cleaning any previous TL/DL and getting TL/DL zip files&quot;
-#cd ${SNAP_ROOT}
+#cd ${OCACCEL_ROOT}
 #make clean                    # to make sure we restart from a blank snap
 #rm -rf hardware/oc-bip        # to make sure we restart from a blank capi-bsp
 #echo &quot;J: git cloning oc-bip&quot;
@@ -521,7 +521,7 @@ echo &quot;export XILINX_LOCAL_USER_DATA=no&quot; &gt;&gt; snap_env.sh
 echo &quot; --&gt; For all OPENCAPI cards we run Vivavo $VIVADO_CHOICE and extend Timing trials to 5 runs until we optimise placement...&quot;
 echo &quot;     unless expressly indicated&quot;
 
-cd ${SNAP_ROOT}
+cd ${OCACCEL_ROOT}
 export VIV_VERSION=&quot;$VIVADO_CHOICE&quot;
 echo &quot;VIVADO version initially set to $VIV_VERSION (please check if we change this later for some specific cards)&quot;
 
@@ -638,9 +638,9 @@ then
 
 else # case of Cloud Build
 # FAB never for the moment but if needed, needs to adapt (BSUB, etc)
-  mkdir -p ${SNAP_ROOT}/hardware/DCPs
+  mkdir -p ${OCACCEL_ROOT}/hardware/DCPs
   echo &quot;J: `date` Build Cloud Image ...&quot;
-  echo &quot;export DCP_ROOT=${SNAP_ROOT}/hardware/DCPs/&quot;              &gt;&gt; snap_env.sh
+  echo &quot;export DCP_ROOT=${OCACCEL_ROOT}/hardware/DCPs/&quot;              &gt;&gt; snap_env.sh
   echo &quot;ENABLE_PRFLOW=y&quot;                                          &gt;&gt; .snap_config
   echo &quot;ENABLE_CLOUD_USER_FLOW=n&quot;                                 &gt;&gt; .snap_config
   echo &quot;ENABLE_CLOUD_BUILD_BITFILE=n&quot;                             &gt;&gt; .snap_config
@@ -667,8 +667,8 @@ echo &quot;J: `date` Checking generated $ACT binaries for $CRD...&quot;
 
 
 #BINFILES contains binary name (In SPI : &quot;primary and secondary&quot; names)
-BINFILES=`ls $SNAP_ROOT/hardware/build/Images/oc_[0-9]*.bin|grep -v FACTORY|head -n2`
-BITFILES=`ls $SNAP_ROOT/hardware/build/Images/oc_[0-9]*.bit|grep -v FACTORY|head -n2`
+BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*.bin|grep -v FACTORY|head -n2`
+BITFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*.bit|grep -v FACTORY|head -n2`
     
   
 if [ &quot;$BINFILES&quot; == &quot;&quot; ]; then echo &quot;  --&gt; cannot find binary files&quot;;exit 1
@@ -686,7 +686,7 @@ done
 # In FACTORY MODE : We save hdl_example and hls_helloworld bin for cards files for future .mcs generation
 #case ${ACT}:$FACTORY in
 #     hdl_example.NORAM:true ) 
-#			FACTBINFILES=`ls -t $SNAP_ROOT/hardware/build/Images/oc_*[0-9]_FACTORY*.bin`  # take FACTORY bin files
+#			FACTBINFILES=`ls -t ${OCACCEL_ROOT}/hardware/build/Images/oc_*[0-9]_FACTORY*.bin`  # take FACTORY bin files
           # Copy hdl_ex Factory files if any
 #            if [ &quot;$FACTBINFILES&quot; == &quot;&quot; ] ; then echo &quot;Cannot find Factory binfile $FACTBINFILES although FACTORY REQUESTED !!&quot;;exit 1
 #            fi
