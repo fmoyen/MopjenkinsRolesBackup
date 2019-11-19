@@ -6,7 +6,7 @@ In case of problems: please contact fabrice_moyen@fr.ibm.com or alexandre.castel
 Only AD9V3 card is available for test on Orpington&#xd;
 Vivado version used : tests on going for 2019.1 (issue with lsf / RH7)&#xd;
 &#xd;
-WARNING : local P9 ocaccel_find_card is used with OC-$CRD prefix&#xd;
+WARNING : P9 ocaccel_find_card is used with OC-$CRD prefix&#xd;
 &#xd;
 Main Issues : &#xd;
 - oc-flash not operational&#xd;
@@ -25,7 +25,7 @@ Main Issues : &#xd;
         <hudson.model.StringParameterDefinition>
           <name>BRANCH</name>
           <description>Choose the branch for https://github.com/OpenCAPI/oc-accel you want to test.</description>
-          <defaultValue>jenkins_mods</defaultValue>
+          <defaultValue>master</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -690,11 +690,11 @@ done
           # Copy hdl_ex Factory files if any
 #            if [ &quot;$FACTBINFILES&quot; == &quot;&quot; ] ; then echo &quot;Cannot find Factory binfile $FACTBINFILES although FACTORY REQUESTED !!&quot;;exit 1
 #            fi
-#            DIR=${CRD}_OC_FACTORY_MCS
-#            mkdir -p /data/Images/${DIR}
-#			SAVE=&quot;/data/Images/${CRD}_OC_FACTORY_MCS&quot;;   echo &quot;J: FACTORY was requested : copy ${CRD} hdl_example.noram bin files to $SAVE&quot;;cp -rp $FACTBINFILES $SAVE;;
+#            SaveDir=&quot;$RootSaveDir/${CRD}_OC_FACTORY_MCS&quot;
+#            mkdir -p $SaveDir
+#			echo &quot;J: FACTORY was requested : copy ${CRD} hdl_example.noram bin files to $SaveDir&quot;;cp -rp $FACTBINFILES $SaveDir;;
 #	hls_helloworld:true )
-#			SAVE=&quot;/data/Images/${CRD}_OC_FACTORY_MCS&quot;;   echo &quot;J: FACTORY was requested : copy ${CRD} hls_helloworld    bin files to $SAVE&quot;;cp -rp $BINFILES $SAVE;;
+#			echo &quot;J: FACTORY was requested : copy ${CRD} hls_helloworld    bin files to $SaveDir&quot;;cp -rp $BINFILES $SaveDir;;
 #esac
 
 
@@ -940,14 +940,13 @@ for loop in `seq 1 $maxloop`;do
   
 done #for loop
 
-# Fab: J&apos;en suis là
+# FAB: J&apos;en suis là
 
 if [ $loop -eq $maxloop ];then
-  DIR=${CRD}_oc_card_not_avail
-  mkdir -p $RootSaveDir/${DIR}
-  SAVE=&quot;$RootSaveDir/${CRD}_card_not_avail&quot;
-  echo &quot;no card avail, copy image to $SAVE&quot;
-  cp -rp $BINFILES $SAVE            
+  SaveDir=&quot;$RootSaveDir/${CRD}_oc_card_not_avail&quot;
+  mkdir -p $SaveDir
+  echo &quot;no card avail, copy image to $SaveDir&quot;
+  cp -rp $BINFILES $SaveDir            
   exit 100
 fi
 
@@ -983,8 +982,8 @@ RC=0; ssh fpga@${box} &quot;git clone git@github.ibm.com:OC-Enablement/oc-snap.g
 #Fab #fi
 
 if [ &quot;$RC&quot; -gt &quot;0&quot; ];then 
-	SAVE=&quot;$RootSaveDir/rsync_error&quot;;echo &quot;git clone git@github.ibm.com:OC-Enablement/oc-snap.git ${TARGET_DIR} failed at ${box}, copy image to $SAVE&quot;;
-	cp -rp $BINFILES $SAVE
+	SaveDir=&quot;$RootSaveDir/rsync_error&quot;;echo &quot;git clone git@github.ibm.com:OC-Enablement/oc-snap.git ${TARGET_DIR} failed at ${box}, copy image to $SaveDir&quot;
+	cp -rp $BINFILES $SaveDir
 	echo &quot;=&gt;exit with RC=100&quot;
 	exit 100
 fi
@@ -999,8 +998,8 @@ do
   echo &quot;J: COPY Image $f to ${IMAGE[$COUNT_IMAGE]} on fpga@$box&quot;
   RC=0;rsync -tvh $f fpga@$box:${IMAGE[$COUNT_IMAGE]} ; RC=$?
   if [ &quot;$RC&quot; -gt &quot;0&quot; ];then 
-    SAVE=&quot;$RootSaveDir/rsync_error&quot;;echo &quot;rsync error, copy image to $SAVE&quot;;
-    cp -rp $f $SAVE
+    SaveDir=&quot;$RootSaveDir/rsync_error&quot;;echo &quot;rsync error, copy image to $SaveDir&quot;;
+    cp -rp $f $SaveDir
     exit 100
   fi
   COUNT_IMAGE=`expr $COUNT_IMAGE + 1` # Modification to support SPI dual files cases
