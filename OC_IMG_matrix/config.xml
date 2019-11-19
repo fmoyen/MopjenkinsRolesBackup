@@ -673,14 +673,16 @@ BITFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*.bit|grep -v FACTORY
   
 if [ &quot;$BINFILES&quot; == &quot;&quot; ]; then echo &quot;  --&gt; cannot find binary files&quot;;exit 1
 fi
+
+COUNT_IMAGE=0
+unset IMAGE
+for  f in $BINFILES; do                   
+  size=`ls -al $f | awk &apos;{print $5}&apos;`
+  echo &quot;binfile=$f size=$size&quot;
+  (( size &lt; 100000 )) &amp;&amp; die 1 &quot;  --&gt; image $f is too small $size to burn&quot;
  
-for  f in $BINFILES
-do                   
-    size=`ls -al $f | awk &apos;{print $5}&apos;`
-    echo &quot;binfile=$f size=$size&quot;
-    (( size &lt; 100000 )) &amp;&amp; die 1 &quot;  --&gt; image $f is too small $size to burn&quot;
-    # We assign IMAGE for log purpose, it eventually takes the name of secondary if SPI8
-    IMAGE=&quot;/home/${HWUser}/images/${CRD}/${ACT}/&quot;`basename $f` 
+  IMAGE[$COUNT_IMAGE]=&quot;/home/${HWUser}/images/${CRD}/${ACT}/&quot;`basename $f` 
+  COUNT_IMAGE=`expr $COUNT_IMAGE + 1`
 done
 
 # In FACTORY MODE : We save hdl_example and hls_helloworld bin for cards files for future .mcs generation
@@ -782,12 +784,12 @@ TARGET_DIR=&quot;${JOB_NAME}-${BUILD_NUMBER}-${GIT_BRANCH}&quot;
 export TARGET_DIR=`echo $TARGET_DIR | sed -e &apos;s/[=,\/]/-/g&apos;`
 echo &quot;TARGET_DIR=${TARGET_DIR}&quot;
 echo &quot;Current Dir is &quot; `pwd`
-echo &quot;  -&gt; JOB_NAME:        ${JOB_NAME}&quot;
-echo &quot;  -&gt; IMAGE:           ${IMAGE}&quot;
-echo &quot;  -&gt; CARD_TO_TEST:    ${CRD}[$cardid]&quot;
-echo &quot;  -&gt; ACTION:          ${ACT}&quot;
-echo &quot;  -&gt; GIT_Branch:      ${GIT_BRANCH}&quot;
-echo &quot;  -&gt; GIT_Commit:      ${GIT_COMMIT}&quot;
+echo &quot;  -&gt; JOB_NAME:     ${JOB_NAME}&quot;
+echo &quot;  -&gt; IMAGE(S):     ${IMAGE[*]}&quot;
+echo &quot;  -&gt; CARD_TO_TEST: ${CRD}[$cardid]&quot;
+echo &quot;  -&gt; ACTION:       ${ACT}&quot;
+echo &quot;  -&gt; GIT_Branch:   ${GIT_BRANCH}&quot;
+echo &quot;  -&gt; GIT_Commit:   ${GIT_COMMIT}&quot;
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Testing TestBoxes reachability&quot;
@@ -962,7 +964,7 @@ ssh ${HWUser}@${box} &quot;echo ------ START of JOB on $box ----&gt;&gt; jenkins
 ssh ${HWUser}@${box} &quot;date                                 &gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;echo JOB_NAME  : $JOB_NAME           &gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;echo Card      : $CRD[$cardid]       &gt;&gt; jenkins.log&quot;
-ssh ${HWUser}@${box} &quot;echo Image     : $IMAGE              &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;echo Image     : ${IMAGE[*]}              &gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;echo Build No  : ${BUILD_NUMBER}     &gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;echo Git Branch: ${GIT_BRANCH}       &gt;&gt; jenkins.log&quot;
 
@@ -984,6 +986,7 @@ echo &quot;  -&gt; Copying image(s) to ${box}:/home/${HWUser}/images/${CRD}/${AC
 ssh $box mkdir -p /home/${HWUser}/images/${CRD}/${ACT}    # create subdirectory, if not avail yet
 
 COUNT_IMAGE=0
+unset IMAGE
 for f in $BINFILES
 do
   IMAGE[$COUNT_IMAGE]=&quot;/home/${HWUser}/images/${CRD}/${ACT}/&quot;`basename $f`
