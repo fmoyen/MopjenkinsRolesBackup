@@ -876,15 +876,17 @@ for loop in `seq 1 $maxloop`;do
 
     case $found:$nusers in
 
+      #------------------------------------
       # no card available =&gt; try other box
       0:*)
         if [ $box == ${TESTBOXES[*]:(-1)} ];then
           echo &quot;  --&gt; $box is the last system to test; Waiting for 60s...&quot;
-          sleep 60
+          sleep 60 # Last box of the list TESBOXES =&gt; Waiting 60s and go to next loop
         fi
-        continue
+        continue # next box or next loop (if it was the last box of the list)
       ;;
-        
+
+      #------------------------------------
       # card available &amp; no user =&gt; now lock &amp; test
       [1234]:0)
 		for cardid in $cards;do
@@ -893,40 +895,44 @@ for loop in `seq 1 $maxloop`;do
 		  if [ $RC == &quot;0&quot; ]; then :
 		    echo &quot;  --&gt; `date` box=$box $LOCK lock RC=$RC&quot;; 
 		    trap finish EXIT  # register finish/unlock function, after lock is set
-		    break 3
+		    break 3 # found card and no user =&gt; going out of $box for-loop and $loop for-loop
 	      else 
 		    echo &quot;  --&gt; box=$box $LOCK already locked, try next card&quot;
 		  fi    
 		done
       ;;
-      
+
+      #------------------------------------
       # found something else than 1,2,3 or 4 cards =&gt; meaning BAD $found return code
       *:0)      
         echo &quot;  --&gt; unknown found_RC=$found from $FindCardTool=$cards. EXITING...&quot;
         exit 100
       ;;
-      
+
+      #------------------------------------
       # card available but user(s) connected...
       *)      
       	if (( 9&lt;=hours &amp;&amp; hours&lt;=19 ));then
-      	  echo &quot;  --&gt; hours=$hours, nusers=$nusers, try other box&quot;
+          # It is day time =&gt; priority to interactive users
+      	  echo &quot;  --&gt; hours=$hours (day), nusers=$nusers, try other box&quot;
           if [ $box == ${TESTBOXES[*]:(-1)} ];then
             echo &quot;  --&gt; $box is the last system to test; Waiting for 60s...&quot;
-            sleep 60
+            sleep 60 # Last box of the list TESBOXES =&gt; Waiting 60s and go to next loop
           fi
-          continue
+          continue # next box or next loop (if it was the last box of the list)
 
         else
+          # It is night =&gt; running on $box even if there are connected users
           ssh ${HWUser}@${box} who|grep -v root|grep -v ${HWUser}
-      	  echo &quot;  --&gt; hours=$hours, nusers=$nusers, now lock &amp; notify &amp; test&quot;
+      	  echo &quot;  --&gt; hours=$hours (night), nusers=$nusers, now lock &amp; notify &amp; test&quot;
 		  for cardid in $cards;do
       	    LOCK=&quot;jenkins_lock_card$cardid&quot;
 		    RC=0;ssh ${HWUser}@$box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
 		    if [ $RC == &quot;0&quot; ]; then :
 	  	      echo &quot;  --&gt; `date` box=$box $LOCK lock RC=$RC&quot;; 
 	   	      trap finish EXIT  # register finish/unlock function, after lock is set
-              ssh ${HWUser}@$box wall &quot;WARNING: JENKINS OPENCAPI TEST on FPGA CARD=$CRD ID=$cards&quot;
-		      break 3
+              ssh ${HWUser}@$box wall &quot;WARNING: JENKINS OPENCAPI TEST STARTING NOW on FPGA CARD=$CRD ID=$cards&quot;
+		      break 3 # found card and it is the night =&gt; going out of $box for-loop and $loop for-loop
 			else 
 			  echo &quot;  --&gt; box=$box $LOCK already locked, try next card&quot;
 			fi    
