@@ -290,7 +290,7 @@ then
   test )
     echo &quot;ACT=test&quot;
     echo
-    gitnames=`git ls-remote git@github.com:OpenCAPI/oc-accel.git|grep &quot;refs/heads/&quot;|awk &apos;{print $2}&apos;`;RC=$?
+    gitnames=`git ls-remote ${GIT_URL}|grep &quot;refs/heads/&quot;|awk &apos;{print $2}&apos;`;RC=$?
     echo &quot;gitnames= $gitnames&quot;
 
     echo
@@ -780,19 +780,14 @@ exit 0
 
 TARGET_DIR=&quot;${JOB_NAME}-${BUILD_NUMBER}-${GIT_BRANCH}&quot;
 export TARGET_DIR=`echo $TARGET_DIR | sed -e &apos;s/[=,\/]/-/g&apos;`
-echo &quot;J: TARGET_DIR=${TARGET_DIR}&quot;
-echo &quot;J: Current Dir is &quot; `pwd`
-#echo &quot;************ Parent Job Data **********************************************************&quot;
-#echo &quot;J: --&gt; PARENT_JOB_NAME: ${PARENT_JOB_NAME}&quot;
-echo &quot;J: --&gt; JOB_NAME:        ${JOB_NAME}&quot;
-echo &quot;J: --&gt; IMAGE:           ${IMAGE}&quot;
-echo &quot;J: --&gt; CARD_TO_TEST:    ${CARD_TO_TEST}&quot;
-echo &quot;J: --&gt; ACTION:          ${ACTION}&quot;
-echo &quot;J: --&gt; GIT_Branch:      ${GIT_BRANCH}&quot;
-echo &quot;J: --&gt; GIT_Commit:      ${GIT_COMMIT}&quot;
-#echo &quot;************ User Input Data **********************************************************&quot;
-#echo &quot;J: --&gt; MY_IMAGE:        ${MY_IMAGE}&quot;
-#echo &quot;J: --&gt; MY_CARD:         ${MY_CARD}&quot;
+echo &quot;TARGET_DIR=${TARGET_DIR}&quot;
+echo &quot;Current Dir is &quot; `pwd`
+echo &quot;  -&gt; JOB_NAME:        ${JOB_NAME}&quot;
+echo &quot;  -&gt; IMAGE:           ${IMAGE}&quot;
+echo &quot;  -&gt; CARD_TO_TEST:    ${CRD}[$cardid]&quot;
+echo &quot;  -&gt; ACTION:          ${ACT}&quot;
+echo &quot;  -&gt; GIT_Branch:      ${GIT_BRANCH}&quot;
+echo &quot;  -&gt; GIT_Commit:      ${GIT_COMMIT}&quot;
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Testing TestBoxes reachability&quot;
@@ -946,7 +941,6 @@ for loop in `seq 1 $maxloop`;do
   
 done #for loop
 
-# FAB: J&apos;en suis là
 
 if [ $loop -eq $maxloop ];then
   echo;echo &quot;***************************************************************************************&quot;
@@ -973,32 +967,20 @@ ssh ${HWUser}@${box} &quot;echo Git Branch: ${GIT_BRANCH}       &gt;&gt; jenkins
 trap finish EXIT  # register finish/unlock function, after lock is set
 
 
-# CAPI2 for memory :
-#echo &quot;J: Copy workspace ${TARGET_DIR} to ${box}&quot;
-#RC=0;rsync -az --delete . fpga@${box}:${TARGET_DIR} ; RC=$?
+echo &quot;  -&gt; Preparing oc-accel workspace by cloning ${GIT_URL} into ${box}:${TARGET_DIR} using branch= ${GIT_BRANCH}&quot;
+RC=0; ssh ${HWUser}@${box} &quot;git clone ${GIT_URL} ${TARGET_DIR};cd ${TARGET_DIR};git checkout ${GIT_BRANCH}&quot; || RC=$?
 
-echo &quot;  -&gt; Preparing oc-accel workspace by cloning git@github.com:OpenCAPI/oc-accel.git into ${box}:${TARGET_DIR} using branch= ${GIT_BRANCH}&quot;
-RC=0; ssh ${HWUser}@${box} &quot;git clone git@github.com:OpenCAPI/oc-accel.git ${TARGET_DIR};cd ${TARGET_DIR};git checkout ${GIT_BRANCH}&quot; || RC=$?
-
-#Fab #RC=0
-#Fab #ssh $box ls -a |grep -Fx snap
-#Fab #if [ ! $(ssh $box &quot;ls -a |grep -Fx snap&quot;) == &quot;snap&quot; ];then
-	#Fab #echo &quot;J: on remote $box, snap dir not existing, cloning it&quot;
-    #Fab #ssh $box git clone http://github.com/open-power/snap.git;RC=$?
-    #Fab #else
-    #Fab #echo &quot;on remote $box, snap dir exists, git pull to update it&quot;
-    #Fab #echo &quot;TO DO : need to select proper branch .... working on master for the moment&quot;
-    #Fab #ssh $box &quot;cd snap;git pull&quot;;RC=$?
-#Fab #fi
-
-if [ &quot;$RC&quot; -gt &quot;0&quot; ];then 
-	SaveDir=&quot;$RootSaveDir/rsync_error&quot;;echo &quot;git clone git@github.com:OpenCAPI/oc-accel.git ${TARGET_DIR} failed at ${box}, copy image to $SaveDir&quot;
+if [ $RC -ne 0 ];then 
+	SaveDir=&quot;$RootSaveDir/gitclone_error&quot;
+    echo &quot;  -&gt; git clone ${GIT_URL} ${TARGET_DIR} failed at ${box} =&gt; copying image to $SaveDir&quot;
 	cp -rp $BINFILES $SaveDir
-	echo &quot;=&gt;exit with RC=100&quot;
+	echo &quot;  -&gt; EXITING !&quot;
 	exit 100
 fi
 
-echo &quot;J: COPY Image(s) $BINFILES to $IMAGE on $box&quot;
+# FAB: J&apos;en suis là
+
+echo &quot;  -&gt; Copying image(s) $BINFILES to $IMAGE on $box&quot;
 ssh $box mkdir -p /home/${HWUser}/images/${CRD}/${ACT}    # create subdirectory, if not avail yet
 
 COUNT_IMAGE=0                         # Modification to support SPI dual files cases
@@ -1017,6 +999,7 @@ done
 
 
 echo &quot;J: BIN Files Transfered to $box ...&quot;
+
 echo &quot;***************************************************************************************&quot;
 echo &quot;&quot;
 # ssh fpga@${box} lsb_release -a
