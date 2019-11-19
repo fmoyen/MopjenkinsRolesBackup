@@ -1003,7 +1003,6 @@ if [ $RSYNC_RC -ne 0 ]; then
   exit 100
 fi
 
-# FAB: J&apos;en suis là
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Testing $CRD card image(s) onto $box system&quot;
@@ -1030,24 +1029,31 @@ else
   SPI8=0
 fi
 
-echo &quot;J: Card=$CRD and SPI8=$SPI8&quot;
-if [ $SPI8 -eq 0 ];then
-#     Preparing Command to be run on $box :
-     if [ -z ${IMAGE} ];then RUN+=&quot; -A ALL&quot;;else RUN+=&quot; -F ${IMAGE} -A ${CRD} -C $cardid&quot;;fi
-else
-#     Preparing Command to be run on $box :
-     if [ -z ${IMAGE} ];then RUN+=&quot; -A ALL&quot;;else RUN+=&quot; -F ${IMAGE[0]} -f ${IMAGE[1]} -A ${CRD} -C $cardid&quot;;fi
-fi   
+echo &quot;     Card=$CRD and SPI8=$SPI8&quot;
 
-echo &quot;***************************************************************************************&quot;
-echo &quot;J: Build the software and actions on $box in $TARGET_DIR ...&quot;
-RC=0;ssh $box make -C ${TARGET_DIR} clean software actions || exit 100
-echo &quot;&quot;
-echo &quot;J: Make finished on $box in $TARGET_DIR ...&quot;
-echo &quot;***************************************************************************************&quot;
-echo &quot;&quot;
-echo &quot;J: `date` Executing this SNAP JENKINS TEST on $box from ${TARGET_DIR} directory:&quot;
-echo &quot;J: =&gt;$RUN&quot;
+if [ ${#IMAGE[@]} -eq 0 ]; then
+  # FAB: Comment on peut en etre là avec $IMAGE vide ??
+  RUN+=&quot; -A ALL&quot;
+else
+  if [ $SPI8 -eq 0 ]; then RUN+=&quot; -F ${IMAGE} -A ${CRD} -C $cardid&quot;;fi
+  if [ $SPI8 -eq 1 ]; then RUN+=&quot; -F ${IMAGE[0]} -f ${IMAGE[1]} -A ${CRD} -C $cardid&quot;;fi
+fi
+
+# FAB: J&apos;en suis là
+
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Building the software and actions on $box in $TARGET_DIR ...&quot;
+RC=0;ssh $box make -C ${TARGET_DIR} clean software actions || RC=$?
+
+if [ $RC -ne 0 ]; then
+  echo &quot;  -&gt; make clean software actions FAILED&quot;
+  echo &quot;  -&gt; EXITING !&quot;
+  exit 100
+fi
+
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: `date` Executing this below SNAP JENKINS TEST on $box from ${TARGET_DIR} directory:&quot;
+echo &quot;  -&gt; $RUN&quot;
 RC=0;ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?
 	export TERM=xterm
 	cd ${TARGET_DIR}
