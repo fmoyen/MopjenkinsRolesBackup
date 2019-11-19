@@ -978,25 +978,32 @@ if [ $RC -ne 0 ];then
 	exit 100
 fi
 
-# FAB: J&apos;en suis là
-
-echo &quot;  -&gt; Copying image(s) $BINFILES to $IMAGE on $box&quot;
+echo &quot;  -&gt; Copying image(s) to ${box}:/home/${HWUser}/images/${CRD}/${ACT}&quot;
 ssh $box mkdir -p /home/${HWUser}/images/${CRD}/${ACT}    # create subdirectory, if not avail yet
 
-COUNT_IMAGE=0                         # Modification to support SPI dual files cases
+COUNT_IMAGE=0
 for f in $BINFILES
 do
   IMAGE[$COUNT_IMAGE]=&quot;/home/${HWUser}/images/${CRD}/${ACT}/&quot;`basename $f`
-  echo &quot;J: COPY Image $f to ${IMAGE[$COUNT_IMAGE]} on ${HWUser}@$box&quot;
-  RC=0;rsync -tvh $f ${HWUser}@$box:${IMAGE[$COUNT_IMAGE]} ; RC=$?
-  if [ &quot;$RC&quot; -gt &quot;0&quot; ];then 
-    SaveDir=&quot;$RootSaveDir/rsync_error&quot;;echo &quot;rsync error, copy image to $SaveDir&quot;;
-    cp -rp $f $SaveDir
-    exit 100
+  echo &quot;      $f -&gt; ${box}:${IMAGE[$COUNT_IMAGE]}&quot;
+  RSYNC_RC=0;rsync -tvh $f ${HWUser}@$box:${IMAGE[$COUNT_IMAGE]} ; RSYNC_RC=$?
+  if [ $RSYNC_RC -ne 0 ];then 
+    echo &quot;  -&gt; copy FAILURE&quot;;
+    break # Failure =&gt; going out of the for-loop
   fi
-  COUNT_IMAGE=`expr $COUNT_IMAGE + 1` # Modification to support SPI dual files cases
+  COUNT_IMAGE=`expr $COUNT_IMAGE + 1`
 done
 
+if [ $RSYNC_RC -ne 0 ]; then
+  SaveDir=&quot;$RootSaveDir/rsync_error&quot;
+  echo &quot;  -&gt; copying image(s) to $SaveDir&quot;;
+  mkdir -p $SaveDir
+  cp -rp $BINFILES $SaveDir
+  echo &quot;EXITING !&quot;
+  exit 100
+fi
+
+# FAB: J&apos;en suis là
 
 echo &quot;J: BIN Files Transfered to $box ...&quot;
 
