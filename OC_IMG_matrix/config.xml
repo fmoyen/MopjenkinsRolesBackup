@@ -574,7 +574,7 @@ case $ACT in          # select config &amp; compile action
           RC=0;ssh ${HWUser}@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
         fi
       
-        if [ $RC == &quot;0&quot; ]; then echo &quot;$box ping ok&quot;; else echo &quot;$box not reachable&quot;;continue;fi
+        if [ $RC == &quot;0&quot; ]; then echo &quot;OK&quot;; else echo &quot;FAILED&quot;;continue;fi
         
         echo &quot;Cleaning process : ssh ${HWUser}@$box find &amp; delete $srch in /home/$HWUser older than $days days&quot;
         ssh ${HWUser}@$box &quot;find /home/$HWUser -type f -name $srch -mtime +$days -ls -delete&quot;
@@ -880,7 +880,9 @@ for loop in `seq 1 $maxloop`;do
     fi
     
     echo -e &quot;  --&gt; Looking for OC-$CRD inside ${box}: \c&quot;
-    found=0;cards=`ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A OC-${CRD}`||found=$?
+    found=0;cards=`ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A OC-${CRD} | head -n1`||found=$?
+    # (head is because $find_card returns something like &quot;0 0&quot; and second line with &quot;Total 2 cards detected&quot;)
+    
     if [ $found -ne 0 ];then echo &quot;I FOUND $found CARD(S) !&quot;; else echo &quot;NO CARD FOUND !&quot;; fi
 
     echo &quot;  --&gt; Removing the tool $FindCardTool ($find_card) from $box RC=$SSH_RC&quot;
