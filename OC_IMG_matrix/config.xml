@@ -330,6 +330,7 @@ echo;echo &quot;defconfig DSKIP=$DSKIP&quot;
 
 echo;echo &quot;*******************************************************************************&quot;
 echo &quot;J: Checking enough space is available&quot;
+echo
 #AFSused=`fs lq /afs/bb/proj/fpga/framework/CI_ws/OC_SNAP_IMG_matrix/|grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
 diskused=`df -h /var/jenkins/workspace/OC_IMG_matrix|grep -v Used|awk &apos;{print $5}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
 SSKIP=0;msg=&quot;disk usage =${diskused}%&quot;
@@ -359,6 +360,7 @@ if [ &quot;$ASKIP&quot; == &quot;1&quot; ] || [ &quot;$DSKIP&quot; == &quot;1&qu
 
 echo;echo &quot;*******************************************************************************&quot;
 echo &quot;J: Forwarding parameters to next script&quot;
+echo
 echo &quot;SKIP=$SKIP&quot; &gt; export_props.properties
 echo &quot;CRD=$CRD&quot; &gt;&gt; export_props.properties
 echo &quot;CL=$CL&quot; &gt;&gt; export_props.properties
@@ -419,7 +421,7 @@ RootSaveDir=/data/Images
 
 #echo;echo &quot;********************************************************************************&quot;
 #echo &quot;J: LSF SETUP ...&quot;
-
+# echo
 # older setup up to RH6
 #export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
 #export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
@@ -474,7 +476,7 @@ function SendAnEmail
 
 echo;echo &quot;*******************************************************************************&quot;
 echo &quot;J: Getting OpenCAPI Simulation Environment (ocse)...&quot;
-
+echo
 echo;echo &quot;Current directory is : $PWD&quot;
 ls -al
 
@@ -498,6 +500,7 @@ echo &quot;export OCSE_ROOT=${USERHOME}/ocse&quot; &gt;snap_env.sh
 # FAB a vérifier si encore nécessaire. A priori non
 #echo;echo &quot;****************************************************************************************&quot;
 #echo &quot;J: Cleaning any previous TL/DL and getting TL/DL zip files&quot;
+#echo
 #cd ${OCACCEL_ROOT}
 #make clean                    # to make sure we restart from a blank snap
 #rm -rf hardware/oc-bip        # to make sure we restart from a blank capi-bsp
@@ -515,7 +518,7 @@ echo &quot;export OCSE_ROOT=${USERHOME}/ocse&quot; &gt;snap_env.sh
 
 echo;echo &quot;****************************************************************************************&quot;
 echo &quot;J: Setting up Vivado Version and timing value&quot;
-
+echo
 echo &quot;#setup: XILINX_LOCAL_USER_DATA=${XILINX_LOCAL_USER_DATA}, overwrite=no to prevent write access error in XilincTclStore (tclapp:load_apps)&quot; &gt;&gt;snap_env.sh
 echo &quot;export XILINX_LOCAL_USER_DATA=no&quot; &gt;&gt; snap_env.sh
 echo &quot; --&gt; For all OPENCAPI cards we run Vivavo $VIVADO_CHOICE and extend Timing trials to 5 runs until we optimise placement...&quot;
@@ -538,6 +541,7 @@ source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
 # No cadence setup at MOP
 #echo;echo &quot;****************************************************************************************&quot; 
 #echo &quot;J: Cadence SETUP ...&quot;
+#echo
 #echo &quot;IES_LIBS=$IES_LIBS&quot;
 #echo &quot;CDS_LIC_FILE=$CDS_LIC_FILE&quot;
 
@@ -617,6 +621,7 @@ then
   do  
     echo;echo &quot;****************************************************************************************&quot;
     echo &quot;J: `date` Build Non-Cloud Image (make image) for $CRD, Loop ${loop}/$maxloop&quot;
+    echo
     #RC=0; bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot; &amp;&amp; break || RC=$?
 	RC=0; make image &amp;&amp; break || RC=$?
   done
@@ -664,7 +669,7 @@ fi
 
 echo;echo &quot;****************************************************************************************&quot;
 echo &quot;J: `date` Checking generated $ACT binaries for $CRD...&quot;
-
+echo
 
 #BINFILES contains binary name (In SPI : &quot;primary and secondary&quot; names)
 BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*.bin|grep -v FACTORY|head -n2`
@@ -708,7 +713,7 @@ case ${TEST_ON_HW} in
   true )
     echo;echo &quot;****************************************************************************************&quot;
     echo &quot;J: Checking if we can test the generated binaries on POWER Hardware (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot;
-
+    echo
     TestCardAvailable=0
     for i in ${LIST_TEST_CARDS[@]}
     do
@@ -726,6 +731,7 @@ case ${TEST_ON_HW} in
       echo;echo &quot;  -&gt; Copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
       ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
       scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
+      echo &quot;  -&gt; EXITING !&quot;
       exit 0
     fi
   ;;
@@ -733,6 +739,7 @@ case ${TEST_ON_HW} in
   false )
     echo;echo &quot;****************************************************************************************&quot;
     echo &quot;J: No test on POWER Hardware requested (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot; 
+    echo
     SaveDir=$RootSaveDir/no_test_required
     mkdir -p $SaveDir
 
@@ -755,6 +762,7 @@ esac
 
 echo;echo &quot;****************************************************************************************&quot;
 echo &quot;J: Testing the generated binaries on POWER Hardware (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot;
+echo
 SaveDir=$RootSaveDir/${CRD}_oc_for_test
 echo &quot;  -&gt; Hardware test for CARD $CRD not yet working, copying $CRD bin-file(s) &amp; bit-file(s) images to $SaveDir&quot;
 mkdir -p $SaveDir
@@ -765,8 +773,9 @@ echo;echo &quot;  -&gt; Copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
 ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
 scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
 
-echo;echo &quot;J: HW TEST NOT YET READY TO WORK ! =&gt; Exiting !&quot;
-exit 0
+echo;echo &quot;J: HW TEST NOT YET READY TO WORK ! =&gt; not Exiting but doing all hardware test preparation for debug purpose !&quot;
+#echo;echo &quot;J: HW TEST NOT YET READY TO WORK ! =&gt; Exiting !&quot;
+#exit 0
 
 #==============================================================================================
 #==============================================================================================
@@ -793,6 +802,7 @@ echo &quot;  -&gt; GIT_Commit:   ${GIT_COMMIT}&quot;
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Testing TestBoxes reachability&quot;
+echo
 echo &quot;  -&gt; testboxes now = ${TESTBOXES[@]}&quot;
 
 for box in &quot;${TESTBOXES[@]}&quot;;do
@@ -834,7 +844,7 @@ function finish # define function to unlock in case of error, executed after reg
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Searching (max $maxloop min) for free card=$CRD in ${TESTBOXES[@]}&quot;
-
+echo
 maxloop=60
 
 FindCardTool=&quot;oc-accel_find_card&quot;
@@ -949,6 +959,7 @@ done #for loop
 if [ $loop -eq $maxloop ];then
   echo;echo &quot;***************************************************************************************&quot;
   echo &quot;J: J: No card $CRD available with TESTBOXES= ${TESTBOXES[*]}&quot;
+  echo
   SaveDir=&quot;$RootSaveDir/${CRD}_oc_card_not_avail&quot;
   mkdir -p $SaveDir
   echo &quot;  -&gt; Copying image to $SaveDir&quot;
@@ -959,7 +970,7 @@ fi
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Preparing $CRD card image(s) test onto $box system&quot;
-
+echo
 ssh ${HWUser}@${box} &quot;echo ------ START of JOB on $box ----&gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;date                                 &gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;echo JOB_NAME  : $JOB_NAME           &gt;&gt; jenkins.log&quot;
@@ -1047,6 +1058,7 @@ fi
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Building the software and actions on $box in $TARGET_DIR ...&quot;
+echo
 RC=0;ssh $box make -C ${TARGET_DIR} clean software actions || RC=$?
 
 if [ $RC -ne 0 ]; then
@@ -1058,7 +1070,7 @@ fi
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: `date` Executing this below SNAP JENKINS TEST on $box from ${TARGET_DIR} directory:&quot;
 echo &quot;  -&gt; $RUN&quot;
-
+echo
 # FAB: For debugging purpose, and because it is not functional for OpenCapi (capi-reset)
 # not running the following but just displaying...
 echo &quot;
@@ -1081,6 +1093,7 @@ ssh ${HWUser}@${box} &quot;echo ----------- EXIT -------------------&gt;&gt; jen
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: `date` Cleaning up ${box}:${TARGET_DIR}&quot;
+echo
 ssh -T ${HWUser}@${box} rm -rf ${TARGET_DIR}
   
 if [ $RC -ne 0 ]; then
