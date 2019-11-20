@@ -1031,7 +1031,7 @@ echo
 # ssh fpga@${box} lsb_release -a
 
 echo &quot;  -&gt; Preparing command ...&quot;
-RUN=&quot;./actions/scripts/oc_snap_jenkins.sh&quot;
+RUN=&quot;./actions/scripts/oc_jenkins.sh&quot;
 if [ ! -f $RUN ];then 
   echo &quot;  -&gt; Shell Script $RUN not found =&gt; EXITING !&quot;
   exit 100
