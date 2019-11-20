@@ -763,17 +763,23 @@ esac
 echo;echo &quot;****************************************************************************************&quot;
 echo &quot;J: Testing the generated binaries on POWER Hardware (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot;
 echo
+
 SaveDir=$RootSaveDir/${CRD}_oc_for_test
 echo &quot;  -&gt; Hardware test for CARD $CRD not yet working, copying $CRD bin-file(s) &amp; bit-file(s) images to $SaveDir&quot;
 mkdir -p $SaveDir
 cp -rp $BINFILES $SaveDir
 echo $BINFILES
 if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; echo $BITFILES; fi
-echo;echo &quot;  -&gt; Copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
+
+echo;echo &quot;  -&gt; Temporarily copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
 ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
 scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
 
-echo;echo &quot;J: HW TEST NOT YET READY TO WORK ! =&gt; not Exiting but doing all hardware test preparation for debug purpose !&quot;
+echo;echo &quot;  -&gt; Temporarily copying $CRD bin-file(s) to orpington:$SaveDir&quot;
+ssh ${HWUser}@orpington &quot;mkdir -p $SaveDir&quot;
+scp -rp $BINFILES ${HWUser}@orpington:$SaveDir
+
+echo;echo &quot;J: HW TEST NOT YET READY TO WORK ! =&gt; not Exiting but doing all hardware test preparation for debugging purpose !&quot;
 #echo;echo &quot;J: HW TEST NOT YET READY TO WORK ! =&gt; Exiting !&quot;
 #exit 0
 
@@ -1051,8 +1057,13 @@ fi
 
 echo &quot;     Card=$CRD and SPI8=$SPI8&quot;
 
+# For debugging purpose, if not giving an IMAGE to next $RUN test command, the $RUN command should run the test with
+# the already in-place image inside the FPGA, without trying to reset the FPGA &amp; flash the new image.
+# So you just need to uncomment the following line to do so (deleting any IMAGE reference)
+# unset IMAGE
+
 if [ ${#IMAGE[@]} -eq 0 ]; then
-  # FAB: Comment on peut en etre là avec $IMAGE vide ??
+  # no IMAGE to test=&gt; $RUN will just test the image already inside the FPGA (no reset, no flash)
   RUN+=&quot; -A ALL&quot;
 else
   if [ $SPI8 -eq 0 ]; then RUN+=&quot; -F ${IMAGE} -A ${CRD} -C $cardid&quot;;fi
