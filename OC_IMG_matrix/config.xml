@@ -873,16 +873,17 @@ for loop in `seq 1 $maxloop`;do
 
     find_card=$FindCardTool.${GIT_COMMIT}.`date +%H%M%S`.`basename $BINFILES`
 
-    echo  &quot;  --&gt; Copying $find_card to $box:/home/${HWUser}&quot;
+    echo  &quot;  --&gt; Copying the tool $FindCardTool ($find_card) to $box:/home/${HWUser}&quot;
     RC=0;scp ./software/tools/$FindCardTool ${HWUser}@$box:/home/${HWUser}/$find_card ; RC=$?
     if [ $RC -gt 0 ];then
       echo &quot;     -&gt; copy $find_card to $box FAILED, continuing anyway...&quot;;
     fi
     
-    echo  &quot;  --&gt; Looking for OC-$CRD inside $box&quot;
+    echo -e &quot;  --&gt; Looking for OC-$CRD inside ${box}: \c&quot;
     found=0;cards=`ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A OC-${CRD}`||found=$?
+    if [ $found -ne 0 ];then echo &quot;I FOUND $found CARD(S) !&quot;; else echo &quot;NO CARD FOUND !&quot;; fi
 
-    echo &quot;  --&gt; Removing $find_card from $box RC=$SSH_RC&quot;
+    echo &quot;  --&gt; Removing the tool $FindCardTool ($find_card) from $box RC=$SSH_RC&quot;
     SSH_RC=0;ssh -ttq ${HWUser}@${box} rm /home/${HWUser}/$find_card || SSH_RC=$?
     if [ $SSH_RC -gt 0 ];then
       echo &quot;    -&gt; Delete $find_card to $box FAILED, continuing anyway...&quot;;
