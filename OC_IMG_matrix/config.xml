@@ -834,11 +834,15 @@ echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
 
 function finish # define function to unlock in case of error, executed after registering with &quot;trap finish EXIT&quot;
   {
-  echo &quot;RC=$?, now unlocking ${LOCK}, cleaning ${box}@$TARGET_DIR and ending&quot;
+  echo;echo &quot;***************************************************************************************&quot;
+  echo &quot;RC=$?&quot;
+  echo &quot;==&gt; unlocking ${LOCK}&quot;
   UNLOCK_RC=0;ssh ${HWUser}@$box rmdir ${LOCK} || UNLOCK_RC=$?
   echo &quot;`date` box=$box $LOCK unlock RC=$UNLOCK_RC&quot;
+  echo &quot;==&gt; cleaning ${box}@$TARGET_DIR&quot;
   CLEAN_RC=0;ssh -T ${HWUser}@$box rm -rf ${TARGET_DIR} || CLEAN_RC=$?
   echo &quot;`date` box=$box clean target_dir=$TARGET_DIR RC=$CLEAN_RC&quot;
+  echo &quot;==&gt; EXITING !&quot;
   }
 
 
