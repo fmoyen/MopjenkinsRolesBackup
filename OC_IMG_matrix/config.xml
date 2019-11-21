@@ -172,7 +172,7 @@ Main Issues : &#xd;
         <string>hdl_example.BRAM</string>
         <string>hdl_example.DDR</string>
         <string>hdl_single_engine</string>
-        <string>hls_helloworld</string>
+        <string>hls_hello_world</string>
         <string>hls_memcopy_1024</string>
         <string>test</string>
       </values>
@@ -689,7 +689,7 @@ for  f in $BINFILES; do
   COUNT_IMAGE=`expr $COUNT_IMAGE + 1`
 done
 
-# In FACTORY MODE : We save hdl_example and hls_helloworld bin for cards files for future .mcs generation
+# In FACTORY MODE : We save hdl_example and hls_hello_world bin for cards files for future .mcs generation
 #case ${ACT}:$FACTORY in
 #     hdl_example.NORAM:true ) 
 #			FACTBINFILES=`ls -t ${OCACCEL_ROOT}/hardware/build/Images/oc_*[0-9]_FACTORY*.bin`  # take FACTORY bin files
@@ -699,7 +699,7 @@ done
 #            SaveDir=&quot;$RootSaveDir/${CRD}_OC_FACTORY_MCS&quot;
 #            mkdir -p $SaveDir
 #			echo &quot;J: FACTORY was requested : copy ${CRD} hdl_example.noram bin files to $SaveDir&quot;;cp -rp $FACTBINFILES $SaveDir;;
-#	hls_helloworld:true )
+#	hls_hello_world:true )
 #			echo &quot;J: FACTORY was requested : copy ${CRD} hls_helloworld    bin files to $SaveDir&quot;;cp -rp $BINFILES $SaveDir;;
 #esac
 
