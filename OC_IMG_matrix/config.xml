@@ -55,22 +55,22 @@ Main Issues : &#xd;
           <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
-          <name>OC-AD9V3</name>
+          <name>AD9V3</name>
           <description>enable/disable the OC-AD9V3 card</description>
           <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
-          <name>OC-AD9H3</name>
+          <name>AD9H3</name>
           <description>enable/disable the OC-AD9H3 card</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
-          <name>OC-AD9H7</name>
+          <name>AD9H7</name>
           <description>enable/disable the OC-AD9H7 card</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
-          <name>OC-INNOVA2</name>
+          <name>INNOVA2</name>
           <description>enable/disable the OC-INNOVA2 card</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
@@ -84,7 +84,7 @@ Main Issues : &#xd;
         <hudson.model.StringParameterDefinition>
           <name>LIST_TEST_CARDS</name>
           <description>List of the cards available for HW testing</description>
-          <defaultValue>OC-AD9V3</defaultValue>
+          <defaultValue>AD9V3</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
@@ -180,10 +180,10 @@ Main Issues : &#xd;
     <hudson.matrix.TextAxis>
       <name>CRD_CL</name>
       <values>
-        <string>OC-AD9V3_nCL</string>
-        <string>OC-AD9H3_nCL</string>
-        <string>OC-AD9H7_nCL</string>
-        <string>OC-INNOVA2_nCL</string>
+        <string>AD9V3_nCL</string>
+        <string>AD9H3_nCL</string>
+        <string>AD9H7_nCL</string>
+        <string>INNOVA2_nCL</string>
       </values>
     </hudson.matrix.TextAxis>
     <hudson.matrix.LabelAxis>
@@ -193,7 +193,7 @@ Main Issues : &#xd;
       </values>
     </hudson.matrix.LabelAxis>
   </axes>
-  <combinationFilter>(  ((ACT=~&quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;)||(ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; ))  &amp;&amp; ( (CRD_CL=~&quot;OC-AD9V3&quot;  &amp;&amp; OC-AD9V3==&quot;true&quot;) || (CRD_CL=~&quot;OC-INNOVA2&quot;  &amp;&amp; OC-INNOVA2==&quot;true&quot;) || ( CRD_CL=~&quot;OC-AD9H&quot; &amp;&amp; (OC-AD9H3==&quot;true&quot;|| OC-AD9H7==&quot;true&quot;) &amp;&amp; !(ACT=~&quot;DDR&quot;) ) )  ) || (ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;OC-AD9V3&quot;) </combinationFilter>
+  <combinationFilter>(  ((ACT=~&quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;)||(ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; ))  &amp;&amp; ( (CRD_CL=~&quot;AD9V3&quot;  &amp;&amp; AD9V3==&quot;true&quot;) || (CRD_CL=~&quot;INNOVA2&quot;  &amp;&amp; INNOVA2==&quot;true&quot;) || ( CRD_CL=~&quot;AD9H&quot; &amp;&amp; (AD9H3==&quot;true&quot;|| AD9H7==&quot;true&quot;) &amp;&amp; !(ACT=~&quot;DDR&quot;) ) )  ) || (ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;AD9V3&quot;) </combinationFilter>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
@@ -261,7 +261,7 @@ function SendAnEmail
 BSKIP=0
 
 if [ &quot;${!ACTION_TYPE}&quot; == &quot;false&quot; ]; then BSKIP=1;fi # if ACTION_TYPE=&quot;HLS&quot;, ${!ACTION_TYPE} is identical to $HLS
-if [ &quot;${!CRD}&quot;         == &quot;false&quot; ]; then BSKIP=1;fi # if CRD=&quot;OC-AD9V3&quot;, ${!CRD} is identical to $OC-AD9V3
+if [ &quot;${!CRD}&quot;         == &quot;false&quot; ]; then BSKIP=1;fi # if CRD=&quot;AD9V3&quot;, ${!CRD} is identical to $AD9V3
 if [ &quot;$ACT&quot;            == &quot;test&quot;  ]; then BSKIP=0;fi
 
 echo &quot;action_types (hdl,hls)=$ACTION_TYPE enabled_cards=$CRD BSKIP=$BSKIP&quot;
@@ -1050,7 +1050,7 @@ RUN+=&quot; -D ${TARGET_DIR}&quot;
 
 BinFilesList=( $BINFILES )
 if [ ${#BinFilesList[@]} -gt 1 ]; then
-  # More than 1 image file (like with OC-AD9V3 which will have 2)
+  # More than 1 image file (like with AD9V3 which will have 2)
   SPI8=1
 else
   # Only 1 image file
@@ -1153,7 +1153,7 @@ fi </command>
   </buildWrappers>
   <executionStrategy class="hudson.matrix.DefaultMatrixExecutionStrategyImpl">
     <runSequentially>false</runSequentially>
-    <touchStoneCombinationFilter>ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;OC-AD9V3_nCL&quot;</touchStoneCombinationFilter>
+    <touchStoneCombinationFilter>ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;AD9V3_nCL&quot;</touchStoneCombinationFilter>
     <touchStoneResultCondition>
       <name>UNSTABLE</name>
       <ordinal>1</ordinal>
