@@ -970,7 +970,7 @@ done #for loop
 
 if [ $loop -eq $maxloop ];then
   echo;echo &quot;***************************************************************************************&quot;
-  echo &quot;J: J: No card $CRD available with TESTBOXES= ${TESTBOXES[*]}&quot;
+  echo &quot;J: No card $CRD available with TESTBOXES= ${TESTBOXES[*]}&quot;
   echo
   SaveDir=&quot;$RootSaveDir/${CRD}_oc_card_not_avail&quot;
   mkdir -p $SaveDir
