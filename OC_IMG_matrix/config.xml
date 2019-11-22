@@ -201,7 +201,7 @@ set +x                           # reduce Jenkins output
 
 echo
 echo &quot;****************************************************************************************&quot;
-echo &quot;`date` BUILD START&quot;
+echo &quot;BUILD START (`date`)&quot;
 echo &quot;****************************************************************************************&quot;
 echo &quot;EXECUTING OpenCAPI IMG FIRST SHELL FROM MOPJENKINS ...&quot;
 echo &quot;****************************************************************************************&quot;
@@ -396,7 +396,7 @@ set +x                            # reduce Jenkins output
 ulimit -c unlimited               # limit core dumps
 
 echo;echo &quot;****************************************************************************************&quot;
-echo &quot;EXECUTING SECOND OpenCAPI SHELL FROM MOPJENKINS ...&quot;
+echo &quot;EXECUTING SECOND OpenCAPI SHELL FROM MOPJENKINS (`date`)&quot;
 echo &quot;****************************************************************************************&quot;
 echo &quot;SKIP forwarded from previous script = $SKIP&quot;
 if [ $SKIP -eq 1 ]
@@ -578,7 +578,7 @@ case $ACT in          # select config &amp; compile action
         echo &quot;Cleaning process : ssh ${HWUser}@$box find &amp; delete $srch in /home/$HWUser older than $days days&quot;
         ssh ${HWUser}@$box &quot;find /home/$HWUser -type f -name $srch -mtime +$days -ls -delete&quot;
         nusers=`ssh ${HWUser}@${box} who|grep -v root|grep -v ${HWUser}|wc -l`
-        echo &quot;`date` box=$box nusers=$nusers&quot;
+        echo &quot;box=$box nusers=$nusers (`date`)&quot;
       done
     fi                          
     exit 0                     
@@ -619,7 +619,7 @@ then
   for loop in `seq 1 $maxloop`
   do  
     echo;echo &quot;****************************************************************************************&quot;
-    echo &quot;J: `date` Build Non-Cloud Image (make image) for $CRD, Loop ${loop}/$maxloop&quot;
+    echo &quot;J: Build Non-Cloud Image (make image) for $CRD, Loop ${loop}/$maxloop&quot;
     echo
     #RC=0; bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot; &amp;&amp; break || RC=$?
 	RC=0; make image &amp;&amp; break || RC=$?
@@ -643,7 +643,8 @@ then
 else # case of Cloud Build
 # FAB never for the moment but if needed, needs to adapt (BSUB, etc)
   mkdir -p ${OCACCEL_ROOT}/hardware/DCPs
-  echo &quot;J: `date` Build Cloud Image ...&quot;
+  echo;echo &quot;****************************************************************************************&quot;
+  echo &quot;J: Build Cloud Image ...&quot;
   echo &quot;export DCP_ROOT=${OCACCEL_ROOT}/hardware/DCPs/&quot;              &gt;&gt; snap_env.sh
   echo &quot;ENABLE_PRFLOW=y&quot;                                          &gt;&gt; .snap_config
   echo &quot;ENABLE_CLOUD_USER_FLOW=n&quot;                                 &gt;&gt; .snap_config
@@ -667,7 +668,7 @@ fi
 # when using a SPI8 flash we have 2 binary files to deal with
 
 echo;echo &quot;****************************************************************************************&quot;
-echo &quot;J: `date` Checking generated $ACT binaries for $CRD...&quot;
+echo &quot;J: Checking generated $ACT binaries for $CRD... (`date`)&quot;
 echo
 
 #BINFILES contains binary name (In SPI : &quot;primary and secondary&quot; names)
@@ -843,16 +844,16 @@ function finish # define function to unlock in case of error, executed after reg
   echo &quot;RC=$?&quot;
   echo &quot;==&gt; unlocking ${LOCK}&quot;
   UNLOCK_RC=0;ssh ${HWUser}@$box rmdir ${LOCK} || UNLOCK_RC=$?
-  echo &quot;`date` box=$box $LOCK unlock RC=$UNLOCK_RC&quot;
+  echo &quot;box=$box $LOCK unlock RC=$UNLOCK_RC (`date`)&quot;
   echo &quot;==&gt; cleaning ${box}@$TARGET_DIR&quot;
   CLEAN_RC=0;ssh -T ${HWUser}@$box rm -rf ${TARGET_DIR} || CLEAN_RC=$?
-  echo &quot;`date` box=$box clean target_dir=$TARGET_DIR RC=$CLEAN_RC&quot;
+  echo &quot;box=$box clean target_dir=$TARGET_DIR RC=$CLEAN_RC (`date`)&quot;
   echo &quot;==&gt; EXITING !&quot;
   }
 
 
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Searching (max $maxloop min) for free card=$CRD in ${TESTBOXES[@]}&quot;
+echo &quot;J: Searching (max $maxloop min) for free card=$CRD in ${TESTBOXES[@]} (`date`)&quot;
 echo
 maxloop=60
 
@@ -861,7 +862,7 @@ FindCardTool=&quot;oc_find_card&quot;
 for loop in `seq 1 $maxloop`;do
 
   echo;echo &quot;#################################################&quot;
-  echo &quot;J: LOOP $loop/$maxloop&quot;
+  echo &quot;J: LOOP $loop/$maxloop (`date`)&quot;
 
   for box in &quot;${TESTBOXES[@]}&quot;;do
 
@@ -897,7 +898,7 @@ for loop in `seq 1 $maxloop`;do
       echo &quot;    -&gt; Delete $find_card to $box FAILED, continuing anyway...&quot;;
     fi
 
-	echo;echo &quot;J: `date` loop=$loop box=$box nusers=$nusers card=$CRD $FindCardTool found=$found&quot;
+	echo;echo &quot;J: loop=$loop box=$box nusers=$nusers card=$CRD $FindCardTool found=$found (`date`)&quot;
     echo
 
     hours=`date +%H`
@@ -921,7 +922,7 @@ for loop in `seq 1 $maxloop`;do
       	  LOCK=&quot;jenkins_lock_card$cardid&quot;
 		  RC=0;ssh ${HWUser}@$box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
 		  if [ $RC == &quot;0&quot; ]; then :
-		    echo &quot;  --&gt; `date` box=$box $LOCK lock RC=$RC&quot;; 
+		    echo &quot;  --&gt; box=$box $LOCK lock RC=$RC (`date`)&quot;; 
 		    trap finish EXIT  # register finish/unlock function, after lock is set
 		    break 3 # found card and no user =&gt; going out of $box for-loop and $loop for-loop
 	      else 
@@ -957,7 +958,7 @@ for loop in `seq 1 $maxloop`;do
       	    LOCK=&quot;jenkins_lock_card$cardid&quot;
 		    RC=0;ssh ${HWUser}@$box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
 		    if [ $RC == &quot;0&quot; ]; then :
-	  	      echo &quot;  --&gt; `date` box=$box $LOCK lock RC=$RC&quot;; 
+	  	      echo &quot;  --&gt; box=$box $LOCK lock RC=$RC (`date`)&quot;; 
 	   	      trap finish EXIT  # register finish/unlock function, after lock is set
               ssh ${HWUser}@$box wall &quot;WARNING: JENKINS OPENCAPI TEST STARTING NOW on FPGA CARD=$CRD ID=$cards&quot;
 		      break 3 # found card and it is the night =&gt; going out of $box for-loop and $loop for-loop
@@ -1092,7 +1093,7 @@ if [ $RC -ne 0 ]; then
 fi
 
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: `date` Executing this below OC-ACCEL JENKINS TEST on $box from ${TARGET_DIR} directory:&quot;
+echo &quot;J: Executing this below OC-ACCEL JENKINS TEST on $box from ${TARGET_DIR} directory (`date`):&quot;
 echo &quot;  -&gt; $RUN&quot;
 echo
 
@@ -1112,13 +1113,13 @@ ssh ${HWUser}@${box} &quot;date                                     &gt;&gt; jen
 ssh ${HWUser}@${box} &quot;echo ----------- EXIT -------------------&gt;&gt; jenkins.log&quot;
 
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: `date` Cleaning up ${box}:${TARGET_DIR}&quot;
+echo &quot;J: Cleaning up ${box}:${TARGET_DIR} (`date`)&quot;
 echo
 ssh -T ${HWUser}@${box} rm -rf ${TARGET_DIR}
   
 if [ $RC -ne 0 ]; then
   echo;echo &quot;***************************************************************************************&quot;
-  echo &quot;J: `date` Test FAILED RC= $RC&quot;
+  echo &quot;J: Test FAILED RC= $RC (`date`)&quot;
   echo &quot;  -&gt; EXITING !&quot;
   exit 100
 fi </command>
