@@ -1076,7 +1076,7 @@ fi
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Building the software and actions on $box in $TARGET_DIR ...&quot;
 echo
-RC=0;ssh $box make -C ${TARGET_DIR} clean software actions || RC=$?
+RC=0;ssh ${HWUser}@$box make -C ${TARGET_DIR} clean software actions || RC=$?
 
 if [ $RC -ne 0 ]; then
   echo &quot;  -&gt; make clean software actions FAILED&quot;
