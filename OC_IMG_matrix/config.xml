@@ -879,10 +879,17 @@ for loop in `seq 1 $maxloop`;do
     fi
     
     echo -e &quot;  --&gt; Looking for $CRD inside ${box}: \c&quot;
-    found=0;cards=`ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} | head -n1`||found=$?
-    # (head is because $find_card returns something like &quot;0 0&quot; and second line with &quot;Total 2 cards detected&quot;)
+    found=0;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} &gt; /dev/null ||found=$?
+    # ($find_card gives the number of found cards inside $?)
     
-    if [ $found -ne 0 ];then echo &quot;I FOUND $found CARD(S) !&quot;; else echo &quot;NO CARD FOUND !&quot;; fi
+    if [ $found -ne 0 ];then
+      echo &quot;I FOUND $found CARD(S) !&quot;
+      cards=`ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} | head -n1`    
+      # (head is needed because if more than 1 card, $find_card returns something like &quot;0 0&quot; and second line with &quot;Total 2 cards detected&quot;)
+    else
+      echo &quot;NO CARD FOUND !&quot;
+      unset cards
+    fi
 
     echo &quot;  --&gt; Removing the tool $FindCardTool ($find_card) from $box RC=$SSH_RC&quot;
     SSH_RC=0;ssh -ttq ${HWUser}@${box} rm /home/${HWUser}/$find_card || SSH_RC=$?
