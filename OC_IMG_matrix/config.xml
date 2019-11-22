@@ -84,7 +84,7 @@ Main Issues : &#xd;
         <hudson.model.StringParameterDefinition>
           <name>LIST_TEST_CARDS</name>
           <description>List of the cards available for HW testing</description>
-          <defaultValue>AD9V3</defaultValue>
+          <defaultValue>OC-AD9V3</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
@@ -172,7 +172,7 @@ Main Issues : &#xd;
         <string>hdl_example.BRAM</string>
         <string>hdl_example.DDR</string>
         <string>hdl_single_engine</string>
-        <string>hls_hello_world</string>
+        <string>hls_helloworld</string>
         <string>hls_memcopy_1024</string>
         <string>test</string>
       </values>
@@ -180,10 +180,10 @@ Main Issues : &#xd;
     <hudson.matrix.TextAxis>
       <name>CRD_CL</name>
       <values>
-        <string>AD9V3_nCL</string>
-        <string>AD9H3_nCL</string>
-        <string>AD9H7_nCL</string>
-        <string>INNOVA2_nCL</string>
+        <string>OC-AD9V3_nCL</string>
+        <string>OC-AD9H3_nCL</string>
+        <string>OC-AD9H7_nCL</string>
+        <string>OC-INNOVA2_nCL</string>
       </values>
     </hudson.matrix.TextAxis>
     <hudson.matrix.LabelAxis>
@@ -193,7 +193,7 @@ Main Issues : &#xd;
       </values>
     </hudson.matrix.LabelAxis>
   </axes>
-  <combinationFilter>(  ((ACT=~&quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;)||(ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; ))  &amp;&amp; ( (CRD_CL=~&quot;AD9V3&quot;  &amp;&amp; AD9V3==&quot;true&quot;) || (CRD_CL=~&quot;INNOVA2&quot;  &amp;&amp; INNOVA2==&quot;true&quot;) || ( CRD_CL=~&quot;AD9H&quot; &amp;&amp; (AD9H3==&quot;true&quot;|| AD9H7==&quot;true&quot;) &amp;&amp; !(ACT=~&quot;DDR&quot;) ) )  ) || (ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;AD9V3&quot;) </combinationFilter>
+  <combinationFilter>(  ((ACT=~&quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;)||(ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; ))  &amp;&amp; ( (CRD_CL=~&quot;OC-AD9V3&quot;  &amp;&amp; AD9V3==&quot;true&quot;) || (CRD_CL=~&quot;OC-INNOVA2&quot;  &amp;&amp; INNOVA2==&quot;true&quot;) || ( CRD_CL=~&quot;OC-AD9H&quot; &amp;&amp; (AD9H3==&quot;true&quot;|| AD9H7==&quot;true&quot;) &amp;&amp; !(ACT=~&quot;DDR&quot;) ) )  ) || (ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;OC-AD9V3&quot;) </combinationFilter>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
@@ -689,7 +689,7 @@ for  f in $BINFILES; do
   COUNT_IMAGE=`expr $COUNT_IMAGE + 1`
 done
 
-# In FACTORY MODE : We save hdl_example and hls_hello_world bin for cards files for future .mcs generation
+# In FACTORY MODE : We save hdl_example and hls_helloworld bin for cards files for future .mcs generation
 #case ${ACT}:$FACTORY in
 #     hdl_example.NORAM:true ) 
 #			FACTBINFILES=`ls -t ${OCACCEL_ROOT}/hardware/build/Images/oc_*[0-9]_FACTORY*.bin`  # take FACTORY bin files
@@ -699,7 +699,7 @@ done
 #            SaveDir=&quot;$RootSaveDir/${CRD}_OC_FACTORY_MCS&quot;
 #            mkdir -p $SaveDir
 #			echo &quot;J: FACTORY was requested : copy ${CRD} hdl_example.noram bin files to $SaveDir&quot;;cp -rp $FACTBINFILES $SaveDir;;
-#	hls_hello_world:true )
+#	hls_helloworld:true )
 #			echo &quot;J: FACTORY was requested : copy ${CRD} hls_helloworld    bin files to $SaveDir&quot;;cp -rp $BINFILES $SaveDir;;
 #esac
 
@@ -878,8 +878,8 @@ for loop in `seq 1 $maxloop`;do
       echo &quot;     -&gt; copy $find_card to $box FAILED, continuing anyway...&quot;;
     fi
     
-    echo -e &quot;  --&gt; Looking for OC-$CRD inside ${box}: \c&quot;
-    found=0;cards=`ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A OC-${CRD} | head -n1`||found=$?
+    echo -e &quot;  --&gt; Looking for $CRD inside ${box}: \c&quot;
+    found=0;cards=`ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} | head -n1`||found=$?
     # (head is because $find_card returns something like &quot;0 0&quot; and second line with &quot;Total 2 cards detected&quot;)
     
     if [ $found -ne 0 ];then echo &quot;I FOUND $found CARD(S) !&quot;; else echo &quot;NO CARD FOUND !&quot;; fi
@@ -1059,14 +1059,14 @@ fi
 
 echo &quot;     Card=$CRD and SPI8=$SPI8&quot;
 
-# For debugging purpose, if not giving an IMAGE to next $RUN test command, the $RUN command should run the test with
+# For debugging purpose, if not giving an IMAGE to next $RUN test command, the $RUN command would run the test with
 # the already in-place image inside the FPGA, without trying to reset the FPGA &amp; flash the new image.
 # So you just need to uncomment the following line to do so (deleting any IMAGE reference)
-# unset IMAGE
+unset IMAGE
 
 if [ ${#IMAGE[@]} -eq 0 ]; then
   # no IMAGE to test=&gt; $RUN will just test the image already inside the FPGA (no reset, no flash)
-  RUN+=&quot; -A ALL&quot;
+  RUN+=&quot; -A ${CRD}&quot;
 else
   if [ $SPI8 -eq 0 ]; then RUN+=&quot; -F ${IMAGE} -A ${CRD} -C $cardid&quot;;fi
   if [ $SPI8 -eq 1 ]; then RUN+=&quot; -F ${IMAGE[0]} -f ${IMAGE[1]} -A ${CRD} -C $cardid&quot;;fi
@@ -1088,9 +1088,7 @@ echo;echo &quot;****************************************************************
 echo &quot;J: `date` Executing this below OC-ACCEL JENKINS TEST on $box from ${TARGET_DIR} directory:&quot;
 echo &quot;  -&gt; $RUN&quot;
 echo
-# FAB: For debugging purpose, and because it is not functional for OpenCapi (capi-reset)
-# not running the following but just displaying...
-echo &quot;
+
 RC=0;ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?
 	export TERM=xterm
 	cd ${TARGET_DIR}
@@ -1098,8 +1096,6 @@ RC=0;ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?
 	set -f  # the set -f command disables file name generation (&quot;path name expansion&quot;), meaning &quot;*.zip&quot; stays &quot;*.zip&quot;
     ${RUN}
 EOF
-&quot;
-# End of debug: remove &apos;echo &quot;&apos; and &apos;&quot;&apos; lines above when OK
 
 
 # Write short log only, Clean workspace
@@ -1153,7 +1149,7 @@ fi </command>
   </buildWrappers>
   <executionStrategy class="hudson.matrix.DefaultMatrixExecutionStrategyImpl">
     <runSequentially>false</runSequentially>
-    <touchStoneCombinationFilter>ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;AD9V3_nCL&quot;</touchStoneCombinationFilter>
+    <touchStoneCombinationFilter>ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;OC-AD9V3_nCL&quot;</touchStoneCombinationFilter>
     <touchStoneResultCondition>
       <name>UNSTABLE</name>
       <ordinal>1</ordinal>
