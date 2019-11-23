@@ -619,7 +619,7 @@ then
   for loop in `seq 1 $maxloop`
   do  
     echo;echo &quot;****************************************************************************************&quot;
-    echo &quot;J: Build Non-Cloud Image (make image) for $CRD, Loop ${loop}/$maxloop&quot;
+    echo &quot;J: Build Non-Cloud Image (make image) for $CRD, Loop ${loop}/$maxloop (`date`)&quot;
     echo
     #RC=0; bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot; &amp;&amp; break || RC=$?
 	RC=0; make image &amp;&amp; break || RC=$?
