@@ -612,6 +612,10 @@ esac
 #==============================================================================================
 # Building image (make image/ make cloud...)
 
+echo;echo &quot;FABDEBUG&quot;;echo
+
+&lt;&lt; FABDEBUG
+
 if [ &quot;$CL&quot; == &quot;nCL&quot; ]
 then
 
@@ -705,6 +709,7 @@ done
 #			echo &quot;J: FACTORY was requested : copy ${CRD} hls_helloworld    bin files to $SaveDir&quot;;cp -rp $BINFILES $SaveDir;;
 #esac
 
+FABDEBUG
 
 #==============================================================================================
 # Checking if we can test the generated binaries on POWER Hardware
@@ -898,11 +903,12 @@ for loop in `seq 1 $maxloop`;do
       unset cards
     fi
 
-    echo &quot;  --&gt; Removing the tool $FindCardTool ($find_card) from $box RC=$SSH_RC&quot;
-    SSH_RC=0;ssh -ttq ${HWUser}@${box} rm /home/${HWUser}/$find_card || SSH_RC=$?
-    if [ $SSH_RC -gt 0 ];then
-      echo &quot;    -&gt; Delete $find_card to $box FAILED, continuing anyway...&quot;;
-    fi
+# FAB DEBUG
+#    echo &quot;  --&gt; Removing the tool $FindCardTool ($find_card) from $box RC=$SSH_RC&quot;
+#    SSH_RC=0;ssh -ttq ${HWUser}@${box} rm /home/${HWUser}/$find_card || SSH_RC=$?
+#    if [ $SSH_RC -gt 0 ];then
+#      echo &quot;    -&gt; Delete $find_card to $box FAILED, continuing anyway...&quot;;
+#    fi
 
 	echo;echo &quot;J: loop=$loop box=$box nusers=$nusers card=$CRD $FindCardTool found=$found (`date`)&quot;
     echo
