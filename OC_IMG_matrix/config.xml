@@ -895,7 +895,7 @@ for loop in `seq 1 $maxloop`;do
     
     if [ $found -ne 0 ];then
       echo &quot;OK: $found CARD(S) FOUND&quot;
-      cards=`ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} 2&gt;/dev/null| head -n1`   
+      cards=`ssh -ttq ${HWUser}@${box} &quot;/home/${HWUser}/$find_card -A ${CRD} 2&gt;/dev/null&quot; | head -n1`   
       echo &quot;      Found card-IDs= $cards&quot;
       # (head is needed because if more than 1 card, $find_card returns something like &quot;0 0&quot; and second line with &quot;Total 2 cards detected&quot;)
     else
