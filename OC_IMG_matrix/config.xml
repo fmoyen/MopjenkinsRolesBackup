@@ -684,7 +684,7 @@ unset IMAGE
 for  f in $BINFILES; do                   
   size=`ls -al $f | awk &apos;{print $5}&apos;`
   echo &quot;binfile=$f&quot;
-  echo &quot;   --&gt; size=$size&quot;
+  echo &quot;   -&gt; size=$size&quot;
   (( size &lt; 100000 )) &amp;&amp; die 1 &quot;  --&gt; image $f is too small $size to burn&quot;
  
   IMAGE[$COUNT_IMAGE]=&quot;/home/${HWUser}/images/${CRD}/${ACT}/&quot;`basename $f` 
@@ -764,7 +764,7 @@ esac
 # =&gt; Copying and exiting !
 
 echo;echo &quot;****************************************************************************************&quot;
-echo &quot;J: Testing the generated binaries on POWER Hardware (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot;
+echo &quot;J: Temporarily copying generated images to jtagx86 and orpington ($RootSaveDir)&quot;
 echo
 
 SaveDir=$RootSaveDir/${CRD}_oc_for_test
@@ -810,7 +810,7 @@ echo &quot;  -&gt; GIT_Branch:   ${GIT_BRANCH}&quot;
 echo &quot;  -&gt; GIT_Commit:   ${GIT_COMMIT}&quot;
 
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Checking TestBoxes reachability&quot;
+echo &quot;J: Checking TestBoxes reachability (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot;
 echo
 echo &quot;  -&gt; testboxes now = ${TESTBOXES[@]}&quot;
 echo
@@ -1047,7 +1047,7 @@ fi
 
 
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Testing $CRD card image(s) with $box system&quot;
+echo &quot;J: Testing $CRD card image(s) with Power $box system&quot;
 echo
 
 # ssh fpga@${box} lsb_release -a
@@ -1086,7 +1086,7 @@ else
   if [ $SPI8 -eq 1 ]; then RUN+=&quot; -F ${IMAGE[0]} -f ${IMAGE[1]} -A ${CRD} -C $cardid&quot;;fi
 fi
 
-echo;echo &quot;  -&gt; RUN=$RUN&quot;
+echo;echo &quot;  -&gt; RUN command= $RUN&quot;
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Building the software and actions on $box in $TARGET_DIR ...&quot;
