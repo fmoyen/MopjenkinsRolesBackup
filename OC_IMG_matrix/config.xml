@@ -77,13 +77,13 @@ Main Issues : &#xd;
         <hudson.model.BooleanParameterDefinition>
           <name>TEST_ON_HW</name>
           <description>Enable/disable testing on HW
-(Disabled by default as oc-flash + oc-reset does&apos;t work yet =&gt; need to reboot to get the code !)
+(Disabled by default as oc-flash + oc-reset does&apos;t work yet =&gt; need to reboot to get the code in!)
 </description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>LIST_TEST_CARDS</name>
-          <description>List of the cards available for HW testing</description>
+          <description>The list of available OpenCAPI cards for HW testing (format: &quot;OC-AD9V3 OC-AD9H7&quot;)</description>
           <defaultValue>OC-AD9V3</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
@@ -683,7 +683,8 @@ COUNT_IMAGE=0
 unset IMAGE
 for  f in $BINFILES; do                   
   size=`ls -al $f | awk &apos;{print $5}&apos;`
-  echo &quot;binfile=$f size=$size&quot;
+  echo &quot;binfile=$f&quot;
+  echo &quot;   --&gt; size=$size&quot;
   (( size &lt; 100000 )) &amp;&amp; die 1 &quot;  --&gt; image $f is too small $size to burn&quot;
  
   IMAGE[$COUNT_IMAGE]=&quot;/home/${HWUser}/images/${CRD}/${ACT}/&quot;`basename $f` 
@@ -733,6 +734,8 @@ case ${TEST_ON_HW} in
       scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
       echo &quot;  -&gt; EXITING !&quot;
       exit 0
+    else
+      echo &quot;  -&gt; OK&quot;
     fi
   ;;
   
@@ -807,9 +810,10 @@ echo &quot;  -&gt; GIT_Branch:   ${GIT_BRANCH}&quot;
 echo &quot;  -&gt; GIT_Commit:   ${GIT_COMMIT}&quot;
 
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Testing TestBoxes reachability&quot;
+echo &quot;J: Checking TestBoxes reachability&quot;
 echo
 echo &quot;  -&gt; testboxes now = ${TESTBOXES[@]}&quot;
+echo
 
 for box in &quot;${TESTBOXES[@]}&quot;;do
   echo &quot;----------------------------------------------------&quot;
@@ -825,8 +829,9 @@ for box in &quot;${TESTBOXES[@]}&quot;;do
   fi
 
 if [ &quot;$RC&quot; == &quot;0&quot; ]; then : 
-    echo &quot;$box ping ok&quot;;
+    echo &quot;OK&quot;;
   else
+    echo &quot;FAILED !&quot;
     for i in &quot;${TESTBOXES[@]}&quot;; do [[ $i != $box ]] &amp;&amp; new+=($i);done   # generate new test array without unreachable box
     unset TESTBOXES;TESTBOXES=(&quot;${new[@]}&quot;);unset new                   # reassign to original array name
     echo &quot;$box not reachable =&gt; removed from testing&quot;
@@ -852,22 +857,21 @@ function finish # define function to unlock in case of error, executed after reg
   }
 
 
-echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Searching (max $maxloop min) for free card=$CRD in ${TESTBOXES[@]} (`date`)&quot;
-echo
 maxloop=60
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Searching (max $maxloop min) for free card=$CRD into ( ${TESTBOXES[@]} ) (`date`)&quot;
 
 FindCardTool=&quot;oc_find_card&quot;
 
 for loop in `seq 1 $maxloop`;do
 
-  echo;echo &quot;#################################################&quot;
+  echo;echo &quot;*************************************************&quot;
   echo &quot;J: LOOP $loop/$maxloop (`date`)&quot;
 
   for box in &quot;${TESTBOXES[@]}&quot;;do
 
     echo;echo &quot;-------------------------------------------------&quot;
-    echo &quot;J: $box&quot;
+    echo &quot;$box&quot;
 
     nusers=`ssh ${HWUser}@${box} who|grep -v root|grep -v ${HWUser}|wc -l`
 
@@ -879,16 +883,16 @@ for loop in `seq 1 $maxloop`;do
       echo &quot;     -&gt; copy $find_card to $box FAILED, continuing anyway...&quot;;
     fi
     
-    echo -e &quot;  --&gt; Looking for $CRD inside ${box}: \c&quot;
+    echo -e &quot;  --&gt; Using the tool, looking for $CRD inside ${box}: \c&quot;
     found=0;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} &gt; /dev/null ||found=$?
     # ($find_card gives the number of found cards inside $?)
     
     if [ $found -ne 0 ];then
-      echo &quot;I FOUND $found CARD(S) !&quot;
+      echo &quot;OK: $found CARD(S) FOUND&quot;
       cards=`ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} | head -n1`    
       # (head is needed because if more than 1 card, $find_card returns something like &quot;0 0&quot; and second line with &quot;Total 2 cards detected&quot;)
     else
-      echo &quot;NO CARD FOUND !&quot;
+      echo &quot;FAILED: NO CARD FOUND&quot;
       unset cards
     fi
 
@@ -1041,7 +1045,7 @@ fi
 
 
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Testing $CRD card image(s) onto $box system&quot;
+echo &quot;J: Testing $CRD card image(s) with $box system&quot;
 echo
 
 # ssh fpga@${box} lsb_release -a
