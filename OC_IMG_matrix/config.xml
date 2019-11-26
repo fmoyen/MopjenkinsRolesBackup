@@ -599,7 +599,7 @@ case $ACT in          # select config &amp; compile action
     ;;
     
   *&quot;nvme&quot;*|*&quot;NVME&quot;*)
-    echo &quot;J: ACT=*NVME* ==&gt; SIMULATOR=nosim &amp; Configure image thanks to $CRD.$ACT.defconfig file ...&quot;;echo
+    echo &quot;J: ACT=*NVME* ==&gt; SIMULATOR=nosim &amp; Configuring image thanks to $CRD.$ACT.defconfig file ...&quot;;echo
     echo &quot;export SIMULATOR=nosim&quot; &gt;&gt; snap_env.sh
     make -s $CRD.$ACT.defconfig
     ;;
@@ -608,7 +608,7 @@ case $ACT in          # select config &amp; compile action
   *&quot;hdl_example.NORAM&quot;*)
     echo &quot;J: ACT=*hdl_example.NORAM* ==&gt; Factory case ?? ...&quot;
     if [ &quot;$FACTORY&quot;  == &quot;true&quot; ];then
-       echo &quot;J: FACTORY=true ==&gt; ENABLE_FACTORY=y &amp; Configure image thanks to $CRD.$ACT.defconfig file...&quot;;echo
+       echo &quot;J: FACTORY=true ==&gt; ENABLE_FACTORY=y &amp; Configuring image thanks to $CRD.$ACT.defconfig file...&quot;;echo
        echo &quot;ENABLE_FACTORY=y&quot; &gt;&gt; ./defconfig/$CRD.$ACT.defconfig
        make -s $CRD.$ACT.defconfig
     else
@@ -617,7 +617,7 @@ case $ACT in          # select config &amp; compile action
     ;;
     
   *)
-    echo &quot;J: Generic case ==&gt; Just configure image thanks to $CRD.$ACT.defconfig file...&quot;;echo
+    echo &quot;J: Generic case ==&gt; Just configuring image thanks to $CRD.$ACT.defconfig file...&quot;;echo
     make -s $CRD.$ACT.defconfig
     ;;
 esac

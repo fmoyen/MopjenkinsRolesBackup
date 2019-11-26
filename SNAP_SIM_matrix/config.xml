@@ -641,7 +641,7 @@ source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
 #==============================================================================================
 # Cadence setup
 
-# No cadence setup at MOP
+# FAB: No cadence setup at MOP
 #echo;echo &quot;****************************************************************************************&quot; 
 #echo &quot;J: Cadence SETUP ...&quot;
 #case $SIM:$VIV in
@@ -667,50 +667,57 @@ source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
 #    fi;;
 #esac
 
-case $ACT in 
-  *&quot;nvme&quot;*|*&quot;NVME&quot;*) echo &quot;Denali SETUP ...&quot;
-    export DENALI=/afs/bb/proj/cte/tools/cds/VIPCAT/11.30.037/tools.lnx86/denali_64bit
-#   export CDS_LIC_FILE=5280@cdsserv1.pok.ibm.com:5280@cdsserv2.pok.ibm.com  # to get VIP_NVME_PS 
-export CDS_LIC_FILE=1716@rchlic1.rchland.ibm.com:1716@rchlic2.rchland.ibm.com:1716@rchlic3.rchland.ibm.com
-#   echo &quot;export DENALI=/afs/bb/proj/cte/tools/cds/VIPCAT/11.30.037/tools.lnx86/denali_64bit&quot; &gt;&gt;snap_env.sh
-#   echo &quot;export CDS_LIC_FILE=5280@auslnxlic01.austin.ibm.com&quot;                                &gt;&gt;snap_env.sh
-    ;;
-esac
-echo &quot;CDS_LIC_FILE=${CDS_LIC_FILE}&quot;
+#case $ACT in 
+#  *&quot;nvme&quot;*|*&quot;NVME&quot;*) echo &quot;Denali SETUP ...&quot;
+#    export DENALI=/afs/bb/proj/cte/tools/cds/VIPCAT/11.30.037/tools.lnx86/denali_64bit
+#export CDS_LIC_FILE=1716@rchlic1.rchland.ibm.com:1716@rchlic2.rchland.ibm.com:1716@rchlic3.rchland.ibm.com
+#    ;;
+#esac
+#echo &quot;CDS_LIC_FILE=${CDS_LIC_FILE}&quot;
 
-#DEBUG AC
-#/afs/bb/data/vlsi/cte/tools/misc/flexlm/11.14/lnx86/mgls_v9-18_8-6-0.ixl/bin/lmstat -a -c ${CDS_LIC_FILE} |grep  -iE &quot;Users of Inc|Users of VIP_NVME|xceli|error&quot;|grep -v scubed
-#DEBUG AC
 
-echo &quot;****************************************************************************************&quot;
-echo &quot;Build Simulation Model ...&quot;
+#==============================================================================================
+# If ACT=test just doing nothing (exit 0),
+# else making $CRD.$ACT.defconfig
+
+echo;echo &quot;****************************************************************************************&quot; 
+
 case $ACT in                    # select config &amp; compile action
+
   &apos;test&apos;) 
-    echo &quot;test exit 0&quot;;exit 0;; # just exit 
+    echo &quot;J: ACT=$ACT ==&gt; skiping model building&quot;;echo
+    echo &quot;            ==&gt; Just EXITING !&quot;
+    exit 0
+    ;;
+    
   &apos;hls_intersect_h&apos;)  
+    echo &quot;J: ACT=$ACT (hash) ==&gt; Configuring image thanks to $CRD.hls_intersect.defconfig file and doing make clean_config_h ...&quot;;echo
     make $CRD.hls_intersect.defconfig
     source ./snap_env.sh        # execute to exploit ACTION_ROOT
-    echo &quot;action compile intersect hash&quot;;
     make -C ${ACTION_ROOT} clean config_h
     ;;
+    
   &apos;hls_intersect_s&apos;)  
+    echo &quot;J: ACT=$ACT (sort) ==&gt; Configuring image thanks to $CRD.hls_intersect.defconfig file and doing make clean_config_s ...&quot;;echo
     make $CRD.hls_intersect.defconfig
     source ./snap_env.sh        # execute to exploit ACTION_ROOT
-    echo &quot;action compile intersect sort&quot;;
     make -C ${ACTION_ROOT} clean config_s
     ;;
+    
   *DENALI*)
     act2=${ACT%.DENALI}
-    echo &quot;build action for ACT=$ACT act2=$act2&quot;
+    echo &quot;J: ACT=$ACT ==&gt; Configuring image thanks to $CRD.$act2.defconfig file ...&quot;;echo  
     make $CRD.$act2.defconfig
     ;;
+    
   *) 
-#   echo &quot;pwd:&quot;;pwd
-#   echo &quot;pwd content:&quot;;ls
-#   echo &quot;defconfig:&quot;;ls defconfig/
+    echo &quot;J: Generic case ==&gt; Just configuring image thanks to $CRD.$ACT.defconfig file...&quot;;echo
     make $CRD.$ACT.defconfig
     ;;
 esac
+
+
+# Build Simulation Model (make model)
 case $SIM:$ACT in
   &apos;xsim&apos;:*|&apos;XSIM&apos;:* )             echo &quot;export SIMULATOR=xsim&quot;     &gt;&gt; .snap_config.sh
                                   sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
