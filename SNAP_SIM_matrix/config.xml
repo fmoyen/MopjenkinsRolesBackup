@@ -5,6 +5,36 @@
 Contacts : alexandre.castellane@fr.ibm.com or fabrice_moyen@fr.ibm.com&#xd;
 &#xd;
 November 2019: Job imported from hdcl070Boeblingen jenkins server&#xd;
+Original Combination filter:&#xd;
+((ACT=~ &quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;) || (ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; )) &#xd;
+  &amp;&amp; &#xd;
+(&#xd;
+  (CRD==&quot;ADKU3&quot; &amp;&amp; ADKU3==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; !(ACT=~&quot;hls_scatter_gather&quot;) &amp;&amp; (SIM_VIV=~&quot;2018.1&quot;)) &#xd;
+    || &#xd;
+  (CRD==&quot;AD8K5&quot; &amp;&amp; AD8K5==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; !(ACT=~&quot;hls_scatter_gather&quot;) &amp;&amp; (SIM_VIV=~&quot;2018.1&quot;)) &#xd;
+    || &#xd;
+  (CRD==&quot;N250S&quot; &amp;&amp; N250S==&quot;true&quot;  &amp;&amp; !(ACT=~&quot;hls_scatter_gather&quot;) &amp;&amp; (SIM_VIV=~&quot;2018.1&quot;)) &#xd;
+    || &#xd;
+  (CRD==&quot;S121B&quot; &amp;&amp; S121B==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; !(ACT=~&quot;hls_scatter_gather&quot;) &amp;&amp; (SIM_VIV=~&quot;2018.1&quot;)) &#xd;
+    || &#xd;
+  (CRD==&quot;RCXVUP&quot; &amp;&amp; RCXVUP==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; (SIM_VIV=~&quot;2017.4&quot;) ) &#xd;
+    || &#xd;
+  (CRD==&quot;AD9V3&quot; &amp;&amp; AD9V3==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; ((SIM_VIV=~&quot;2018.2&quot;) || (SIM_VIV=~&quot;2018.3&quot;)) ) &#xd;
+    || &#xd;
+  (CRD==&quot;U200&quot; &amp;&amp; U200==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; ((SIM_VIV=~&quot;2018.2&quot;) || (SIM_VIV=~&quot;2018.3&quot;)) ) &#xd;
+    || &#xd;
+  (CRD==&quot;S241&quot; &amp;&amp; S241==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; ((SIM_VIV=~&quot;2018.2&quot;) || (SIM_VIV=~&quot;2018.3&quot;)) ) &#xd;
+    || &#xd;
+  (CRD==&quot;FX609&quot; &amp;&amp; FX609==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; ((SIM_VIV=~&quot;2018.2&quot;) || (SIM_VIV=~&quot;2018.3&quot;)) ) &#xd;
+    || &#xd;
+  (CRD==&quot;N250SP&quot; &amp;&amp; N250SP==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; ((SIM_VIV=~&quot;2018.2&quot;) || (SIM_VIV=~&quot;2018.3&quot;)) ) &#xd;
+    || &#xd;
+  (CRD==&quot;U200&quot; &amp;&amp; U200==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; (SIM_VIV=~&quot;2018.3&quot;)) &#xd;
+) &#xd;
+  &amp;&amp; &#xd;
+  ((SIM_VIV=~&quot;irun&quot; &amp;&amp; IRUN==&quot;true&quot;) || (SIM_VIV=~&quot;xsim&quot; &amp;&amp; XSIM==&quot;true&quot;) || (SIM_VIV=~&quot;xcelium&quot; &amp;&amp; XCELIUM==&quot;true&quot;)) &#xd;
+  ||  &#xd;
+  (ACT==&quot;test&quot; &amp;&amp; CRD==&quot;ADKU3&quot; &amp;&amp; SIM_VIV=~&quot;xsim&quot;) &#xd;
 &#xd;
 April 26th 2019 : filter : CAPI1 2018.1 CAPI2 2018.2or 3, U200 2018.3 RCXVUP 2017.4&#xd;
 &#xd;
@@ -21,7 +51,7 @@ Removed hls_intersect_s &amp; hls_intersect_h from matrix</description>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
           <name>BRANCH</name>
-          <description>Choose the branch you want to test. Please do not use wildcards!!</description>
+          <description>Choose the branch for https://github.com/open-power/snap you want to test. Please do not use wildcards!!</description>
           <defaultValue>master</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
@@ -38,7 +68,7 @@ Removed hls_intersect_s &amp; hls_intersect_h from matrix</description>
         <hudson.model.BooleanParameterDefinition>
           <name>ADKU3</name>
           <description>enable/disable ADKU3 simulation</description>
-          <defaultValue>true</defaultValue>
+          <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>AD8K5</name>
@@ -111,18 +141,535 @@ Removed hls_intersect_s &amp; hls_intersect_h from matrix</description>
       <paramsToUseForLimit></paramsToUseForLimit>
     </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
   </properties>
-  <scm class="hudson.scm.NullSCM"/>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.9.3">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>https://github.com/open-power/snap</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>${BRANCH}</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions>
+      <hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
+        <relativeTargetDir>snap</relativeTargetDir>
+      </hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
+      <hudson.plugins.git.extensions.impl.PruneStaleBranch/>
+      <hudson.plugins.git.extensions.impl.CleanBeforeCheckout/>
+    </extensions>
+  </scm>
   <canRoam>true</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers/>
   <concurrentBuild>true</concurrentBuild>
-  <axes/>
-  <builders/>
-  <publishers/>
-  <buildWrappers/>
+  <axes>
+    <hudson.matrix.TextAxis>
+      <name>ACT</name>
+      <values>
+        <string>hdl_example.SDRAM</string>
+        <string>hdl_example.BRAM</string>
+        <string>hdl_example.NORAM</string>
+        <string>hdl_helloworld</string>
+        <string>hdl_example.SDRAM.NVME.DENALI</string>
+        <string>hdl_example.SDRAM.NVME</string>
+        <string>hdl_nvme_example.BRAM.NVME.DENALI</string>
+        <string>hdl_nvme_example.BRAM.NVME</string>
+        <string>hls_nvme_memcopy.DENALI</string>
+        <string>hls_nvme_memcopy</string>
+        <string>hls_memcopy</string>
+        <string>hls_bfs</string>
+        <string>hls_hashjoin</string>
+        <string>hls_search</string>
+        <string>hls_sponge</string>
+        <string>hls_helloworld</string>
+        <string>hls_decimal_mult</string>
+        <string>hls_scatter_gather</string>
+        <string>hls_latency_eval</string>
+        <string>hls_parallel_memcpy</string>
+        <string>hls_vector_generator</string>
+        <string>test</string>
+      </values>
+    </hudson.matrix.TextAxis>
+    <hudson.matrix.TextAxis>
+      <name>CRD</name>
+      <values>
+        <string>ADKU3</string>
+        <string>AD8K5</string>
+        <string>N250S</string>
+        <string>S121B</string>
+        <string>N250SP</string>
+        <string>FX609</string>
+        <string>S241</string>
+        <string>RCXVUP</string>
+        <string>AD9V3</string>
+        <string>U200</string>
+      </values>
+    </hudson.matrix.TextAxis>
+    <hudson.matrix.TextAxis>
+      <name>SIM_VIV</name>
+      <values>
+        <string>xsim_2018.1</string>
+        <string>irun_2018.1</string>
+        <string>xsim_2018.2</string>
+        <string>irun_2018.2</string>
+        <string>xsim_2018.3</string>
+        <string>irun_2018.3</string>
+      </values>
+    </hudson.matrix.TextAxis>
+  </axes>
+  <combinationFilter>((ACT=~ &quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;) || (ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; )) &amp;&amp; (CRD==&quot;AD9V3&quot; &amp;&amp; AD9V3==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; ((SIM_VIV=~&quot;2018.2&quot;) || (SIM_VIV=~&quot;2018.3&quot;)) ) &amp;&amp; ((SIM_VIV=~&quot;irun&quot; &amp;&amp; IRUN==&quot;true&quot;) || (SIM_VIV=~&quot;xsim&quot; &amp;&amp; XSIM==&quot;true&quot;) || (SIM_VIV=~&quot;xcelium&quot; &amp;&amp; XCELIUM==&quot;true&quot;)) ||  (ACT==&quot;test&quot; &amp;&amp; CRD==&quot;AD9V3&quot; &amp;&amp; SIM_VIV=~&quot;xsim&quot;) </combinationFilter>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>#!/bin/bash
+set +x                           # reduce Jenkins output
+echo &quot;****************************************************************************************&quot;
+echo &quot;`date` BUILD START&quot;
+echo &quot;****************************************************************************************&quot;
+echo &quot;EXECUTING FIRST SHELL FROM CAPI1&amp;2 SIM JENKINS - V1.1 - 2019 march 21 - ...&quot;
+echo &quot;****************************************************************************************&quot;
+NAME=$(echo $GIT_BRANCH| cut -d&apos;/&apos; -f 2 |tr &apos;[:upper:]&apos; &apos;[:lower:]&apos;) # remove origin/ from branch and translate to lowercase
+PREFIX=$(echo $NAME| cut -d&apos;_&apos; -f 1)    # chars up to first &apos;_&apos; identify need for test
+ACTION_TYPE=$(echo $ACT| cut -d&apos;_&apos; -f 1)
+SIM=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 1)    # chars up to  first &apos;_&apos; identify Simulator
+VIV=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 2)    # chars behind first &apos;_&apos; identify Vivado version
+echo &quot;Build with Card=$CRD Action=$ACT Action_type=$ACTION_TYPE branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX&quot;
+
+BSKIP=0
+if [ &quot;$ACTION_TYPE&quot; == &quot;hdl&quot;    ] &amp;&amp; [ &quot;$HDL&quot;    == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$ACTION_TYPE&quot; == &quot;hls&quot;    ] &amp;&amp; [ &quot;$HLS&quot;    == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$CRD&quot;         == &quot;ADKU3&quot;  ] &amp;&amp; [ &quot;$ADKU3&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$CRD&quot;         == &quot;AD8K5&quot;  ] &amp;&amp; [ &quot;$AD8K5&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$CRD&quot;         == &quot;N250S&quot;  ] &amp;&amp; [ &quot;$N250S&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$CRD&quot;         == &quot;S121B&quot;  ] &amp;&amp; [ &quot;$S121B&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$CRD&quot;         == &quot;N250SP&quot; ] &amp;&amp; [ &quot;$N250SP&quot; == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$CRD&quot;         == &quot;RCXVUP&quot; ] &amp;&amp; [ &quot;$RCXVUP&quot; == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$CRD&quot;         == &quot;S241&quot;   ] &amp;&amp; [ &quot;$S241&quot;   == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$CRD&quot;         == &quot;FX609&quot;  ] &amp;&amp; [ &quot;$FX609&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$CRD&quot;         == &quot;AD9V3&quot;  ] &amp;&amp; [ &quot;$AD9V3&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$CRD&quot;         == &quot;U200&quot;   ] &amp;&amp; [ &quot;$U200&quot;   == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$ACT&quot;         == &quot;test&quot;   ]; then BSKIP=0;fi
+echo &quot;examples(hdl,hls)=$HDL $HLS card_enabled(ku3,8k5,250S,S121B,N250SP,RCXVUP,S241,FX609,AD9V3,U200)=$ADKU3 $AD8K5 $N250S $S121B $N250SP $RCXVUP $S241 $FX609 $AD9V3 $U200 BSKIP=$BSKIP&quot;
+
+#debug AC
+  case &quot;$BSKIP&quot; in
+    1 )
+        echo &quot;mail sent to castella informing BSKIPPING&quot;
+        mail -s &quot;BSKIP SET TO 1 examples(hdl,hls)=$HDL $HLS card_enabled(ku3,8k5,250S,S121,250SP)=$ADKU3 $AD8K5 $N250S $S121B $N250SP&quot; castella
+        ;;
+  esac
+
+#AC adding CAPI2 Variable =&gt;&gt; to do : need to be exported to next shell   and eventually removed
+CAPI2=0
+case $CRD in
+  &apos;N250SP&apos;) CAPI2=1;;
+  &apos;AD9V3&apos;)  CAPI2=1;;            
+  &apos;RCXVUP&apos;) CAPI2=1;;
+  &apos;FX609&apos;)  CAPI2=1;;
+  &apos;S241&apos;)   CAPI2=1;;
+  &apos;U200&apos;)   CAPI2=1;;  
+  *)        CAPI2=0;;
+esac   
+#AC adding CAPI2 Variable
+
+case &quot;$CRD:$ACT:$SIM:$CAPI2&quot; in
+  *:hls_scatter_gather:0 )      C=&quot;scc1&quot;;ASKIP=1;; # no scatter_gather for CAPI1 cards // test done by jenkins filter , could be removed, as well as the CAPI2 variable
+  *:*DENALI*:xsim:* )           C=&quot;NVMD&quot;;ASKIP=1;; # DENALI doesnt work with xsim
+  *:*NVME*:xsim:* )             C=&quot;NVMX&quot;;ASKIP=1;;
+  *:*nvme*:xsim:* )             C=&quot;nvmX&quot;;ASKIP=1;;
+# S121B:hdl_example.SDRAM:*:* ) C=&quot;S1SD&quot;;ASKIP=0;; # $CRD can be xsim, irun, default
+# S121B:*:*:* )                 C=&quot;S1&quot;  ;ASKIP=1;;  
+# N250S:*NVME*:*:* )            C=&quot;SNVM&quot;;ASKIP=0;;
+# N250S:*nvme*:*:* )            C=&quot;Snvm&quot;;ASKIP=0;;
+# N250SP:hdl_example*:*:* )     C=&quot;SPex&quot;;ASKIP=0;;
+# N250SP:*:*:* )                C=&quot;SP&quot;  ;ASKIP=0;;
+  RCXVUP:*:xcelium:* )          C=&quot;rcxc&quot;;ASKIP=1;; # disable xcelium on RCXVUP AC 20180924
+  *:hdl_example.*RAM:xcelium:* )C=&quot;xce0&quot;;ASKIP=0;; # test xcelium on some hdl_example actions
+  *:*:xcelium:* )               C=&quot;xce1&quot;;ASKIP=1;; # disable xcelium on all other actions
+# *:hdl_example*:*:* )          C=&quot;exmp&quot;;ASKIP=0;;
+# *:hls_memcopy:*:* )           C=&quot;memc&quot;;ASKIP=0;;
+# *:hls_bfs:*:* )               C=&quot;bfs&quot; ;ASKIP=0;;
+# *:hls_hashjoin:*:* )          C=&quot;hshj&quot;;ASKIP=0;;
+# AC 20180921 : removing intersect sims 
+  *:hls_intersect_h:*:* )       C=&quot;inth&quot;;ASKIP=1;;
+  *:hls_intersect_s:*:* )       C=&quot;ints&quot;;ASKIP=1;;
+  *:hls_search:xsim:* )         C=&quot;srhx&quot;;ASKIP=1;; # too long testtime, wait for xsim performance fix
+# *:hls_search:*:* )            C=&quot;srch&quot;;ASKIP=0;;
+# *:hls_sponge:*:* )            C=&quot;spng&quot;;ASKIP=0;;
+  *:hls_blowfish:*:* )          C=&quot;blow&quot;;ASKIP=1;; # no maintenance for blowfish
+# N250SP:hls_helloworld:*:* )   C=&quot;SPhw&quot;;ASKIP=1;; # N250SP did not allow more than 128B DMA xfers =&gt; solved  AC 20180924
+# *:hls_helloworld:*:* )        C=&quot;helw&quot;;ASKIP=1;;
+# *:test:*:* )                  C=&quot;test&quot;;ASKIP=0;;
+  *:hls_parallel_memcpy:*:*)
+    if [[ $BRANCH != &quot;emrick&quot; ]]; then
+      C=&quot;pmcp&quot;; ASKIP=1
+    elif [[ $CRD != &quot;AD9V3&quot; &amp;&amp; $CRD != &quot;N250SP&quot; ]]; then
+      C=&quot;pmcp&quot;; ASKIP=1
+    fi;;
+  *:hls_vector_generator:*:*)
+    if [[ $BRANCH != &quot;emrick&quot; ]]; then
+      C=&quot;vgen&quot;; ASKIP=1
+    elif [[ $CRD != &quot;AD9V3&quot; &amp;&amp; $CRD != &quot;N250SP&quot; ]]; then
+      C=&quot;vgen&quot;; ASKIP=1
+    fi;;
+  * )                           C=&quot;def&quot; ;ASKIP=0;;
+esac            
+echo &quot;card=$CRD CAPI2=$CAPI2 action=$ACT Sim=$SIM VIV=$VIV case=$C ASKIP=$ASKIP&quot;
+
+case &quot;$ACT&quot; in
+  test )
+    gitnames=`git ls-remote https://github.com/open-power/snap|grep &quot;refs/heads/&quot;|awk &apos;{print $2}&apos;`
+    echo &quot;RC=$RC gitnames=$gitnames&quot;
+    for dir in &quot;/afs/bb/proj/fpga/framework/CI_ws/SNAP_SIM_matrix&quot;/*;do
+      if [ -d &quot;$dir&quot; ];then
+        branch=&quot;refs/heads/&quot;`basename $dir`
+        if [[ &quot;$gitnames&quot; =~ &quot;$branch&quot; ]];then echo &quot;branch=$branch found in gitnames, keep dir=$dir&quot;
+        else 
+          echo &quot;branch=$branch not found in gitnames, delete dir=\&apos;$dir\&apos;&quot;
+          rm -rf &quot;$dir&quot;     # put in quotes to work for directories with blanks
+        fi
+      else echo &quot;$dir is not a directory, continuing&quot;
+      fi
+    done
+    
+    echo &quot;mail informing castella test triggered&quot;
+    mail -s &quot;Jenkins SIMULATION started with : branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX&quot; castella
+
+    date
+    DSKIP=0;;
+  *&quot;hls_intersect&quot;* ) 
+    if [ -f snap/defconfig/$CRD.hls_intersect.defconfig ];then DSKIP=0
+    else 
+      echo &quot;$CRD.hls_intersect.defconfig does not exist&quot;
+      ls snap/defconfig/
+      DSKIP=1
+    fi;;  
+  *DENALI*)
+    act2=${ACT%.DENALI}
+    if [ -f snap/defconfig/$CRD.$act2.defconfig ];then DSKIP=0
+    else 
+      echo &quot;$CRD.$act2.defconfig does not exist&quot;
+      ls snap/defconfig/
+      DSKIP=1
+    fi;;  
+  * )          
+    if [ -f snap/defconfig/$CRD.$ACT.defconfig ];then DSKIP=0
+    else 
+      echo &quot;$CRD.$ACT.defconfig does not exist&quot;
+      ls snap/defconfig/
+      DSKIP=1
+    fi;;  
+esac
+echo &quot;defconfig SKIP=$DSKIP&quot;
+
+AFSused=`fs lq /afs/bb/proj/fpga/framework/CI_ws/SNAP_SIM_matrix/|grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
+SSKIP=0;msg=&quot;AFS spaced currently used=${AFSused}%&quot;
+if   (( AFSused &gt; 90 ));then 
+  msg=&quot;ERROR: $msg, stopping additional builds&quot;;SSKIP=1
+  echo &quot;mail sent to castella : ERROR AFS space&quot;
+  mail -s &quot;ERROR: AFS space SIMULATION is used up to ${AFSused}%, stopping additional builds&quot; castella
+  #mail -s &quot;ERROR: AFS space SIMULATION is used up to ${AFSused}%, stopping additional builds&quot; mesnet
+
+elif (( AFSused &gt; 70 ));then
+   msg=&quot;WARNING: $msg&quot;
+   echo &quot;mail sent to castella : WARNING AFS space&quot;
+   mail -s &quot;WARNING: AFS space IMAGETEST is used up to ${AFSused}%&quot; castella
+   #mail -s &quot;WARNING: AFS space IMAGETEST is used up to ${AFSused}%&quot; mesnet
+fi;echo &quot;$msg&quot;
+
+if (( ASKIP+DSKIP+BSKIP+SSKIP &gt; 0 ));then SKIP=1;else SKIP=0;fi
+echo &quot;SKIP=$SKIP&quot; &gt;export_props.properties
+echo &quot;properties passed to next shell:&quot;
+cat export_props.properties
+echo &quot;***********************************************************&quot;
+</command>
+    </hudson.tasks.Shell>
+    <EnvInjectBuilder plugin="envinject@2.1.6">
+      <info>
+        <propertiesFilePath>export_props.properties</propertiesFilePath>
+      </info>
+    </EnvInjectBuilder>
+    <org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder plugin="conditional-buildstep@1.3.6">
+      <condition class="org.jenkins_ci.plugins.run_condition.core.BooleanCondition" plugin="run-condition@1.2">
+        <token>$SKIP</token>
+      </condition>
+      <buildStep class="org.jenkins_ci.plugins.fail_the_build.FixResultBuilder" plugin="fail-the-build-plugin@1.0">
+        <defaultResultName>ABORTED</defaultResultName>
+        <success></success>
+        <unstable></unstable>
+        <failure></failure>
+        <aborted></aborted>
+      </buildStep>
+      <runner class="org.jenkins_ci.plugins.run_condition.BuildStepRunner$Fail" plugin="run-condition@1.2"/>
+    </org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder>
+    <hudson.tasks.Shell>
+      <command>#!/bin/bash
+set +x                           # reduce Jenkins output
+#ulimit -c unlimited             # reduce core dumps from what .profile says (kB)
+ulimit -S -c 128000
+echo &quot;****************************************************************************************&quot;
+echo &quot;`date` BUILD START&quot;
+echo &quot;****************************************************************************************&quot;
+echo &quot;EXECUTING SECOND SHELL FROM CAPI1&amp;2 SIM JENKINS - V1.1 - 2019 march 21 - ...&quot;
+echo &quot;****************************************************************************************&quot;
+export PATH=$PATH:/usr/local/bin # python3 needs this path setup
+export USERHOME=`pwd`
+export SNAP_ROOT=$USERHOME/snap
+SIM=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 1)    # chars up to  first &apos;_&apos; identify Simulator
+VIV=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 2)    # chars behind first &apos;_&apos; identify Vivado version
+
+echo &quot;****************************************************************************************&quot;
+echo &quot;LSF SETUP ...&quot;
+ulimit -c unlimited
+export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
+export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+export LSF_BINDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+export LSF_SUBMITTER_OSTYPE=Linux
+export LSF_ENVDIR=/home/lsfbb/prod/conf
+LSF=&quot;-P zsort&quot;
+LSF+=&quot; -M 2&quot;                    # GB memory
+LSF+=&quot; -C 2000&quot;                 # KB core file
+LSF+=&apos; -R type=X86_64 -R span[hosts=1]&apos;
+LSF+=&quot; -I -n 4 &quot;				# number of processors
+
+echo &quot;****************************************************************************************&quot;
+rm -rf pslse
+case $CRD in 
+  &apos;N250SP&apos;) branch=&apos;master&apos;;  # PSL8 and PSL9 merged in branch=capi2 since 05Mar2018
+#           export PSLVER=9;  # set by snap_env since branch=pslver
+#           branch=&apos;capi2&apos; ;  # PSL8 and PSL9 merged in branch=capi2 since 12dec2017
+            ;;
+  *) 		branch=&apos;master&apos;;  # PSL8 and PSL9 merged in branch=capi2 since 05Mar2018
+#           export PSLVER=8;  # set by snap_env since branch=pslver
+#           branch=&apos;v3.1&apos;  ;  # tempfix see issues #98/99/
+#           branch=&apos;capi2&apos; ;  # PSL8 and PSL9 merged in branch=capi2 since 12dec2017
+            ;;
+esac
+echo &quot;Get PSL Simulation Environment branch=$branch for card=$CRD...&quot;
+git clone -b $branch https://github.com/ibm-capi/pslse pslse  
+cd ${SNAP_ROOT}
+echo &quot;export PSLSE_ROOT=$USERHOME/pslse&quot; &gt;snap_env.sh
+echo &quot;#PSL_DCP not included in Simulation, replaced anyhow by PSLSE&quot; &gt;&gt;snap_env.sh
+echo &quot;#export PSL_DCP=/afs/bb/proj/fpga/framework/cards/$CRD/current/b_route_design.dcp&quot; &gt;&gt;snap_env.sh
+echo &quot;#setup: XILINX_LOCAL_USER_DATA=${XILINX_LOCAL_USER_DATA}, overwrite=no to prevent write access error in XilincTclStore (tclapp:load_apps)&quot; &gt;&gt;snap_env.sh
+echo &quot;export XILINX_LOCAL_USER_DATA=no&quot; &gt;&gt; snap_env.sh
+case $CRD in 
+  &apos;N250SP&apos;) #echo &quot;export PSL_IP_CORE=/afs/bb/proj/fpga/framework/cards/N250SP/ibm.com_CAPI_PSL9_WRAP_2.00.zip&quot; &gt;&gt;snap_env.sh
+			echo &quot;export HDK_ROOT=/afs/bb/proj/fpga/framework/cards/N250SP/HDK&quot; &gt;&gt;snap_env.sh
+            ;;
+  *)        ;;    
+esac 
+
+echo &quot;****************************************************************************************&quot;
+#case $CRD:$ACT in 
+#  N250SP:*)		export VIV_VERSION=&quot;2017.4&quot;; export IES_VERSION=&quot;15.20.s18&quot;;;
+#  *:hdl_example*)	export VIV_VERSION=&quot;2017.4&quot;; export IES_VERSION=&quot;15.20.s18&quot;;;  # test 2017.4 for selected configs
+# *) 				export VIV_VERSION=&quot;2016.4&quot;; export IES_VERSION=&quot;15.10.s19&quot;;;    
+#esac
+
+# adding specificity for RCXVUP card using an -es part (requires VIV2017.4) AC 20180921
+case $SIM:$VIV:$CRD in    # test multiple Vivado versions in one build
+  *RCXVUP)# force 2017.4 for RCXVUP
+    VIV=&quot;2017.4&quot;
+    export VIV_VERSION=&quot;2017.4&quot;; export IES_VERSION=&quot;15.20.s18&quot;
+    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION}
+    export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION};;
+  *U200)# force 208.3 for U200 as it is not supported in earlier versions
+    VIV=&quot;2018.3&quot;
+    export VIV_VERSION=&quot;2018.3&quot;; export IES_VERSION=&quot;15.20.s18&quot;
+    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION}
+    export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION};;
+  xcelium:2018*:*)	# Xcelium needs Vivado 2018.1 or higher
+    export VIV_VERSION=$VIV; export IES_VERSION=&quot;17.10.002&quot;
+    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Xcelium/${IES_VERSION}
+    export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/xce${IES_VERSION};;
+  xcelium:*:*)
+    echo &quot;unsupported Vivado version $VIV for XCELIUM&quot;;exit 1;;
+  *:2016.4:*)
+    export VIV_VERSION=&quot;2016.4&quot;; export IES_VERSION=&quot;15.10.s19&quot;
+    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION} 
+	export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION};;
+  *2017.4!*|*2018.1:*|*2018.2:*|*2018.3:*)  # adding 2018.3 for U200
+    export VIV_VERSION=$VIV; export IES_VERSION=&quot;15.20.s18&quot;
+    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION}
+#   export CDS_INST_DIR=/afs/apd/func/vlsi/cds/Incisive/${IES_VERSION}  # for 15.20.046 only
+	export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION};; 
+  *)
+    echo &quot;unsupported Vivado version $VIV&quot;;exit 1;;
+esac
+# export VIV_VERSION=&quot;2017.4&quot;; export IES_VERSION=&quot;15.20.s18&quot;     # same version for all configs
+
+echo &quot;Vivado SETUP $VIV_VERSION ...&quot;
+export XILINX_ROOT=/afs/bb/proj/fpga/xilinx
+export XILINXD_LICENSE_FILE=2100@pokwinlic1.pok.ibm.com
+source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
+case $SIM:$VIV in
+  xcelium:2018.2 ) echo &quot;Cadence SETUP $IES_VERSION for Vivado 2018.2&quot;
+    export PATH=$CDS_INST_DIR/tools/bin:$PATH
+#   export CDS_LIC_FILE=5280@auslnxlic01.austin.ibm.com
+#   export CDS_LIC_FILE=5280@cdsserv1.pok.ibm.com:5280@cdsserv2.pok.ibm.com
+    export CDS_LIC_FILE=1716@rchlic1.rchland.ibm.com:1716@rchlic2.rchland.ibm.com:1716@rchlic3.rchland.ibm.com
+    export LD_LIBRARY_PATH=$CDS_INST_DIR/tools/lib/64bit:$LD_LIBRARY_PATH
+    if [ -f &quot;$IES_LIBS/cds.lib&quot; ]; then 
+      echo &quot;IES_LIBS found in $IES_LIBS&quot;
+    else
+      echo &quot;WARNING: cannot find IES_LIBS=$IES_LIBS, Cadence compilation won&apos;t work&quot;
+      exit 1
+    fi;;
+  irun:*|IRUN:*|xcelium:* ) echo &quot;Cadence SETUP $IES_VERSION for Vivado 2018.1&quot;
+    export PATH=$CDS_INST_DIR/tools/bin:$PATH
+#   export CDS_LIC_FILE=5280@hdlic10.boeblingen.de.ibm.com:5280@hdlic11.boeblingen.de.ibm.com
+    export CDS_LIC_FILE=1716@rchlic1.rchland.ibm.com:1716@rchlic2.rchland.ibm.com:1716@rchlic3.rchland.ibm.com
+    export LD_LIBRARY_PATH=$CDS_INST_DIR/tools/lib/64bit:$LD_LIBRARY_PATH
+#   echo &quot;export LD_LIBRARY_PATH=$CDS_INST_DIR/tools/lib/64bit:$LD_LIBRARY_PATH&quot; &gt;&gt; snap_env.sh
+    if [ -f &quot;$IES_LIBS/cds.lib&quot; ]; then 
+      echo &quot;IES_LIBS found in $IES_LIBS&quot;
+    else
+      echo &quot;WARNING: cannot find IES_LIBS=$IES_LIBS, Cadence compilation won&apos;t work&quot;
+      exit 1
+    fi;;
+
+esac
+
+case $ACT in 
+  *&quot;nvme&quot;*|*&quot;NVME&quot;*) echo &quot;Denali SETUP ...&quot;
+    export DENALI=/afs/bb/proj/cte/tools/cds/VIPCAT/11.30.037/tools.lnx86/denali_64bit
+#   export CDS_LIC_FILE=5280@cdsserv1.pok.ibm.com:5280@cdsserv2.pok.ibm.com  # to get VIP_NVME_PS 
+export CDS_LIC_FILE=1716@rchlic1.rchland.ibm.com:1716@rchlic2.rchland.ibm.com:1716@rchlic3.rchland.ibm.com
+#   echo &quot;export DENALI=/afs/bb/proj/cte/tools/cds/VIPCAT/11.30.037/tools.lnx86/denali_64bit&quot; &gt;&gt;snap_env.sh
+#   echo &quot;export CDS_LIC_FILE=5280@auslnxlic01.austin.ibm.com&quot;                                &gt;&gt;snap_env.sh
+    ;;
+esac
+echo &quot;CDS_LIC_FILE=${CDS_LIC_FILE}&quot;
+
+#DEBUG AC
+#/afs/bb/data/vlsi/cte/tools/misc/flexlm/11.14/lnx86/mgls_v9-18_8-6-0.ixl/bin/lmstat -a -c ${CDS_LIC_FILE} |grep  -iE &quot;Users of Inc|Users of VIP_NVME|xceli|error&quot;|grep -v scubed
+#DEBUG AC
+
+echo &quot;****************************************************************************************&quot;
+echo &quot;Build Simulation Model ...&quot;
+case $ACT in                    # select config &amp; compile action
+  &apos;test&apos;) 
+    echo &quot;test exit 0&quot;;exit 0;; # just exit 
+  &apos;hls_intersect_h&apos;)  
+    make $CRD.hls_intersect.defconfig
+    source ./snap_env.sh        # execute to exploit ACTION_ROOT
+    echo &quot;action compile intersect hash&quot;;
+    make -C ${ACTION_ROOT} clean config_h
+    ;;
+  &apos;hls_intersect_s&apos;)  
+    make $CRD.hls_intersect.defconfig
+    source ./snap_env.sh        # execute to exploit ACTION_ROOT
+    echo &quot;action compile intersect sort&quot;;
+    make -C ${ACTION_ROOT} clean config_s
+    ;;
+  *DENALI*)
+    act2=${ACT%.DENALI}
+    echo &quot;build action for ACT=$ACT act2=$act2&quot;
+    make $CRD.$act2.defconfig
+    ;;
+  *) 
+#   echo &quot;pwd:&quot;;pwd
+#   echo &quot;pwd content:&quot;;ls
+#   echo &quot;defconfig:&quot;;ls defconfig/
+    make $CRD.$ACT.defconfig
+    ;;
+esac
+case $SIM:$ACT in
+  &apos;xsim&apos;:*|&apos;XSIM&apos;:* )             echo &quot;export SIMULATOR=xsim&quot;     &gt;&gt; .snap_config.sh
+                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+                                  echo &quot;SIM_XSIM=y&quot;                &gt;&gt; .snap_config;;   # overwrite simulator
+  &apos;irun&apos;:*DENALI|&apos;IRUN&apos;:*DENALI ) echo &quot;ENABLE_DENALI=y&quot;           &gt;&gt; .snap_config;make -s oldconfig
+                                  echo &quot;export SIMULATOR=irun&quot;     &gt;&gt; .snap_config.sh
+                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+                                  echo &quot;SIM_IRUN=y&quot;                &gt;&gt; .snap_config;;   # overwrite simulator
+  &apos;irun&apos;:*|&apos;IRUN&apos;:* )             echo &quot;export SIMULATOR=irun&quot;     &gt;&gt; .snap_config.sh
+                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+                                  echo &quot;SIM_IRUN=y&quot;                &gt;&gt; .snap_config;;   # overwrite simulator
+  xcelium:*DENALI)                echo &quot;ENABLE_DENALI=y&quot;           &gt;&gt; .snap_config;make -s oldconfig
+  			                      echo &quot;export SIMULATOR=xcelium&quot;  &gt;&gt; .snap_config.sh
+                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+                                  echo &quot;SIM_XCELIUM=y&quot;             &gt;&gt; .snap_config;;   # overwrite simulator
+  xcelium:*)                      echo &quot;export SIMULATOR=xcelium&quot;  &gt;&gt; .snap_config.sh
+                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+                                  echo &quot;SIM_XCELIUM=y&quot;             &gt;&gt; .snap_config;;   # overwrite simulator
+  questa:*)                       echo &quot;export SIMULATOR=questa&quot;   &gt;&gt; .snap_config.sh
+                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+                                  echo &quot;SIM_QUESTA=y&quot;              &gt;&gt; .snap_config;;   # overwrite simulator
+  modelsim:*)                     echo &quot;export SIMULATOR=modelsim&quot; &gt;&gt; .snap_config.sh
+                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+                                  echo &quot;SIM_MODELSIM=y&quot;            &gt;&gt; .snap_config;;   # overwrite simulator
+  *) echo &quot;WARNING: unknown simulator=$SIM, continuing with default&quot;;;
+esac
+# execute with LSF, SNAP_ROOT must reside in AFS
+#echo &quot;PATH=$PATH&quot;
+#which irun
+bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}_model&quot; &quot;make model&quot;|| exit 1
+echo &quot;****************************************************************************************&quot;
+echo &quot;Run $SIM Simulation ...&quot;
+cd ${SNAP_ROOT}/hardware/sim
+##### enable SW trace
+# export SNAP_TRACE=0xf
+##### execute locally
+# ./run_sim -list testlist.sh -noaet
+##### execute on AFS with LSF, report error as unstable build
+case $SIM in
+  &apos;xsim&apos;|&apos;XSIM&apos; ) bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;./run_sim -list testlist.sh -noaet&quot;||exit 100;;
+  &apos;irun&apos;|&apos;IRUN&apos; ) bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;./run_sim -irun -list testlist.sh -noaet&quot;||exit 100;;
+  *)              bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;./run_sim -list testlist.sh -noaet&quot;||exit 100;;
+esac</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.plugins.ws__cleanup.WsCleanup plugin="ws-cleanup@0.37">
+      <patterns class="empty-list"/>
+      <deleteDirs>false</deleteDirs>
+      <skipWhenFailed>false</skipWhenFailed>
+      <cleanWhenSuccess>true</cleanWhenSuccess>
+      <cleanWhenUnstable>false</cleanWhenUnstable>
+      <cleanWhenFailure>false</cleanWhenFailure>
+      <cleanWhenNotBuilt>false</cleanWhenNotBuilt>
+      <cleanWhenAborted>false</cleanWhenAborted>
+      <notFailBuild>false</notFailBuild>
+      <cleanupMatrixParent>false</cleanupMatrixParent>
+      <externalDelete></externalDelete>
+      <disableDeferredWipeout>false</disableDeferredWipeout>
+    </hudson.plugins.ws__cleanup.WsCleanup>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.19">
+      <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
+        <timeoutMinutes>300</timeoutMinutes>
+      </strategy>
+      <operationList>
+        <hudson.plugins.build__timeout.operations.FailOperation/>
+      </operationList>
+    </hudson.plugins.build__timeout.BuildTimeoutWrapper>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
+    <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.1">
+      <template>#${BUILD_NUMBER}}-${GIT_BRANCH}</template>
+      <descriptionTemplate></descriptionTemplate>
+      <runAtStart>true</runAtStart>
+      <runAtEnd>true</runAtEnd>
+    </org.jenkinsci.plugins.buildnamesetter.BuildNameSetter>
+  </buildWrappers>
   <executionStrategy class="hudson.matrix.DefaultMatrixExecutionStrategyImpl">
     <runSequentially>false</runSequentially>
+    <touchStoneCombinationFilter>ACT==&quot;test&quot; &amp;&amp; CRD==&quot;ADKU3&quot; &amp;&amp; SIM_VIV=~&quot;xsim&quot;</touchStoneCombinationFilter>
+    <touchStoneResultCondition>
+      <name>UNSTABLE</name>
+      <ordinal>1</ordinal>
+      <color>YELLOW</color>
+      <completeBuild>true</completeBuild>
+    </touchStoneResultCondition>
   </executionStrategy>
+  <childCustomWorkspace>${BRANCH}/${COMBINATION}</childCustomWorkspace>
 </matrix-project>
