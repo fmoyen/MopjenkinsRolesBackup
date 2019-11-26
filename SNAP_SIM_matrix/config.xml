@@ -67,12 +67,12 @@ Removed hls_intersect_s &amp; hls_intersect_h from matrix</description>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>ADKU3</name>
-          <description>enable/disable ADKU3 simulation</description>
+          <description>enable/disable ADKU3 simulation (CAPI1)</description>
           <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>AD8K5</name>
-          <description>enable/disable AD8K5 simulation</description>
+          <description>enable/disable AD8K5 simulation (CAPI1)</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
@@ -82,7 +82,7 @@ Removed hls_intersect_s &amp; hls_intersect_h from matrix</description>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>S121B</name>
-          <description>enable/disable S121B simulation</description>
+          <description>enable/disable S121B simulation (CAPI1)</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
@@ -92,12 +92,12 @@ Removed hls_intersect_s &amp; hls_intersect_h from matrix</description>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>FX609</name>
-          <description>enable/disable FX609 simulation</description>
+          <description>enable/disable FX609 simulation (CAPI2)</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>S241</name>
-          <description>enable/disable S241 simulation</description>
+          <description>enable/disable S241 simulation (CAPI2)</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
@@ -107,7 +107,7 @@ Removed hls_intersect_s &amp; hls_intersect_h from matrix</description>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>U200</name>
-          <description>enable/disable U200 simulation</description>
+          <description>enable/disable U200 simulation (CAPI2)</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
@@ -202,7 +202,6 @@ Removed hls_intersect_s &amp; hls_intersect_h from matrix</description>
         <string>N250SP</string>
         <string>FX609</string>
         <string>S241</string>
-        <string>RCXVUP</string>
         <string>AD9V3</string>
         <string>U200</string>
       </values>
@@ -227,51 +226,71 @@ set +x                           # reduce Jenkins output
 echo &quot;****************************************************************************************&quot;
 echo &quot;`date` BUILD START&quot;
 echo &quot;****************************************************************************************&quot;
-echo &quot;EXECUTING FIRST SHELL FROM CAPI1&amp;2 SIM JENKINS - V1.1 - 2019 march 21 - ...&quot;
+echo &quot;EXECUTING FIRST SHELL FROM CAPI1&amp;2 SIM JENKINS ...&quot;
 echo &quot;****************************************************************************************&quot;
+echo
+
+#==============================================================================================
+# Variables
+
+&gt; export_props.properties
 NAME=$(echo $GIT_BRANCH| cut -d&apos;/&apos; -f 2 |tr &apos;[:upper:]&apos; &apos;[:lower:]&apos;) # remove origin/ from branch and translate to lowercase
 PREFIX=$(echo $NAME| cut -d&apos;_&apos; -f 1)    # chars up to first &apos;_&apos; identify need for test
-ACTION_TYPE=$(echo $ACT| cut -d&apos;_&apos; -f 1)
+ACTION_TYPE=$(echo $ACT| cut -d&apos;_&apos; -f 1 |tr &apos;[:lower:]&apos; &apos;[:upper:]&apos;) # get ACTION_TYPE (hls, hld) and translate to uppercase
 SIM=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 1)    # chars up to  first &apos;_&apos; identify Simulator
 VIV=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 2)    # chars behind first &apos;_&apos; identify Vivado version
-echo &quot;Build with Card=$CRD Action=$ACT Action_type=$ACTION_TYPE branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX&quot;
+
+CAPI2CardsList=( N250SP FX609 S241 RCXVUP AD9V3 U200 )
+CAPI2=0
+for i in ${CAPI2CardsList[@]}; do
+  if [ &quot;$CRD&quot; == &quot;$i&quot; ]; then CAPI2=1; fi
+done
+
+echo &quot;Build with Card=$CRD CAPI2=$CAPI2 Action=$ACT Action_type=$ACTION_TYPE branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX&quot;
+
+EmailDestinationList=( fabrice_moyen@fr.ibm.com fabricepb@free.fr )
+HWUser=&quot;capimop&quot;
+
+
+#==============================================================================================
+# Functions
+
+# Function for sending alerting emails
+# Example 1: SendAnEmail -s &quot;This is the subject/alert&quot; -d firstDest@gmail.com -d SecondDest@free.fr
+# Example 2: SendAnEmail -s &quot;This is the subject/alert&quot; -d &quot;${EmailDestinationList[*]}&quot;
+function SendAnEmail
+{
+  local OPTIND opt DestList
+  while getopts &quot;s:d:&quot; opt
+  do 
+    case $opt in
+      s)
+        Subject=&quot;$OPTARG&quot;
+      ;;
+      d)
+        DestList+=(&quot;$OPTARG&quot;)
+      ;;
+    esac
+  done
+  
+  for i in ${DestList[@]}
+  do
+    echo &quot;&quot; | mail -s &quot;$Subject&quot; $i
+  done
+}
+
+
+#==============================================================================================
+# Do not run non-desired cases (action types, actions, cards)
+# BSKIP stands for board skip
 
 BSKIP=0
-if [ &quot;$ACTION_TYPE&quot; == &quot;hdl&quot;    ] &amp;&amp; [ &quot;$HDL&quot;    == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$ACTION_TYPE&quot; == &quot;hls&quot;    ] &amp;&amp; [ &quot;$HLS&quot;    == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$CRD&quot;         == &quot;ADKU3&quot;  ] &amp;&amp; [ &quot;$ADKU3&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$CRD&quot;         == &quot;AD8K5&quot;  ] &amp;&amp; [ &quot;$AD8K5&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$CRD&quot;         == &quot;N250S&quot;  ] &amp;&amp; [ &quot;$N250S&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$CRD&quot;         == &quot;S121B&quot;  ] &amp;&amp; [ &quot;$S121B&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$CRD&quot;         == &quot;N250SP&quot; ] &amp;&amp; [ &quot;$N250SP&quot; == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$CRD&quot;         == &quot;RCXVUP&quot; ] &amp;&amp; [ &quot;$RCXVUP&quot; == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$CRD&quot;         == &quot;S241&quot;   ] &amp;&amp; [ &quot;$S241&quot;   == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$CRD&quot;         == &quot;FX609&quot;  ] &amp;&amp; [ &quot;$FX609&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$CRD&quot;         == &quot;AD9V3&quot;  ] &amp;&amp; [ &quot;$AD9V3&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$CRD&quot;         == &quot;U200&quot;   ] &amp;&amp; [ &quot;$U200&quot;   == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;${!ACTION_TYPE}&quot; == &quot;false&quot; ]; then BSKIP=1;fi # if ACTION_TYPE=&quot;HLS&quot;, ${!ACTION_TYPE} is identical to $HLS
+if [ &quot;${!CRD}&quot;         == &quot;false&quot; ]; then BSKIP=1;fi # if CRD=&quot;AD9V3&quot;, ${!CRD} is identical to $AD9V3
 if [ &quot;$ACT&quot;         == &quot;test&quot;   ]; then BSKIP=0;fi
-echo &quot;examples(hdl,hls)=$HDL $HLS card_enabled(ku3,8k5,250S,S121B,N250SP,RCXVUP,S241,FX609,AD9V3,U200)=$ADKU3 $AD8K5 $N250S $S121B $N250SP $RCXVUP $S241 $FX609 $AD9V3 $U200 BSKIP=$BSKIP&quot;
 
-#debug AC
-  case &quot;$BSKIP&quot; in
-    1 )
-        echo &quot;mail sent to castella informing BSKIPPING&quot;
-        mail -s &quot;BSKIP SET TO 1 examples(hdl,hls)=$HDL $HLS card_enabled(ku3,8k5,250S,S121,250SP)=$ADKU3 $AD8K5 $N250S $S121B $N250SP&quot; castella
-        ;;
-  esac
+echo &quot;action_types (hdl,hls)=$ACTION_TYPE enabled_cards=$CRD BSKIP=$BSKIP&quot;
 
-#AC adding CAPI2 Variable =&gt;&gt; to do : need to be exported to next shell   and eventually removed
-CAPI2=0
-case $CRD in
-  &apos;N250SP&apos;) CAPI2=1;;
-  &apos;AD9V3&apos;)  CAPI2=1;;            
-  &apos;RCXVUP&apos;) CAPI2=1;;
-  &apos;FX609&apos;)  CAPI2=1;;
-  &apos;S241&apos;)   CAPI2=1;;
-  &apos;U200&apos;)   CAPI2=1;;  
-  *)        CAPI2=0;;
-esac   
-#AC adding CAPI2 Variable
 
 case &quot;$CRD:$ACT:$SIM:$CAPI2&quot; in
   *:hls_scatter_gather:0 )      C=&quot;scc1&quot;;ASKIP=1;; # no scatter_gather for CAPI1 cards // test done by jenkins filter , could be removed, as well as the CAPI2 variable
