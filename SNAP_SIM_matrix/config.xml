@@ -535,109 +535,137 @@ function SendAnEmail
 
 
 #==============================================================================================
-# Simulation Engine (pslse) setup
+# Power Service Layer Simulation Engine (pslse) setup
 
 echo;echo &quot;*******************************************************************************&quot;
-echo &quot;J: &quot;
+echo &quot;J: Getting Power Service Layer Simulation Engine Environment (pslse)...&quot;
 echo
 
+echo;echo &quot;Deleting old ./pslse (Power Service Layer Simulation Engine) directory&quot;
 rm -rf pslse
-case $CRD in 
-  &apos;N250SP&apos;) branch=&apos;master&apos;;  # PSL8 and PSL9 merged in branch=capi2 since 05Mar2018
-#           export PSLVER=9;  # set by snap_env since branch=pslver
-#           branch=&apos;capi2&apos; ;  # PSL8 and PSL9 merged in branch=capi2 since 12dec2017
-            ;;
-  *) 		branch=&apos;master&apos;;  # PSL8 and PSL9 merged in branch=capi2 since 05Mar2018
-#           export PSLVER=8;  # set by snap_env since branch=pslver
-#           branch=&apos;v3.1&apos;  ;  # tempfix see issues #98/99/
-#           branch=&apos;capi2&apos; ;  # PSL8 and PSL9 merged in branch=capi2 since 12dec2017
-            ;;
-esac
-echo &quot;Get PSL Simulation Environment branch=$branch for card=$CRD...&quot;
-git clone -b $branch https://github.com/ibm-capi/pslse pslse  
+
+PSLSE_Branch=master
+
+echo;echo &quot;Getting (git clone) PSL Simulation Environment branch=$PSLSE_Branch for card=$CRD...&quot;
+git clone -b $PSLSE_Branch https://github.com/ibm-capi/pslse pslse; echo &quot;git clone PSLSE RC=$?&quot;
+
 cd ${SNAP_ROOT}
+echo;echo &quot;Exporting PSLSE directory as : ${USERHOME}/pslse into snap_env.sh&quot;
 echo &quot;export PSLSE_ROOT=$USERHOME/pslse&quot; &gt;snap_env.sh
 echo &quot;#PSL_DCP not included in Simulation, replaced anyhow by PSLSE&quot; &gt;&gt;snap_env.sh
 echo &quot;#export PSL_DCP=/afs/bb/proj/fpga/framework/cards/$CRD/current/b_route_design.dcp&quot; &gt;&gt;snap_env.sh
 echo &quot;#setup: XILINX_LOCAL_USER_DATA=${XILINX_LOCAL_USER_DATA}, overwrite=no to prevent write access error in XilincTclStore (tclapp:load_apps)&quot; &gt;&gt;snap_env.sh
 echo &quot;export XILINX_LOCAL_USER_DATA=no&quot; &gt;&gt; snap_env.sh
-case $CRD in 
-  &apos;N250SP&apos;) #echo &quot;export PSL_IP_CORE=/afs/bb/proj/fpga/framework/cards/N250SP/ibm.com_CAPI_PSL9_WRAP_2.00.zip&quot; &gt;&gt;snap_env.sh
-			echo &quot;export HDK_ROOT=/afs/bb/proj/fpga/framework/cards/N250SP/HDK&quot; &gt;&gt;snap_env.sh
-            ;;
-  *)        ;;    
-esac 
 
-echo &quot;****************************************************************************************&quot;
-#case $CRD:$ACT in 
-#  N250SP:*)		export VIV_VERSION=&quot;2017.4&quot;; export IES_VERSION=&quot;15.20.s18&quot;;;
-#  *:hdl_example*)	export VIV_VERSION=&quot;2017.4&quot;; export IES_VERSION=&quot;15.20.s18&quot;;;  # test 2017.4 for selected configs
-# *) 				export VIV_VERSION=&quot;2016.4&quot;; export IES_VERSION=&quot;15.10.s19&quot;;;    
-#esac
+# FAB: but why ??
+#case $CRD in 
+#  &apos;N250SP&apos;) #echo &quot;export PSL_IP_CORE=/afs/bb/proj/fpga/framework/cards/N250SP/ibm.com_CAPI_PSL9_WRAP_2.00.zip&quot; &gt;&gt;snap_env.sh
+#			echo &quot;export HDK_ROOT=/afs/bb/proj/fpga/framework/cards/N250SP/HDK&quot; &gt;&gt;snap_env.sh
+#            ;;
+#  *)        ;;    
+#esac 
 
-# adding specificity for RCXVUP card using an -es part (requires VIV2017.4) AC 20180921
+
+#==============================================================================================
+# Adding specificities for specific card (such as another Vivado version)
+
+# FAB: CDS_INST_DIR &amp; IES_LIBS ??
 case $SIM:$VIV:$CRD in    # test multiple Vivado versions in one build
-  *RCXVUP)# force 2017.4 for RCXVUP
-    VIV=&quot;2017.4&quot;
+
+  *RCXVUP) # adding specificity for RCXVUP card using an -es part (requires VIV2017.4) AC 20180921
+    VIV=&quot;2017.4&quot; # force 2017.4 for RCXVUP
     export VIV_VERSION=&quot;2017.4&quot;; export IES_VERSION=&quot;15.20.s18&quot;
     export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION}
-    export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION};;
-  *U200)# force 208.3 for U200 as it is not supported in earlier versions
+    export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION}
+    ;;
+    
+  *U200) # force 2018.3 for U200 as it is not supported in earlier versions
     VIV=&quot;2018.3&quot;
     export VIV_VERSION=&quot;2018.3&quot;; export IES_VERSION=&quot;15.20.s18&quot;
     export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION}
-    export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION};;
+    export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION}
+    ;;
+    
   xcelium:2018*:*)	# Xcelium needs Vivado 2018.1 or higher
     export VIV_VERSION=$VIV; export IES_VERSION=&quot;17.10.002&quot;
     export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Xcelium/${IES_VERSION}
-    export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/xce${IES_VERSION};;
+    export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/xce${IES_VERSION}
+    ;;
+    
   xcelium:*:*)
-    echo &quot;unsupported Vivado version $VIV for XCELIUM&quot;;exit 1;;
+    echo &quot;unsupported Vivado version $VIV for XCELIUM&quot;
+    exit 1
+    ;;
+    
   *:2016.4:*)
     export VIV_VERSION=&quot;2016.4&quot;; export IES_VERSION=&quot;15.10.s19&quot;
     export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION} 
-	export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION};;
+	export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION}
+    ;;
+    
   *2017.4!*|*2018.1:*|*2018.2:*|*2018.3:*)  # adding 2018.3 for U200
     export VIV_VERSION=$VIV; export IES_VERSION=&quot;15.20.s18&quot;
     export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION}
-#   export CDS_INST_DIR=/afs/apd/func/vlsi/cds/Incisive/${IES_VERSION}  # for 15.20.046 only
-	export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION};; 
+	export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION}
+    ;;
+    
   *)
-    echo &quot;unsupported Vivado version $VIV&quot;;exit 1;;
+    echo &quot;unsupported Vivado version $VIV&quot;
+    exit 1
+    ;;
+
 esac
+
+
+#==============================================================================================
+# Setting up Vivado and Timing value
+
+echo;echo &quot;****************************************************************************************&quot;
+echo &quot;J: Setting up Vivado Version and timing value&quot;
+echo
+
 # export VIV_VERSION=&quot;2017.4&quot;; export IES_VERSION=&quot;15.20.s18&quot;     # same version for all configs
 
 echo &quot;Vivado SETUP $VIV_VERSION ...&quot;
-export XILINX_ROOT=/afs/bb/proj/fpga/xilinx
+
+# FAB: TIMING_LABLIMIT. On le configure ?
+
+echo;echo &quot;****************************************************************************************&quot; 
+echo &quot;J: Vivado paths &amp; licences server setup ...&quot;
+export XILINX_ROOT=/opt/Xilinx
+#export XILINX_ROOT=/afs/bb/proj/fpga/xilinx
 export XILINXD_LICENSE_FILE=2100@pokwinlic1.pok.ibm.com
 source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
-case $SIM:$VIV in
-  xcelium:2018.2 ) echo &quot;Cadence SETUP $IES_VERSION for Vivado 2018.2&quot;
-    export PATH=$CDS_INST_DIR/tools/bin:$PATH
-#   export CDS_LIC_FILE=5280@auslnxlic01.austin.ibm.com
-#   export CDS_LIC_FILE=5280@cdsserv1.pok.ibm.com:5280@cdsserv2.pok.ibm.com
-    export CDS_LIC_FILE=1716@rchlic1.rchland.ibm.com:1716@rchlic2.rchland.ibm.com:1716@rchlic3.rchland.ibm.com
-    export LD_LIBRARY_PATH=$CDS_INST_DIR/tools/lib/64bit:$LD_LIBRARY_PATH
-    if [ -f &quot;$IES_LIBS/cds.lib&quot; ]; then 
-      echo &quot;IES_LIBS found in $IES_LIBS&quot;
-    else
-      echo &quot;WARNING: cannot find IES_LIBS=$IES_LIBS, Cadence compilation won&apos;t work&quot;
-      exit 1
-    fi;;
-  irun:*|IRUN:*|xcelium:* ) echo &quot;Cadence SETUP $IES_VERSION for Vivado 2018.1&quot;
-    export PATH=$CDS_INST_DIR/tools/bin:$PATH
-#   export CDS_LIC_FILE=5280@hdlic10.boeblingen.de.ibm.com:5280@hdlic11.boeblingen.de.ibm.com
-    export CDS_LIC_FILE=1716@rchlic1.rchland.ibm.com:1716@rchlic2.rchland.ibm.com:1716@rchlic3.rchland.ibm.com
-    export LD_LIBRARY_PATH=$CDS_INST_DIR/tools/lib/64bit:$LD_LIBRARY_PATH
-#   echo &quot;export LD_LIBRARY_PATH=$CDS_INST_DIR/tools/lib/64bit:$LD_LIBRARY_PATH&quot; &gt;&gt; snap_env.sh
-    if [ -f &quot;$IES_LIBS/cds.lib&quot; ]; then 
-      echo &quot;IES_LIBS found in $IES_LIBS&quot;
-    else
-      echo &quot;WARNING: cannot find IES_LIBS=$IES_LIBS, Cadence compilation won&apos;t work&quot;
-      exit 1
-    fi;;
 
-esac
+
+#==============================================================================================
+# Cadence setup
+
+# No cadence setup at MOP
+#echo;echo &quot;****************************************************************************************&quot; 
+#echo &quot;J: Cadence SETUP ...&quot;
+#case $SIM:$VIV in
+#  xcelium:2018.2 ) echo &quot;Cadence SETUP $IES_VERSION for Vivado 2018.2&quot;
+#    export PATH=$CDS_INST_DIR/tools/bin:$PATH
+#    export CDS_LIC_FILE=1716@rchlic1.rchland.ibm.com:1716@rchlic2.rchland.ibm.com:1716@rchlic3.rchland.ibm.com
+#    export LD_LIBRARY_PATH=$CDS_INST_DIR/tools/lib/64bit:$LD_LIBRARY_PATH
+#    if [ -f &quot;$IES_LIBS/cds.lib&quot; ]; then 
+#      echo &quot;IES_LIBS found in $IES_LIBS&quot;
+#    else
+#      echo &quot;WARNING: cannot find IES_LIBS=$IES_LIBS, Cadence compilation won&apos;t work&quot;
+#      exit 1
+#    fi;;
+#  irun:*|IRUN:*|xcelium:* ) echo &quot;Cadence SETUP $IES_VERSION for Vivado 2018.1&quot;
+#    export PATH=$CDS_INST_DIR/tools/bin:$PATH
+#    export CDS_LIC_FILE=1716@rchlic1.rchland.ibm.com:1716@rchlic2.rchland.ibm.com:1716@rchlic3.rchland.ibm.com
+#    export LD_LIBRARY_PATH=$CDS_INST_DIR/tools/lib/64bit:$LD_LIBRARY_PATH
+#    if [ -f &quot;$IES_LIBS/cds.lib&quot; ]; then 
+#      echo &quot;IES_LIBS found in $IES_LIBS&quot;
+#    else
+#      echo &quot;WARNING: cannot find IES_LIBS=$IES_LIBS, Cadence compilation won&apos;t work&quot;
+#      exit 1
+#    fi;;
+#esac
 
 case $ACT in 
   *&quot;nvme&quot;*|*&quot;NVME&quot;*) echo &quot;Denali SETUP ...&quot;
