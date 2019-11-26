@@ -238,7 +238,7 @@ echo
 NAME=$(echo $GIT_BRANCH| cut -d&apos;/&apos; -f 2 |tr &apos;[:upper:]&apos; &apos;[:lower:]&apos;) # remove origin/ from branch and translate to lowercase
 PREFIX=$(echo $NAME| cut -d&apos;_&apos; -f 1)    # chars up to first &apos;_&apos; identify need for test
 ACTION_TYPE=$(echo $ACT| cut -d&apos;_&apos; -f 1 |tr &apos;[:lower:]&apos; &apos;[:upper:]&apos;) # get ACTION_TYPE (hls, hld) and translate to uppercase
-SIM=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 1)    # chars up to  first &apos;_&apos; identify Simulator
+SIM=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 1 |tr &apos;[:upper:]&apos; &apos;[:lower:]&apos;)    # chars up to  first &apos;_&apos; identify Simulator and translate to lowercase
 VIV=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 2)    # chars behind first &apos;_&apos; identify Vivado version
 
 CAPI2CardsList=( N250SP FX609 S241 RCXVUP AD9V3 U200 )
@@ -717,49 +717,107 @@ case $ACT in                    # select config &amp; compile action
 esac
 
 
-# Build Simulation Model (make model)
+#==============================================================================================
+# Configure SIMULATOR and ACTION types
+
+echo;echo &quot;****************************************************************************************&quot; 
+echo &quot;J: Configuring SIMULATOR and ACTION types with SIMULATOR=$SIM and ACTION=$ACT&quot;
+echo
+
 case $SIM:$ACT in
-  &apos;xsim&apos;:*|&apos;XSIM&apos;:* )             echo &quot;export SIMULATOR=xsim&quot;     &gt;&gt; .snap_config.sh
-                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
-                                  echo &quot;SIM_XSIM=y&quot;                &gt;&gt; .snap_config;;   # overwrite simulator
-  &apos;irun&apos;:*DENALI|&apos;IRUN&apos;:*DENALI ) echo &quot;ENABLE_DENALI=y&quot;           &gt;&gt; .snap_config;make -s oldconfig
-                                  echo &quot;export SIMULATOR=irun&quot;     &gt;&gt; .snap_config.sh
-                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
-                                  echo &quot;SIM_IRUN=y&quot;                &gt;&gt; .snap_config;;   # overwrite simulator
-  &apos;irun&apos;:*|&apos;IRUN&apos;:* )             echo &quot;export SIMULATOR=irun&quot;     &gt;&gt; .snap_config.sh
-                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
-                                  echo &quot;SIM_IRUN=y&quot;                &gt;&gt; .snap_config;;   # overwrite simulator
-  xcelium:*DENALI)                echo &quot;ENABLE_DENALI=y&quot;           &gt;&gt; .snap_config;make -s oldconfig
-  			                      echo &quot;export SIMULATOR=xcelium&quot;  &gt;&gt; .snap_config.sh
-                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
-                                  echo &quot;SIM_XCELIUM=y&quot;             &gt;&gt; .snap_config;;   # overwrite simulator
-  xcelium:*)                      echo &quot;export SIMULATOR=xcelium&quot;  &gt;&gt; .snap_config.sh
-                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
-                                  echo &quot;SIM_XCELIUM=y&quot;             &gt;&gt; .snap_config;;   # overwrite simulator
-  questa:*)                       echo &quot;export SIMULATOR=questa&quot;   &gt;&gt; .snap_config.sh
-                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
-                                  echo &quot;SIM_QUESTA=y&quot;              &gt;&gt; .snap_config;;   # overwrite simulator
-  modelsim:*)                     echo &quot;export SIMULATOR=modelsim&quot; &gt;&gt; .snap_config.sh
-                                  sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
-                                  echo &quot;SIM_MODELSIM=y&quot;            &gt;&gt; .snap_config;;   # overwrite simulator
-  *) echo &quot;WARNING: unknown simulator=$SIM, continuing with default&quot;;;
+  &apos;xsim&apos;:* )
+    echo &quot;export SIMULATOR=xsim&quot;     &gt;&gt; .snap_config.sh
+    sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+    echo &quot;SIM_XSIM=y&quot;                &gt;&gt; .snap_config   # overwrite simulator
+    ;;
+    
+  &apos;irun&apos;:*DENALI )
+    echo &quot;ENABLE_DENALI=y&quot;           &gt;&gt; .snap_config;make -s oldconfig
+    echo &quot;export SIMULATOR=irun&quot;     &gt;&gt; .snap_config.sh
+    sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+    echo &quot;SIM_IRUN=y&quot;                &gt;&gt; .snap_config   # overwrite simulator
+    ;;
+    
+  &apos;irun&apos;:* )
+    echo &quot;export SIMULATOR=irun&quot;     &gt;&gt; .snap_config.sh
+    sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+    echo &quot;SIM_IRUN=y&quot;                &gt;&gt; .snap_config   # overwrite simulator
+    ;;
+    
+  xcelium:*DENALI)
+    echo &quot;ENABLE_DENALI=y&quot;           &gt;&gt; .snap_config;make -s oldconfig
+  	echo &quot;export SIMULATOR=xcelium&quot;  &gt;&gt; .snap_config.sh
+    sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+    echo &quot;SIM_XCELIUM=y&quot;             &gt;&gt; .snap_config   # overwrite simulator
+    ;;
+    
+  xcelium:*)
+    echo &quot;export SIMULATOR=xcelium&quot;  &gt;&gt; .snap_config.sh
+    sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+    echo &quot;SIM_XCELIUM=y&quot;             &gt;&gt; .snap_config   # overwrite simulator
+    ;;
+    
+  questa:*)
+    echo &quot;export SIMULATOR=questa&quot;   &gt;&gt; .snap_config.sh
+    sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+    echo &quot;SIM_QUESTA=y&quot;              &gt;&gt; .snap_config   # overwrite simulator
+    ;;
+    
+  modelsim:*)
+    echo &quot;export SIMULATOR=modelsim&quot; &gt;&gt; .snap_config.sh
+    sed -i &quot;s/^SIM_/# SIM_/&quot;         .snap_config
+    echo &quot;SIM_MODELSIM=y&quot;            &gt;&gt; .snap_config   # overwrite simulator
+    ;;
+    
+  *) 
+    echo &quot;WARNING: unknown simulator=$SIM, continuing with default&quot;
+    ;;
+    
 esac
+
+
+#==============================================================================================
+# Build Simulation Model (make model)
+
+echo;echo &quot;****************************************************************************************&quot; 
+echo &quot;J: Building simulation model (make model)&quot;
+echo
+
 # execute with LSF, SNAP_ROOT must reside in AFS
-#echo &quot;PATH=$PATH&quot;
-#which irun
-bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}_model&quot; &quot;make model&quot;|| exit 1
-echo &quot;****************************************************************************************&quot;
-echo &quot;Run $SIM Simulation ...&quot;
+#bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}_model&quot; &quot;make model&quot;|| exit 1
+
+make model ||RC=$?
+if [ $RC -ne 0 ]; then
+  echo &quot;make model FAILED !&quot;
+  echo &quot; ==&gt; EXITING !&quot;
+  exit 1
+fi
+
+
+#==============================================================================================
+# Run $SIM simulation
+
+echo;echo &quot;****************************************************************************************&quot; 
+echo &quot;J: Running $SIM Simulation ...&quot;
+
 cd ${SNAP_ROOT}/hardware/sim
-##### enable SW trace
-# export SNAP_TRACE=0xf
-##### execute locally
-# ./run_sim -list testlist.sh -noaet
-##### execute on AFS with LSF, report error as unstable build
+
+# enable SW trace
+#export SNAP_TRACE=0xf
+
+# report error as unstable build
 case $SIM in
-  &apos;xsim&apos;|&apos;XSIM&apos; ) bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;./run_sim -list testlist.sh -noaet&quot;||exit 100;;
-  &apos;irun&apos;|&apos;IRUN&apos; ) bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;./run_sim -irun -list testlist.sh -noaet&quot;||exit 100;;
-  *)              bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;./run_sim -list testlist.sh -noaet&quot;||exit 100;;
+
+  &apos;irun&apos; )
+#    bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;./run_sim -irun -list testlist.sh -noaet&quot;||exit 100
+    ./run_sim -irun -list testlist.sh -noaet || exit 100
+    ;;
+    
+  *)
+#    bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;./run_sim -list testlist.sh -noaet&quot;||exit 100
+    ./run_sim -list testlist.sh -noaet || exit 100
+    ;;
+    
 esac</command>
     </hudson.tasks.Shell>
   </builders>
