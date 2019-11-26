@@ -291,35 +291,21 @@ if [ &quot;$ACT&quot;         == &quot;test&quot;   ]; then BSKIP=0;fi
 
 echo &quot;action_types (hdl,hls)=$ACTION_TYPE enabled_cards=$CRD BSKIP=$BSKIP&quot;
 
-
+# Following filtering will stop the current test if not required or not possible
+# This will lead to a brown colored result meaning : aborted
+# ASKIP may stand for ACTION skip
 case &quot;$CRD:$ACT:$SIM:$CAPI2&quot; in
-  *:hls_scatter_gather:0 )      C=&quot;scc1&quot;;ASKIP=1;; # no scatter_gather for CAPI1 cards // test done by jenkins filter , could be removed, as well as the CAPI2 variable
+  *:hls_scatter_gather:*:0 )    C=&quot;scc1&quot;;ASKIP=1;; # no scatter_gather for CAPI1 cards // test done by jenkins filter , could be removed, as well as the CAPI2 variable
   *:*DENALI*:xsim:* )           C=&quot;NVMD&quot;;ASKIP=1;; # DENALI doesnt work with xsim
   *:*NVME*:xsim:* )             C=&quot;NVMX&quot;;ASKIP=1;;
   *:*nvme*:xsim:* )             C=&quot;nvmX&quot;;ASKIP=1;;
-# S121B:hdl_example.SDRAM:*:* ) C=&quot;S1SD&quot;;ASKIP=0;; # $CRD can be xsim, irun, default
-# S121B:*:*:* )                 C=&quot;S1&quot;  ;ASKIP=1;;  
-# N250S:*NVME*:*:* )            C=&quot;SNVM&quot;;ASKIP=0;;
-# N250S:*nvme*:*:* )            C=&quot;Snvm&quot;;ASKIP=0;;
-# N250SP:hdl_example*:*:* )     C=&quot;SPex&quot;;ASKIP=0;;
-# N250SP:*:*:* )                C=&quot;SP&quot;  ;ASKIP=0;;
-  RCXVUP:*:xcelium:* )          C=&quot;rcxc&quot;;ASKIP=1;; # disable xcelium on RCXVUP AC 20180924
   *:hdl_example.*RAM:xcelium:* )C=&quot;xce0&quot;;ASKIP=0;; # test xcelium on some hdl_example actions
   *:*:xcelium:* )               C=&quot;xce1&quot;;ASKIP=1;; # disable xcelium on all other actions
-# *:hdl_example*:*:* )          C=&quot;exmp&quot;;ASKIP=0;;
-# *:hls_memcopy:*:* )           C=&quot;memc&quot;;ASKIP=0;;
-# *:hls_bfs:*:* )               C=&quot;bfs&quot; ;ASKIP=0;;
-# *:hls_hashjoin:*:* )          C=&quot;hshj&quot;;ASKIP=0;;
 # AC 20180921 : removing intersect sims 
   *:hls_intersect_h:*:* )       C=&quot;inth&quot;;ASKIP=1;;
   *:hls_intersect_s:*:* )       C=&quot;ints&quot;;ASKIP=1;;
   *:hls_search:xsim:* )         C=&quot;srhx&quot;;ASKIP=1;; # too long testtime, wait for xsim performance fix
-# *:hls_search:*:* )            C=&quot;srch&quot;;ASKIP=0;;
-# *:hls_sponge:*:* )            C=&quot;spng&quot;;ASKIP=0;;
   *:hls_blowfish:*:* )          C=&quot;blow&quot;;ASKIP=1;; # no maintenance for blowfish
-# N250SP:hls_helloworld:*:* )   C=&quot;SPhw&quot;;ASKIP=1;; # N250SP did not allow more than 128B DMA xfers =&gt; solved  AC 20180924
-# *:hls_helloworld:*:* )        C=&quot;helw&quot;;ASKIP=1;;
-# *:test:*:* )                  C=&quot;test&quot;;ASKIP=0;;
   *:hls_parallel_memcpy:*:*)
     if [[ $BRANCH != &quot;emrick&quot; ]]; then
       C=&quot;pmcp&quot;; ASKIP=1
@@ -333,54 +319,74 @@ case &quot;$CRD:$ACT:$SIM:$CAPI2&quot; in
       C=&quot;vgen&quot;; ASKIP=1
     fi;;
   * )                           C=&quot;def&quot; ;ASKIP=0;;
-esac            
+esac        
+
 echo &quot;card=$CRD CAPI2=$CAPI2 action=$ACT Sim=$SIM VIV=$VIV case=$C ASKIP=$ASKIP&quot;
+
+
+#==============================================================================================
+# Cleaning directories if ACT=test,
+# else checking $CRD.$ACT.defconfig file existence
+
+echo;echo &quot;*******************************************************************************&quot;
 
 case &quot;$ACT&quot; in
   test )
-    gitnames=`git ls-remote https://github.com/open-power/snap|grep &quot;refs/heads/&quot;|awk &apos;{print $2}&apos;`
+    echo &quot;ACT=test&quot;
+    echo
+    gitnames=`git ls-remote ${GIT_URL}|grep &quot;refs/heads/&quot;|awk &apos;{print $2}&apos;`; RC=$?
     echo &quot;RC=$RC gitnames=$gitnames&quot;
-    for dir in &quot;/afs/bb/proj/fpga/framework/CI_ws/SNAP_SIM_matrix&quot;/*;do
+
+    echo
+#    for dir in &quot;/afs/bb/proj/fpga/framework/CI_ws/SNAP_SIM_matrix&quot;/*;do
+    for dir in &quot;/var/jenkins/workspace/SNAP_SIM_matrix&quot;/*;do
       if [ -d &quot;$dir&quot; ];then
         branch=&quot;refs/heads/&quot;`basename $dir`
-        if [[ &quot;$gitnames&quot; =~ &quot;$branch&quot; ]];then echo &quot;branch=$branch found in gitnames, keep dir=$dir&quot;
+        if [[ &quot;$gitnames&quot; =~ &quot;$branch&quot; ]];then echo &quot;branch=$branch found in gitnames, keeping dir=$dir&quot;
         else 
-          echo &quot;branch=$branch not found in gitnames, delete dir=\&apos;$dir\&apos;&quot;
+          echo &quot;branch=$branch not found in gitnames, deleting dir=\&apos;$dir\&apos;&quot;
           rm -rf &quot;$dir&quot;     # put in quotes to work for directories with blanks
         fi
       else echo &quot;$dir is not a directory, continuing&quot;
       fi
     done
+    DSKIP=0
+    ;;
     
-    echo &quot;mail informing castella test triggered&quot;
-    mail -s &quot;Jenkins SIMULATION started with : branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX&quot; castella
-
-    date
-    DSKIP=0;;
   *&quot;hls_intersect&quot;* ) 
-    if [ -f snap/defconfig/$CRD.hls_intersect.defconfig ];then DSKIP=0
+    echo &quot;Checking snap/defconfig/$CRD.hls_intersect.defconfig existence (ACT=$ACT)&quot;
+    if [ -f snap/defconfig/$CRD.hls_intersect.defconfig ];then
+      DSKIP=0
     else 
       echo &quot;$CRD.hls_intersect.defconfig does not exist&quot;
       ls snap/defconfig/
       DSKIP=1
-    fi;;  
-  *DENALI*)
+    fi
+    ;;
+    
+  *DENALI* )
     act2=${ACT%.DENALI}
+    echo &quot;Checking snap/defconfig/$CRD.$act2.defconfig existence (ACT=$ACT)&quot;
     if [ -f snap/defconfig/$CRD.$act2.defconfig ];then DSKIP=0
     else 
       echo &quot;$CRD.$act2.defconfig does not exist&quot;
       ls snap/defconfig/
       DSKIP=1
-    fi;;  
-  * )          
+    fi
+    ;;
+    
+  * )      
+    echo &quot;Checking snap/defconfig/$CRD.hls_$ACT.defconfig existence&quot;
     if [ -f snap/defconfig/$CRD.$ACT.defconfig ];then DSKIP=0
     else 
       echo &quot;$CRD.$ACT.defconfig does not exist&quot;
       ls snap/defconfig/
       DSKIP=1
-    fi;;  
+    fi
+    ;;  
 esac
-echo &quot;defconfig SKIP=$DSKIP&quot;
+
+echo;echo &quot;defconfig SKIP=$DSKIP&quot;
 
 AFSused=`fs lq /afs/bb/proj/fpga/framework/CI_ws/SNAP_SIM_matrix/|grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
 SSKIP=0;msg=&quot;AFS spaced currently used=${AFSused}%&quot;
