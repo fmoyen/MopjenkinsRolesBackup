@@ -222,6 +222,7 @@ Removed hls_intersect_s &amp; hls_intersect_h from matrix</description>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
+
 set +x                           # reduce Jenkins output
 echo &quot;****************************************************************************************&quot;
 echo &quot;`date` BUILD START&quot;
@@ -326,7 +327,7 @@ echo &quot;card=$CRD CAPI2=$CAPI2 action=$ACT Sim=$SIM VIV=$VIV case=$C ASKIP=$A
 
 #==============================================================================================
 # Cleaning directories if ACT=test,
-# else checking $CRD.$ACT.defconfig file existence
+# else checking $CRD.action.defconfig file existence
 
 echo;echo &quot;*******************************************************************************&quot;
 
@@ -388,27 +389,59 @@ esac
 
 echo;echo &quot;defconfig SKIP=$DSKIP&quot;
 
-AFSused=`fs lq /afs/bb/proj/fpga/framework/CI_ws/SNAP_SIM_matrix/|grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
-SSKIP=0;msg=&quot;AFS spaced currently used=${AFSused}%&quot;
-if   (( AFSused &gt; 90 ));then 
+
+#==============================================================================================
+# Checking enough space is available
+
+echo;echo &quot;*******************************************************************************&quot;
+echo &quot;J: Checking enough space is available&quot;
+echo
+
+#AFSused=`fs lq /afs/bb/proj/fpga/framework/CI_ws/SNAP_SIM_matrix/|grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
+diskused=`df -h /var/jenkins/workspace/OC_IMG_matrix|grep -v Used|awk &apos;{print $5}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
+SSKIP=0;msg=&quot;disk usage =${diskused}%&quot;
+
+if   (( diskused &gt; 90 ));then 
   msg=&quot;ERROR: $msg, stopping additional builds&quot;;SSKIP=1
-  echo &quot;mail sent to castella : ERROR AFS space&quot;
-  mail -s &quot;ERROR: AFS space SIMULATION is used up to ${AFSused}%, stopping additional builds&quot; castella
-  #mail -s &quot;ERROR: AFS space SIMULATION is used up to ${AFSused}%, stopping additional builds&quot; mesnet
+  #SendAnEmail -s &quot;ERROR: Disk space is used up to ${diskused}%, stopping additional builds&quot; -d &quot;${EmailDestinationList[*]}&quot;
+  #SendAnEmail -s &quot;ERROR: AFS space is used up to ${AFSused}%, stopping additional builds&quot; -d &quot;${EmailDestinationList[*]}&quot;  
 
-elif (( AFSused &gt; 70 ));then
-   msg=&quot;WARNING: $msg&quot;
-   echo &quot;mail sent to castella : WARNING AFS space&quot;
-   mail -s &quot;WARNING: AFS space IMAGETEST is used up to ${AFSused}%&quot; castella
-   #mail -s &quot;WARNING: AFS space IMAGETEST is used up to ${AFSused}%&quot; mesnet
-fi;echo &quot;$msg&quot;
+elif (( diskused &gt; 70 ));then
+  msg=&quot;WARNING: $msg&quot;
+  #SendAnEmail -s &quot;WARNING: Disk space is used up to ${diskused}%&quot; -d &quot;${EmailDestinationList[*]}&quot;
+  #SendAnEmail -s &quot;WARNING: AFS space is used up to ${AFSused}%&quot; -d &quot;${EmailDestinationList[*]}&quot;  
 
-if (( ASKIP+DSKIP+BSKIP+SSKIP &gt; 0 ));then SKIP=1;else SKIP=0;fi
-echo &quot;SKIP=$SKIP&quot; &gt;export_props.properties
+else
+   msg=&quot;OK: $msg&quot;
+fi
+echo &quot;$msg&quot;
+
+#==============================================================================================
+# Aborting if something went wrong
+
+if [ &quot;$ASKIP&quot; == &quot;1&quot; ] || [ &quot;$DSKIP&quot; == &quot;1&quot; ] || [ &quot;$BSKIP&quot; == &quot;1&quot; ] || [ &quot;$SSKIP&quot; == &quot;1&quot; ];then SKIP=1;else SKIP=0;fi
+
+
+#==============================================================================================
+# Passing parameters to next script
+
+echo;echo &quot;*******************************************************************************&quot;
+echo &quot;J: Forwarding parameters to next script&quot;
+echo
+
+echo &quot;SKIP=$SKIP&quot; &gt;&gt; export_props.properties
+echo &quot;CRD=$CRD&quot; &gt;&gt; export_props.properties
+echo &quot;CL=$CL&quot; &gt;&gt; export_props.properties
+echo &quot;CAPI2=$CAPI2&quot; &gt;&gt; export_props.properties
+echo &quot;SIM=$SIM&quot; &gt;&gt; export_props.properties
+echo &quot;VIV=$VIV&quot; &gt;&gt; export_props.properties
+echo &quot;EmailDestinationList=( ${EmailDestinationList[*]} )&quot; &gt;&gt; export_props.properties
+echo &quot;HWUser=${HWUser}&quot; &gt;&gt; export_props.properties
+
 echo &quot;properties passed to next shell:&quot;
 cat export_props.properties
-echo &quot;***********************************************************&quot;
-</command>
+echo;echo &quot;*******************************************************************************&quot;
+echo</command>
     </hudson.tasks.Shell>
     <EnvInjectBuilder plugin="envinject@2.1.6">
       <info>
@@ -430,37 +463,84 @@ echo &quot;***********************************************************&quot;
     </org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
+
 set +x                           # reduce Jenkins output
 #ulimit -c unlimited             # reduce core dumps from what .profile says (kB)
 ulimit -S -c 128000
+
 echo &quot;****************************************************************************************&quot;
-echo &quot;`date` BUILD START&quot;
+echo &quot;EXECUTING SECOND SHELL FROM CAPI1&amp;2 SIM JENKINS (`date`)&quot;
 echo &quot;****************************************************************************************&quot;
-echo &quot;EXECUTING SECOND SHELL FROM CAPI1&amp;2 SIM JENKINS - V1.1 - 2019 march 21 - ...&quot;
-echo &quot;****************************************************************************************&quot;
+echo &quot;Simulating with Card=$CRD Action=$ACT CLOUD=$CL CAPI2=$CAPI2&quot;
+echo
+
+
+#==============================================================================================
+# Variables
+
 export PATH=$PATH:/usr/local/bin # python3 needs this path setup
 export USERHOME=`pwd`
 export SNAP_ROOT=$USERHOME/snap
-SIM=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 1)    # chars up to  first &apos;_&apos; identify Simulator
-VIV=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 2)    # chars behind first &apos;_&apos; identify Vivado version
 
-echo &quot;****************************************************************************************&quot;
-echo &quot;LSF SETUP ...&quot;
-ulimit -c unlimited
-export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
-export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
-export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
-export LSF_BINDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
-export LSF_SUBMITTER_OSTYPE=Linux
-export LSF_ENVDIR=/home/lsfbb/prod/conf
-LSF=&quot;-P zsort&quot;
-LSF+=&quot; -M 2&quot;                    # GB memory
-LSF+=&quot; -C 2000&quot;                 # KB core file
-LSF+=&apos; -R type=X86_64 -R span[hosts=1]&apos;
-LSF+=&quot; -I -n 4 &quot;				# number of processors
+#echo;echo &quot;********************************************************************************&quot;
+#echo &quot;J: LSF SETUP ...&quot;
+# echo
+# older setup up to RH6
+#export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+#export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
+#export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+#export LSF_BINDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+#export LSF_SUBMITTER_OSTYPE=Linux
+#export LSF_ENVDIR=/home/lsfbb/prod/conf
+#LSF=&apos;-P zsort -M 2 -C 2000 -I -n 4 -R type=X86_64 -R span[hosts=1]&apos;  # Project, GB_mem, KB_core, #_processors, type of processor
 
-echo &quot;****************************************************************************************&quot;
+# new setup for RH7
+#export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
+#export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/etc
+#export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
+#export LSF_BINDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
+#export LSF_SUBMITTER_OSTYPE=Linux
+#export LSF_ENVDIR=/home/lsfbb/prod/conf
+#LSF=&apos;-P zsort -M 2 -C 2000 -I -n 4 -R type=X86_64  -R osver=rh7 -R span[hosts=1]&apos;  # Project, GB_mem, KB_core, #_processors, type of processor
+
+
+#==============================================================================================
+# Functions
+
+# Function for sending alerting emails
+# Example 1: SendAnEmail -s &quot;This is the subject/alert&quot; -d firstDest@gmail.com -d SecondDest@free.fr
+# Example 2: SendAnEmail -s &quot;This is the subject/alert&quot; -d &quot;${EmailDestinationList[*]}&quot;
+function SendAnEmail
+{
+  local OPTIND opt DestList
+  while getopts &quot;s:d:&quot; opt
+  do 
+    case $opt in
+      s)
+        Subject=&quot;$OPTARG&quot;
+      ;;
+      d)
+        DestList+=(&quot;$OPTARG&quot;)
+      ;;
+    esac
+  done
+  
+  for i in ${DestList[@]}
+  do
+    echo &quot;&quot; | mail -s &quot;$Subject&quot; $i
+  done
+}
+
+
+#==============================================================================================
+# Simulation Engine (pslse) setup
+
+echo;echo &quot;*******************************************************************************&quot;
+echo &quot;J: &quot;
+echo
+
 rm -rf pslse
 case $CRD in 
   &apos;N250SP&apos;) branch=&apos;master&apos;;  # PSL8 and PSL9 merged in branch=capi2 since 05Mar2018

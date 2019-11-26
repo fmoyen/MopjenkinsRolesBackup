@@ -342,13 +342,13 @@ SSKIP=0;msg=&quot;disk usage =${diskused}%&quot;
 
 if   (( diskused &gt; 90 ));then 
   msg=&quot;ERROR: $msg, stopping additional builds&quot;;SSKIP=1
-  #SendAnEmail -s &quot;ERROR: OpenCAPI AFS space SIMULATION is used up to ${diskused}%, stopping additional builds&quot; -d &quot;${EmailDestinationList[*]}&quot;
-  #SendAnEmail -s &quot;ERROR: AFS space SIMULATION is used up to ${AFSused}%, stopping additional builds&quot; -d &quot;${EmailDestinationList[*]}&quot;  
+  #SendAnEmail -s &quot;ERROR: Disk space is used up to ${diskused}%, stopping additional builds&quot; -d &quot;${EmailDestinationList[*]}&quot;
+  #SendAnEmail -s &quot;ERROR: AFS space is used up to ${AFSused}%, stopping additional builds&quot; -d &quot;${EmailDestinationList[*]}&quot;  
 
 elif (( diskused &gt; 70 ));then
    msg=&quot;WARNING: $msg&quot;
-  #SendAnEmail -s &quot;WARNING: OpenCAPI space IMAGETEST is used up to ${diskused}%&quot; -d &quot;${EmailDestinationList[*]}&quot;
-  #SendAnEmail -s &quot;WARNING: AFS space IMAGETEST is used up to ${AFSused}%&quot; -d &quot;${EmailDestinationList[*]}&quot;  
+  #SendAnEmail -s &quot;WARNING: Disk space is used up to ${diskused}%&quot; -d &quot;${EmailDestinationList[*]}&quot;
+  #SendAnEmail -s &quot;WARNING: AFS space is used up to ${AFSused}%&quot; -d &quot;${EmailDestinationList[*]}&quot;  
 
 else
    msg=&quot;OK: $msg&quot;
@@ -356,6 +356,10 @@ fi
 echo &quot;$msg&quot;
 
 fi # end of if ASKIP
+
+
+#==============================================================================================
+# Aborting if something went wrong
 
 if [ &quot;$ASKIP&quot; == &quot;1&quot; ] || [ &quot;$DSKIP&quot; == &quot;1&quot; ] || [ &quot;$BSKIP&quot; == &quot;1&quot; ] || [ &quot;$SSKIP&quot; == &quot;1&quot; ];then SKIP=1;else SKIP=0;fi
 
@@ -366,7 +370,7 @@ if [ &quot;$ASKIP&quot; == &quot;1&quot; ] || [ &quot;$DSKIP&quot; == &quot;1&qu
 echo;echo &quot;*******************************************************************************&quot;
 echo &quot;J: Forwarding parameters to next script&quot;
 echo
-echo &quot;SKIP=$SKIP&quot; &gt; export_props.properties
+echo &quot;SKIP=$SKIP&quot; &gt;&gt; export_props.properties
 echo &quot;CRD=$CRD&quot; &gt;&gt; export_props.properties
 echo &quot;CL=$CL&quot; &gt;&gt; export_props.properties
 echo &quot;EmailDestinationList=( ${EmailDestinationList[*]} )&quot; &gt;&gt; export_props.properties
