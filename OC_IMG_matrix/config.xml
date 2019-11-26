@@ -162,7 +162,13 @@ Main Issues : &#xd;
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-  <triggers/>
+  <triggers>
+    <hudson.triggers.SCMTrigger>
+      <spec>H 0-8/1 * * *
+H 22-23/1 * * *</spec>
+      <ignorePostCommitHooks>false</ignorePostCommitHooks>
+    </hudson.triggers.SCMTrigger>
+  </triggers>
   <concurrentBuild>true</concurrentBuild>
   <axes>
     <hudson.matrix.TextAxis>
