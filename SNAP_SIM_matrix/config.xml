@@ -791,7 +791,9 @@ echo
 # execute with LSF, SNAP_ROOT must reside in AFS
 #bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}_model&quot; &quot;make model&quot;|| exit 1
 
-make -I $XILINX_ROOT/Vivado/${VIV_VERSION}/data/xsim/include/ model ||RC=$?
+alias make=&apos;/usr/bin/make -I $XILINX_ROOT/Vivado/${VIV_VERSION}/data/xsim/include/&apos;
+
+make model ||RC=$?
 if [ $RC -ne 0 ]; then
   echo &quot;make model FAILED !&quot;
   echo &quot; ==&gt; EXITING !&quot;
