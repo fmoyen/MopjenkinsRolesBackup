@@ -641,7 +641,7 @@ export XILINX_ROOT=/opt/Xilinx
 #export XILINX_ROOT=/afs/bb/proj/fpga/xilinx
 export XILINXD_LICENSE_FILE=2100@pokwinlic1.pok.ibm.com
 source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
-
+export XILINX_VIVADO=$XILINX_ROOT/Vivado/${VIV_VERSION}
 
 #==============================================================================================
 # Cadence setup
