@@ -473,7 +473,7 @@ set +x                           # reduce Jenkins output
 #ulimit -c unlimited             # reduce core dumps from what .profile says (kB)
 ulimit -S -c 128000
 
-echo &quot;****************************************************************************************&quot;
+echo;echo &quot;****************************************************************************************&quot;
 echo &quot;EXECUTING SECOND SHELL FROM CAPI1&amp;2 SIM JENKINS (`date`)&quot;
 echo &quot;****************************************************************************************&quot;
 echo &quot;Simulating with Card=$CRD Action=$ACT CLOUD=$CL CAPI2=$CAPI2&quot;
@@ -575,6 +575,7 @@ echo &quot;export XILINX_LOCAL_USER_DATA=no&quot; &gt;&gt; snap_env.sh
 # Adding specificities for specific card (such as another Vivado version)
 
 # FAB: CDS_INST_DIR &amp; IES_LIBS ??
+# FAB: if VIV_VERSION unset, XILINX_VIVADO unset too. OK but why ?
 
 case $SIM:$VIV:$CRD in    # test multiple Vivado versions in one build
 
@@ -610,8 +611,8 @@ case $SIM:$VIV:$CRD in    # test multiple Vivado versions in one build
     ;;
     
   *2017.4:*|*2018.1:*|*2018.2:*|*2018.3:*)  # adding 2018.3 for U200
-    echo &quot;COUCOU FAB !&quot;
-    export VIV_VERSION=$VIV; export IES_VERSION=&quot;15.20.s18&quot;
+    export VIV_VERSION=$VIV
+#	export IES_VERSION=&quot;15.20.s18&quot;
 #	export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION}
 #	export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION}
     ;;
@@ -639,9 +640,12 @@ echo &quot;Vivado SETUP $VIV_VERSION ...&quot;
 
 echo;echo &quot;****************************************************************************************&quot; 
 echo &quot;J: Vivado paths &amp; licences server setup ...&quot;
+echo
 export XILINX_ROOT=/opt/Xilinx
 #export XILINX_ROOT=/afs/bb/proj/fpga/xilinx
 export XILINXD_LICENSE_FILE=2100@pokwinlic1.pok.ibm.com
+echo &quot;  -&gt; Xilinx License access: $XILINXD_LICENSE_FILE&quot;
+echo &quot;  -&gt; sourcing $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh&quot;
 source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
 
 
