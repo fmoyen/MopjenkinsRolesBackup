@@ -574,8 +574,10 @@ echo &quot;export XILINX_LOCAL_USER_DATA=no&quot; &gt;&gt; snap_env.sh
 #==============================================================================================
 # Adding specificities for specific card (such as another Vivado version)
 
-# FAB: CDS_INST_DIR &amp; IES_LIBS ??
-# FAB: if VIV_VERSION unset, XILINX_VIVADO unset too. OK but why ?
+# FAB: if CDS_INST_DIR is set, pslse/afu_driver/src/Makefile will search for vpi_user.h into $CDS_INST_DIR
+#      Otherwise will look for vpi_user.h into $XILINX_VIVADO
+
+# FAB: if VIV_VERSION unset, XILINX_VIVADO unset too (XILINX_VIVADO is set by: source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh)
 
 case $SIM:$VIV:$CRD in    # test multiple Vivado versions in one build
 
