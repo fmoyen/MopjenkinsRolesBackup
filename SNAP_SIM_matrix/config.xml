@@ -791,7 +791,17 @@ echo
 # execute with LSF, SNAP_ROOT must reside in AFS
 #bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}_model&quot; &quot;make model&quot;|| exit 1
 
-alias make=&apos;/usr/bin/make -I $XILINX_ROOT/Vivado/${VIV_VERSION}/data/xsim/include/&apos;
+# alias make=&apos;/usr/bin/make -I $XILINX_ROOT/Vivado/${VIV_VERSION}/data/xsim/include/&apos;
+
+echo &quot;XILINX_ROOT/Vivado/${VIV_VERSION}/data/xsim/include/ :&quot;
+ls -lad XILINX_ROOT/Vivado/${VIV_VERSION}/data/xsim/include/
+
+echo &quot;XILINX_VIVADO = $XILINX_VIVADO&quot;
+
+echo; echo &quot;ENV:&quot;
+env
+echo
+
 
 make model ||RC=$?
 if [ $RC -ne 0 ]; then
