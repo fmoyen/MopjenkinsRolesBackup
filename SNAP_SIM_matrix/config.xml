@@ -5,36 +5,29 @@
 Contacts : alexandre.castellane@fr.ibm.com or fabrice_moyen@fr.ibm.com&#xd;
 &#xd;
 November 2019: Job imported from hdcl070Boeblingen jenkins server&#xd;
-Original Combination filter:&#xd;
-((ACT=~ &quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;) || (ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; )) &#xd;
-  &amp;&amp; &#xd;
-(&#xd;
-  (CRD==&quot;ADKU3&quot; &amp;&amp; ADKU3==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; !(ACT=~&quot;hls_scatter_gather&quot;) &amp;&amp; (SIM_VIV=~&quot;2018.1&quot;)) &#xd;
-    || &#xd;
-  (CRD==&quot;AD8K5&quot; &amp;&amp; AD8K5==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; !(ACT=~&quot;hls_scatter_gather&quot;) &amp;&amp; (SIM_VIV=~&quot;2018.1&quot;)) &#xd;
-    || &#xd;
-  (CRD==&quot;N250S&quot; &amp;&amp; N250S==&quot;true&quot;  &amp;&amp; !(ACT=~&quot;hls_scatter_gather&quot;) &amp;&amp; (SIM_VIV=~&quot;2018.1&quot;)) &#xd;
-    || &#xd;
-  (CRD==&quot;S121B&quot; &amp;&amp; S121B==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; !(ACT=~&quot;hls_scatter_gather&quot;) &amp;&amp; (SIM_VIV=~&quot;2018.1&quot;)) &#xd;
-    || &#xd;
-  (CRD==&quot;RCXVUP&quot; &amp;&amp; RCXVUP==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; (SIM_VIV=~&quot;2017.4&quot;) ) &#xd;
-    || &#xd;
-  (CRD==&quot;AD9V3&quot; &amp;&amp; AD9V3==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; ((SIM_VIV=~&quot;2018.2&quot;) || (SIM_VIV=~&quot;2018.3&quot;)) ) &#xd;
-    || &#xd;
-  (CRD==&quot;U200&quot; &amp;&amp; U200==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; ((SIM_VIV=~&quot;2018.2&quot;) || (SIM_VIV=~&quot;2018.3&quot;)) ) &#xd;
-    || &#xd;
-  (CRD==&quot;S241&quot; &amp;&amp; S241==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; ((SIM_VIV=~&quot;2018.2&quot;) || (SIM_VIV=~&quot;2018.3&quot;)) ) &#xd;
-    || &#xd;
-  (CRD==&quot;FX609&quot; &amp;&amp; FX609==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; ((SIM_VIV=~&quot;2018.2&quot;) || (SIM_VIV=~&quot;2018.3&quot;)) ) &#xd;
-    || &#xd;
-  (CRD==&quot;N250SP&quot; &amp;&amp; N250SP==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; ((SIM_VIV=~&quot;2018.2&quot;) || (SIM_VIV=~&quot;2018.3&quot;)) ) &#xd;
-    || &#xd;
-  (CRD==&quot;U200&quot; &amp;&amp; U200==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; (SIM_VIV=~&quot;2018.3&quot;)) &#xd;
-) &#xd;
-  &amp;&amp; &#xd;
-  ((SIM_VIV=~&quot;irun&quot; &amp;&amp; IRUN==&quot;true&quot;) || (SIM_VIV=~&quot;xsim&quot; &amp;&amp; XSIM==&quot;true&quot;) || (SIM_VIV=~&quot;xcelium&quot; &amp;&amp; XCELIUM==&quot;true&quot;)) &#xd;
-  ||  &#xd;
-  (ACT==&quot;test&quot; &amp;&amp; CRD==&quot;ADKU3&quot; &amp;&amp; SIM_VIV=~&quot;xsim&quot;) &#xd;
+Original ACT matrix:&#xd;
+hdl_example.SDRAM&#xd;
+hdl_example.BRAM&#xd;
+hdl_example.NORAM&#xd;
+hdl_helloworld&#xd;
+hdl_example.SDRAM.NVME.DENALI&#xd;
+hdl_example.SDRAM.NVME&#xd;
+hdl_nvme_example.BRAM.NVME.DENALI&#xd;
+hdl_nvme_example.BRAM.NVME&#xd;
+hls_nvme_memcopy.DENALI&#xd;
+hls_nvme_memcopy&#xd;
+hls_memcopy&#xd;
+hls_bfs&#xd;
+hls_hashjoin&#xd;
+hls_search&#xd;
+hls_sponge&#xd;
+hls_helloworld&#xd;
+hls_decimal_mult&#xd;
+hls_scatter_gather&#xd;
+hls_latency_eval&#xd;
+hls_parallel_memcpy&#xd;
+hls_vector_generator&#xd;
+test&#xd;
 &#xd;
 April 26th 2019 : filter : CAPI1 2018.1 CAPI2 2018.2or 3, U200 2018.3 RCXVUP 2017.4&#xd;
 &#xd;
@@ -169,27 +162,8 @@ Removed hls_intersect_s &amp; hls_intersect_h from matrix</description>
     <hudson.matrix.TextAxis>
       <name>ACT</name>
       <values>
-        <string>hdl_example.SDRAM</string>
-        <string>hdl_example.BRAM</string>
-        <string>hdl_example.NORAM</string>
         <string>hdl_helloworld</string>
-        <string>hdl_example.SDRAM.NVME.DENALI</string>
-        <string>hdl_example.SDRAM.NVME</string>
-        <string>hdl_nvme_example.BRAM.NVME.DENALI</string>
-        <string>hdl_nvme_example.BRAM.NVME</string>
-        <string>hls_nvme_memcopy.DENALI</string>
-        <string>hls_nvme_memcopy</string>
-        <string>hls_memcopy</string>
-        <string>hls_bfs</string>
-        <string>hls_hashjoin</string>
-        <string>hls_search</string>
-        <string>hls_sponge</string>
         <string>hls_helloworld</string>
-        <string>hls_decimal_mult</string>
-        <string>hls_scatter_gather</string>
-        <string>hls_latency_eval</string>
-        <string>hls_parallel_memcpy</string>
-        <string>hls_vector_generator</string>
         <string>test</string>
       </values>
     </hudson.matrix.TextAxis>
@@ -225,7 +199,7 @@ Removed hls_intersect_s &amp; hls_intersect_h from matrix</description>
       </values>
     </hudson.matrix.LabelAxis>
   </axes>
-  <combinationFilter>((ACT=~ &quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;) || (ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; ))   &amp;&amp;   (   (CRD==&quot;AD9V3&quot; &amp;&amp; AD9V3==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; ACT=~&quot;helloworld&quot; &amp;&amp; ((SIM_VIV=~&quot;2018.2&quot;) || (SIM_VIV=~&quot;2018.3&quot;)))   ||   (CRD==&quot;ADKU3&quot; &amp;&amp; ADKU3==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; ACT=~&quot;helloworld&quot; &amp;&amp; (SIM_VIV=~&quot;2018.1&quot;))    )   &amp;&amp;   (( SIM_VIV=~&quot;irun&quot; &amp;&amp; IRUN==&quot;true&quot;) || (SIM_VIV=~&quot;xsim&quot; &amp;&amp; XSIM==&quot;true&quot;) || (SIM_VIV=~&quot;xcelium&quot; &amp;&amp; XCELIUM==&quot;true&quot;))   ||   (ACT==&quot;test&quot; &amp;&amp; CRD==&quot;ADKU3&quot; &amp;&amp; SIM_VIV=~&quot;xsim&quot;) </combinationFilter>
+  <combinationFilter>((ACT=~ &quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;) || (ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; ))     &amp;&amp; (   (CRD==&quot;ADKU3&quot; &amp;&amp; ADKU3==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; !(ACT=~&quot;hls_scatter_gather&quot;) &amp;&amp; (SIM_VIV=~&quot;2018.1&quot;))      ||    (CRD==&quot;AD8K5&quot; &amp;&amp; AD8K5==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; !(ACT=~&quot;hls_scatter_gather&quot;) &amp;&amp; (SIM_VIV=~&quot;2018.1&quot;))      ||    (CRD==&quot;N250S&quot; &amp;&amp; N250S==&quot;true&quot;  &amp;&amp; !(ACT=~&quot;hls_scatter_gather&quot;) &amp;&amp; (SIM_VIV=~&quot;2018.1&quot;))      ||    (CRD==&quot;S121B&quot; &amp;&amp; S121B==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; !(ACT=~&quot;hls_scatter_gather&quot;) &amp;&amp; (SIM_VIV=~&quot;2018.1&quot;))      ||    (CRD==&quot;RCXVUP&quot; &amp;&amp; RCXVUP==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; (SIM_VIV=~&quot;2017.4&quot;) )      ||    (CRD==&quot;AD9V3&quot; &amp;&amp; AD9V3==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; ((SIM_VIV=~&quot;2018.2&quot;) || (SIM_VIV=~&quot;2018.3&quot;)) )      ||    (CRD==&quot;U200&quot; &amp;&amp; U200==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; ((SIM_VIV=~&quot;2018.2&quot;) || (SIM_VIV=~&quot;2018.3&quot;)) )      ||    (CRD==&quot;S241&quot; &amp;&amp; S241==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; ((SIM_VIV=~&quot;2018.2&quot;) || (SIM_VIV=~&quot;2018.3&quot;)) )      ||    (CRD==&quot;FX609&quot; &amp;&amp; FX609==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; ((SIM_VIV=~&quot;2018.2&quot;) || (SIM_VIV=~&quot;2018.3&quot;)) )      ||    (CRD==&quot;N250SP&quot; &amp;&amp; N250SP==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; ((SIM_VIV=~&quot;2018.2&quot;) || (SIM_VIV=~&quot;2018.3&quot;)) )      ||    (CRD==&quot;U200&quot; &amp;&amp; U200==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;) &amp;&amp; (SIM_VIV=~&quot;2018.3&quot;))  )    &amp;&amp;    ((SIM_VIV=~&quot;irun&quot; &amp;&amp; IRUN==&quot;true&quot;) || (SIM_VIV=~&quot;xsim&quot; &amp;&amp; XSIM==&quot;true&quot;) || (SIM_VIV=~&quot;xcelium&quot; &amp;&amp; XCELIUM==&quot;true&quot;))    ||     (ACT==&quot;test&quot; &amp;&amp; CRD==&quot;ADKU3&quot; &amp;&amp; SIM_VIV=~&quot;xsim&quot;) </combinationFilter>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
