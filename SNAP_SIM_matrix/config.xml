@@ -795,7 +795,7 @@ echo
 # alias make=&apos;/usr/bin/make -I $XILINX_ROOT/Vivado/${VIV_VERSION}/data/xsim/include/&apos;
 
 echo &quot;XILINX_ROOT/Vivado/${VIV_VERSION}/data/xsim/include/ :&quot;
-ls -lad XILINX_ROOT/Vivado/${VIV_VERSION}/data/xsim/include/
+ls -lad $XILINX_ROOT/Vivado/${VIV_VERSION}/data/xsim/include/
 
 echo &quot;XILINX_VIVADO = $XILINX_VIVADO&quot;
 
