@@ -728,7 +728,6 @@ esac
 
 echo;echo &quot;****************************************************************************************&quot; 
 echo &quot;J: Configuring SIMULATOR and ACTION types with SIMULATOR=$SIM and ACTION=$ACT&quot;
-echo
 
 case $SIM:$ACT in
   &apos;xsim&apos;:* )
@@ -780,6 +779,15 @@ case $SIM:$ACT in
     ;;
     
 esac
+
+echo
+echo &quot;.snap_config:&quot;
+echo &quot;-------------&quot;
+cat .snap_config | grep -v &quot;^#&quot;
+echo
+echo &quot;.snap_config.sh:&quot;
+echo &quot;----------------&quot;
+cat .snap_config | grep -v &quot;^#&quot;
 
 
 #==============================================================================================
