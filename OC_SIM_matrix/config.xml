@@ -142,9 +142,9 @@ H 18-23/4 * * *</spec>
     <hudson.matrix.TextAxis>
       <name>CRD</name>
       <values>
-        <string>AD9V3</string>
-        <string>AD9H3</string>
-        <string>AD9H7</string>
+        <string>OC-AD9V3</string>
+        <string>OC-AD9H3</string>
+        <string>OC-AD9H7</string>
       </values>
     </hudson.matrix.TextAxis>
     <hudson.matrix.TextAxis>
