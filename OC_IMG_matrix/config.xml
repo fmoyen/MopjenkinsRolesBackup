@@ -24,7 +24,7 @@ Main Issues : &#xd;
         <hudson.model.StringParameterDefinition>
           <name>BRANCH</name>
           <description>Choose the branch for https://github.com/OpenCAPI/oc-accel you want to test.</description>
-          <defaultValue>master</defaultValue>
+          <defaultValue>jenkins_mods3</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -62,12 +62,12 @@ Main Issues : &#xd;
         <hudson.model.BooleanParameterDefinition>
           <name>AD9H3</name>
           <description>enable/disable the OC-AD9H3 card</description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>AD9H7</name>
           <description>enable/disable the OC-AD9H7 card</description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>INNOVA2</name>
