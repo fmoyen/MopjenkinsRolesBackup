@@ -593,6 +593,7 @@ case $SIM:$VIV:$CRD in    # test multiple Vivado versions in one build
     ;;
     
   *2017.4:*|*2018.1:*|*2018.2:*|*2018.3:*|*2019.1:*)  # adding 2018.3 for U200
+    echo &quot;exporting Vivado $VIV&quot;
     export VIV_VERSION=$VIV
 #	export IES_VERSION=&quot;15.20.s18&quot;
 #	export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION}
