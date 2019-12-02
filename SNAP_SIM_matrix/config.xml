@@ -230,7 +230,7 @@ done
 
 echo &quot;Build with Card=$CRD CAPI2=$CAPI2 Action=$ACT Action_type=$ACTION_TYPE branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX&quot;
 
-EmailDestinationList=( fabrice_moyen@fr.ibm.com fabricepb@free.fr )
+EmailDestinationList=( fabrice_moyen@fr.ibm.com )
 
 
 #==============================================================================================

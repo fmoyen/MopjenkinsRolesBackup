@@ -228,7 +228,7 @@ CL=$(echo $CRD_CL| cut -d&apos;_&apos; -f 2)     # chars behind first &apos;_&ap
 
 echo &quot;Build with Card=$CRD Action=$ACT Action_type=$ACTION_TYPE CLOUD_build=$CL branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX test_on_hw=$TEST_ON_HW&quot;
 
-EmailDestinationList=( fabrice_moyen@fr.ibm.com fabricepb@free.fr )
+EmailDestinationList=( fabrice_moyen@fr.ibm.com )
 HWUser=&quot;capimop&quot;
 
 
