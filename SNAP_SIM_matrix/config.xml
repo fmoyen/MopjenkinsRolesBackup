@@ -557,22 +557,25 @@ case $SIM:$VIV:$CRD in    # test multiple Vivado versions in one build
 
   *RCXVUP) # adding specificity for RCXVUP card using an -es part (requires VIV2017.4) AC 20180921
     VIV=&quot;2017.4&quot; # force 2017.4 for RCXVUP
-    export VIV_VERSION=&quot;2017.4&quot;; export IES_VERSION=&quot;15.20.s18&quot;
-    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION}
-    export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION}
+    export VIV_VERSION=&quot;2017.4&quot;
+#    export IES_VERSION=&quot;15.20.s18&quot;
+#    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION}
+#    export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION}
     ;;
     
   *U200) # force 2018.3 for U200 as it is not supported in earlier versions
     VIV=&quot;2018.3&quot;
-    export VIV_VERSION=&quot;2018.3&quot;; export IES_VERSION=&quot;15.20.s18&quot;
-    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION}
-    export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION}
+    export VIV_VERSION=&quot;2018.3&quot;
+#    export IES_VERSION=&quot;15.20.s18&quot;
+#    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION}
+#    export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION}
     ;;
     
   xcelium:2018*:*)	# Xcelium needs Vivado 2018.1 or higher
-    export VIV_VERSION=$VIV; export IES_VERSION=&quot;17.10.002&quot;
-    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Xcelium/${IES_VERSION}
-    export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/xce${IES_VERSION}
+    export VIV_VERSION=$VIV
+#    export IES_VERSION=&quot;17.10.002&quot;
+#    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Xcelium/${IES_VERSION}
+#    export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/xce${IES_VERSION}
     ;;
     
   xcelium:*:*)
@@ -581,9 +584,10 @@ case $SIM:$VIV:$CRD in    # test multiple Vivado versions in one build
     ;;
     
   *:2016.4:*)
-    export VIV_VERSION=&quot;2016.4&quot;; export IES_VERSION=&quot;15.10.s19&quot;
-    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION} #
-	export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION}
+    export VIV_VERSION=&quot;2016.4&quot;
+#    export IES_VERSION=&quot;15.10.s19&quot;
+#    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION}
+#	export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION}
     ;;
     
   *2017.4:*|*2018.1:*|*2018.2:*|*2018.3:*)  # adding 2018.3 for U200
