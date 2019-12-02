@@ -174,7 +174,7 @@ H 22-23/1 * * *</spec>
     <hudson.matrix.TextAxis>
       <name>ACT</name>
       <values>
-        <string>hdl_example.noRAM</string>
+        <string>hdl_example.NORAM</string>
         <string>hdl_example.BRAM</string>
         <string>hdl_example.DDR</string>
         <string>hdl_single_engine</string>
