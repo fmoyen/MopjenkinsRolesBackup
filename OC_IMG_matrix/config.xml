@@ -75,11 +75,6 @@ Main Issues : &#xd;
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
-          <name>FACTORY</name>
-          <description>Used to generate a FACTORY image with hdl_example.NORAM cases. Files are copied in /data/Images/card_FACTORY_MCS directory</description>
-          <defaultValue>false</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
           <name>TEST_ON_HW</name>
           <description>Enable/disable testing on HW
 (Disabled by default as oc-flash + oc-reset does&apos;t work yet =&gt; need to reboot to get the code in!)
@@ -609,18 +604,6 @@ case $ACT in          # select config &amp; compile action
     make -s $CRD.$ACT.defconfig
     ;;
     
-# In case we would like a FACTORY, we build it using hdl_example.NORAM to ease debug
-  *&quot;hdl_example.NORAM&quot;*)
-    echo &quot;J: ACT=*hdl_example.NORAM* ==&gt; Factory case ?? ...&quot;
-    if [ &quot;$FACTORY&quot;  == &quot;true&quot; ];then
-       echo &quot;J: FACTORY=true ==&gt; ENABLE_FACTORY=y &amp; Configuring image thanks to $CRD.$ACT.defconfig file...&quot;;echo
-       echo &quot;ENABLE_FACTORY=y&quot; &gt;&gt; ./defconfig/$CRD.$ACT.defconfig
-       make -s $CRD.$ACT.defconfig
-    else
-       echo &quot;J: FACTORY=false ==&gt; Doing NOTHING...&quot;;echo
-    fi
-    ;;
-    
   *)
     echo &quot;J: Generic case ==&gt; Just configuring image thanks to $CRD.$ACT.defconfig file...&quot;;echo
     make -s $CRD.$ACT.defconfig
@@ -709,20 +692,6 @@ for  f in $BINFILES; do
   IMAGE[$COUNT_IMAGE]=&quot;/home/${HWUser}/images/${CRD}/${ACT}/&quot;`basename $f` 
   COUNT_IMAGE=`expr $COUNT_IMAGE + 1`
 done
-
-# In FACTORY MODE : We save hdl_example and hls_helloworld bin for cards files for future .mcs generation
-#case ${ACT}:$FACTORY in
-#     hdl_example.NORAM:true ) 
-#			FACTBINFILES=`ls -t ${OCACCEL_ROOT}/hardware/build/Images/oc_*[0-9]_FACTORY*.bin`  # take FACTORY bin files
-          # Copy hdl_ex Factory files if any
-#            if [ &quot;$FACTBINFILES&quot; == &quot;&quot; ] ; then echo &quot;Cannot find Factory binfile $FACTBINFILES although FACTORY REQUESTED !!&quot;;exit 1
-#            fi
-#            SaveDir=&quot;$RootSaveDir/${CRD}_OC_FACTORY_MCS&quot;
-#            mkdir -p $SaveDir
-#			echo &quot;J: FACTORY was requested : copy ${CRD} hdl_example.noram bin files to $SaveDir&quot;;cp -rp $FACTBINFILES $SaveDir;;
-#	hls_helloworld:true )
-#			echo &quot;J: FACTORY was requested : copy ${CRD} hls_helloworld    bin files to $SaveDir&quot;;cp -rp $BINFILES $SaveDir;;
-#esac
 
 
 #==============================================================================================
