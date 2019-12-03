@@ -274,9 +274,12 @@ if [ &quot;$ACT&quot;         == &quot;test&quot;   ]; then BSKIP=0;fi
 
 echo &quot;action_types (hdl,hls)=$ACTION_TYPE enabled_cards=$CRD BSKIP=$BSKIP&quot;
 
+
+#==============================================================================================
 # Following filtering will stop the current test if not required or not possible
 # This will lead to a brown colored result meaning : aborted
-# ASKIP may stand for ACTION skip
+# ASKIP stands for ACTION skip
+
 case &quot;$CRD:$ACT:$SIM:$CAPI2&quot; in
   *:hls_scatter_gather:*:0 )    C=&quot;scc1&quot;;ASKIP=1;; # no scatter_gather for CAPI1 cards // test done by jenkins filter , could be removed, as well as the CAPI2 variable
   *:*DENALI*:xsim:* )           C=&quot;NVMD&quot;;ASKIP=1;; # DENALI doesnt work with xsim
