@@ -272,7 +272,7 @@ if [ &quot;${!ACTION_TYPE}&quot; == &quot;false&quot; ]; then BSKIP=1;fi # if AC
 if [ &quot;${!CRD}&quot;         == &quot;false&quot; ]; then BSKIP=1;fi # if CRD=&quot;AD9V3&quot;, ${!CRD} is identical to $AD9V3
 if [ &quot;$ACT&quot;         == &quot;test&quot;   ]; then BSKIP=0;fi
 
-echo &quot;action_types (hdl,hls)=$ACTION_TYPE enabled_cards=$CRD BSKIP=$BSKIP&quot;
+echo;echo &quot;action_types (hdl,hls)=$ACTION_TYPE enabled_cards=$CRD BSKIP=$BSKIP&quot;
 
 
 #==============================================================================================
@@ -307,8 +307,58 @@ case &quot;$CRD:$ACT:$SIM:$CAPI2&quot; in
   * )                           C=&quot;def&quot; ;ASKIP=0;;
 esac        
 
-echo &quot;card=$CRD CAPI2=$CAPI2 action=$ACT Sim=$SIM VIV=$VIV case=$C ASKIP=$ASKIP&quot;
+echo;echo &quot;card=$CRD CAPI2=$CAPI2 action=$ACT Sim=$SIM VIV=$VIV case=$C ASKIP=$ASKIP&quot;
 
+
+#==============================================================================================
+# Specificities for some cards (such as another Vivado version)
+# preventing to run what is not in tune with these specificities
+
+# FAB: if CDS_INST_DIR is set, pslse/afu_driver/src/Makefile will search for vpi_user.h into $CDS_INST_DIR
+#      Otherwise will look for vpi_user.h into $XILINX_VIVADO
+
+# FAB: if VIV_VERSION unset, XILINX_VIVADO unset too (XILINX_VIVADO is set by: source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh)
+
+FSKIP=0 # stands for fineness skip
+
+case $SIM:$VIV:$CRD in
+
+  *RCXVUP) # adding specificity for RCXVUP card using an -es part (requires VIV2017.4) AC 20180921
+    if [ $VIV != &quot;2017.4&quot; ]; then FSKIP=1; else echo &quot;Running with Vivado $VIV&quot;; fi # force 2017.4 for RCXVUP
+#    export IES_VERSION=&quot;15.20.s18&quot;
+#    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION}
+#    export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION}
+    ;;
+    
+  *U200) # U200 is not supported in earlier versions than 2018.3 included
+    if [ $VIV == &quot;2018.3&quot; ] || [[ $VIV =~ &quot;2019&quot; ]]; then echo &quot;Running with Vivado $VIV&quot;; else FSKIP=1; fi
+#    export IES_VERSION=&quot;15.20.s18&quot;
+#    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION}
+#    export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION}
+    ;;
+    
+  xcelium:2018*:*)	# Xcelium needs Vivado 2018.1 or higher
+    if [[ $VIV =~ &quot;2018&quot; ]] || [[ $VIV =~ &quot;2019&quot; ]]; then echo &quot;Running with Vivado $VIV&quot;; else FSKIP=1; fi
+#    export IES_VERSION=&quot;17.10.002&quot;
+#    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Xcelium/${IES_VERSION}
+#    export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/xce${IES_VERSION}
+    ;;
+    
+  xcelium:*:*)
+    echo &quot;unsupported Vivado version $VIV for XCELIUM&quot;
+    FSKIP=1
+    ;;
+    
+  *)
+    echo &quot;Running with Vivado $VIV&quot;
+#	export IES_VERSION=&quot;15.20.s18&quot;
+#	export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION}
+#	export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION}
+   ;;
+
+esac
+
+echo;echo &quot;Fineness (specificities) FSKIP=$FSKIP&quot;
 
 #==============================================================================================
 # Cleaning directories if ACT=test,
@@ -404,7 +454,7 @@ echo &quot;$msg&quot;
 #==============================================================================================
 # Aborting if something went wrong
 
-if [ &quot;$ASKIP&quot; == &quot;1&quot; ] || [ &quot;$DSKIP&quot; == &quot;1&quot; ] || [ &quot;$BSKIP&quot; == &quot;1&quot; ] || [ &quot;$SSKIP&quot; == &quot;1&quot; ];then SKIP=1;else SKIP=0;fi
+if [ &quot;$ASKIP&quot; == &quot;1&quot; ] || [ &quot;$DSKIP&quot; == &quot;1&quot; ] || [ &quot;$BSKIP&quot; == &quot;1&quot; ] || [ &quot;$SSKIP&quot; == &quot;1&quot; ] || [ &quot;$FSKIP&quot; == &quot;1&quot; ];then SKIP=1;else SKIP=0;fi
 
 
 #==============================================================================================
@@ -550,66 +600,6 @@ echo &quot;export XILINX_LOCAL_USER_DATA=no&quot; &gt;&gt; snap_env.sh
 #esac 
 
 
-#==============================================================================================
-# Adding specificities for specific card (such as another Vivado version)
-
-# FAB: if CDS_INST_DIR is set, pslse/afu_driver/src/Makefile will search for vpi_user.h into $CDS_INST_DIR
-#      Otherwise will look for vpi_user.h into $XILINX_VIVADO
-
-# FAB: if VIV_VERSION unset, XILINX_VIVADO unset too (XILINX_VIVADO is set by: source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh)
-
-case $SIM:$VIV:$CRD in    # test multiple Vivado versions in one build
-
-  *RCXVUP) # adding specificity for RCXVUP card using an -es part (requires VIV2017.4) AC 20180921
-    VIV=&quot;2017.4&quot; # force 2017.4 for RCXVUP
-    export VIV_VERSION=&quot;2017.4&quot;
-#    export IES_VERSION=&quot;15.20.s18&quot;
-#    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION}
-#    export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION}
-    ;;
-    
-  *U200) # force 2018.3 for U200 as it is not supported in earlier versions
-    VIV=&quot;2018.3&quot;
-    export VIV_VERSION=&quot;2018.3&quot;
-#    export IES_VERSION=&quot;15.20.s18&quot;
-#    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION}
-#    export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION}
-    ;;
-    
-  xcelium:2018*:*)	# Xcelium needs Vivado 2018.1 or higher
-    export VIV_VERSION=$VIV
-#    export IES_VERSION=&quot;17.10.002&quot;
-#    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Xcelium/${IES_VERSION}
-#    export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/xce${IES_VERSION}
-    ;;
-    
-  xcelium:*:*)
-    echo &quot;unsupported Vivado version $VIV for XCELIUM&quot;
-    exit 1
-    ;;
-    
-  *:2016.4:*)
-    export VIV_VERSION=&quot;2016.4&quot;
-#    export IES_VERSION=&quot;15.10.s19&quot;
-#    export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION}
-#	export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION}
-    ;;
-    
-  *2017.4:*|*2018.1:*|*2018.2:*|*2018.3:*|*2019.1:*)  # adding 2018.3 for U200
-    echo &quot;exporting Vivado $VIV&quot;
-    export VIV_VERSION=$VIV
-#	export IES_VERSION=&quot;15.20.s18&quot;
-#	export CDS_INST_DIR=/afs/bb/proj/cte/tools/cds/Incisiv/${IES_VERSION}
-#	export IES_LIBS=/afs/bb/proj/fpga/framework/ies_libs/viv${VIV_VERSION}/ies${IES_VERSION}
-    ;;
-    
-  *)
-    echo &quot;unsupported Vivado version $VIV&quot;
-    exit 1
-    ;;
-
-esac
-
 
 #==============================================================================================
 # Setting up Vivado and Timing value
@@ -618,8 +608,7 @@ echo;echo &quot;****************************************************************
 echo &quot;J: Setting up Vivado Version and timing value&quot;
 echo
 
-# export VIV_VERSION=&quot;2017.4&quot;; export IES_VERSION=&quot;15.20.s18&quot;     # same version for all configs
-
+export VIV_VERSION=$VIV
 echo &quot;Vivado SETUP $VIV_VERSION ...&quot;
 
 # FAB: TIMING_LABLIMIT. On le configure ?
