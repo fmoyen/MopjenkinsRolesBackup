@@ -530,7 +530,7 @@ echo &quot;J: Setting up Vivado Version and timing value&quot;
 echo
 echo &quot;#setup: XILINX_LOCAL_USER_DATA=${XILINX_LOCAL_USER_DATA}, overwrite=no to prevent write access error in XilincTclStore (tclapp:load_apps)&quot; &gt;&gt;snap_env.sh
 echo &quot;export XILINX_LOCAL_USER_DATA=no&quot; &gt;&gt; snap_env.sh
-echo &quot; --&gt; For all OPENCAPI cards we run Vivavo $VIVADO_CHOICE and extend Timing trials to 5 runs until we optimise placement...&quot;
+echo &quot; --&gt; For all OPENCAPI cards we run Vivado $VIVADO_CHOICE and extend Timing trials to 5 runs until we optimise placement...&quot;
 echo &quot;     unless expressly indicated&quot;
 
 cd ${OCACCEL_ROOT}
