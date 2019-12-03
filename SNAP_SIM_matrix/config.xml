@@ -54,7 +54,7 @@ Removed hls_intersect_s &amp; hls_intersect_h from matrix</description>
         <hudson.model.BooleanParameterDefinition>
           <name>HDL</name>
           <description>enable/disable HDL examples simulation</description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>HLS</name>
@@ -69,32 +69,32 @@ Removed hls_intersect_s &amp; hls_intersect_h from matrix</description>
         <hudson.model.BooleanParameterDefinition>
           <name>AD8K5</name>
           <description>enable/disable AD8K5 simulation (CAPI1)</description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>N250S</name>
           <description>enable/disable N250S simulation (CAPI1)</description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>S121B</name>
           <description>enable/disable S121B simulation (CAPI1)</description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>N250SP</name>
           <description>enable/disable N250SP simulation (CAPI2)</description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>FX609</name>
           <description>enable/disable FX609 simulation (CAPI2)</description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>S241</name>
           <description>enable/disable S241 simulation (CAPI2)</description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>AD9V3</name>
@@ -104,7 +104,7 @@ Removed hls_intersect_s &amp; hls_intersect_h from matrix</description>
         <hudson.model.BooleanParameterDefinition>
           <name>U200</name>
           <description>enable/disable U200 simulation (CAPI2)</description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>XSIM</name>
