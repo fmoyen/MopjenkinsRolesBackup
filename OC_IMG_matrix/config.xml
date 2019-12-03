@@ -24,7 +24,7 @@ Main Issues : &#xd;
         <hudson.model.StringParameterDefinition>
           <name>BRANCH</name>
           <description>Choose the branch for https://github.com/OpenCAPI/oc-accel you want to test.</description>
-          <defaultValue>jenkins_mods3</defaultValue>
+          <defaultValue>master</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -47,7 +47,7 @@ Main Issues : &#xd;
         <hudson.model.BooleanParameterDefinition>
           <name>HDL</name>
           <description>enable/disable the HDL examples</description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>HLS</name>
@@ -224,6 +224,7 @@ NAME=$(echo $GIT_BRANCH| cut -d&apos;/&apos; -f 2 |tr &apos;[:upper:]&apos; &apo
 PREFIX=$(echo $NAME| cut -d&apos;_&apos; -f 1)    # chars up to first &apos;_&apos; identify need for test
 ACTION_TYPE=$(echo $ACT| cut -d&apos;_&apos; -f 1 |tr &apos;[:lower:]&apos; &apos;[:upper:]&apos;) # get ACTION_TYPE (hls, hld) and translate to uppercase
 CRD=$(echo $CRD_CL| cut -d&apos;_&apos; -f 1)    # chars up to  first &apos;_&apos; identify card
+CRDSuffix=$(echo $CRD | cut -d&apos;-&apos; -f 2)
 CL=$(echo $CRD_CL| cut -d&apos;_&apos; -f 2)     # chars behind first &apos;_&apos; identify Cloud build
 
 echo &quot;Build with Card=$CRD Action=$ACT Action_type=$ACTION_TYPE CLOUD_build=$CL branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX test_on_hw=$TEST_ON_HW&quot;
@@ -267,16 +268,26 @@ function SendAnEmail
 BSKIP=0
 
 if [ &quot;${!ACTION_TYPE}&quot; == &quot;false&quot; ]; then BSKIP=1;fi # if ACTION_TYPE=&quot;HLS&quot;, ${!ACTION_TYPE} is identical to $HLS
-if [ &quot;${!CRD}&quot;         == &quot;false&quot; ]; then BSKIP=1;fi # if CRD=&quot;AD9V3&quot;, ${!CRD} is identical to $AD9V3
+if [ &quot;${!CRDSuffix}&quot;         == &quot;false&quot; ]; then BSKIP=1;fi # if CRDSuffix=&quot;AD9V3&quot;, ${!CRDSuffix} is identical to $AD9V3
 if [ &quot;$ACT&quot;            == &quot;test&quot;  ]; then BSKIP=0;fi
 
 echo &quot;action_types (hdl,hls)=$ACTION_TYPE enabled_cards=$CRD BSKIP=$BSKIP&quot;
 
 # Following filtering will stop the current test if not required or not possible
 # This will lead to a brown colored result meaning : aborted
-# ASKIP may stand for ACTION skip
+# ASKIP stands for ACTION skip
+
 case &quot;$CRD:$ACT&quot; in
-  * )                      C=&quot;def &quot;;ASKIP=0;; # def=default
+  
+  OC-AD9H7:hls_memcopy_1024 ) # c-accel/hardware/oc-bip/board_support_packages/ad9h7/xdc/snap_hbm_timing.xdc does not exist
+    C=&quot;unsupported &quot;
+    ASKIP=1
+    ;;
+    
+  * )
+    C=&quot;def &quot;  # def=default
+    ASKIP=0
+    ;;
 esac        
 
 echo &quot;card=$CRD action=$ACT case=$C ASKIP=$ASKIP&quot;
