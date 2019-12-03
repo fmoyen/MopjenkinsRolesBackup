@@ -75,6 +75,11 @@ Main Issues : &#xd;
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
+          <name>FACTORY</name>
+          <description>Used to generate a FACTORY image with hdl_example.NORAM cases. Files are copied in /data/Images/card_FACTORY_MCS directory</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
           <name>TEST_ON_HW</name>
           <description>Enable/disable testing on HW
 (Disabled by default as oc-flash + oc-reset does&apos;t work yet =&gt; need to reboot to get the code in!)
