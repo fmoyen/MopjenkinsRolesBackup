@@ -504,19 +504,22 @@ echo
 echo;echo &quot;Current directory is : $PWD&quot;
 ls -al
 
-echo;echo &quot;Deleting old ./ocse (OpenCAPI Simulation Engine) directory&quot;
+echo;echo &quot;  -&gt; Deleting old ./ocse (OpenCAPI Simulation Engine) directory&quot;
 rm -rf ocse
 
 # When Lance Thomson makes a mod in his OCSE, we might use a specific branch for test
 # 2019 Nov 04 he merged the issue_2 into master (removing the debug messages)
 
-echo;echo &quot;Getting (git clone) OpenCAPI Simulation Environment (ocse) branch=$OCSE_BRANCH for card=$CRD...&quot;
+echo;echo &quot;  -&gt; Getting (git clone) OpenCAPI Simulation Environment (ocse) branch=$OCSE_BRANCH for card=$CRD...&quot;
 git clone -b $OCSE_BRANCH https://github.com/OpenCAPI/ocse ocse;echo &quot;git clone OCSE RC=$?&quot;
 
 export OCSE_INSTALL_DIR=${USERHOME}/ocse   # ca ne sert à rien on dirait !!
-echo;echo &quot;Exporting ocse directory as : ${USERHOME}/ocse into snap_env.sh&quot;
+echo;echo &quot;  -&gt; Exporting ocse directory as : ${USERHOME}/ocse into snap_env.sh&quot;
 echo &quot;export OCSE_ROOT=${USERHOME}/ocse&quot; &gt;snap_env.sh
 
+echo;echo &quot;  -&gt; Exporting XILINX_LOCAL_USER_DATA=no into snap_env.sh&quot;
+echo &quot;#setup: XILINX_LOCAL_USER_DATA=${XILINX_LOCAL_USER_DATA}, overwrite=no to prevent write access error in XilincTclStore (tclapp:load_apps)&quot; &gt;&gt;snap_env.sh
+echo &quot;export XILINX_LOCAL_USER_DATA=no&quot; &gt;&gt; snap_env.sh
 
 #==============================================================================================
 # Cleaning previous TL/DL &amp; getting TL:DL zip files
@@ -543,8 +546,6 @@ echo &quot;export OCSE_ROOT=${USERHOME}/ocse&quot; &gt;snap_env.sh
 echo;echo &quot;****************************************************************************************&quot;
 echo &quot;J: Setting up Vivado Version and timing value&quot;
 echo
-echo &quot;#setup: XILINX_LOCAL_USER_DATA=${XILINX_LOCAL_USER_DATA}, overwrite=no to prevent write access error in XilincTclStore (tclapp:load_apps)&quot; &gt;&gt;snap_env.sh
-echo &quot;export XILINX_LOCAL_USER_DATA=no&quot; &gt;&gt; snap_env.sh
 echo &quot; --&gt; For all OPENCAPI cards we run Vivado $VIVADO_CHOICE and extend Timing trials to 5 runs until we optimise placement...&quot;
 echo &quot;     unless expressly indicated&quot;
 

@@ -30,6 +30,16 @@ hls_parallel_memcpy removed (fails)</description>
           <defaultValue>master</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>VIVADO_CHOICE</name>
+          <description>Choose the Vivado version to use</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>2019.1</string>
+              <string>2018.3</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>HDL</name>
           <description>enable/disable the HDL examples</description>
@@ -618,7 +628,7 @@ function SendAnEmail
 
 
 #==============================================================================================
-# Power Service Layer Simulation Engine (ocse) setup
+# Power Service Layer Simulation Engine (pslse) setup
 # Should not be used but may be required by ??
 
 echo;echo &quot;*******************************************************************************&quot;
@@ -644,15 +654,22 @@ cd ${SNAP_ROOT}
 echo;echo &quot;  -&gt; Exporting pslse directory as : ${USERHOME}/pslse into snap_env.sh&quot;
 echo &quot;export PSLSE_ROOT=$USERHOME/pslse&quot; &gt;snap_env.sh
 
-
-# FAB: ICI
+echo;echo &quot;  -&gt; Exporting XILINX_LOCAL_USER_DATA=no into snap_env.sh&quot;
 #echo &quot;export PSL_DCP=/afs/bb/proj/fpga/framework/cards/$CRD/current/b_route_design.dcp&quot; &gt;&gt;snap_env.sh
 echo &quot;#setup: XILINX_LOCAL_USER_DATA=${XILINX_LOCAL_USER_DATA}, overwrite=no to prevent write access error in XilincTclStore (tclapp:load_apps)&quot; &gt;&gt;snap_env.sh
 echo &quot;export XILINX_LOCAL_USER_DATA=no&quot; &gt;&gt; snap_env.sh
-echo &quot;&quot;
-echo &quot;J:Setting up the VIVADO version. PSL9_IP_CORE set for CAPI2.0 Cards and Timing to -300ps&quot;
-echo &quot;J:For all CAPI2 cards (but RCXVUP) we run 2018.3 and extend Timing trials to 5 runs until we optimise placement&quot;
-echo &quot;J:NOTE : 2018.3 has a bug affecting CAPI-BSP IP&quot;
+echo
+
+
+#==============================================================================================
+# Setting up Vivado, PSL9 and Timing value
+
+echo;echo &quot;****************************************************************************************&quot;
+echo &quot;J: Setting up Vivado Version, PSL9_IP_CORE (Zip file) for CAPI2.0 cards and timing value&quot;
+echo
+echo &quot; --&gt; For all OPENCAPI cards we run Vivado $VIVADO_CHOICE and extend Timing trials to 5 runs until we optimise placement...&quot;
+echo &quot;     unless expressly indicated&quot;
+
 echo &quot;J:git cloning capi2-bsp submodule&quot;
 echo &quot;export PSL9_IP_CORE=/afs/bb/proj/fpga/framework/cards/$CRD/ibm.com_CAPI_PSL9_WRAP_2.00.zip&quot; &gt;&gt;snap_env.sh
 git submodule update --init --recursive hardware/capi2-bsp
