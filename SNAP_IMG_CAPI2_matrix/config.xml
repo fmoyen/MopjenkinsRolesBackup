@@ -1,0 +1,208 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<matrix-project plugin="matrix-project@1.14">
+  <actions/>
+  <description>Builds bitstreams with many different configurations and tests this images on real HW if possible.&#xd;
+In case of problems: please contact alexandre.castellane@fr.ibm.com&#xd;
+WARNING !!! &#xd;
+=&gt;&gt; FX609, S241, RCXVUP, U200 cards are not available for test =&gt; only binary generation are performed (no hw test)  &#xd;
+=&gt;&gt; TIMING increased to 300ps for CAPI2&#xd;
+==&gt; default is now 2018.3 (was already forced for to 2018.3 for U200 and eventually 2017.4 for RCXVUP, and 2018.2(pcigen4) for N250SP)&#xd;
+&#xd;
+Test in 2019.1 unsuccessful since glic 2.14 requested by vivado &amp; not installed ?&#xd;
+&#xd;
+==&gt; Brahma hosts N250SP tests available.      &#xd;
+==&gt; Orpington hosts 2 AD9V3&#xd;
+&#xd;
+RCXVUP_nCL removed from matrix to reduce load&#xd;
+hdl_example.NORAM temporarily removed (generates junk on jenkins log)&#xd;
+hls_parallel_memcpy removed (fails)</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.4">
+      <projectUrl>https://github.com/open-power/snap/</projectUrl>
+      <displayName></displayName>
+    </com.coravy.hudson.plugins.github.GithubProjectProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>BRANCH</name>
+          <description>Choose the branch for github.com:open-power/snap you want to test. Please do not use wildcards!!</description>
+          <defaultValue>master</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>TEST_ON_HW</name>
+          <description>enable/disable testing on HW</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>mopBoxes</name>
+          <description>List of Montpellier systems available for testing :
+  - orpington: AC922 8335-GTH with one CAPI2 AD9V3 and 1 OC-AD9V3
+(it needs to define capimop user with authorized_keys)</description>
+          <defaultValue>orpington</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>austinBoxes</name>
+          <description>List of Austin systems available for testing :
+(Assuming no VPN or jump server is needed to access Austin servers, 9.X.X.X addresses)
+(it needs to define capimop user with authorized_keys)</description>
+          <defaultValue>hawklp10.aus.stglabs.ibm.com</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>HDL</name>
+          <description>enable/disable the HDL examples</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>HLS</name>
+          <description>enable/disable the HLS examples</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>N250SP</name>
+          <description>enable/disable the N250SP card</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>AD9V3</name>
+          <description>enable/disable the AD9V3 card</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>AD9H3</name>
+          <description>enable/disable the AD9H3 card</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>FX609</name>
+          <description>enable/disable the FX609 card</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>S241</name>
+          <description>enable/disable the S241 card</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>U200</name>
+          <description>enable/disable the U200 card</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>FACTORY</name>
+          <description>Used to generate a FACTORY image for hdl_example.NORAM cases. hdl_ex &amp; hls_hello Files are copied in /data/Images/$card_FACTORY_MCS directory</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
+      <maxConcurrentPerNode>1</maxConcurrentPerNode>
+      <maxConcurrentTotal>10</maxConcurrentTotal>
+      <categories class="java.util.concurrent.CopyOnWriteArrayList"/>
+      <throttleEnabled>true</throttleEnabled>
+      <throttleOption>category</throttleOption>
+      <limitOneJobWithMatchingParams>true</limitOneJobWithMatchingParams>
+      <matrixOptions>
+        <throttleMatrixBuilds>false</throttleMatrixBuilds>
+        <throttleMatrixConfigurations>true</throttleMatrixConfigurations>
+      </matrixOptions>
+      <paramsToUseForLimit></paramsToUseForLimit>
+    </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.9.3">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>git@github.com:open-power/snap.git</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>${BRANCH}</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions>
+      <hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
+        <relativeTargetDir>snap</relativeTargetDir>
+      </hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
+      <hudson.plugins.git.extensions.impl.SubmoduleOption>
+        <disableSubmodules>false</disableSubmodules>
+        <recursiveSubmodules>true</recursiveSubmodules>
+        <trackingSubmodules>false</trackingSubmodules>
+        <reference></reference>
+        <parentCredentials>false</parentCredentials>
+      </hudson.plugins.git.extensions.impl.SubmoduleOption>
+    </extensions>
+  </scm>
+  <assignedNode>X86_UBUNTU</assignedNode>
+  <canRoam>false</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers>
+    <com.cloudbees.jenkins.GitHubPushTrigger plugin="github@1.29.4">
+      <spec></spec>
+    </com.cloudbees.jenkins.GitHubPushTrigger>
+    <hudson.triggers.SCMTrigger>
+      <spec>H 0-8/1 * * *
+H 22-23/1 * * *</spec>
+      <ignorePostCommitHooks>false</ignorePostCommitHooks>
+    </hudson.triggers.SCMTrigger>
+  </triggers>
+  <concurrentBuild>true</concurrentBuild>
+  <axes>
+    <hudson.matrix.TextAxis>
+      <name>ACT</name>
+      <values>
+        <string>hdl_example.BRAM</string>
+        <string>hdl_example.SDRAM</string>
+        <string>hdl_example.SDRAM.NVME</string>
+        <string>hdl_helloworld</string>
+        <string>hdl_nvme_example.SDRAM.NVME</string>
+        <string>hls_nvme_memcopy</string>
+        <string>hls_memcopy</string>
+        <string>hls_bfs</string>
+        <string>hls_hashjoin</string>
+        <string>hls_search</string>
+        <string>hls_sponge</string>
+        <string>hls_helloworld</string>
+        <string>hls_decimal_mult</string>
+        <string>hls_scatter_gather</string>
+        <string>hls_latency_eval</string>
+        <string>hls_vector_generator</string>
+        <string>test</string>
+      </values>
+    </hudson.matrix.TextAxis>
+    <hudson.matrix.TextAxis>
+      <name>CRD_CL</name>
+      <values>
+        <string>N250SP_nCL</string>
+        <string>AD9V3_nCL</string>
+        <string>AD9H3_nCL</string>
+        <string>FX609_nCL</string>
+        <string>S241_nCL</string>
+        <string>U200_nCL</string>
+      </values>
+    </hudson.matrix.TextAxis>
+  </axes>
+  <combinationFilter>(  ((ACT=~&quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;)||(ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; ))  &amp;&amp; ( (CRD_CL=~&quot;N250SP&quot; &amp;&amp; N250SP==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;)) || (CRD_CL=~&quot;S241&quot;   &amp;&amp; S241==&quot;true&quot;   &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;)) || (CRD_CL=~&quot;FX609&quot;  &amp;&amp; FX609==&quot;true&quot;  &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;)) || (CRD_CL=~&quot;AD9V3&quot;  &amp;&amp; AD9V3==&quot;true&quot;  &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;)) || (CRD_CL=~&quot;AD9H3&quot;  &amp;&amp; AD9H3==&quot;true&quot;  &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;)) || (CRD_CL=~&quot;U200&quot;   &amp;&amp; U200==&quot;true&quot;   &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;)) || (CRD_CL=~&quot;RCXVUP&quot; &amp;&amp; RCXVUP==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;)) ) ) || (ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;ADKU3_nCL&quot;)</combinationFilter>
+  <builders/>
+  <publishers/>
+  <buildWrappers/>
+  <executionStrategy class="hudson.matrix.DefaultMatrixExecutionStrategyImpl">
+    <runSequentially>false</runSequentially>
+    <touchStoneCombinationFilter>ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;AD9V3_nCL&quot;</touchStoneCombinationFilter>
+    <touchStoneResultCondition>
+      <name>UNSTABLE</name>
+      <ordinal>1</ordinal>
+      <color>YELLOW</color>
+      <completeBuild>true</completeBuild>
+    </touchStoneResultCondition>
+  </executionStrategy>
+  <childCustomWorkspace>${BRANCH}/${COMBINATION}</childCustomWorkspace>
+</matrix-project>
