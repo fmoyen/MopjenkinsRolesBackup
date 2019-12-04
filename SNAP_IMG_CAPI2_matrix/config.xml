@@ -1164,120 +1164,152 @@ if [ $loop -eq $maxloop ];then
 fi
 
 # FAB ICI
-ssh fpga@${box} &quot;echo ------ START of JOB on $box ----&gt;&gt; jenkins.log&quot;
-ssh fpga@${box} &quot;date                                 &gt;&gt; jenkins.log&quot;
-ssh fpga@${box} &quot;echo JOB_NAME  : $JOB_NAME           &gt;&gt; jenkins.log&quot;
-ssh fpga@${box} &quot;echo Card      : $CRD[$cardid]       &gt;&gt; jenkins.log&quot;
-ssh fpga@${box} &quot;echo Image     : $IMAGE              &gt;&gt; jenkins.log&quot;
-ssh fpga@${box} &quot;echo Build No  : ${BUILD_NUMBER}     &gt;&gt; jenkins.log&quot;
-ssh fpga@${box} &quot;echo Git Branch: ${GIT_BRANCH}       &gt;&gt; jenkins.log&quot;
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Preparing $CRD card image(s) test onto $box system&quot;
+echo
+ssh ${HWUser}@${box} &quot;echo ------ START of JOB on $box ----&gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;date                                 &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;echo JOB_NAME  : $JOB_NAME           &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;echo Card      : $CRD[$cardid]       &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;echo Image     : ${IMAGE[*]}              &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;echo Build No  : ${BUILD_NUMBER}     &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;echo Git Branch: ${GIT_BRANCH}       &gt;&gt; jenkins.log&quot;
 
 trap finish EXIT  # register finish/unlock function, after lock is set
 
-echo &quot;Running on $box :ls -al&quot;
-ssh $box ls -al
+echo &quot;  -&gt; Preparing snap workspace by cloning ${GIT_URL} into ${box}:${TARGET_DIR} using branch= ${GIT_BRANCH}&quot;
+RC=0; ssh ${HWUser}@${box} &quot;git clone ${GIT_URL} ${TARGET_DIR};cd ${TARGET_DIR};git checkout ${GIT_BRANCH}&quot; || RC=$?
 
-echo &quot;J:Copy workspace ${TARGET_DIR} to ${box}&quot;
-#RC=0;rsync -az --delete . fpga@${box}:${TARGET_DIR} ; RC=$?
-RC=0; ssh fpga@${box} &quot;git clone http://github.com/open-power/snap.git ${TARGET_DIR}&quot; || RC=$?
-
-#Fab #RC=0
-#Fab #ssh $box ls -a |grep -Fx snap
-#Fab #if [ ! $(ssh $box &quot;ls -a |grep -Fx snap&quot;) == &quot;snap&quot; ];then
-	#Fab #echo &quot;J:on remote $box, snap dir not existing, cloning it&quot;
-    #Fab #ssh $box git clone http://github.com/open-power/snap.git;RC=$?
-    #Fab #else
-    #Fab #echo &quot;on remote $box, snap dir exists, git pull to update it&quot;
-    #Fab #echo &quot;TO DO : need to select proper branch .... working on master for the moment&quot;
-    #Fab #ssh $box &quot;cd snap;git pull&quot;;RC=$?
-#Fab #fi
-
-if [ &quot;$RC&quot; -gt &quot;0&quot; ];then 
-	SAVE=&quot;/data/Images/rsync_error&quot;;echo &quot;git clone http://github.com/open-power/snap.git ${TARGET_DIR} failed, copy image to $SAVE&quot;;
-	cp -rp $BINFILES $SAVE
-	echo &quot;=&gt;exit with RC=100&quot;
+if [ $RC -ne 0 ];then 
+	SaveDir=&quot;$RootSaveDir/gitclone_error&quot;
+    echo &quot;  -&gt; git clone ${GIT_URL} ${TARGET_DIR} failed at ${box} =&gt; copying image to $SaveDir&quot;
+	cp -rp $BINFILES $SaveDir
+	echo &quot;  -&gt; EXITING !&quot;
 	exit 100
 fi
 
-echo &quot;J:COPY Image(s) $BINFILES to $IMAGE on $box&quot;
-ssh $box mkdir -p /home/fpga/images/${CRD}/${ACT}    # create subdirectory, if not avail yet
+echo &quot;  -&gt; Copying image(s) to ${box}:/home/${HWUser}/images/${CRD}/${ACT}&quot;
+ssh $box mkdir -p /home/${HWUser}/images/${CRD}/${ACT}    # create subdirectory, if not avail yet
 
 COUNT_IMAGE=0                         # Modification to support SPI dual files cases
+unset IMAGE
 for f in $BINFILES
 do
-  IMAGE[$COUNT_IMAGE]=&quot;/home/fpga/images/${CRD}/${ACT}/&quot;`basename $f`
-  echo &quot;J:COPY Image $f to ${IMAGE[$COUNT_IMAGE]} on fpga@$box&quot;
-  RC=0;rsync -tvh $f fpga@$box:${IMAGE[$COUNT_IMAGE]} ; RC=$?
-  if [ &quot;$RC&quot; -gt &quot;0&quot; ];then 
-    SAVE=&quot;/data/Images/rsync_error&quot;;echo &quot;rsync error, copy image to $SAVE&quot;;
-    cp -rp $f $SAVE
-    exit 100
+  IMAGE[$COUNT_IMAGE]=&quot;/home/${HWUser}/images/${CRD}/${ACT}/&quot;`basename $f`
+  echo &quot;      $f -&gt; ${box}:${IMAGE[$COUNT_IMAGE]}&quot;
+  RSYNC_RC=0;rsync -tvh $f ${HWUser}@$box:${IMAGE[$COUNT_IMAGE]} ; RSYNC_RC=$?
+  if [ $RSYNC_RC -ne 0 ];then 
+    echo &quot;  -&gt; copy FAILURE&quot;;
+    break # Failure =&gt; going out of the for-loop
   fi
-  COUNT_IMAGE=`expr $COUNT_IMAGE + 1` # Modification to support SPI dual files cases
+  COUNT_IMAGE=`expr $COUNT_IMAGE + 1`
 done
 
-
-echo &quot;J:BIN Files Transfered to $box ...&quot;
-echo &quot;***************************************************************************************&quot;
-echo &quot;&quot;
-# ssh fpga@${box} lsb_release -a
-
-echo &quot;J:Preparing command ...&quot;
-RUN=&quot;./actions/scripts/snap_jenkins.sh&quot;
-if [ ! -f $RUN ];then 
-  echo &quot;J:`date` Shell Script $RUN not found,Exit UNSTABLE&quot;;
+if [ $RSYNC_RC -ne 0 ]; then
+  SaveDir=&quot;$RootSaveDir/rsync_error&quot;
+  echo &quot;  -&gt; copying image(s) to $SaveDir&quot;;
+  mkdir -p $SaveDir
+  cp -rp $BINFILES $SaveDir
+  echo &quot;EXITING !&quot;
   exit 100
 fi
+
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Testing $CRD card image(s) with Power $box system&quot;
+echo
+
+# ssh fpga@${box} lsb_release -a
+
+echo &quot;  -&gt; Preparing command ...&quot;
+RUN=&quot;./actions/scripts/snap_jenkins.sh&quot;
+if [ ! -f $RUN ];then 
+  echo &quot;  -&gt; Shell Script $RUN not found =&gt; EXITING !&quot;
+  exit 100
+fi
+
+# FAB: Copie de OC_IMG_matrix. Le sudo est-il necessaire avec /dev/cxl ? On va supposer que non
+#RUN=&quot;sudo $RUN&quot; #sudo used to get access to /dev/ocxl directory
+
 RUN+=&quot; -D ${TARGET_DIR}&quot;
 
-#AC adding SPI8 Variable
-SPI8=0
-case $CRD in
-  &quot;AD9V3&quot;)  SPI8=1;;            
-  &quot;RCXVUP&quot;) SPI8=1;;
-  &quot;AD9H3&quot;) SPI8=1;;
-  *)        SPI8=0;;
-esac   
-#AC adding SPI8 Variable
-
-echo &quot;J:Card=$CRD and SPI8=$SPI8&quot;
-if [ $SPI8 -eq 0 ];then
-#     Preparing Command to be run on $box :
-     if [ -z ${IMAGE} ];then RUN+=&quot; -A ALL&quot;;else RUN+=&quot; -F ${IMAGE} -A ${CRD} -C $cardid&quot;;fi
+BinFilesList=( $BINFILES )
+if [ ${#BinFilesList[@]} -gt 1 ]; then
+  # More than 1 image file (like with AD9V3 which will have 2)
+  SPI8=1
 else
-#     Preparing Command to be run on $box :
-     if [ -z ${IMAGE} ];then RUN+=&quot; -A ALL&quot;;else RUN+=&quot; -F ${IMAGE[0]} -f ${IMAGE[1]} -A ${CRD} -C $cardid&quot;;fi
-fi   
+  # Only 1 image file
+  SPI8=0
+fi
 
-echo &quot;***************************************************************************************&quot;
-echo &quot;J:Build the software and actions on $box in $TARGET_DIR ...&quot;
-RC=0;ssh $box make -C ${TARGET_DIR} clean software actions || exit 100
-echo &quot;&quot;
-echo &quot;J:Make finished on $box in $TARGET_DIR ...&quot;
-echo &quot;***************************************************************************************&quot;
-echo &quot;&quot;
-echo &quot;J:`date` Executing this SNAP JENKINS TEST on $box:&quot;
-echo &quot;J:=&gt;$RUN&quot;
-RC=0;ssh -T fpga@${box} &lt;&lt; EOF || RC=$?
+echo &quot;     Card=$CRD and SPI8=$SPI8&quot;
+
+# For debugging purpose, if not giving an IMAGE to next $RUN test command, the $RUN command would run the test with
+# the already in-place image inside the FPGA, without trying to reset the FPGA &amp; flash the new image.
+# So you just need to uncomment the following line (unset IMAGE) to do so (deleting any IMAGE reference)
+#unset IMAGE
+
+if [ ${#IMAGE[@]} -eq 0 ]; then
+  # no IMAGE to test=&gt; $RUN will just test the image already inside the FPGA (no reset, no flash)
+  RUN+=&quot; -A ${CRD}&quot;
+else
+  if [ $SPI8 -eq 0 ]; then RUN+=&quot; -F ${IMAGE} -A ${CRD} -C $cardid&quot;;fi
+  if [ $SPI8 -eq 1 ]; then RUN+=&quot; -F ${IMAGE[0]} -f ${IMAGE[1]} -A ${CRD} -C $cardid&quot;;fi
+fi
+
+echo;echo &quot;  -&gt; RUN command= $RUN&quot;
+
+
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Building the software and actions on $box in $TARGET_DIR ...&quot;
+echo
+echo &quot;  -&gt; make clean software actions&quot;
+echo
+RC=0;ssh ${HWUser}@$box make -C ${TARGET_DIR} clean software actions || RC=$?
+
+if [ $RC -ne 0 ]; then
+  echo;echo &quot;  -&gt; make clean software actions FAILED&quot;
+  echo &quot;  -&gt; EXITING !&quot;
+  exit 100
+fi
+
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Executing below SNAP Jenkins test on $box from ${TARGET_DIR} directory (`date`):&quot;
+echo &quot;  -&gt; $RUN&quot;
+echo
+
+RC=0;ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?
 	export TERM=xterm
 	cd ${TARGET_DIR}
-	set -f
+    pwd
+	set -f  # the set -f command disables file name generation (&quot;path name expansion&quot;), meaning &quot;*.zip&quot; stays &quot;*.zip&quot;
     ${RUN}
 EOF
 
+
 # Write short log only, Clean workspace
 # Note: this lines in the log file and the lines above can be 
-ssh fpga@${box} &quot;echo Exit: $JOB_NAME RC = $RC at:\       &gt;&gt; jenkins.log&quot;
-ssh fpga@${box} &quot;date                                     &gt;&gt; jenkins.log&quot;
-ssh fpga@${box} &quot;echo ----------- EXIT -------------------&gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;echo Exit: $JOB_NAME RC = $RC at:\       &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;date                                     &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;echo ----------- EXIT -------------------&gt;&gt; jenkins.log&quot;
 
-echo &quot;J:`date` Clean up ${TARGET_DIR} on ${box}&quot;
-ssh -T fpga@${box} rm -rf ${TARGET_DIR}
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Cleaning up ${box}:${TARGET_DIR} (`date`)&quot;
+echo
+RM_RC=0;ssh -T ${HWUser}@${box} rm -rf ${TARGET_DIR} || RM_RC=$?
+
+if [ $RM_RC -eq 0 ]; then
+  echo &quot;  -&gt; Cleaning operation: OK&quot;
+else
+  echo &quot;  -&gt; Cleaning operation: FAILED&quot;
+fi
   
-if [ 0 -ne $RC ]; then
-  echo &quot;J:`date` Test failed RC = $RC, exit UNSTABLE&quot;
+if [ $RC -ne 0 ]; then
+  echo;echo &quot;***************************************************************************************&quot;
+  echo &quot;J: Test FAILED RC= $RC (`date`)&quot;
+  echo &quot;  -&gt; EXITING !&quot;
   exit 100
-fi </command>
+fi 
+</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>

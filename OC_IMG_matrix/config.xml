@@ -3,16 +3,16 @@
   <actions/>
   <description>Builds bitstreams with different configurations and tests images on real HW if possible.&#xd;
 In case of problems: please contact fabrice_moyen@fr.ibm.com or alexandre.castellane@fr.ibm.com&#xd;
-2019.1 is default&#xd;
+Vivado version used : tests on going for 2019.1 (issue with lsf / RH7)&#xd;
 &#xd;
-WARNING : P9 oc_find_card works with OC-$CRD prefixes&#xd;
+WARNING : P9 oc_find_card is used with OC-$CRD prefix&#xd;
 &#xd;
-Main Issues : NO HARDWARE TESTS AVAILABLE YET !!&#xd;
+Main Issues : &#xd;
 - oc-flash not operational&#xd;
 - after flashing the oc-reset doesn&apos;t cut the power supply, and FPGA is not refreshed !! Need &quot;Power9 reload routine&quot;&#xd;
 &#xd;
-=&gt; hdl_example.NORAM had an issue at config level in CAPI2, seems OK in OC&#xd;
-</description>
+=&gt; hdl_example.NORAM had an issue at config level (same as for CAPI2) to be confirmed&#xd;
+=&gt; ID are not coherent with SNAP IDs  =&gt; repaired</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.4">
@@ -833,8 +833,8 @@ for box in &quot;${TESTBOXES[@]}&quot;;do
     RC=0;ssh ${HWUser}@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
   fi
 
-if [ &quot;$RC&quot; == &quot;0&quot; ]; then : 
-    echo &quot;OK&quot;;
+if [ $RC -eq 0 ]; then : 
+    echo &quot;OK&quot;
   else
     echo &quot;FAILED !&quot;
     for i in &quot;${TESTBOXES[@]}&quot;; do [[ $i != $box ]] &amp;&amp; new+=($i);done   # generate new test array without unreachable box
@@ -1080,7 +1080,7 @@ echo &quot;     Card=$CRD and SPI8=$SPI8&quot;
 
 # For debugging purpose, if not giving an IMAGE to next $RUN test command, the $RUN command would run the test with
 # the already in-place image inside the FPGA, without trying to reset the FPGA &amp; flash the new image.
-# So you just need to uncomment the following line to do so (deleting any IMAGE reference)
+# So you just need to uncomment the following line (unset IMAGE) to do so (deleting any IMAGE reference)
 unset IMAGE
 
 if [ ${#IMAGE[@]} -eq 0 ]; then
