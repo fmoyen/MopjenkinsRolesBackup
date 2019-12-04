@@ -3,8 +3,12 @@
   <actions/>
   <description>builds and simulates many different configurations, automatic nightruns on master&#xd;
 in case of problems: please contact fmoyen@fr.ibm.com or alexandre.castellane@fr.ibm.com&#xd;
-=&gt; local ocse used (not repo)&#xd;
-=&gt; 2019.1 test on AD9V3 only</description>
+=&gt; 2019.1 is default&#xd;
+&#xd;
+KNOWN FAILURES : &#xd;
+- hdl do not have a hw_test available&#xd;
+- HBM cannot be simulated with xsim yet&#xd;
+</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.4">

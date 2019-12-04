@@ -3,16 +3,16 @@
   <actions/>
   <description>Builds bitstreams with different configurations and tests images on real HW if possible.&#xd;
 In case of problems: please contact fabrice_moyen@fr.ibm.com or alexandre.castellane@fr.ibm.com&#xd;
-Vivado version used : tests on going for 2019.1 (issue with lsf / RH7)&#xd;
+2019.1 is default&#xd;
 &#xd;
-WARNING : P9 oc_find_card is used with OC-$CRD prefix&#xd;
+WARNING : P9 oc_find_card works with OC-$CRD prefixes&#xd;
 &#xd;
-Main Issues : &#xd;
+Main Issues : NO HARDWARE TESTS AVAILABLE YET !!&#xd;
 - oc-flash not operational&#xd;
 - after flashing the oc-reset doesn&apos;t cut the power supply, and FPGA is not refreshed !! Need &quot;Power9 reload routine&quot;&#xd;
 &#xd;
-=&gt; hdl_example.NORAM had an issue at config level (same as for CAPI2) to be confirmed&#xd;
-=&gt; ID are not coherent with SNAP IDs  =&gt; repaired</description>
+=&gt; hdl_example.NORAM had an issue at config level in CAPI2, seems OK in OC&#xd;
+</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.4">

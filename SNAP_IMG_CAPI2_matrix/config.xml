@@ -468,7 +468,7 @@ echo;echo &quot;****************************************************************
 echo &quot;J: Checking enough space is available&quot;
 echo
 #AFSused=`fs lq /afs/bb/proj/fpga/framework/CI_ws/SNAP_IMG_TEST_matrix/|grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
-diskused=`df -h /var/jenkins/workspace/OC_IMG_matrix|grep -v Used|awk &apos;{print $5}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
+diskused=`df -h /var/jenkins/workspace/SNAP_IMG_CAPI2_matrix|grep -v Used|awk &apos;{print $5}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
 SSKIP=0;msg=&quot;disk usage =${diskused}%&quot;
 
 if   (( diskused &gt; 90 ));then 
@@ -918,7 +918,7 @@ case ${TEST_ON_HW} in
 
     if [ $TestCardAvailable -eq 0 ]
     then
-      SaveDir=$RootSaveDir/${CRD}_oc_missing
+      SaveDir=$RootSaveDir/${CRD}_missing
       echo &quot;  -&gt; No test CARD $CRD available, copying $CRD bin-file(s) &amp; bit-file(s) images to $SaveDir&quot;
       mkdir -p $SaveDir
       cp -rp $BINFILES $SaveDir
@@ -1011,82 +1011,159 @@ done # for box
 echo;echo &quot;----------------------------------------------------&quot;
 echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
 
-# FAB ICI
+
 function finish {  # define function to unlock in case of error, executed after registering with &quot;trap finish EXIT&quot;
-    echo &quot;RC=$?, now unlock ${LOCK} and end&quot;
-	SSH_RC=0;ssh fpga@$box rmdir ${LOCK} || SSH_RC=$?
-	echo &quot;`date` box=$box $LOCK unlock RC=$SSH_RC&quot;
+  echo;echo &quot;***************************************************************************************&quot;
+  echo &quot;J: FINISH function&quot;
+  
+  echo &quot;RC=$?&quot;
+  echo;echo &quot;  -&gt; unlocking ${LOCK}&quot;
+  UNLOCK_RC=0;ssh ${HWUser}@$box rmdir ${LOCK} || UNLOCK_RC=$?
+  echo &quot;box=$box lock=$LOCK unlock RC=$UNLOCK_RC (`date`)&quot;
+  echo;echo &quot;  -&gt; cleaning ${box}@$TARGET_DIR&quot;
+  CLEAN_RC=0;ssh -T ${HWUser}@$box rm -rf ${TARGET_DIR} || CLEAN_RC=$?
+  echo &quot;box=$box clean target_dir=$TARGET_DIR RC=$CLEAN_RC (`date`)&quot;
+  echo;echo &quot;  -&gt; EXITING !&quot;  
 }
-echo &quot;testboxes4=${TESTBOXES[@]}&quot;
-maxloop=60; echo &quot;Wait (max $maxloop min) for free card=$CRD in ${TESTBOXES[@]}, Iam `whoami`(whoami answer)&quot;
+
+
+maxloop=60
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Searching (max $maxloop min) for free card=$CRD into ( ${TESTBOXES[@]} ) (`date`)&quot;
+
+FindCardTool=&quot;snap_find_card&quot;
+
 for loop in `seq 1 $maxloop`;do
+
+  echo;echo &quot;*************************************************&quot;
+  echo &quot;J: LOOP $loop/$maxloop (`date`)&quot;
+
   for box in &quot;${TESTBOXES[@]}&quot;;do
-    nusers=`ssh fpga@${box} who|grep -v root|grep -v fpga|wc -l`
-#   echo &quot;remote homespace content:&quot;; ssh $box ls -al /home/fpga
-    find_card=snap_find_card.${GIT_COMMIT}.`date +%H%M%S`.`basename $BINFILES`
-    echo  &quot;J:copy $find_card to $box:/home/fpga&quot;;  # watch out &quot;single_test&quot; need to have this cp done before!
-    RC=0;scp ./software/tools/snap_find_card fpga@$box:/home/fpga/$find_card ; RC=$?
-    if
-      [ &quot;$RC&quot; -gt &quot;0&quot; ];then echo &quot;copy $find_card to $box result : RC=$RC, continue anyway&quot;;
+
+    echo;echo &quot;-------------------------------------------------&quot;
+    echo &quot;$box&quot;
+
+    nusers=`ssh ${HWUser}@${box} who|grep -v root|grep -v ${HWUser}|wc -l`
+
+    find_card=$FindCardTool.${GIT_COMMIT}.`date +%H%M%S`.`basename $BINFILES`
+
+    echo  &quot;  --&gt; Copying the tool $FindCardTool ($find_card) to $box:/home/${HWUser}&quot;
+    RC=0;scp ./software/tools/$FindCardTool ${HWUser}@$box:/home/${HWUser}/$find_card ; RC=$?
+    if [ $RC -gt 0 ];then
+      echo &quot;     -&gt; copy $find_card to $box FAILED, continuing anyway...&quot;;
     fi
-    # Checking with temporary snap_find_card_our_reference if we have a $CRD available
-    found=0;cards=`ssh -ttq fpga@${box} /home/fpga/$find_card -A ${CRD}`||found=$?
-    SSH_RC=0;ssh -ttq fpga@${box} rm /home/fpga/$find_card || SSH_RC=$?
-    echo &quot;J:`date` removed $find_card ./from $box RC=$SSH_RC&quot;
+    
+    echo -e &quot;  --&gt; Using the tool, looking for $CRD inside ${box}: \c&quot;
+    found=0;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} &gt; /dev/null 2&gt;&amp;1 ||found=$?
+    # ($find_card gives the number of found cards inside $?)
+    
+    if [ $found -ne 0 ];then
+      echo &quot;OK: $found CARD(S) FOUND&quot;
+      cards=`ssh -ttq ${HWUser}@${box} &quot;/home/${HWUser}/$find_card -A ${CRD} 2&gt;/dev/null&quot; | head -n1`   
+      echo &quot;      Found card-IDs= $cards&quot;
+      # (head is needed because if more than 1 card, $find_card returns something like &quot;0 0&quot; and second line with &quot;Total 2 cards detected&quot;)
+    else
+      echo &quot;FAILED: NO CARD FOUND&quot;
+      unset cards
+    fi
+
+    echo &quot;  --&gt; Removing the tool $FindCardTool ($find_card) from $box RC=$SSH_RC&quot;
+    SSH_RC=0;ssh -ttq ${HWUser}@${box} rm /home/${HWUser}/$find_card || SSH_RC=$?
+    if [ $SSH_RC -gt 0 ];then
+      echo &quot;    -&gt; Delete $find_card to $box FAILED, continuing anyway...&quot;;
+    fi
+
+	echo;echo &quot;J: loop=$loop box=$box nusers=$nusers card=$CRD $FindCardTool found=$found (`date`)&quot;
+    echo
+
     hours=`date +%H`
-	echo &quot;J:`date` loop=$loop box=$box nusers=$nusers card=$CRD snap_find_card found=$found&quot;
+
     case $found:$nusers in
-      0:*)      
-#       echo &quot;no card avail, try other box&quot;;
-        if [ $box == ${TESTBOXES[*]:(-1)} ];then echo &quot;wait...&quot;;sleep 60;fi
-        continue;;
-      [1234]:0) 
-#	    echo &quot;card avail, no user, now lock &amp; test&quot;
+
+      #------------------------------------
+      # no card available =&gt; try other box
+      0:*)
+        if [ $box == ${TESTBOXES[*]:(-1)} ];then
+          echo &quot;  --&gt; $box is the last system to test; Waiting for 60s...&quot;
+          sleep 60 # Last box of the list TESBOXES =&gt; Waiting 60s and go to next loop
+        fi
+        continue # next box or next loop (if it was the last box of the list)
+      ;;
+
+      #------------------------------------
+      # card available &amp; no user =&gt; now lock &amp; test
+      [1234]:0)
 		for cardid in $cards;do
-      	  LOCK=&quot;jenkins_lock_card&quot;$cardid
-		  RC=0;ssh $box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
+      	  LOCK=&quot;jenkins_lock_card$cardid&quot;
+		  RC=0;ssh ${HWUser}@$box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
 		  if [ $RC == &quot;0&quot; ]; then :
-		    echo &quot;J:`date` box=$box $LOCK lock RC=$RC&quot;; 
+		    echo &quot;  --&gt; box=$box lock=$LOCK lock RC=$RC (`date`)&quot;; 
 		    trap finish EXIT  # register finish/unlock function, after lock is set
-		    break 3
+		    break 3 # found card and no user =&gt; going out of $box for-loop and $loop for-loop
 	      else 
-		    echo &quot;J:box=$box $LOCK already locked, try next card&quot;
+		    echo &quot;  --&gt; box=$box lock=$LOCK already locked, try next card&quot;
 		  fi    
-		done;;
+		done
+      ;;
+
+      #------------------------------------
+      # found something else than 1,2,3 or 4 cards =&gt; meaning BAD $found return code
       *:0)      
-        echo &quot;J:unknown found_RC=$found from snap_find_card=$cards&quot;; 
-        exit 100;;
+        echo &quot;  --&gt; unknown found_RC=$found from $FindCardTool=$cards. EXITING...&quot;
+        exit 100
+      ;;
+
+      #------------------------------------
+      # card available but user(s) connected...
       *)      
       	if (( 9&lt;=hours &amp;&amp; hours&lt;=19 ));then
-      	  echo &quot;J:hours=$hours, nusers=$nusers, try other box&quot;
-          if [ $box == ${TESTBOXES[*]:(-1)} ];then echo &quot;wait...&quot;;sleep 60;fi
-          continue
+          # It is day time =&gt; priority to interactive users
+      	  echo &quot;  --&gt; hours=$hours (day), nusers=$nusers, try other box&quot;
+          if [ $box == ${TESTBOXES[*]:(-1)} ];then
+            echo &quot;  --&gt; $box is the last system to test; Waiting for 60s...&quot;
+            sleep 60 # Last box of the list TESBOXES =&gt; Waiting 60s and go to next loop
+          fi
+          continue # next box or next loop (if it was the last box of the list)
+
         else
-          ssh fpga@${box} who|grep -v root|grep -v fpga
-      	  echo &quot;J:hours=$hours, nusers=$nusers, now lock &amp; notify &amp; test&quot;
+          # It is night =&gt; running on $box even if there are connected users
+          ssh ${HWUser}@${box} who|grep -v root|grep -v ${HWUser}
+      	  echo &quot;  --&gt; hours=$hours (night), nusers=$nusers, now lock &amp; notify &amp; test&quot;
 		  for cardid in $cards;do
-      	    LOCK=&quot;jenkins_lock_card&quot;$cardid
-		    RC=0;ssh $box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
+      	    LOCK=&quot;jenkins_lock_card$cardid&quot;
+		    RC=0;ssh ${HWUser}@$box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
 		    if [ $RC == &quot;0&quot; ]; then :
-	  	      echo &quot;J:`date` box=$box $LOCK lock RC=$RC&quot;; 
+	  	      echo &quot;  --&gt; box=$box lock=$LOCK lock RC=$RC (`date`)&quot;; 
 	   	      trap finish EXIT  # register finish/unlock function, after lock is set
-              ssh $box wall &quot;WARNING: JENKINS TEST on FPGA CARD=$CRD ID=$cards&quot;
-		      break 3
+              ssh ${HWUser}@$box wall &quot;WARNING: JENKINS OPENCAPI TEST STARTING NOW on FPGA CARD=$CRD ID=$cards&quot;
+		      break 3 # found card and it is the night =&gt; going out of $box for-loop and $loop for-loop
 			else 
-			  echo &quot;J:box=$box $LOCK already locked, try next card&quot;
+			  echo &quot;  --&gt; box=$box lock=$LOCK already locked, try next card&quot;
 			fi    
           done
-        fi;;
+        fi
+      ;;
+      
     esac
+    
   done # for box
+  
 done #for loop
-if [ &quot;$loop&quot; == &quot;$maxloop&quot; ];then 
-  SAVE=&quot;/data/Images/card_not_avail&quot;
-  echo &quot;no card avail, copy image to $SAVE&quot;
-  cp -rp $BINFILES $SAVE            
+
+
+if [ $loop -eq $maxloop ];then
+  echo;echo &quot;***************************************************************************************&quot;
+  echo &quot;J: No card $CRD available with TESTBOXES= ${TESTBOXES[*]}&quot;
+  echo
+  SaveDir=&quot;$RootSaveDir/${CRD}_card_not_avail&quot;
+  mkdir -p $SaveDir
+  echo &quot;  -&gt; Copying image to $SaveDir&quot;
+  cp -rp $BINFILES $SaveDir
+  echo &quot;  -&gt; EXITING !&quot;
   exit 100
 fi
 
+# FAB ICI
 ssh fpga@${box} &quot;echo ------ START of JOB on $box ----&gt;&gt; jenkins.log&quot;
 ssh fpga@${box} &quot;date                                 &gt;&gt; jenkins.log&quot;
 ssh fpga@${box} &quot;echo JOB_NAME  : $JOB_NAME           &gt;&gt; jenkins.log&quot;
