@@ -74,6 +74,17 @@ Main Issues : &#xd;
           <description>enable/disable the OC-INNOVA2 card</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>TIMING_LABLIMIT_CHOICE</name>
+          <description>Choose the TIMING_LABLIMIT parameter. If timing is higher than your choice when doing a make image, the run will failed.</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>-1000</string>
+              <string>-300</string>
+              <string>-600</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>TEST_ON_HW</name>
           <description>Enable/disable testing on HW
@@ -87,17 +98,6 @@ Main Issues : &#xd;
           <defaultValue>OC-AD9V3</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
-        <hudson.model.ChoiceParameterDefinition>
-          <name>TIMING_LABLIMIT_CHOICE</name>
-          <description>Choose the TIMING_LABLIMIT parameter. If timing is higher than your choice when doing a make image, the run will failed.</description>
-          <choices class="java.util.Arrays$ArrayList">
-            <a class="string-array">
-              <string>-1000</string>
-              <string>-300</string>
-              <string>-600</string>
-            </a>
-          </choices>
-        </hudson.model.ChoiceParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>mopBoxes</name>
           <description>List of Montpellier systems available for testing :
