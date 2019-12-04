@@ -367,6 +367,7 @@ echo;echo &quot;Fineness (specificities) FSKIP=$FSKIP&quot;
 echo;echo &quot;*******************************************************************************&quot;
 
 case &quot;$ACT&quot; in
+
   test )
     echo &quot;ACT=test&quot;
     echo
@@ -390,11 +391,13 @@ case &quot;$ACT&quot; in
     ;;
     
   *&quot;hls_intersect&quot;* ) 
-    echo &quot;Checking snap/defconfig/$CRD.hls_intersect.defconfig existence (ACT=$ACT)&quot;
+    echo;echo &quot;Checking snap/defconfig/$CRD.hls_intersect.defconfig existence (ACT=$ACT)&quot;
     if [ -f snap/defconfig/$CRD.hls_intersect.defconfig ];then
       DSKIP=0
+      echo &quot;--&gt; OK&quot;
     else 
-      echo &quot;$CRD.hls_intersect.defconfig does not exist&quot;
+      echo &quot;--&gt; $CRD.hls_intersect.defconfig does not exist&quot;
+      echo;echo &quot;ls snap/defconfig:&quot;;echo &quot;------------------&quot;
       ls snap/defconfig/
       DSKIP=1
     fi
@@ -402,24 +405,31 @@ case &quot;$ACT&quot; in
     
   *DENALI* )
     act2=${ACT%.DENALI}
-    echo &quot;Checking snap/defconfig/$CRD.$act2.defconfig existence (ACT=$ACT)&quot;
-    if [ -f snap/defconfig/$CRD.$act2.defconfig ];then DSKIP=0
+    echo;echo &quot;Checking snap/defconfig/$CRD.$act2.defconfig existence (ACT=$ACT)&quot;
+    if [ -f snap/defconfig/$CRD.$act2.defconfig ];then 
+      DSKIP=0
+      echo &quot;--&gt; OK&quot;
     else 
-      echo &quot;$CRD.$act2.defconfig does not exist&quot;
+      echo &quot;--&gt; $CRD.$act2.defconfig does not exist&quot;
+      echo;echo &quot;ls snap/defconfig:&quot;;echo &quot;------------------&quot;
       ls snap/defconfig/
       DSKIP=1
     fi
     ;;
     
   * )      
-    echo &quot;Checking snap/defconfig/$CRD.hls_$ACT.defconfig existence&quot;
-    if [ -f snap/defconfig/$CRD.$ACT.defconfig ];then DSKIP=0
+    echo;echo &quot;Checking snap/defconfig/$CRD.$ACT.defconfig existence&quot;
+    if [ -f snap/defconfig/$CRD.$ACT.defconfig ];then
+      DSKIP=0
+      echo &quot;--&gt; OK&quot;
     else 
-      echo &quot;$CRD.$ACT.defconfig does not exist&quot;
+      echo &quot;--&gt; $CRD.$ACT.defconfig does not exist&quot;
+      echo;echo &quot;ls snap/defconfig:&quot;;echo &quot;------------------&quot;
       ls snap/defconfig/
       DSKIP=1
     fi
     ;;  
+
 esac
 
 echo;echo &quot;defconfig SKIP=$DSKIP&quot;
