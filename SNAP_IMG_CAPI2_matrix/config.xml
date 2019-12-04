@@ -544,17 +544,11 @@ export PATH=$PATH:/usr/local/bin  # python3 needs this path setup
 export USERHOME=`pwd`
 export SNAP_ROOT=$USERHOME/snap
 
-# Marennes (P8) hosts a 8k5 card in IBM Montpellier (requires a vpn access)
-# Brahma (Boston P9 9006-22p) hosts a N250SP card in IBM Montpellier (requires a vpn access)
-# Brahma (newell/whiterspoon P9 AC922) host a AD9V3 card in IBM Montpellier (requires a vpn access)
-# yob594 (newell/whiterspoon P9 AC922) host a AD9V3 card in IBM Montpellier (requires a vpn access)
-# boeBoxes=( tul3 tul2 )
-# mopBoxes=( brahma marennes lewen05 lewen5 yob594 )
-
 TESTBOXES=( ${mopBoxes[*]} ${austinBoxes[*]} ) # init array of systems
 echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
 RootSaveDir=/data/Images
 PSLSE_BRANCH=master
+PSL9File=/opt/IBM/PSL9/v2.00/ibm.com_CAPI_PSL9_WRAP_2.00.zip
 
 #echo;echo &quot;****************************************************************************************&quot;
 #echo &quot;J:LSF SETUP ...&quot;
@@ -670,18 +664,22 @@ echo
 echo &quot; --&gt; For all OPENCAPI cards we run Vivado $VIVADO_CHOICE and extend Timing trials to 5 runs until we optimise placement...&quot;
 echo &quot;     unless expressly indicated&quot;
 
-echo &quot;J:git cloning capi2-bsp submodule&quot;
-echo &quot;export PSL9_IP_CORE=/afs/bb/proj/fpga/framework/cards/$CRD/ibm.com_CAPI_PSL9_WRAP_2.00.zip&quot; &gt;&gt;snap_env.sh
-git submodule update --init --recursive hardware/capi2-bsp
 cd ${SNAP_ROOT}
-# older config untill oct1st 2019
-#export VIV_VERSION=&quot;2018.2&quot;  # 2018.3 IS JUST FOR TESTING NEW CAPI-BSP 2019 04 16
+export VIV_VERSION=&quot;$VIVADO_CHOICE&quot;
+echo &quot;  -&gt; VIVADO version initially set to $VIV_VERSION (please check if we change this later for some specific cards)&quot;
 
-# testing 2019.1 aborted as pb with LSF
-export VIV_VERSION=&quot;2018.3&quot;
-echo &quot;VIVADO version initially set to $VIV_VERSION (check if we change this later for some card specificity)&quot;
-echo &quot;export TIMING_LABLIMIT=\&quot;-300\&quot;&quot; &gt;&gt; snap_env.sh
-echo &quot;TIMING LIMIT set to -300&quot;
+echo &quot;export TIMING_LABLIMIT=\&quot;${TIMING_LABLIMIT_CHOICE}\&quot;&quot; &gt;&gt; snap_env.sh
+echo &quot;  -&gt; TIMING LIMIT set to ${TIMING_LABLIMIT_CHOICE} into snap_env.sh&quot;
+
+#echo &quot;export PSL9_IP_CORE=/afs/bb/proj/fpga/framework/cards/$CRD/ibm.com_CAPI_PSL9_WRAP_2.00.zip&quot; &gt;&gt;snap_env.sh
+echo &quot;export PSL9_IP_CORE=$PSL9File&quot; &gt;&gt;snap_env.sh
+echo &quot;  -&gt; PSL9_IP_CORE set to ${PSL9File} into snap_env.sh&quot;
+
+# FAB: unneeded as jenkins configured to get submodules. To be checked
+#echo &quot;J:git cloning capi2-bsp submodule&quot;
+#git submodule update --init --recursive hardware/capi2-bsp
+
+
 # RCXVUP with Eng sample can run only with 2017.4 !
 # U200 runs only with 2018.3 or later
 case $CRD in 
@@ -701,53 +699,66 @@ case $CRD in
             ;;
 esac
 
-
-echo &quot;****************************************************************************************&quot;
-echo &quot;J:Vivado PATHES SETUP ...&quot;
-export XILINX_ROOT=/afs/bb/proj/fpga/xilinx
+echo;echo &quot;****************************************************************************************&quot; 
+echo &quot;J: Vivado paths &amp; licences server setup ...&quot;
+export XILINX_ROOT=/opt/Xilinx
+#export XILINX_ROOT=/afs/bb/proj/fpga/xilinx
 export XILINXD_LICENSE_FILE=2100@pokwinlic1.pok.ibm.com
 source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
-echo &quot;J:Cadence SETUP ...&quot;
-echo &quot;IES_LIBS=$IES_LIBS&quot;
-echo &quot;CDS_LIC_FILE=$CDS_LIC_FILE&quot;
 
-echo &quot;****************************************************************************************&quot;
 
-echo &quot;J:Configure Image ...&quot;
+#==============================================================================================
+# Cadence setup
+
+# FAB: No cadence setup at MOP
+#echo;echo &quot;****************************************************************************************&quot; 
+#echo &quot;J: Cadence SETUP ...&quot;
+#echo
+#echo &quot;IES_LIBS=$IES_LIBS&quot;
+#echo &quot;CDS_LIC_FILE=$CDS_LIC_FILE&quot;
+
+
+#==============================================================================================
+# Testing POWER servers accessibility if ACT=test and TEST_ON_HW=true,
+# else making $CRD.$ACT.defconfig 
+
+echo;echo &quot;****************************************************************************************&quot;
+
 case $ACT in          # select config &amp; compile action
+
   &quot;test&quot;)
-    echo &quot;*T E S T  **skip image build /test&quot;
+    echo &quot;J: ACT=$ACT ==&gt; skiping image building&quot;;echo
     
   	if [ &quot;$TEST_ON_HW&quot; == &quot;true&quot; ]; then 
-      RC=0;ssh dim1 ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 ||RC=$?
-      if [ $RC == &quot;0&quot; ]; then echo &quot;dim1 ping ok&quot;; else echo &quot;dim1 not reachable&quot;;exit 1;fi
+    
+      echo &quot;Test on Hardware selected ==&gt; testing POWER servers accessibility:&quot;
+      # Cleaning will occur at this step, remote fw*.bin* files older than $days will be removed
+      days=90;srch=&quot;&apos;fw*.bin*&apos;&quot;
 
-        # Cleaning will occur at this step, remote fw*.bin* files older than $days will be removed
-        days=90;srch=&quot;&apos;fw*.bin*&apos;&quot;
-      
       for box in &quot;${TESTBOXES[@]}&quot;;do
       
         if [[ ${mopBoxes[*]} =~ $box ]]
         then
           # $box is a Montpellier server
-          bindir=&quot;/home/fpga/&quot;
-          RC=0;ssh $box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
+          echo -e &quot;MOP   : $box -&gt; \c&quot;
+          RC=0;ssh ${HWUser}@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
         else
-          # $box is a Boeblingen server, accessible through dim1 system
-          bindir=&quot;/opt/fpga/&quot;
-          RC=0;ssh dim1 ping $box -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
+          echo -e &quot;AUSTIN: $box -&gt; \c&quot;
+          RC=0;ssh ${HWUser}@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
         fi
-      
-        if [ $RC == &quot;0&quot; ]; then echo &quot;$box ping ok&quot;; else echo &quot;$box not reachable&quot;;continue;fi
-        
-        echo &quot;CLEANING Process : ssh $box find &amp; delete $srch in $bindir older than $days days&quot;
-        ssh $box &quot;find $bindir -type f -name $srch -mtime +$days -ls -delete&quot;
-        nusers=`ssh fpga@${box} who|grep -v root|grep -v fpga|wc -l`
-        echo &quot;`date` box=$box nusers=$nusers&quot;
+
+        if [ $RC == &quot;0&quot; ]; then echo &quot;OK&quot;; else echo &quot;FAILED&quot;;continue;fi
+                
+        echo &quot;Cleaning process : ssh ${HWUser}@$box find &amp; delete $srch in /home/$HWUser older than $days days&quot;
+        ssh ${HWUser}@$box &quot;find /home/$HWUser -type f -name $srch -mtime +$days -ls -delete&quot;
+        nusers=`ssh ${HWUser}@${box} who|grep -v root|grep -v ${HWUser}|wc -l`
+        echo &quot;box=$box nusers=$nusers (`date`)&quot;                
       done
     fi                          
     exit 0                     
     ;;
+    
+# FAB ICI    
   *&quot;nvme&quot;*|*&quot;NVME&quot;*)
     echo &quot;export SIMULATOR=nosim&quot; &gt;&gt; snap_env.sh
     make -s $CRD.$ACT.defconfig
@@ -1107,7 +1118,7 @@ fi </command>
     </hudson.plugins.build__timeout.BuildTimeoutWrapper>
     <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
     <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.1">
-      <template>#${BUILD_NUMBER} ${GIT_BRANCH} HWTest=${ENV,var=&quot;TEST_ON_HW&quot;}</template>
+      <template>#${BUILD_NUMBER} ${GIT_BRANCH} Vivado=${ENV,var=&quot;VIVADO_CHOICE&quot;} HWTest=${ENV,var=&quot;TEST_ON_HW&quot;}</template>
       <descriptionTemplate></descriptionTemplate>
       <runAtStart>true</runAtStart>
       <runAtEnd>true</runAtEnd>
