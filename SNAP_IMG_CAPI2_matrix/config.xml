@@ -758,23 +758,30 @@ case $ACT in          # select config &amp; compile action
     exit 0                     
     ;;
     
-# FAB ICI    
   *&quot;nvme&quot;*|*&quot;NVME&quot;*)
+    echo &quot;J: ACT=*NVME* ==&gt; SIMULATOR=nosim &amp; Configuring image thanks to $CRD.$ACT.defconfig file ...&quot;;echo
     echo &quot;export SIMULATOR=nosim&quot; &gt;&gt; snap_env.sh
     make -s $CRD.$ACT.defconfig
     ;;
     
 # In case we would like a FACTORY, we build it using hdl_example.NORAM to ease debug
   *&quot;hdl_example.NORAM&quot;*)
+    echo &quot;J: ACT=$ACT ==&gt; Checking if FACTORY requested...&quot;;echo
     if [ &quot;$FACTORY&quot;  == &quot;true&quot; ];then
-        echo &quot;Doing hdl_example.NORAM with FACTORY ENABLED&quot;
+        echo &quot;  -&gt; Factory requested: Configuring image with ENABLE_FACTORY=y thanks to $CRD.$ACT.defconfig file ...&quot;;echo
         echo &quot;ENABLE_FACTORY=y&quot; &gt;&gt; ./defconfig/$CRD.$ACT.defconfig
         make -s $CRD.$ACT.defconfig      
-    fi;;
+    else
+        echo &quot;  -&gt; Factory NOT requested: Only configuring image thanks to $CRD.$ACT.defconfig file ...&quot;;echo
+        make -s $CRD.$ACT.defconfig      
+    fi
+    ;;
     
   *)
+    echo &quot;J: Generic case ==&gt; Just configuring image thanks to $CRD.$ACT.defconfig file...&quot;;echo
     make -s $CRD.$ACT.defconfig
     ;;
+    
 esac
 
 echo &quot;****************************************************************************************&quot;
