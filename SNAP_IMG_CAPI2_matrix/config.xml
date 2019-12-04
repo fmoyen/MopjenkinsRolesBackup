@@ -516,17 +516,20 @@ echo</command>
     </org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
-echo &quot;SKIP PASSED = $SKIP&quot;
-if [ $SKIP -eq 1 ]
-then 
-exit 0  #&quot;temporarily setting not available as success !
-fi
 
 set +x                            # reduce Jenkins output
 ulimit -c unlimited               # limit core dumps
+
+echo;echo &quot;****************************************************************************************&quot;
+echo &quot;EXECUTING SECOND CAPI2 SHELL FROM MOPJENKINS ...&quot;
 echo &quot;****************************************************************************************&quot;
-echo &quot;EXECUTING SECOND CAPI2 SHELL FROM JENKINS - V1.4 - 2019 October 16th - ...&quot;
-echo &quot;****************************************************************************************&quot;
+
+echo &quot;Building with Card=$CRD Action=$ACT CLOUD=$CL&quot;
+
+
+#==============================================================================================
+# Variables
+
 export PATH=$PATH:/usr/local/bin  # python3 needs this path setup
 export USERHOME=`pwd`
 export SNAP_ROOT=$USERHOME/snap
@@ -538,74 +541,111 @@ export SNAP_ROOT=$USERHOME/snap
 # boeBoxes=( tul3 tul2 )
 # mopBoxes=( brahma marennes lewen05 lewen5 yob594 )
 
-TESTBOXES=( ${boeBoxes[*]} ${mopBoxes[*]}) # init array of systems
+TESTBOXES=( ${mopBoxes[*]} ${austinBoxes[*]} ) # init array of systems
+echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
+RootSaveDir=/data/Images
+PSLSE_BRANCH=master
 
-echo &quot;testboxes1=${TESTBOXES[@]}&quot;
+#echo;echo &quot;****************************************************************************************&quot;
+#echo &quot;J:LSF SETUP ...&quot;
 
-echo &quot;****************************************************************************************&quot;
-echo &quot;J:LSF SETUP ...&quot;
-
-
-# previous settings :
- export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
- export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
- export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
- export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
- export LSF_BINDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
- export LSF_SUBMITTER_OSTYPE=Linux
- export LSF_ENVDIR=/home/lsfbb/prod/conf
-
-# Rolf recommendations :
-# LSF_BINDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
-# LSF_ENVDIR=/home/lsfbb/prod/conf
-# LSF_LIBDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
-# LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/etc
-# LSF_SUBMITTER_OSTYPE=Linux
-
-# tested settings :
-# export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
-# export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/etc
-# export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
-# export LSF_BINDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
+## previous settings :
+# export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+# export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
+# export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+# export LSF_BINDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
 # export LSF_SUBMITTER_OSTYPE=Linux
 # export LSF_ENVDIR=/home/lsfbb/prod/conf
 
-LSF=&quot;-P zsort&quot;
-LSF+=&quot; -M 6&quot;                      # 12GB memory
-LSF+=&quot; -C 2000&quot;                   # 2MB core file
+## Rolf recommendations :
+## LSF_BINDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
+## LSF_ENVDIR=/home/lsfbb/prod/conf
+## LSF_LIBDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
+## LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/etc
+## LSF_SUBMITTER_OSTYPE=Linux
 
-# AC 2019 10 08 : forcing RH7 for Vivado 2019.1
-# LSF+=&apos; -R osver=rh7&apos;
-# LSF+=&apos; -R type==X86_64&apos;
-# LSF+=&apos; -R span[hosts=1]&apos;
+## tested settings :
+## export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
+## export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/etc
+## export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
+## export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
+## export LSF_BINDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
+## export LSF_SUBMITTER_OSTYPE=Linux
+## export LSF_ENVDIR=/home/lsfbb/prod/conf
 
-# AC : older configuration
-LSF+=&apos; -R type=X86_64 -R span[hosts=1]&apos;
-LSF+=&quot; -I -n 8&quot;
-echo &quot;LSF variable set to : $LSF&quot;
+#LSF=&quot;-P zsort&quot;
+#LSF+=&quot; -M 6&quot;                      # 12GB memory
+#LSF+=&quot; -C 2000&quot;                   # 2MB core file
 
-# Fabrice: CRD and CL now passed from first script thanks to export_props.properties file
-# CRD=$(echo $CRD_CL| cut -d&apos;_&apos; -f 1)    # chars up to  first &apos;_&apos; identify card
-# CL=$(echo $CRD_CL| cut -d&apos;_&apos; -f 2)     # chars behind first &apos;_&apos; identify Cloud build
+## AC 2019 10 08 : forcing RH7 for Vivado 2019.1
+## LSF+=&apos; -R osver=rh7&apos;
+## LSF+=&apos; -R type==X86_64&apos;
+## LSF+=&apos; -R span[hosts=1]&apos;
 
-echo &quot;J:Checking Build with Card=$CRD Action=$ACT CLOUD=$CL&quot;
+## AC : older configuration
+#LSF+=&apos; -R type=X86_64 -R span[hosts=1]&apos;
+#LSF+=&quot; -I -n 8&quot;
+#echo &quot;LSF variable set to : $LSF&quot;
 
-echo &quot;****************************************************************************************&quot;
-echo &quot;J:Get PSL Simulation Environment ...&quot;
-echo &quot;current path is :&quot;
-pwd
-#echo &quot;size of current volume data:&quot;
-#fs lq
+
+#==============================================================================================
+# Functions
+
+# Function for sending alerting emails
+# Example 1: SendAnEmail -s &quot;This is the subject/alert&quot; -d firstDest@gmail.com -d SecondDest@free.fr
+# Example 2: SendAnEmail -s &quot;This is the subject/alert&quot; -d &quot;${EmailDestinationList[*]}&quot;
+function SendAnEmail
+{
+  local OPTIND opt DestList
+  while getopts &quot;s:d:&quot; opt
+  do 
+    case $opt in
+      s)
+        Subject=&quot;$OPTARG&quot;
+      ;;
+      d)
+        DestList+=(&quot;$OPTARG&quot;)
+      ;;
+    esac
+  done
+  
+  for i in ${DestList[@]}
+  do
+    echo &quot;&quot; | mail -s &quot;$Subject&quot; $i
+  done
+}
+
+
+#==============================================================================================
+# Power Service Layer Simulation Engine (ocse) setup
+# Should not be used but may be required by ??
+
+echo;echo &quot;*******************************************************************************&quot;
+echo &quot;J:Getting Power Service Layer Simulation Engine (pslse) Environment ...&quot;
+echo
+echo;echo &quot;Current directory is : $PWD&quot;
+ls -al
+
+echo;echo &quot;  -&gt; Deleting old ./pslse (Power Service Layer Simulation Engine) directory&quot;
 rm -rf pslse
-# PSLVER=8/9 merged in branch=capi2 since 05Mar2018, selected by snap_env.sh
-git clone https://github.com/ibm-capi/pslse pslse
+
+echo;echo &quot;Getting (git clone) Pwoer Service Layer Simulation Environment (pslse) branch=$PSLSE_BRANCH for card=$CRD...&quot;
+git clone -b $PSLSE_BRANCH https://github.com/ibm-capi/pslse pslse;echo &quot;git clone PSLSE RC=$?&quot;
+
+
+echo;echo &quot;  -&gt; Cleaning (make clean) $SNAP_ROOT &amp; $SNAP_ROOT/hardware/capi2-bsp directories&quot;
 cd ${SNAP_ROOT}
 make clean                   # to make sure we restart from a blank snap
-cd hardware/capi2-bsp        # to make sure we restart from a blank capi-bsp
+cd hardware/capi2-bsp
 make clean                   # to make sure we restart from a blank capi-bsp
-cd ../..                     # to make sure we restart from a blank capi-bsp
+
+cd ${SNAP_ROOT}
+echo;echo &quot;  -&gt; Exporting pslse directory as : ${USERHOME}/pslse into snap_env.sh&quot;
 echo &quot;export PSLSE_ROOT=$USERHOME/pslse&quot; &gt;snap_env.sh
+
+
+# FAB: ICI
 #echo &quot;export PSL_DCP=/afs/bb/proj/fpga/framework/cards/$CRD/current/b_route_design.dcp&quot; &gt;&gt;snap_env.sh
 echo &quot;#setup: XILINX_LOCAL_USER_DATA=${XILINX_LOCAL_USER_DATA}, overwrite=no to prevent write access error in XilincTclStore (tclapp:load_apps)&quot; &gt;&gt;snap_env.sh
 echo &quot;export XILINX_LOCAL_USER_DATA=no&quot; &gt;&gt; snap_env.sh

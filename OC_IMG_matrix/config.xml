@@ -445,15 +445,15 @@ RootSaveDir=/data/Images
 #echo;echo &quot;********************************************************************************&quot;
 #echo &quot;J: LSF SETUP ...&quot;
 # echo
-# older setup up to RH6
-#export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
-#export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
-#export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
-#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
-#export LSF_BINDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
-#export LSF_SUBMITTER_OSTYPE=Linux
-#export LSF_ENVDIR=/home/lsfbb/prod/conf
-#LSF=&apos;-P zsort -M 2 -C 2000 -I -n 4 -R type=X86_64 -R span[hosts=1]&apos;  # Project, GB_mem, KB_core, #_processors, type of processor
+## older setup up to RH6
+##export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+##export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
+##export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+##export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+##export LSF_BINDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+##export LSF_SUBMITTER_OSTYPE=Linux
+##export LSF_ENVDIR=/home/lsfbb/prod/conf
+##LSF=&apos;-P zsort -M 2 -C 2000 -I -n 4 -R type=X86_64 -R span[hosts=1]&apos;  # Project, GB_mem, KB_core, #_processors, type of processor
 
 # new setup for RH7
 #export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
@@ -492,6 +492,7 @@ function SendAnEmail
     echo &quot;&quot; | mail -s &quot;$Subject&quot; $i
   done
 }
+
 
 #==============================================================================================
 # OpenCAPI Simulation Engine (ocse) setup
