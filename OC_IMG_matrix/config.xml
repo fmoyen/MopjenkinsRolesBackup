@@ -306,8 +306,9 @@ if [ $ASKIP -eq 0 ]
 then 
 
  case &quot;$ACT&quot; in
+ 
   test )
-    echo &quot;ACT=test&quot;
+    echo &quot;J: ACT=test&quot;
     echo
     gitnames=`git ls-remote ${GIT_URL}|grep &quot;refs/heads/&quot;|awk &apos;{print $2}&apos;`;RC=$?
     echo &quot;gitnames= $gitnames&quot;
@@ -324,10 +325,11 @@ then
       else echo &quot;$dir is not a directory, continuing&quot;
       fi
     done
-    DSKIP=0;;
+    DSKIP=0
+    ;;
 
   * )
-    echo &quot;Checking oc-accel/defconfig/$CRD.$ACT.defconfig existence&quot;
+    echo &quot;J: Checking oc-accel/defconfig/$CRD.$ACT.defconfig existence&quot;
     if [ -f oc-accel/defconfig/$CRD.$ACT.defconfig ]
     then
       echo &quot; --&gt; OK&quot;
@@ -339,8 +341,11 @@ then
       echo &quot;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!&quot;;echo
       echo; ls oc-accel/defconfig/
       DSKIP=1
-    fi;;  
+    fi
+    ;;
+    
 esac
+
 echo;echo &quot;defconfig DSKIP=$DSKIP&quot;
 
 
@@ -422,12 +427,7 @@ ulimit -c unlimited               # limit core dumps
 echo;echo &quot;****************************************************************************************&quot;
 echo &quot;EXECUTING SECOND OpenCAPI SHELL FROM MOPJENKINS (`date`)&quot;
 echo &quot;****************************************************************************************&quot;
-echo &quot;SKIP forwarded from previous script = $SKIP&quot;
-if [ $SKIP -eq 1 ]
-then
-  echo &quot;SKIP=$SKIP ==&gt; Exiting...&quot;
-  exit 0  #&quot;temporarily setting not available as success !
-fi
+
 echo &quot;Building with Card=$CRD Action=$ACT CLOUD=$CL&quot;
 
 

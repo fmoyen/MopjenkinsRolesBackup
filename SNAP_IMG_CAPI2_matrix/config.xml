@@ -357,33 +357,47 @@ if [ $ASKIP -eq 0 ]
 then 
 
  case &quot;$ACT&quot; in
+ 
   test )
+    echo &quot;J: ACT=test&quot;
     gitnames=`git ls-remote https://github.com/open-power/snap|grep &quot;refs/heads/&quot;|awk &apos;{print $2}&apos;`
     echo &quot;gitnames=$gitnames&quot;
-    for dir in &quot;/afs/bb/proj/fpga/framework/CI_ws/SNAP_IMG_CAPI2_matrix&quot;/*;do
+    
+    echo
+    for dir in &quot;/var/jenkins/workspace/SNAP_IMG_CAPI2_matrix&quot;/*;do
       if [ -d &quot;$dir&quot; ];then
         branch=&quot;refs/heads/&quot;`basename $dir`
-        if [[ &quot;$gitnames&quot; =~ &quot;$branch&quot; ]];then echo &quot;branch=$branch found in gitnames, keep dir=$dir&quot;
+        if [[ &quot;$gitnames&quot; =~ &quot;$branch&quot; ]];then echo &quot;branch=$branch found in gitnames, keeping dir=$dir&quot;
         else 
-          echo &quot;branch=$branch not found in gitnames, delete dir=\&apos;$dir\&apos;&quot;
+          echo &quot;branch=$branch not found in gitnames, deleting dir=\&apos;$dir\&apos;&quot;
           rm -rf &quot;$dir&quot;     # put in quotes to work for directories with blanks
         fi        
       else echo &quot;$dir is not a directory, continuing&quot;
       fi
     done
-    echo &quot;mail informing castella test triggered&quot;
-    mail -s &quot;Jenkins Test on going : CLOUD_build=$CL branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX test_on_hw=$TEST_ON_HW&quot; castella
-    DSKIP=0;;
-  *&quot;hls_intersect&quot;* )     
-    if [ -f snap/defconfig/$CRD.hls_intersect.defconfig ];then DSKIP=0
-    else 
+    DSKIP=0
+    ;;
+    
+  *&quot;hls_intersect&quot;* )    
+    echo &quot;J: ACT=$ACT =&gt; Checking oc-accel/defconfig/$CRD.hls_intersect.defconfig existence&quot;
+    if [ -f snap/defconfig/$CRD.hls_intersect.defconfig ];then
+      echo &quot; --&gt; OK&quot;
+      DSKIP=0
+    else
+      echo;echo &quot;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!&quot;
       echo &quot;$CRD.hls_intersect.defconfig does not exist&quot;
+      echo &quot;Aborting...&quot;
+      echo;echo &quot;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!&quot;
+      echo;echo &quot;defconfig directory content:&quot;
+      echo &quot;----------------------------&quot;
       ls snap/defconfig/
       # automated mail
       echo &quot;mail sent to castella Initial Test Failure&quot;
       mail -s &quot;Initial Test Failure : $CRD.hls_intersect.defconfig does not exist&quot; castella
       DSKIP=1
     fi;;
+
+# FAB: à vérifier ce que cela pourrait faire là (déjà commenté)
 #  *&quot;hdl_example.NORAM&quot;*)
 #    if [ &quot;$FACTORY&quot;  == &quot;true&quot; ];then
 #        echo &quot;ENABLE_FACTORY=y&quot; &gt;&gt; .snap_config
@@ -410,47 +424,77 @@ then
 #     fi;;   
 
   * )    
-    if [ -f snap/defconfig/$CRD.$ACT.defconfig ];then DSKIP=0
+    echo &quot;J: Checking oc-accel/defconfig/$CRD.$ACT.defconfig existence&quot;
+    if [ -f snap/defconfig/$CRD.$ACT.defconfig ];then
+      echo &quot; --&gt; OK&quot;
+      DSKIP=0
     else 
+      echo;echo &quot;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!&quot;
       echo &quot;$CRD.$ACT.defconfig does not exist&quot;
+      echo &quot;Aborting...&quot;
+      echo;echo &quot;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!&quot;
+      echo;echo &quot;defconfig directory content:&quot;
+      echo &quot;----------------------------&quot;
       ls snap/defconfig/
-      # automated mail
-         echo &quot;mail sent to castella Initial Test Failure&quot;
-      mail -s &quot;Initial Test Failure : $CRD.$ACT.defconfig does not exist&quot; castella
       DSKIP=1
-    fi;;  
+    fi
+    ;;
+    
 esac
-echo &quot;defconfig SKIP=$DSKIP&quot;
 
-AFSused=`fs lq /afs/bb/proj/fpga/framework/CI_ws/SNAP_IMG_TEST_matrix/|grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
-echo &quot;AFS spaced currently used=${AFSused}%&quot;
-	if [ &quot;$AFSused&quot; -gt &quot;90&quot; ];then
-  		echo &quot;ERROR: AFS space IMAGETEST is used up to ${AFSused}%, stopping additional builds&quot;
-  		echo &quot;mail sent to castella : ERROR AFS space&quot;
-  		mail -s &quot;ERROR: urgent AFS space IMAGETEST is used up to ${AFSused}%, stopping additional builds&quot; castella
-  		exit 1
-	else if(( AFSused &gt; 70 ));then
-  		echo &quot;WARNING: AFS space is used up ${AFSused}%&quot;
-  		case &quot;$ACT&quot; in
-    		test )
-        		echo &quot;mail sent to castella : WARNING AFS space&quot;
-        		mail -s &quot;WARNING: urgent AFS space IMAGETEST is used up to ${AFSused}%&quot; castella
-        		;;
-  		esac      
-  	fi # end of AFS test
+echo;echo &quot;defconfig DSKIP=$DSKIP&quot;
+
+
+#==============================================================================================
+# Checking enough space is available
+
+echo;echo &quot;*******************************************************************************&quot;
+echo &quot;J: Checking enough space is available&quot;
+echo
+#AFSused=`fs lq /afs/bb/proj/fpga/framework/CI_ws/SNAP_IMG_TEST_matrix/|grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
+diskused=`df -h /var/jenkins/workspace/OC_IMG_matrix|grep -v Used|awk &apos;{print $5}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
+SSKIP=0;msg=&quot;disk usage =${diskused}%&quot;
+
+if   (( diskused &gt; 90 ));then 
+  msg=&quot;ERROR: $msg, stopping additional builds&quot;;SSKIP=1
+  #SendAnEmail -s &quot;ERROR: Disk space is used up to ${diskused}%, stopping additional builds&quot; -d &quot;${EmailDestinationList[*]}&quot;
+  #SendAnEmail -s &quot;ERROR: AFS space is used up to ${AFSused}%, stopping additional builds&quot; -d &quot;${EmailDestinationList[*]}&quot;  
+
+elif (( diskused &gt; 70 ));then
+   msg=&quot;WARNING: $msg&quot;
+  #SendAnEmail -s &quot;WARNING: Disk space is used up to ${diskused}%&quot; -d &quot;${EmailDestinationList[*]}&quot;
+  #SendAnEmail -s &quot;WARNING: AFS space is used up to ${AFSused}%&quot; -d &quot;${EmailDestinationList[*]}&quot;  
+
+else
+   msg=&quot;OK: $msg&quot;
 fi
+echo &quot;$msg&quot;
 
 fi # end of if ASKIP
 
-if [ &quot;$ASKIP&quot; == &quot;1&quot; ] || [ &quot;$DSKIP&quot; == &quot;1&quot; ] || [ &quot;$BSKIP&quot; == &quot;1&quot; ];then SKIP=1;else SKIP=0;fi
 
+#==============================================================================================
+# Aborting if something went wrong
+
+if [ &quot;$ASKIP&quot; == &quot;1&quot; ] || [ &quot;$DSKIP&quot; == &quot;1&quot; ] || [ &quot;$BSKIP&quot; == &quot;1&quot; ] || [ &quot;$SSKIP&quot; == &quot;1&quot; ];then SKIP=1;else SKIP=0;fi
+
+
+#==============================================================================================
 # Passing parameters to next script
+
+echo;echo &quot;*******************************************************************************&quot;
+echo &quot;J: Forwarding parameters to next script&quot;
+echo
 echo &quot;SKIP=$SKIP&quot; &gt; export_props.properties
 echo &quot;CRD=$CRD&quot; &gt;&gt; export_props.properties
 echo &quot;CL=$CL&quot; &gt;&gt; export_props.properties
-echo &quot;properties passed to next shell:&quot;
+echo &quot;EmailDestinationList=( ${EmailDestinationList[*]} )&quot; &gt;&gt; export_props.properties
+echo &quot;HWUser=${HWUser}&quot; &gt;&gt; export_props.properties
+
+echo &quot;properties forwarded to next shell:&quot;
 cat export_props.properties
-echo &quot;***********************************************************&quot;</command>
+echo;echo &quot;*******************************************************************************&quot;
+echo</command>
     </hudson.tasks.Shell>
     <EnvInjectBuilder plugin="envinject@2.1.6">
       <info>
