@@ -265,13 +265,16 @@ function SendAnEmail
 # Do not run non-desired cases (action types, actions, cards)
 # BSKIP stands for board skip
 
+echo;echo &quot;*******************************************************************************&quot;
+echo &quot;J: Do not run (abort) non-desired cases (action types, actions, cards)&quot;
+
 BSKIP=0
 
 if [ &quot;${!ACTION_TYPE}&quot; == &quot;false&quot; ]; then BSKIP=1;fi # if ACTION_TYPE=&quot;HLS&quot;, ${!ACTION_TYPE} is identical to $HLS
 if [ &quot;${!CRDSuffix}&quot;         == &quot;false&quot; ]; then BSKIP=1;fi # if CRDSuffix=&quot;AD9V3&quot;, ${!CRDSuffix} is identical to $AD9V3
 if [ &quot;$ACT&quot;            == &quot;test&quot;  ]; then BSKIP=0;fi
 
-echo &quot;action_types (hdl,hls)=$ACTION_TYPE enabled_cards=$CRD BSKIP=$BSKIP&quot;
+echo &quot;  -&gt; action_types (hdl,hls)=$ACTION_TYPE enabled_cards=$CRD BSKIP=$BSKIP&quot;
 
 # Following filtering will stop the current test if not required or not possible
 # This will lead to a brown colored result meaning : aborted
@@ -290,7 +293,7 @@ case &quot;$CRD:$ACT&quot; in
     ;;
 esac        
 
-echo &quot;card=$CRD action=$ACT case=$C ASKIP=$ASKIP&quot;
+echo &quot;  -&gt; card=$CRD action=$ACT case=$C ASKIP=$ASKIP&quot;
 
 
 #==============================================================================================
