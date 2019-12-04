@@ -212,85 +212,143 @@ H 22-23/1 * * *</spec>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
 set +x
+
+echo
 echo &quot;****************************************************************************************&quot;
-echo &quot;`date` BUILD START&quot;
+echo &quot;BUILD START (`date`)&quot;
 echo &quot;****************************************************************************************&quot;
-echo &quot;EXECUTING CAPI2.0 IMG FIRST SHELL FROM JENKINS - V1.4 - 2019 October 16th - ...&quot;
+echo &quot;EXECUTING OpenCAPI IMG FIRST SHELL FROM MOPJENKINS ...&quot;
+echo &quot;EXECUTING CAPI2.0 IMG FIRST SHELL FROM MOPJENKINS ...&quot;
 echo &quot;****************************************************************************************&quot;
-CRD=$(echo $CRD_CL| cut -d&apos;_&apos; -f 1)    # chars up to  first &apos;_&apos; identify card
-CL=$(echo $CRD_CL| cut -d&apos;_&apos; -f 2)     # chars behind first &apos;_&apos; identify Cloud build
-ACTION_TYPE=$(echo $ACT| cut -d&apos;_&apos; -f 1)
+echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot;
+echo &quot;Working dir is : $PWD&quot;
+echo
+
+
+#==============================================================================================
+# Variables
+
+&gt; export_props.properties
 NAME=$(echo $GIT_BRANCH| cut -d&apos;/&apos; -f 2 |tr &apos;[:upper:]&apos; &apos;[:lower:]&apos;) # remove origin/ from branch and translate to lowercase
 PREFIX=$(echo $NAME| cut -d&apos;_&apos; -f 1)    # chars up to first &apos;_&apos; identify need for test
+ACTION_TYPE=$(echo $ACT| cut -d&apos;_&apos; -f 1)
+CRD=$(echo $CRD_CL| cut -d&apos;_&apos; -f 1)    # chars up to  first &apos;_&apos; identify card
+CL=$(echo $CRD_CL| cut -d&apos;_&apos; -f 2)     # chars behind first &apos;_&apos; identify Cloud build
+
+
 echo &quot;Build with Card=$CRD Action=$ACT Action_type=$ACTION_TYPE CLOUD_build=$CL branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX test_on_hw=$TEST_ON_HW&quot;
 
-# Following filtering will stop the current test if the card was not selected (default or user choice)
-# Seems redundant with the Jenkins pre-selection ??
+EmailDestinationList=( fabrice_moyen@fr.ibm.com )
+HWUser=&quot;capimop&quot;
+
+
+#==============================================================================================
+# Functions
+
+# Function for sending alerting emails
+# Example 1: SendAnEmail -s &quot;This is the subject/alert&quot; -d firstDest@gmail.com -d SecondDest@free.fr
+# Example 2: SendAnEmail -s &quot;This is the subject/alert&quot; -d &quot;${EmailDestinationList[*]}&quot;
+function SendAnEmail
+{
+  local OPTIND opt DestList
+  while getopts &quot;s:d:&quot; opt
+  do 
+    case $opt in
+      s)
+        Subject=&quot;$OPTARG&quot;
+      ;;
+      d)
+        DestList+=(&quot;$OPTARG&quot;)
+      ;;
+    esac
+  done
+  
+  for i in ${DestList[@]}
+  do
+    echo &quot;&quot; | mail -s &quot;$Subject&quot; $i
+  done
+}
+
+
+#==============================================================================================
+# Do not run non-desired cases (action types, actions, cards)
+# This will lead to a brown colored result meaning : aborted
+
 # BSKIP stands for board skip
 
 BSKIP=0
-if [ &quot;$ACTION_TYPE&quot; == &quot;hdl&quot;    ] &amp;&amp; [ &quot;$HDL&quot;    == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$ACTION_TYPE&quot; == &quot;hls&quot;    ] &amp;&amp; [ &quot;$HLS&quot;    == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$CRD&quot;         == &quot;N250SP&quot; ] &amp;&amp; [ &quot;$N250SP&quot; == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$CRD&quot;         == &quot;AD9V3&quot;  ] &amp;&amp; [ &quot;$AD9V3&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$CRD&quot;         == &quot;AD9H3&quot;  ] &amp;&amp; [ &quot;$AD9H3&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$CRD&quot;         == &quot;U200&quot;   ] &amp;&amp; [ &quot;$U200&quot;   == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$CRD&quot;         == &quot;FX609&quot;  ] &amp;&amp; [ &quot;$FX609&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$CRD&quot;         == &quot;S241&quot;   ] &amp;&amp; [ &quot;$S241&quot;   == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$CRD&quot;         == &quot;RCXVUP&quot; ] &amp;&amp; [ &quot;$RCXVUP&quot; == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$ACT&quot;         == &quot;test&quot;   ]; then BSKIP=0;fi
-echo &quot;examples(hdl,hls)=$HDL $HLS card_enabled(N250SP,AD9V3,AD9H3,S241,FX609,U200,RCXVUP)=$N250SP $AD9V3 $AD9H3 $S241 $FX609 $U200 $RCXVUP BSKIP=$BSKIP&quot;
 
-#debug AC
-  case &quot;$BSKIP&quot; in
-    1 )
-#        echo &quot;mail sent to castella informing BSKIPPING&quot;
-#        mail -s &quot;DEBUG! BSKIP SET TO 1 build(nCL,CL)= examples(hdl,hls)=$HDL $HLS card_enabled(N250SP,AD9V3,AD9H3,S241,FX609,U200,RCXVUP)=$N250SP $AD9V3 $AD9H3 $S241 $FX609 $U200 $RCXVUP&quot; castella
-        ;;
-  esac
-#debug AC  
+if [ &quot;${!ACTION_TYPE}&quot; == &quot;false&quot; ]; then BSKIP=1;fi # if ACTION_TYPE=&quot;HLS&quot;, ${!ACTION_TYPE} is identical to $HLS
+if [ &quot;${!CRD}&quot;         == &quot;false&quot; ]; then BSKIP=1;fi # if CRD=&quot;AD9V3&quot;, ${!CRD} is identical to $AD9V3
+if [ &quot;$ACT&quot;            == &quot;test&quot;  ]; then BSKIP=0;fi
+
+echo &quot;action_types (hdl,hls)=$ACTION_TYPE enabled_cards=$CRD BSKIP=$BSKIP&quot;
 
 
-# Following filtering will stop the current test if not required or not possible
-# This will lead to a brown colored result meaning : aborted
-# ASKIP may stand for ACTION skip
+# ASKIP stands for ACTION skip
+
+# FAB: faire le tri dans ces cases
 case &quot;$CRD:$ACT&quot; in
-  *:scatter_gather* )    C=&quot;scc1&quot;;ASKIP=1;; # no scatter_gather for CAPI1 cards
-  AD9H3:hdl_example.SDRAM* ) C=&quot;hnsd&quot;;ASKIP=1;; # AD9H3 has no SDRAM
-  AD9H3:hls_memcopy ) C=&quot;hnsd&quot;;ASKIP=1;; # AD9H3 has no SDRAM
-  AD9H3:hls_bfs ) C=&quot;hndf&quot;;ASKIP=1;; # AD9H3 has no defconfig
-  AD9H3:hls_hashjoin ) C=&quot;hndf&quot;;ASKIP=1;; # AD9H3 has no defconfig
-  AD9H3:hls_search ) C=&quot;hnsd&quot;;ASKIP=1;; # AD9H3 has no SDRAM
-  AD9H3:hls_sponge ) C=&quot;hndf&quot;;ASKIP=1;; # AD9H3 has no defconfig
-  AD9H3:hls_scatter_gather ) C=&quot;hndf&quot;;ASKIP=1;; # AD9H3 has no defconfig
-  AD9H3:hls_vector_generator ) C=&quot;hndf&quot;;ASKIP=1;; # AD9H3 has no defconfig  
-#  N250SP:hls_helloworld )C=&quot;SPhw&quot;;ASKIP=1;; # disabled, until N250SP allows more than 128B DMA xfers
-  N250SP:*NVME*)         C=&quot;SPNV&quot;;ASKIP=1;; # disabled, as Nvme not yet available
-  N250SP:*nvme*)         C=&quot;SPnv&quot;;ASKIP=1;; # disabled, as Nvme not yet available
-  #*:*NVME* )             C=&quot;NVME&quot;;ASKIP=1;;
-  #*:*nvme* )             C=&quot;nvme&quot;;ASKIP=1;;
-# *:hdl_example* )       C=&quot;exmp&quot;;ASKIP=0;;
-# *:hls_memcopy )        C=&quot;memc&quot;;ASKIP=0;;
-# *:hls_bfs )            C=&quot;bfs &quot;;ASKIP=0;;
-# *:hls_hashjoin )       C=&quot;join&quot;;ASKIP=0;;
-  *:hls_intersect_h )    C=&quot;inth&quot;;ASKIP=1;;
-  *:hls_intersect_s )    C=&quot;ints&quot;;ASKIP=1;;
-# *:hls_search )         C=&quot;srch&quot;;ASKIP=0;;
-# *:hls_sponge )         C=&quot;spng&quot;;ASKIP=0;;
-  *:hls_blowfish )       C=&quot;blow&quot;;ASKIP=1;; # no maintenance for blowfish
-# *:hls_helloworld )     C=&quot;helw&quot;;ASKIP=0;;
-# *:test )               C=&quot;test&quot;;ASKIP=0;;
+    
+  AD9H3:hdl_example.SDRAM* | AD9H3:hls_memcopy | AD9H3:hls_search ) # AD9H3 has no SDRAM
+    C=&quot;hnsd&quot;
+    ASKIP=1
+    ;; 
+        
+  AD9H3:hls_bfs | AD9H3:hls_hashjoin | AD9H3:hls_sponge | AD9H3:hls_scatter_gather | AD9H3:hls_vector_generator ) # AD9H3 has no defconfig
+    C=&quot;hndf&quot;
+    ASKIP=1
+    ;; 
+    
+  N250SP:*NVME* | N250SP:*nvme* ) # disabled, as Nvme not yet available
+    C=&quot;SPNV&quot;
+    ASKIP=1
+    ;;
+    
+  *:hls_intersect_h )
+    C=&quot;inth&quot;
+    ASKIP=1
+    ;;
+    
+  *:hls_intersect_s )
+    C=&quot;ints&quot;
+    ASKIP=1
+    ;;
+    
+  *:hls_blowfish ) # no maintenance for blowfish
+    C=&quot;blow&quot;
+    ASKIP=1
+    ;;
+    
   *:hls_parallel_memcpy)
     if [[ $CRD != &quot;AD9V3&quot; &amp;&amp; $CRD != &quot;N250SP&quot; ]]; then
-      C=&quot;pmcp&quot;; ASKIP=1
-    fi;;
+      C=&quot;pmcp&quot;
+      ASKIP=1
+    fi
+    ;;
+    
   *:hls_vector_generator)
     if [[ $CRD != &quot;AD9V3&quot; &amp;&amp; $CRD != &quot;N250SP&quot; ]]; then
-      C=&quot;vgen&quot;; ASKIP=1
-    fi;;
-  * )                      C=&quot;def &quot;;ASKIP=0;;
-esac            
+      C=&quot;vgen&quot;
+      ASKIP=1
+    fi
+    ;;
+    
+  * )
+    C=&quot;def &quot;
+    ASKIP=0
+    ;;
+
+esac  
+
 echo &quot;card=$CRD action=$ACT case=$C ASKIP=$ASKIP&quot;
+
+
+#==============================================================================================
+# Cleaning directories if ACT=test,
+# else checking $CRD.$ACT.defconfig file existence
+
+echo;echo &quot;*******************************************************************************&quot;
 
 if [ $ASKIP -eq 0 ]
 then 
