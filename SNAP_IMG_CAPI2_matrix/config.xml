@@ -556,6 +556,10 @@ RootSaveDir=/data/Images
 PSLSE_BRANCH=master
 PSL9File=/opt/IBM/PSL9/v2.00/ibm.com_CAPI_PSL9_WRAP_2.00.zip
 
+# FAB: prb pour passer la liste entre script1 et script2
+# SendAnEmail échoue car il essaye d&apos;envoyer à ( et à )
+unset EmailDestinationList; EmailDestinationList=( fabrice_moyen@fr.ibm.com )
+
 #echo;echo &quot;****************************************************************************************&quot;
 #echo &quot;J:LSF SETUP ...&quot;
 
