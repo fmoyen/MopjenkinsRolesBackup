@@ -712,7 +712,7 @@ done
 
 
 #==============================================================================================
-# Checking if we can test the generated binaries on POWER Hardware
+# Checking if we can test the generated binaries on POWER Hardware (checking LIST_TEST_CARDS list)
 
 case ${TEST_ON_HW} in
 

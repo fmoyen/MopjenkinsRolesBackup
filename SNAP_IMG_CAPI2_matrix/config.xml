@@ -102,6 +102,12 @@ hls_parallel_memcpy removed (fails)</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.StringParameterDefinition>
+          <name>LIST_TEST_CARDS</name>
+          <description>The list of available CAPI2.0 cards for HW testing (format: &quot;AD9V3 AD9H3&quot;)</description>
+          <defaultValue>AD9H3</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
           <name>mopBoxes</name>
           <description>List of Montpellier systems available for testing :
   - orpington: AC922 8335-GTH with one CAPI2 AD9V3 and 1 OC-AD9V3
@@ -784,18 +790,41 @@ case $ACT in          # select config &amp; compile action
     
 esac
 
-echo &quot;****************************************************************************************&quot;
-if [ &quot;$CL&quot; == &quot;nCL&quot; ]; then
-    maxloop=5;
-    for loop in `seq 1 $maxloop`;do  
-      echo &quot;J:`date` Build Non_Cloud Image for $CRD, Loop $loop&quot;
-      RC=0; bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot; &amp;&amp; break || RC=$?
-    done
-    if [ $RC = &quot;0&quot; ] &amp;&amp; [ $loop -gt 1 ]; then mail -s &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot; castella;  fi
-    if [ $RC != &quot;0&quot; ]; then mail -s &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot; castella; exit 1;  fi
 
-# The following was copied from CAPI1.0 )&gt; not UPDATED YET AS CAPI2.0 DOES NOT OFFER Partial RECONFIGURATION
+#==============================================================================================
+# Building image (make image/ make cloud...)
+
+if [ &quot;$CL&quot; == &quot;nCL&quot; ]
+then
+
+  maxloop=5;
+  for loop in `seq 1 $maxloop`
+  do  
+    echo;echo &quot;****************************************************************************************&quot;
+    echo &quot;J: Build Non-Cloud Image (make image) for $CRD, Loop ${loop}/$maxloop (`date`)&quot;
+    echo
+    #RC=0; bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot; &amp;&amp; break || RC=$?
+    RC=0; make image &amp;&amp; break || RC=$?
+  done
+  
+  if [ $RC -eq 0 ] &amp;&amp; [ $loop -eq 1 ]; then 
+    echo &quot;OK : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED at the first try (loop=$loop)&quot;
+
+  elif [ $RC -eq 0 ] &amp;&amp; [ $loop -gt 1 ]; then
+    echo &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot;
+    echo &quot;  -&gt; Sending an email to ${EmailDestinationList[*]}&quot;
+    SendAnEmail -s &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot; -d &quot;${EmailDestinationList[*]}&quot;
+
+  elif [ $RC -ne 0 ]; then
+    echo &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot;
+    echo &quot;  -&gt; Sending an email to ${EmailDestinationList[*]}&quot;    
+    SendAnEmail -s &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot; -d &quot;${EmailDestinationList[*]}&quot;
+    exit 1
+  fi
+
 else # case of Cloud Build
+# The following was copied from CAPI1.0 )&gt; not UPDATED YET AS CAPI2.0 DOES NOT OFFER Partial RECONFIGURATION
+# FAB never for the moment but if needed, needs to adapt (BSUB, etc)
   mkdir -p ${SNAP_ROOT}/hardware/DCPs
   echo &quot;J:`date` Build Cloud Image ...&quot;
   echo &quot;export DCP_ROOT=${SNAP_ROOT}/hardware/DCPs/&quot;              &gt;&gt; snap_env.sh
@@ -813,103 +842,176 @@ else # case of Cloud Build
   bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_merge&quot; || exit
 fi
 
+
+#==============================================================================================
+# Checking generated binaries
+
 # when using a parallel flash we have only 1 binary file
 # when using a SPI8 flash we have 2 binary files to deal with
 
-  #BINFILES contains binary name (In SPI : &quot;primary and secondary&quot; names)
-  BINFILES=`ls $SNAP_ROOT/hardware/build/Images/fw_[0-9]*.bin|grep -v FACTORY|head -n2`
-  
-  if [ &quot;$BINFILES&quot; == &quot;&quot; ]; then echo &quot;cannot find binfile $BINFILES&quot;;exit 1
-  fi
-for  f in $BINFILES
-do                   
-    size=`ls -al $f | awk &apos;{print $5}&apos;`
-    echo &quot;binfile=$f size=$size&quot;
-  # if (( size &lt; 100000 ));then echo &quot;ERROR: image is too small to burn&quot;;exit 1;fi  
-    (( size &lt; 100000 )) &amp;&amp; die 1 &quot;image $f is too small $size to burn&quot;
-    # We assign IMAGE for log purpose, it eventually takes the name of secondary if SPI8
-    IMAGE=&quot;/home/fpga/images/${CRD}/${ACT}/&quot;`basename $f` 
+echo;echo &quot;****************************************************************************************&quot;
+echo &quot;J: Checking generated $ACT binaries for $CRD... (`date`)&quot;
+echo
+
+#BINFILES contains binary name (In SPI : &quot;primary and secondary&quot; names)
+BINFILES=`ls ${SNAP_ROOT}/hardware/build/Images/fw_[0-9]*.bin|grep -v FACTORY|head -n2`
+BITFILES=`ls ${SNAP_ROOT}/hardware/build/Images/fw_[0-9]*.bit|grep -v FACTORY|head -n2`
+
+if [ &quot;$BINFILES&quot; == &quot;&quot; ]; then echo &quot;  --&gt; cannot find binary files&quot;;exit 1
+fi
+
+COUNT_IMAGE=0
+unset IMAGE
+for  f in $BINFILES; do                   
+  size=`ls -al $f | awk &apos;{print $5}&apos;`
+  echo &quot;binfile=$f&quot;
+  echo &quot;   -&gt; size=$size&quot;
+  (( size &lt; 100000 )) &amp;&amp; die 1 &quot;  --&gt; image $f is too small $size to burn&quot;
+ 
+  IMAGE[$COUNT_IMAGE]=&quot;/home/${HWUser}/images/${CRD}/${ACT}/&quot;`basename $f` 
+  COUNT_IMAGE=`expr $COUNT_IMAGE + 1`
 done
 
+
 # In FACTORY MODE : We save hdl_example and hls_helloworld bin for cards files for future .mcs generation
+
 case ${ACT}:$FACTORY in
-     hdl_example.NORAM:true ) 
-			FACTBINFILES=`ls -t $SNAP_ROOT/hardware/build/Images/fw_*[0-9]_FACTORY*.bin`  # take FACTORY bin files
-          # Copy hdl_ex Factory files if any
-            if [ &quot;$FACTBINFILES&quot; == &quot;&quot; ] ; then echo &quot;Cannot find Factory binfile $FACTBINFILES although FACTORY REQUESTED !!&quot;;exit 1
-            fi
-            DIR=${CRD}_FACTORY_MCS
-            mkdir -p /data/Images/${DIR}
-			SAVE=&quot;/data/Images/${CRD}_FACTORY_MCS&quot;;   echo &quot;J:FACTORY was requested : copy ${CRD} hdl_example.noram bin files to $SAVE&quot;;cp -rp $FACTBINFILES $SAVE;;
-	hls_helloworld:true )
-			SAVE=&quot;/data/Images/${CRD}_FACTORY_MCS&quot;;   echo &quot;J:FACTORY was requested : copy ${CRD} hls_helloworld    bin files to $SAVE&quot;;cp -rp $BINFILES $SAVE;;
+
+  hdl_example.NORAM:true ) 
+	FACTBINFILES=`ls -t $SNAP_ROOT/hardware/build/Images/fw_*[0-9]_FACTORY*.bin`  # take FACTORY bin files
+    # Copy hdl_ex Factory files if any
+    if [ &quot;$FACTBINFILES&quot; == &quot;&quot; ] ; then echo &quot;  --&gt; cannot find Factory binfile $FACTBINFILES although FACTORY REQUESTED !!&quot;;exit 1
+    fi
+    DIR=${RootSaveDir}/${CRD}_FACTORY_MCS
+    mkdir -p $DIR
+	echo &quot;  --&gt; FACTORY requested : copying $CRD hdl_example.NORAM Factory binary files to $DIR&quot;
+    cp -rp $FACTBINFILES $DIR
+    ;;
+
+# FAB: Image en _FACTORY ou pas ?
+# FAB: Encore un sens helloworld en factory ?
+  hls_helloworld:true )
+    DIR=${RootSaveDir}/${CRD}_FACTORY_MCS
+    mkdir -p $DIR
+     
+	echo &quot;  -&gt; FACTORY requested : copying ${CRD} hls_helloworld Factory binary files to $DIR&quot;
+    cp -rp $BINFILES $DIR
+    ;;
+    
 esac
 
-echo &quot;****************************************************************************************&quot;
-echo &quot;test_on_hw=${TEST_ON_HW} for card=$CRD&quot;
-#AC : in case directory is not existing (case of a new card)
-DIR=${CRD}_missing
-mkdir -p /data/Images/${DIR}
-case $CRD:${TEST_ON_HW} in
-#  N250SP:* ) SAVE=&quot;/data/Images/N250SP_missing&quot;;  echo &quot;no test required, copy image to $SAVE&quot;;cp -rp $BINFILES $SAVE;exit 0;;
-  S121B:* )  SAVE=&quot;/data/Images/S121B_missing&quot;;   echo &quot;no test required, copy image to $SAVE&quot;;cp -rp $BINFILES $SAVE;exit 0;;
-  FX609:* )  SAVE=&quot;/data/Images/FX609_missing&quot;;   echo &quot;no test required, copy image to $SAVE&quot;;cp -rp $BINFILES $SAVE;exit 0;;
-  S241:* )   SAVE=&quot;/data/Images/S241_missing&quot;;    echo &quot;no test required, copy image to $SAVE&quot;;cp -rp $BINFILES $SAVE;exit 0;;    
-#  AD9V3:* )  SAVE=&quot;/data/Images/AD9V3_missing&quot;;   echo &quot;no test required, copy image to $SAVE&quot;;cp -rp $BINFILES $SAVE;exit 0;;
-#  AD9H3:* )  SAVE=&quot;/data/Images/AD9H3_missing&quot;;   echo &quot;no test required, copy image to $SAVE&quot;;cp -rp $BINFILES $SAVE;exit 0;
-  U200:* )   SAVE=&quot;/data/Images/U200_missing&quot;;   echo &quot;no test required, copy image to $SAVE&quot;;cp -rp $BINFILES $SAVE;exit 0;;    
-  RCXVUP:* ) SAVE=&quot;/data/Images/RCXVUP_missing&quot;;  echo &quot;no test required, copy image to $SAVE&quot;;cp -rp $BINFILES $SAVE;exit 0;;
-  *:false )  SAVE=&quot;/data/Images/no_test_required&quot;;echo &quot;no test required, copy image to $SAVE&quot;;cp -rp $BINFILES $SAVE;exit 0;;
+
+#==============================================================================================
+# Checking if we can test the generated binaries on POWER Hardware (checking LIST_TEST_CARDS list)
+
+case ${TEST_ON_HW} in
+
+  true )
+    echo;echo &quot;****************************************************************************************&quot;
+    echo &quot;J: Checking if we can test the generated binaries on POWER Hardware (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot;
+    echo
+    TestCardAvailable=0
+    for i in ${LIST_TEST_CARDS[@]}
+    do
+      if [ &quot;$CRD&quot; == &quot;$i&quot; ];then TestCardAvailable=1;fi
+    done
+
+    if [ $TestCardAvailable -eq 0 ]
+    then
+      SaveDir=$RootSaveDir/${CRD}_oc_missing
+      echo &quot;  -&gt; No test CARD $CRD available, copying $CRD bin-file(s) &amp; bit-file(s) images to $SaveDir&quot;
+      mkdir -p $SaveDir
+      cp -rp $BINFILES $SaveDir
+      echo $BINFILES
+      if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; echo $BITFILES; fi
+      echo;echo &quot;  -&gt; Copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
+      ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
+      scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
+      echo &quot;  -&gt; EXITING !&quot;
+      exit 0
+    else
+      echo &quot;  -&gt; OK&quot;
+    fi
+  ;;
+  
+  false )
+    echo;echo &quot;****************************************************************************************&quot;
+    echo &quot;J: No test on POWER Hardware requested (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot; 
+    echo
+    SaveDir=$RootSaveDir/no_test_required
+    mkdir -p $SaveDir
+
+    echo &quot;  -&gt; No test required, copying image to $SaveDir&quot;
+    cp -rp $BINFILES $SaveDir
+    echo $BINFILES
+    if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; echo $BITFILES; fi
+    echo;echo &quot;  -&gt; Copying $CRD image to jtagx86:$SaveDir&quot;
+    ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
+    scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
+    exit 0
+  ;;
+
 esac
 
-#
+
+#==============================================================================================
+#==============================================================================================
+#==============================================================================================
+
+
+#==============================================================================================
+# Testing the generated binaries on POWER Hardware
+# (if $TEST_ON_HW==true and $CRD into $LIST_TEST_CARDS[*])
+
 # Set unique target directory such that parallel builds do not disturb each other.
 # Well, we might to clean up those from time to time ...
-#
+
 TARGET_DIR=&quot;${JOB_NAME}-${BUILD_NUMBER}-${GIT_BRANCH}&quot;
 export TARGET_DIR=`echo $TARGET_DIR | sed -e &apos;s/[=,\/]/-/g&apos;`
-echo &quot;J:TARGET_DIR=${TARGET_DIR}&quot;
-echo &quot;J:Current Dir is &quot; `pwd`
-#echo &quot;************ Parent Job Data **********************************************************&quot;
-#echo &quot;J:--&gt; PARENT_JOB_NAME: ${PARENT_JOB_NAME}&quot;
-echo &quot;J:--&gt; JOB_NAME:        ${JOB_NAME}&quot;
-echo &quot;J:--&gt; IMAGE:           ${IMAGE}&quot;
-echo &quot;J:--&gt; CARD_TO_TEST:    ${CARD_TO_TEST}&quot;
-echo &quot;J:--&gt; ACTION:          ${ACTION}&quot;
-echo &quot;J:--&gt; GIT_Branch:      ${GIT_BRANCH}&quot;
-echo &quot;J:--&gt; GIT_Commit:      ${GIT_COMMIT}&quot;
-#echo &quot;************ User Input Data **********************************************************&quot;
-#echo &quot;J:--&gt; MY_IMAGE:        ${MY_IMAGE}&quot;
-#echo &quot;J:--&gt; MY_CARD:         ${MY_CARD}&quot;
+echo &quot;TARGET_DIR=${TARGET_DIR}&quot;
+echo &quot;Current Dir is &quot; `pwd`
+echo &quot;  -&gt; JOB_NAME:        ${JOB_NAME}&quot;
+echo &quot;  -&gt; IMAGE:           ${IMAGE}&quot;
+echo &quot;  -&gt; CARD_TO_TEST:    ${CARD_TO_TEST}&quot;
+echo &quot;  -&gt; ACTION:          ${ACTION}&quot;
+echo &quot;  -&gt; GIT_Branch:      ${GIT_BRANCH}&quot;
+echo &quot;  -&gt; GIT_Commit:      ${GIT_COMMIT}&quot;
 
-echo &quot;***************************************************************************************&quot;
-RC=0;ssh dim1 ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 ||RC=$?
-if [ $RC == &quot;0&quot; ]; then echo &quot;dim1 ping ok&quot;; else echo &quot;dim1 not pingable&quot;;exit 100;fi
-
-echo &quot;testboxes2=${TESTBOXES[@]}&quot;
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Checking TestBoxes reachability (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot;
+echo
+echo &quot;  -&gt; testboxes now = ${TESTBOXES[@]}&quot;
+echo
 
 for box in &quot;${TESTBOXES[@]}&quot;;do
+  echo &quot;----------------------------------------------------&quot;
   if [[ ${mopBoxes[*]} =~ $box ]]
   then
     # $box is a Montpellier server
-    RC=0;ssh $box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
+    echo -e &quot;MOP   : $box -&gt; \c&quot;
+    RC=0;ssh ${HWUser}@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
   else
-    # $Box is a Boeblingen server, accessible through dim1 system
-    RC=0;ssh dim1 ping $box -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
+    # $box is an Austin server
+    echo -e &quot;AUSTIN: $box -&gt; \c&quot;
+    RC=0;ssh ${HWUser}@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
   fi
 
-if [ &quot;$RC&quot; == &quot;0&quot; ]; then : 
-    echo &quot;$box ping ok&quot;;
+if [ $RC -eq 0 ]; then
+    echo &quot;OK&quot;
   else
+    echo &quot;FAILED !&quot;
     for i in &quot;${TESTBOXES[@]}&quot;; do [[ $i != $box ]] &amp;&amp; new+=($i);done   # generate new test array without unreachable box
     unset TESTBOXES;TESTBOXES=(&quot;${new[@]}&quot;);unset new                   # reassign to original array name
-    echo &quot;$box not pingable, remove from testing, remaining=${TESTBOXES[@]}&quot;
-    if [[ &quot;${TESTBOXES[@]}&quot; == &quot;&quot; ]];then echo &quot;no test machines avail anymore&quot;;exit 1;fi
+    echo &quot;$box not reachable, remove from testing&quot;
+    echo &quot;testboxes remaining = ${TESTBOXES[@]}&quot;
+    if [[ &quot;${TESTBOXES[@]}&quot; == &quot;&quot; ]];then echo &quot;no test machines available anymore&quot;;exit 1;fi
   fi
 done # for box
 
-echo &quot;testboxes3=${TESTBOXES[@]}&quot;
+echo;echo &quot;----------------------------------------------------&quot;
+echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
 
+# FAB ICI
 function finish {  # define function to unlock in case of error, executed after registering with &quot;trap finish EXIT&quot;
     echo &quot;RC=$?, now unlock ${LOCK} and end&quot;
 	SSH_RC=0;ssh fpga@$box rmdir ${LOCK} || SSH_RC=$?
@@ -1125,7 +1227,7 @@ fi </command>
     </hudson.plugins.build__timeout.BuildTimeoutWrapper>
     <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
     <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.1">
-      <template>#${BUILD_NUMBER} ${GIT_BRANCH} Vivado=${ENV,var=&quot;VIVADO_CHOICE&quot;} HWTest=${ENV,var=&quot;TEST_ON_HW&quot;}</template>
+      <template>#${BUILD_NUMBER} ${GIT_BRANCH} Vivado=${ENV,var=&quot;VIVADO_CHOICE&quot;} HWTest=${ENV,var=&quot;TEST_ON_HW&quot;} HWCards= ${ENV,var=&quot;LIST_TEST_CARDS&quot;}</template>
       <descriptionTemplate></descriptionTemplate>
       <runAtStart>true</runAtStart>
       <runAtEnd>true</runAtEnd>
