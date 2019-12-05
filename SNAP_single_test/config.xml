@@ -305,7 +305,7 @@ for loop in `seq 1 $maxloop`;do
       unset cards
     fi
 
-    echo &quot;  --&gt; Removing the tool $FindCardTool ($find_card) from $box RC=$SSH_RC&quot;
+    echo &quot;  --&gt; Removing the tool $FindCardTool ($find_card) from $box&quot;
     SSH_RC=0;ssh -ttq ${HWUser}@${box} rm /home/${HWUser}/$find_card || SSH_RC=$?
     if [ $SSH_RC -gt 0 ];then
       echo &quot;    -&gt; Delete $find_card to $box FAILED, continuing anyway...&quot;;
@@ -321,10 +321,6 @@ for loop in `seq 1 $maxloop`;do
       #------------------------------------
       # no card available =&gt; try other box
       0:*)
-        if [ $box == ${TESTBOXES[*]:(-1)} ];then
-          echo &quot;  --&gt; $box is the last system to test; Waiting for 60s...&quot;
-          sleep 60 # Last box of the list TESBOXES =&gt; Waiting 60s and go to next loop
-        fi
         for i in &quot;${TESTBOXES[@]}&quot;; do [[ $i != $box ]] &amp;&amp; new+=($i);done   # generate new test array without unreachable box
         unset TESTBOXES;TESTBOXES=(&quot;${new[@]}&quot;);unset new                   # reassign to original array name
         echo &quot;card not avail in $box =&gt; removed from Boxes testing list, remaining=${TESTBOXES[@]}&quot;        

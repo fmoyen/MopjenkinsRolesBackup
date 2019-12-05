@@ -1083,7 +1083,7 @@ for loop in `seq 1 $maxloop`;do
       unset cards
     fi
 
-    echo &quot;  --&gt; Removing the tool $FindCardTool ($find_card) from $box RC=$SSH_RC&quot;
+    echo &quot;  --&gt; Removing the tool $FindCardTool ($find_card) from $box&quot;
     SSH_RC=0;ssh -ttq ${HWUser}@${box} rm /home/${HWUser}/$find_card || SSH_RC=$?
     if [ $SSH_RC -gt 0 ];then
       echo &quot;    -&gt; Delete $find_card to $box FAILED, continuing anyway...&quot;;
