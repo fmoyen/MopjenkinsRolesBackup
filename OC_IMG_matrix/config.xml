@@ -728,7 +728,7 @@ case ${TEST_ON_HW} in
 
     if [ $TestCardAvailable -eq 0 ]
     then
-      SaveDir=$RootSaveDir/${CRD}_oc_missing
+      SaveDir=$RootSaveDir/${CRD}_missing
       echo &quot;  -&gt; No test CARD $CRD available, copying $CRD bin-file(s) &amp; bit-file(s) images to $SaveDir&quot;
       mkdir -p $SaveDir
       cp -rp $BINFILES $SaveDir
@@ -748,7 +748,7 @@ case ${TEST_ON_HW} in
     echo;echo &quot;****************************************************************************************&quot;
     echo &quot;J: No test on POWER Hardware requested (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot; 
     echo
-    SaveDir=$RootSaveDir/no_test_required
+    SaveDir=$RootSaveDir/oc_no_test_required
     mkdir -p $SaveDir
 
     echo &quot;  -&gt; No test required, copying image to $SaveDir&quot;
@@ -772,7 +772,7 @@ echo;echo &quot;****************************************************************
 echo &quot;J: Temporarily copying generated images to jtagx86 and orpington ($RootSaveDir)&quot;
 echo
 
-SaveDir=$RootSaveDir/${CRD}_oc_for_test
+SaveDir=$RootSaveDir/${CRD}_for_test
 echo &quot;  -&gt; Hardware test for CARD $CRD not yet working, copying $CRD bin-file(s) &amp; bit-file(s) images to $SaveDir&quot;
 mkdir -p $SaveDir
 cp -rp $BINFILES $SaveDir
@@ -991,7 +991,7 @@ if [ $loop -eq $maxloop ];then
   echo;echo &quot;***************************************************************************************&quot;
   echo &quot;J: No card $CRD available with TESTBOXES= ${TESTBOXES[*]}&quot;
   echo
-  SaveDir=&quot;$RootSaveDir/${CRD}_oc_card_not_avail&quot;
+  SaveDir=&quot;$RootSaveDir/${CRD}_card_not_avail&quot;
   mkdir -p $SaveDir
   echo &quot;  -&gt; Copying image to $SaveDir&quot;
   cp -rp $BINFILES $SaveDir
