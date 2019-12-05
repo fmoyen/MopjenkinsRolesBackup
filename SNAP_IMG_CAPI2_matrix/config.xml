@@ -1179,7 +1179,7 @@ if [ $loop -eq $maxloop ];then
   exit 100
 fi
 
-# FAB ICI
+
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Preparing $CRD card image(s) test onto $box system&quot;
 echo
