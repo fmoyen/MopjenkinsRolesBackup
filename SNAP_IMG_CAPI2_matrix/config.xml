@@ -2,20 +2,35 @@
 <matrix-project plugin="matrix-project@1.14">
   <actions/>
   <description>Builds bitstreams with many different configurations and tests this images on real HW if possible.&#xd;
-In case of problems: please contact alexandre.castellane@fr.ibm.com&#xd;
+In case of problems: please contact alexandre.castellane@fr.ibm.com or fabrice_moyen@fr.ibm.com&#xd;
 WARNING !!! &#xd;
 =&gt;&gt; FX609, S241, RCXVUP, U200 cards are not available for test =&gt; only binary generation are performed (no hw test)  &#xd;
 =&gt;&gt; TIMING increased to 300ps for CAPI2&#xd;
-==&gt; default is now 2018.3 (was already forced for to 2018.3 for U200 and eventually 2017.4 for RCXVUP, and 2018.2(pcigen4) for N250SP)&#xd;
-&#xd;
-Test in 2019.1 unsuccessful since glic 2.14 requested by vivado &amp; not installed ?&#xd;
-&#xd;
-==&gt; Brahma hosts N250SP tests available.      &#xd;
 ==&gt; Orpington hosts 2 AD9V3&#xd;
 &#xd;
 RCXVUP_nCL removed from matrix to reduce load&#xd;
 hdl_example.NORAM temporarily removed (generates junk on jenkins log)&#xd;
-hls_parallel_memcpy removed (fails)</description>
+hls_parallel_memcpy removed (fails)&#xd;
+&#xd;
+2019/12/05: initial actions matrix&#xd;
+-----------------------------------------------&#xd;
+hdl_example.BRAM&#xd;
+hdl_example.SDRAM&#xd;
+hdl_example.SDRAM.NVME&#xd;
+hdl_helloworld&#xd;
+hdl_nvme_example.SDRAM.NVME&#xd;
+hls_nvme_memcopy&#xd;
+hls_memcopy&#xd;
+hls_bfs&#xd;
+hls_hashjoin&#xd;
+hls_search&#xd;
+hls_sponge&#xd;
+hls_helloworld&#xd;
+hls_decimal_mult&#xd;
+hls_scatter_gather&#xd;
+hls_latency_eval&#xd;
+hls_vector_generator&#xd;
+test</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.4">
@@ -193,15 +208,11 @@ H 22-23/1 * * *</spec>
         <string>hdl_nvme_example.SDRAM.NVME</string>
         <string>hls_nvme_memcopy</string>
         <string>hls_memcopy</string>
-        <string>hls_bfs</string>
-        <string>hls_hashjoin</string>
-        <string>hls_search</string>
         <string>hls_sponge</string>
         <string>hls_helloworld</string>
         <string>hls_decimal_mult</string>
         <string>hls_scatter_gather</string>
         <string>hls_latency_eval</string>
-        <string>hls_vector_generator</string>
         <string>test</string>
       </values>
     </hudson.matrix.TextAxis>
