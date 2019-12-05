@@ -107,18 +107,19 @@ ulimit -c unlimited                  # limit core dumps
 # Variables
 
 TESTBOXES=( ${mopBoxes[*]} ${austinBoxes[*]} ) # init array of systems
-echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
 CARDSList=($CARDS)
+EmailDestinationList=( fabrice_moyen@fr.ibm.com )
+HWUser=&quot;capimop&quot;
 
 mopIMGRootDir=&quot;/data/Images&quot;
 IMGFileName=$(basename $mopIMGFile)
 mopIMGDir=$(dirname $mopIMGRootDir/$mopIMGFile)
 
-ExecutorIMGRootDir=&quot;/home/fpga/images/single_test&quot;
+ExecutorIMGRootDir=&quot;/home/$HWUser/images/single_test&quot;
 
-echo &quot;testboxes1 : ${TESTBOXES[*]}&quot;
-echo &quot;Cards list : ${CARDSList[*]}&quot;
-echo &quot;running    : $mopIMGDir/$IMGFileName&quot;
+echo &quot;testboxes now     : ${TESTBOXES[@]}&quot;
+echo &quot;Cards list        : ${CARDSList[*]}&quot;
+echo &quot;running           : $mopIMGDir/$IMGFileName&quot;
 echo &quot;working directory : $(pwd)&quot;
 
 #------------------------------------------------------------------------------------------------------------------------------
@@ -139,12 +140,39 @@ function finish {  # define function to unlock in case of error, executed after 
   echo &quot;`date` box=$box $LOCK unlock RC=$SSH_RC&quot;
 }
 
-#------------------------------------------------------------------------------------------------------------------------------
-# Test if size file is coherent
+# Function for sending alerting emails
+# Example 1: SendAnEmail -s &quot;This is the subject/alert&quot; -d firstDest@gmail.com -d SecondDest@free.fr
+# Example 2: SendAnEmail -s &quot;This is the subject/alert&quot; -d &quot;${EmailDestinationList[*]}&quot;
+function SendAnEmail
+{
+  local OPTIND opt DestList
+  while getopts &quot;s:d:&quot; opt
+  do 
+    case $opt in
+      s)
+        Subject=&quot;$OPTARG&quot;
+      ;;
+      d)
+        DestList+=(&quot;$OPTARG&quot;)
+      ;;
+    esac
+  done
+  
+  for i in ${DestList[@]}
+  do
+    echo &quot;&quot; | mail -s &quot;$Subject&quot; $i
+  done
+}
 
+
+#------------------------------------------------------------------------------------------------------------------------------
+# Test if file size is coherent
+
+echo;echo &quot;****************************************************************************************&quot;
+echo &quot;J: Testing if file size is coherent ($mopIMGDir/$IMGFileName)...&quot; 
 size=`ls -al $mopIMGDir/$IMGFileName | awk &apos;{print $5}&apos;`
-echo &quot;size of file is $size&quot;
-(( $size &lt; 100000 ))          &amp;&amp; die 1 &quot;image $$mopIMGDir/$IMGFileName is too small $size to burn&quot;
+echo &quot;  -&gt; Size of file is $size&quot;
+(( $size &lt; 100000 ))          &amp;&amp; die 1 &quot;  -&gt; Image $$mopIMGDir/$IMGFileName is too small $size to burn&quot;
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Create a list of Cards sorted by card names&apos; length
@@ -157,25 +185,34 @@ done | sort --reverse | cut -d&apos; &apos; -f2- )
 
 SortedCARDSList=($SortedCARDSString)
 
+
 #------------------------------------------------------------------------------------------------------------------------------
 # Search for a card in the Image file name
+echo;echo &quot;****************************************************************************************&quot;
+echo &quot;J: Searching for the card name in the image file name ($IMGFileName)...&quot; 
 
 for CRD in &quot;${SortedCARDSList[@]}&quot;;do
-  if [[ &quot;$IMGFileName&quot; =~ &quot;$CRD&quot; ]];then echo &quot;found card=$CRD for image=$IMGFileName size=$size&quot;;break;fi
-  if [ $CRD == ${SortedCARDSList[*]: -1} ];then die 100 &quot;cannot find card for image=$IMGFileName in cards=${CARDSList[*]}&quot;;fi
+  if [[ &quot;$IMGFileName&quot; =~ &quot;$CRD&quot; ]];then echo &quot;  -&gt; Found card=$CRD for image=$IMGFileName size=$size&quot;;break;fi
+  if [ $CRD == ${SortedCARDSList[*]: -1} ];then die 100 &quot;  -&gt; Cannot find card for image=$IMGFileName in cards=${CARDSList[*]}&quot;;fi
 done
+
 
 #------------------------------------------------------------------------------------------------------------------------------
 # SPI8 Cards case: meaning primary and secondary IMG files
+echo;echo &quot;****************************************************************************************&quot;
+echo &quot;J: Checking if $CRD card is SPI8...&quot; 
 
 if echo $IMGFileName | egrep &quot;primary|secondary&quot; ; then
-        echo &quot;SPI8 file detected&quot;;SPI8=1;
+        echo &quot;  -&gt; SPI8 file detected&quot;;SPI8=1;
   else
-         echo &quot;Not an SPI8 file&quot;;SPI8=0;
+         echo &quot;  -&gt; Not an SPI8 file&quot;;SPI8=0;
 fi
 
+
+#------------------------------------------------------------------------------------------------------------------------------
 # Generating ReducedFileName (without _primary.bin or _secondary.bin)
-echo &quot;Reducing Image name to get the base name&quot;
+echo;echo &quot;****************************************************************************************&quot;
+echo &quot;J: Reducing Image name to get the base name&quot;
 if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
         echo &quot;   SPI8 =&gt; Memorizing the primary and secondary image names&quot;
         ReducedFileName=&quot;${IMGFileName%_*}&quot;        # Get all the beginning up to the last &quot;_&quot; (removing &quot;_primary.bin&quot; or &quot;_secondary.bin&quot;)
@@ -191,15 +228,45 @@ if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
         echo $ReducedFileName;
 fi
 
+
 #------------------------------------------------------------------------------------------------------------------------------
 # Test if boxes in TESTBOXES are accessible
+echo;echo &quot;****************************************************************************************&quot;
+echo &quot;J: Testing POWER servers accessibility:&quot;
+
+for box in &quot;${TESTBOXES[@]}&quot;;do
+      
+  if [[ ${mopBoxes[*]} =~ $box ]]
+  then
+    # $box is a Montpellier server
+    echo -e &quot;MOP   : $box -&gt; \c&quot;
+    RC=0;ssh ${HWUser}@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
+  else
+    echo -e &quot;AUSTIN: $box -&gt; \c&quot;
+    RC=0;ssh ${HWUser}@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
+  fi
+
+  if [ $RC == &quot;0&quot; ]; then 
+    echo &quot;OK&quot;
+  else
+    echo &quot;FAILED&quot;
+    for i in &quot;${TESTBOXES[@]}&quot;; do [[ $i != $box ]] &amp;&amp; new+=($i);done   # generate new test array without unreachable box
+    unset TESTBOXES;TESTBOXES=(&quot;${new[@]}&quot;);unset new                   # reassign to original array name
+    echo &quot;$box not reachable =&gt; removed from Boxes testing list, remaining=${TESTBOXES[@]}&quot;
+    if [[ &quot;${TESTBOXES[@]}&quot; == &quot;&quot; ]];then echo &quot;no test machines avail anymore&quot;;exit 1;fi
+  fi
+  
+done
+
+echo;echo &quot;testboxes now     : ${TESTBOXES[@]}&quot;
+
+echo;echo &quot;FABEND&quot;;exit 0
 
 for box in &quot;${TESTBOXES[@]}&quot;;do
       
   if [[ ${mopBoxes[*]} =~ $box ]]
   then
      # $box is a Montpellier server
-     bindir=&quot;/home/fpga/&quot;
      RC=0;ssh fpga@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
   fi
 
