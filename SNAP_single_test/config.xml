@@ -188,6 +188,7 @@ SortedCARDSList=($SortedCARDSString)
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Search for a card in the Image file name
+
 echo;echo &quot;****************************************************************************************&quot;
 echo &quot;J: Searching for the card name in the image file name ($IMGFileName)...&quot; 
 
@@ -199,6 +200,7 @@ done
 
 #------------------------------------------------------------------------------------------------------------------------------
 # SPI8 Cards case: meaning primary and secondary IMG files
+
 echo;echo &quot;****************************************************************************************&quot;
 echo &quot;J: Checking if $CRD card is SPI8...&quot; 
 
@@ -211,6 +213,7 @@ fi
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Generating ReducedFileName (without _primary.bin or _secondary.bin)
+
 echo;echo &quot;****************************************************************************************&quot;
 echo &quot;J: Reducing Image name to get the base name&quot;
 if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
@@ -231,6 +234,7 @@ fi
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Test if boxes in TESTBOXES are accessible
+
 echo;echo &quot;****************************************************************************************&quot;
 echo &quot;J: Testing POWER servers accessibility:&quot;
 
@@ -262,47 +266,30 @@ echo;echo &quot;testboxes now     : ${TESTBOXES[@]}&quot;
 
 echo;echo &quot;FABEND&quot;;exit 0
 
-for box in &quot;${TESTBOXES[@]}&quot;;do
-      
-  if [[ ${mopBoxes[*]} =~ $box ]]
-  then
-     # $box is a Montpellier server
-     RC=0;ssh fpga@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
-  fi
-
-  if [ &quot;$RC&quot; == &quot;0&quot; ]; then : 
-    echo &quot;$box ping ok&quot;;
-  else
-    for i in &quot;${TESTBOXES[@]}&quot;; do [[ $i != $box ]] &amp;&amp; new+=($i);done   # generate new test array without unreachable box
-    unset TESTBOXES;TESTBOXES=(&quot;${new[@]}&quot;);unset new                   # reassign to original array name
-    echo &quot;$box not pingable, remove from testing, remaining=${TESTBOXES[@]}&quot;
-    if [[ &quot;${TESTBOXES[@]}&quot; == &quot;&quot; ]];then echo &quot;no test machines avail anymore&quot;;exit 1;fi
-  fi
-done # for box
-
-echo &quot;testboxes2=${TESTBOXES[@]}&quot;
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Waiting for available $CRD in ${TESTBOXES[*]}
 
-maxloop=60; echo &quot;Wait (max $maxloop min) for free card=$CRD in ${TESTBOXES[@]} iam=`whoami`&quot;
+maxloop=60
+echo;echo &quot;****************************************************************************************&quot;
+echo &quot;J: Waiting (max $maxloop min) for free card=$CRD in the list ( ${TESTBOXES[*]} )...&quot;
 
 for loop in `seq 1 $maxloop`;do
   for box in &quot;${TESTBOXES[@]}&quot;;do 
-    users=`ssh fpga@${box} who|grep -v root|grep -v fpga|grep -v sinitame | awk &apos;{print $1}&apos; | sort -u `
+    users=`ssh ${HWUser}@${box} who|grep -v root|grep -v ${HWUser} | awk &apos;{print $1}&apos; | sort -u `
     nusers=`echo $users | wc -w`
-	  echo &quot;$nusers connected on $box :&quot;
+	echo &quot;  -&gt; $nusers connected on $box :&quot;
     echo $users
     
     #Sending a message to all users connected to $box
     if [ $nusers -ge 1 ];then
       for user in $users
       do
-   	    ssh fpga@$box &quot;echo &apos;JENKINS IS TRYING TO RUN A TEST ON $box WITH $CRD FPGA ADAPTER, CAN YOU LOGOUT ? THANKS&apos; | write $user&quot;
+   	    ssh ${HWUser}@$box &quot;echo &apos;JENKINS IS TRYING TO RUN A TEST ON $box WITH $CRD FPGA ADAPTER, CAN YOU LOGOUT ? THANKS&apos; | write $user&quot;
       done
     fi
 
-    echo &quot;J:getting ${CRD} card position on ${box}:&quot;
+    echo &quot;J: getting ${CRD} card position on ${box}:&quot;
     found=0;cards=`ssh -ttq fpga@${box} /home/fpga/snap_find_card -A ${CRD}`||found=$?
     hours=`date +%H`
 	  echo &quot;`date` loop=$loop box=$box nusers=$nusers card=$CRD snap_find_card found=$found&quot;
