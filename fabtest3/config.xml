@@ -67,7 +67,23 @@ echo &quot;X: $X, Y: $Y&quot;
 sleep 10</command>
     </hudson.tasks.Shell>
   </builders>
-  <publishers/>
+  <publishers>
+    <htmlpublisher.HtmlPublisher plugin="htmlpublisher@1.18">
+      <reportTargets>
+        <htmlpublisher.HtmlPublisherTarget>
+          <reportName>FABHTML Report</reportName>
+          <reportDir>fabtest</reportDir>
+          <reportFiles>index.html</reportFiles>
+          <alwaysLinkToLastBuild>false</alwaysLinkToLastBuild>
+          <reportTitles></reportTitles>
+          <keepAll>false</keepAll>
+          <allowMissing>false</allowMissing>
+          <includes>**/*</includes>
+          <escapeUnderscores>true</escapeUnderscores>
+        </htmlpublisher.HtmlPublisherTarget>
+      </reportTargets>
+    </htmlpublisher.HtmlPublisher>
+  </publishers>
   <buildWrappers/>
   <executionStrategy class="hudson.matrix.DefaultMatrixExecutionStrategyImpl">
     <runSequentially>false</runSequentially>
