@@ -296,9 +296,8 @@ for loop in `seq 1 $maxloop`;do
     # ($find_card gives the number of found cards inside $?)
     
     if [ $found -ne 0 ];then
-      echo -e &quot;OK: $found CARD(S) FOUND &quot;
       cards=`ssh -ttq ${HWUser}@${box} &quot;/home/${HWUser}/$find_card -A ${CRD} 2&gt;/dev/null&quot; | head -n1`   
-      echo &quot;(card-IDs= $cards)&quot;
+      echo -e &quot;OK: $found CARD(S) FOUND (card-IDs= $cards)&quot;
       # (head is needed because if more than 1 card, $find_card returns something like &quot;0 0&quot; and second line with &quot;Total 2 cards detected&quot;)
     else
       echo &quot;FAILED: NO CARD FOUND&quot;
@@ -406,13 +405,13 @@ ssh ${HWUser}@${box} &quot;echo Card      : $CRD[$cardid]       &gt;&gt; jenkins
 ssh ${HWUser}@${box} &quot;echo Image     : /home/$HWUser/$IMGFileName &gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;echo Build No  : ${BUILD_NUMBER}     &gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;echo Git Branch: ${GIT_BRANCH}       &gt;&gt; jenkins.log&quot;
-ssh ${HWUser}@${box} tail -n8 jenkins.log
+ssh ${HWUser}@${box} tail -n7 jenkins.log
 
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Copying Working directory TARGET_DIR into $box:/home/$HWUser
 
-TARGET_DIR=&quot;`basename $pwd`-${ReducedFileName}-${BUILD_NUMBER}&quot;
+TARGET_DIR=&quot;`basename $PWD`-${ReducedFileName}-${BUILD_NUMBER}&quot;
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Copying Working directory $TARGET_DIR into $box:/home/$HWUser&quot;
 
