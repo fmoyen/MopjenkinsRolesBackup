@@ -1,8 +1,8 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>-&gt; Transfer an already built image to the right card and test it&#xd;
-for Questions: please contact  A.Castellane or F.Moyen</description>
+  <description>transfer an already built image to the right card and test it&#xd;
+for Questions: contact J.Kayser, A.Castellane or F.Moyen</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <jenkins.model.BuildDiscarderProperty>
@@ -14,7 +14,7 @@ for Questions: please contact  A.Castellane or F.Moyen</description>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
     <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.4">
-      <projectUrl>https://github.com/open-power/snap/</projectUrl>
+      <projectUrl>git@github.com:open-power/snap.git/</projectUrl>
       <displayName></displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
     <hudson.model.ParametersDefinitionProperty>
@@ -37,22 +37,15 @@ for Questions: please contact  A.Castellane or F.Moyen</description>
           <name>mopBoxes</name>
           <description>List of Montpellier systems available for testing
 Marennes is a P8 (CAPI1 cards)
-Orpington and Lewen05 are P9 (CAPI2.0 cards)</description>
-          <defaultValue>orpington</defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>austinBoxes</name>
-          <description>List of Austin systems available for testing :
-(Assuming no VPN or jump server is needed to access Austin servers, 9.X.X.X addresses)
-(it needs to define capimop user with authorized_keys)</description>
-          <defaultValue>hawklp10.aus.stglabs.ibm.com</defaultValue>
+Brahma and lewen05 and yob594 are P9 (CAPI2.0 cards)
+brahma marennes lewen05</description>
+          <defaultValue>brahma lewen05</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>CARDS</name>
           <description>CARDS=(ADKU3 AD8K5 S121B N250S N250SP AD9V3)</description>
-          <defaultValue>AD9V3 AD9H3</defaultValue>
+          <defaultValue>N250SP AD9V3</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
@@ -71,7 +64,7 @@ Orpington and Lewen05 are P9 (CAPI2.0 cards)</description>
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
-        <url>git@github.com:open-power/snap.git</url>
+        <url>https://github.com/OpenCAPI/oc-accel.git</url>
       </hudson.plugins.git.UserRemoteConfig>
     </userRemoteConfigs>
     <branches>
@@ -94,7 +87,16 @@ Orpington and Lewen05 are P9 (CAPI2.0 cards)</description>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-  <triggers/>
+  <triggers>
+    <com.cloudbees.jenkins.GitHubPushTrigger plugin="github@1.29.4">
+      <spec></spec>
+    </com.cloudbees.jenkins.GitHubPushTrigger>
+    <hudson.triggers.SCMTrigger>
+      <spec>H 0-8/4 * * *
+H 18-23/4 * * *</spec>
+      <ignorePostCommitHooks>false</ignorePostCommitHooks>
+    </hudson.triggers.SCMTrigger>
+  </triggers>
   <concurrentBuild>true</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
@@ -106,8 +108,7 @@ ulimit -c unlimited                  # limit core dumps
 #------------------------------------------------------------------------------------------------------------------------------
 # Variables
 
-TESTBOXES=( ${mopBoxes[*]} ${austinBoxes[*]} ) # init array of systems
-echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
+TESTBOXES=(${mopBoxes[*]}) # init array of systems
 CARDSList=($CARDS)
 
 mopIMGRootDir=&quot;/data/Images&quot;
@@ -445,8 +446,8 @@ fi</command>
   </publishers>
   <buildWrappers>
     <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.19">
-      <strategy class="hudson.plugins.build_timeout.impl.NoActivityTimeOutStrategy">
-        <timeoutSecondsString>180</timeoutSecondsString>
+      <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
+        <timeoutMinutes>1200</timeoutMinutes>
       </strategy>
       <operationList/>
     </hudson.plugins.build__timeout.BuildTimeoutWrapper>
