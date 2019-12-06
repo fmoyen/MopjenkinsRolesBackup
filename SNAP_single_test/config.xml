@@ -143,7 +143,7 @@ function die {     # define function to exit with msg: call with &quot;die [exit
 
 function finish {  # define function to unlock in case of error, executed after registering with &quot;trap finish EXIT&quot;
   echo &quot;RC=$?, now unlock ${LOCK} and end&quot;
-  SSH_RC=0;ssh fpga@$box rmdir ${LOCK} || SSH_RC=$?
+  SSH_RC=0;ssh ${HWUser}@${box} rmdir ${LOCK} || SSH_RC=$?
   echo &quot;`date` box=$box $LOCK unlock RC=$SSH_RC&quot;
 }
 
@@ -447,7 +447,7 @@ ssh ${HWUser}@${box} mkdir -p ${ExecutorIMGRootDir}/$CRD
 if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
 	echo &quot;  -&gt; Copying Image $IMGPrimaryName   to $box:${ExecutorIMGRootDir}/$CRD&quot;
     rsync -az   $mopIMGDir/$IMGPrimaryName ${HWUser}@${box}:${ExecutorIMGRootDir}/$CRD
-	echo &quot;J: Copying Image $IMGSecondaryName to $box:${ExecutorIMGRootDir}/$CRD&quot;
+	echo &quot;  -&gt; Copying Image $IMGSecondaryName to $box:${ExecutorIMGRootDir}/$CRD&quot;
     rsync -az $mopIMGDir/$IMGSecondaryName ${HWUser}@${box}:${ExecutorIMGRootDir}/$CRD
     RUN+=&quot; -D ${TARGET_DIR}&quot;
 	if [ -z ${mopIMGFile} ]; then RUN+=&quot; -A ALL&quot;;else RUN+=&quot; -F ${ExecutorIMGRootDir}/$CRD/$IMGPrimaryName -f ${ExecutorIMGRootDir}/$CRD/$IMGSecondaryName -A ${CRD} -C $cardid&quot;;fi
