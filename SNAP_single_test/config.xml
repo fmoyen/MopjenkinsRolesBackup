@@ -34,6 +34,12 @@ for Questions: please contact  A.Castellane or F.Moyen</description>
           </choiceListProvider>
         </jp.ikedam.jenkins.plugins.extensible__choice__parameter.ExtensibleChoiceParameterDefinition>
         <hudson.model.StringParameterDefinition>
+          <name>BRANCH</name>
+          <description>Choose the branch for github.com:open-power/snap you want to test. Please do not use wildcards!!</description>
+          <defaultValue>ad9h3_addition</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
           <name>mopBoxes</name>
           <description>List of Montpellier systems available for testing
 Marennes is a P8 (CAPI1 cards)
@@ -76,7 +82,7 @@ Orpington and Lewen05 are P9 (CAPI2.0 cards)</description>
     </userRemoteConfigs>
     <branches>
       <hudson.plugins.git.BranchSpec>
-        <name>master</name>
+        <name>${BRANCH}</name>
       </hudson.plugins.git.BranchSpec>
     </branches>
     <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
@@ -289,7 +295,7 @@ for loop in `seq 1 $maxloop`;do
     find_card=$FindCardTool.${GIT_COMMIT}.`date +%H%M%S`
 
     echo  &quot;  --&gt; Copying the tool $FindCardTool ($find_card) to $box:/home/${HWUser}&quot;
-    RC=0;scp ./software/tools/$FindCardTool ${HWUser}@$box:/home/${HWUser}/$find_card ; RC=$?
+    RC=0;scp snap/software/tools/$FindCardTool ${HWUser}@$box:/home/${HWUser}/$find_card ; RC=$?
     if [ $RC -gt 0 ];then
       echo &quot;     -&gt; copy $find_card to $box FAILED, continuing anyway...&quot;;
     fi
@@ -416,15 +422,14 @@ ssh ${HWUser}@${box} tail -n7 jenkins.log
 
 TARGET_DIR=&quot;`basename $PWD`-${ReducedFileName}-${BUILD_NUMBER}&quot;
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Copying Working directory $TARGET_DIR into $box:/home/$HWUser&quot;
-
-echo &quot;  (Current Dir = $PWD)&quot;
+echo &quot;J: Copying snap working directory into $box:/home/$HWUser/$TARGET_DIR&quot;
+echo &quot;  (Local current Dir = $PWD)&quot;
 
 RUN=&quot;./actions/scripts/snap_jenkins.sh&quot;
 echo &quot;  -&gt; Creating $box:/home/$HWUser/$TARGET_DIR, if not existing&quot;
 ssh ${HWUser}@${box} mkdir -p ${TARGET_DIR}
-echo &quot;  -&gt; Copying workspace ${TARGET_DIR} to ${box}:/home/${HWUser}/${TARGET_DIR}&quot;
-rsync -az snap/ ${box}:/home/${HWUser}/${TARGET_DIR}
+echo &quot;  -&gt; Copying snap workspace directory to ${box}:/home/${HWUser}/${TARGET_DIR}&quot;
+rsync -az snap/ ${HWUser}@${box}:/home/${HWUser}/${TARGET_DIR}
 
 
 #------------------------------------------------------------------------------------------------------------------------------
@@ -437,15 +442,15 @@ ssh ${HWUser}@${box} mkdir -p ${ExecutorIMGRootDir}/$CRD
 
 if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
 	echo &quot;  -&gt; Copying Image $IMGPrimaryName   to $box:${ExecutorIMGRootDir}/$CRD&quot;
-    rsync -az   $mopIMGDir/$IMGPrimaryName ${box}:${ExecutorIMGRootDir}/$CRD
+    rsync -az   $mopIMGDir/$IMGPrimaryName ${HWUser}@${box}:${ExecutorIMGRootDir}/$CRD
 	echo &quot;J: Copying Image $IMGSecondaryName to $box:${ExecutorIMGRootDir}/$CRD&quot;
-    rsync -az $mopIMGDir/$IMGSecondaryName ${box}:${ExecutorIMGRootDir}/$CRD
+    rsync -az $mopIMGDir/$IMGSecondaryName ${HWUser}@${box}:${ExecutorIMGRootDir}/$CRD
     RUN+=&quot; -D ${TARGET_DIR}&quot;
 	if [ -z ${mopIMGFile} ]; then RUN+=&quot; -A ALL&quot;;else RUN+=&quot; -F ${ExecutorIMGRootDir}/$CRD/$IMGPrimaryName -f ${ExecutorIMGRootDir}/$CRD/$IMGSecondaryName -A ${CRD} -C $cardid&quot;;fi
 
 else
 	echo &quot;  -&gt; Copying Image $IMGFileName to $box:${ExecutorIMGRootDir}/$CRD&quot;
-    rsync -az $mopIMGDir/$IMGFileName ${box}:${ExecutorIMGRootDir}/$CRD
+    rsync -az $mopIMGDir/$IMGFileName ${HWUser}@${box}:${ExecutorIMGRootDir}/$CRD
 	RUN+=&quot; -D ${TARGET_DIR}&quot;
 	if [ -z ${mopIMGFile} ]; then RUN+=&quot; -A ALL&quot;;else RUN+=&quot; -F ${ExecutorIMGRootDir}/$CRD/$IMGFileName -A ${CRD} -C $cardid&quot;;fi
 fi
@@ -579,7 +584,7 @@ fi</command>
       <operationList/>
     </hudson.plugins.build__timeout.BuildTimeoutWrapper>
     <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.1">
-      <template>${PROJECT_NAME} #${BUILD_NUMBER}</template>
+      <template>${PROJECT_NAME} #${BUILD_NUMBER} ${GIT_BRANCH}</template>
       <descriptionTemplate></descriptionTemplate>
       <runAtStart>true</runAtStart>
       <runAtEnd>true</runAtEnd>
