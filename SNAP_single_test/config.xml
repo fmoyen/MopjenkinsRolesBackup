@@ -85,6 +85,9 @@ Orpington and Lewen05 are P9 (CAPI2.0 cards)</description>
       <hudson.plugins.git.extensions.impl.PruneStaleBranch/>
       <hudson.plugins.git.extensions.impl.CleanCheckout/>
       <hudson.plugins.git.extensions.impl.CleanBeforeCheckout/>
+      <hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
+        <relativeTargetDir>snap</relativeTargetDir>
+      </hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
     </extensions>
   </scm>
   <canRoam>true</canRoam>
