@@ -121,7 +121,8 @@ mopIMGRootDir=&quot;/data/Images&quot;
 IMGFileName=$(basename $mopIMGFile)
 mopIMGDir=$(dirname $mopIMGRootDir/$mopIMGFile)
 
-ExecutorIMGRootDir=&quot;/home/$HWUser/images/single_test&quot;
+#ExecutorIMGRootDir=&quot;/home/$HWUser/images/single_test&quot;
+ExecutorIMGRootDir=&quot;/data/Images/single_test&quot;
 CapiUtilsURL=&quot;git@github.com:ibm-capi/capi-utils.git&quot;
 
 echo &quot;testboxes now     : ${TESTBOXES[@]}&quot;
@@ -291,9 +292,7 @@ for loop in `seq 1 $maxloop`;do
     echo;echo &quot;-------------------------------------------------&quot;
     echo &quot;$box&quot;
 	
-    #FAB: added castella user for debugging. 
-    nusers=`ssh ${HWUser}@${box} who|grep -v root|grep -v ${HWUser}| grep -v castella|wc -l`
-    #nusers=`ssh ${HWUser}@${box} who|grep -v root|grep -v ${HWUser}|wc -l`
+    nusers=`ssh ${HWUser}@${box} who|grep -v root|grep -v ${HWUser}|wc -l`
 
     find_card=$FindCardTool.${GIT_COMMIT}.`date +%H%M%S`
 
@@ -437,9 +436,9 @@ rsync -az snap/ ${HWUser}@${box}:/home/${HWUser}/${TARGET_DIR}
 
 
 #------------------------------------------------------------------------------------------------------------------------------
-# Copying Image(s) into $box:/home/$HWUser/images
+# Copying Image(s) into $box:${ExecutorIMGRootDir}/$CRD
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Copying Image(s) into $box:/home/$HWUser/images&quot;
+echo &quot;J: Copying Image(s) into $box:${ExecutorIMGRootDir}/$CRD&quot;
 
 echo &quot;  -&gt; mkdir ${ExecutorIMGRootDir}/$CRD, if not existing&quot;
 ssh ${HWUser}@${box} mkdir -p ${ExecutorIMGRootDir}/$CRD

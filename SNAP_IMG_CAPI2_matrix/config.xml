@@ -567,6 +567,7 @@ RootSaveDir=/data/Images
 PSLSE_BRANCH=master
 #PSL9File=/opt/IBM/PSL9/v2.00/ibm.com_CAPI_PSL9_WRAP_2.00.zip # v2.00: original ibm zip file
 PSL9File=/opt/IBM/PSL9/v2.01/ibm.com_CAPI_PSL9_WRAP_2.01.zip # v2.01: Added virtexuplushbm supportedFamilies
+CapiUtilsURL=&quot;git@github.com:ibm-capi/capi-utils.git&quot;
 
 # FAB: prb pour passer la liste entre script1 et script2
 # SendAnEmail échoue car il essaye d&apos;envoyer à ( et à )
@@ -1287,6 +1288,14 @@ if [ $RC -ne 0 ]; then
   echo &quot;  -&gt; EXITING !&quot;
   exit 100
 fi
+
+# Git clone capi-utils tools into $box:/home/$HWUser
+
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Git cloning Capi-Utils tools into $box:/home/$HWUser...&quot;
+echo &quot;  (capi-flash-script.sh used by command `echo $RUN | cut -d&apos; &apos; -f1` )&quot;
+ssh ${HWUser}@${box} git clone $CapiUtilsURL
+
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Executing below SNAP Jenkins test on $box from ${TARGET_DIR} directory (`date`):&quot;
