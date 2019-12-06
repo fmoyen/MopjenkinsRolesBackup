@@ -476,11 +476,8 @@ ssh ${HWUser}@${box} cp ${TARGET_DIR}/software/tools/$FindCardTool .
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Git cloning Capi-Utils tools into $box:/home/$HWUser...&quot;
+echo &quot;  (capi-flash-script.sh used by command `echo $RUN | cut -d&apos; &apos; -f1` )&quot;
 ssh ${HWUser}@${box} git clone $CapiUtilsURL
-
-# FABEND
-exit 0
-# adapter pour make install ssh ${HWUser}@${box} make -C ${TARGET_DIR} clean software actions
 
 
 #------------------------------------------------------------------------------------------------------------------------------
@@ -488,8 +485,11 @@ exit 0
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Execute Test: $RUN on $box (`date`)&quot;
+echo &quot;FAB: NOT YET !&quot;
 
 RC=0
+# FAB: remove comments to do test
+&lt;&lt; //// # Multi-lines comment
 ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?
 	export TERM=xterm
 	cd ${TARGET_DIR}
@@ -502,6 +502,8 @@ ssh ${HWUser}@${box} &quot;echo Exit: $JOB_NAME RC = $RC at:\      &gt;&gt; jenk
 ssh ${HWUser}@${box} &quot;date                                    &gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;echo ------ EXIT -----------------------&gt;&gt; jenkins.log&quot;
 
+////
+# End of multi-lines comment
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Do Clean-up work: $TARGET_DIR on the $box, and image files at MOPJENKINS site
