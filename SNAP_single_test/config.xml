@@ -532,10 +532,11 @@ echo
 
 if [ $RC -eq 0 ]; then : 
   echo &quot;Job return code is good ==&gt;&quot;
-  echo &quot; =&gt; $box: Cleaning working directory
+  echo &quot; =&gt; $box: Cleaning working directory&quot;
   echo &quot; =&gt; Jenkins: Cleaning images from $mopIMGDir&quot;
   echo &quot; =&gt; $box: Moving Primary/secondary image file to good.* inside $ExecutorIMGRootDir/$CRD&quot;
-  echo &quot;   (needs to be done because SNAP github script does not manage Primary/Secondary files for the moment)&quot;
+  echo &quot;   (needs to be manually done because SNAP github script does not manage Primary/Secondary files for the moment)&quot;
+  echo &quot;   (so it is just renaming primary to primary.good)&quot;
 
   echo;echo &quot;+ Cleaning up working directory ${TARGET_DIR} from ${box}&quot;
   ssh ${HWUser}@${box} rm -rf ${TARGET_DIR}
@@ -552,9 +553,9 @@ if [ $RC -eq 0 ]; then :
 
   echo;echo &quot;+ Renaming good.* primary/secondary files on ${box}&quot;
   echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGPrimaryName&quot;
-  ssh ${HWUser}@${box} &quot;mv $ExecutorIMGRootDir/$CRD/$IMGPrimaryName $ExecutorIMGRootDir/$CRD/good.$IMGPrimaryName&quot;
+  ssh ${HWUser}@${box} &quot;mv `ls $ExecutorIMGRootDir/$CRD/$IMGPrimaryName.\*` $ExecutorIMGRootDir/$CRD/good.$IMGPrimaryName&quot;
   echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGSecondaryName&quot;
-  ssh ${HWUser}@${box} &quot;mv $ExecutorIMGRootDir/$CRD/$IMGSecondaryName $ExecutorIMGRootDir/$CRD/good.$IMGSecondaryName&quot;
+  ssh ${HWUser}@${box} &quot;mv `ls $ExecutorIMGRootDir/$CRD/$IMGSecondaryName.\*` $ExecutorIMGRootDir/$CRD/good.$IMGSecondaryName&quot;
 
   echo
 else 
