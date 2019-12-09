@@ -490,6 +490,9 @@ ssh ${HWUser}@${box} &quot;rm capi-utils/psl-devices; ln -s /lib/capi-utils/psl-
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Execute Test: $RUN on $box (`date`)&quot;
 
+echo &quot;FAB: Debugging&quot;
+RUN=&quot;sudo id&quot;
+echo &quot;FAB: RUN=$RUN&quot;
 RC=0
 ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?
 	export TERM=xterm
