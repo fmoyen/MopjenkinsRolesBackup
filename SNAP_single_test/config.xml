@@ -121,8 +121,8 @@ mopIMGRootDir=&quot;/data/Images&quot;
 IMGFileName=$(basename $mopIMGFile)
 mopIMGDir=$(dirname $mopIMGRootDir/$mopIMGFile)
 
-#ExecutorIMGRootDir=&quot;/home/$HWUser/images/single_test&quot;
-ExecutorIMGRootDir=&quot;/data/Images/single_test&quot;
+ExecutorIMGRootDir=&quot;/home/$HWUser/images/single_test&quot;
+
 CapiUtilsURL=&quot;git@github.com:ibm-capi/capi-utils.git&quot;
 SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not needed to access /dev/cxl
 
@@ -144,10 +144,20 @@ function die {     # define function to exit with msg: call with &quot;die [exit
 }
 
 function finish {  # define function to unlock in case of error, executed after registering with &quot;trap finish EXIT&quot;
-  echo &quot;RC=$?, now unlock ${LOCK} and end&quot;
-  SSH_RC=0;ssh ${HWUser}@${box} rmdir ${LOCK} || SSH_RC=$?
-  echo &quot;`date` box=$box $LOCK unlock RC=$SSH_RC&quot;
+  echo;echo &quot;***************************************************************************************&quot;
+  echo &quot;J: FINISH function&quot;
+  
+  echo &quot;RC=$?&quot;
+  echo;echo &quot;  -&gt; unlocking ${LOCK}&quot;
+  UNLOCK_RC=0;ssh ${HWUser}@${box} rmdir ${LOCK} || UNLOCK_RC=$?
+  echo &quot;box=$box lock=$LOCK unlock RC=$UNLOCK_RC (`date`)&quot;
+  echo;echo &quot;  -&gt; cleaning ${box}@$TARGET_DIR&quot;
+  CLEAN_RC=0;ssh -T ${HWUser}@$box rm -rf ${TARGET_DIR} || CLEAN_RC=$?
+  echo &quot;box=$box clean target_dir=$TARGET_DIR RC=$CLEAN_RC (`date`)&quot;
+  echo;echo &quot;  -&gt; EXITING !&quot;  
+
 }
+
 
 # Function for sending alerting emails
 # Example 1: SendAnEmail -s &quot;This is the subject/alert&quot; -d firstDest@gmail.com -d SecondDest@free.fr
@@ -517,28 +527,34 @@ ssh ${HWUser}@${box} &quot;echo ------ EXIT -----------------------&gt;&gt; jenk
 # Do Clean-up work: $TARGET_DIR on the $box, and image files at MOPJENKINS site
 
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Checking RUN return code...&quot;
+echo &quot;J: Checking RUN return code (`date`)...&quot;
 echo
 
 if [ $RC -eq 0 ]; then : 
   echo &quot;Job return code is good ==&gt;&quot;
-  echo &quot; =&gt; Cleaning working directory from $box&quot;
-  echo &quot; =&gt; Cleaning images from $mopIMGDir&quot;
-  echo &quot; =&gt; Moving Primary/secondary image file to good.* inside $box:$ExecutorIMGRootDir/$CRD&quot;
+  echo &quot; =&gt; $box: Cleaning working directory
+  echo &quot; =&gt; Jenkins: Cleaning images from $mopIMGDir&quot;
+  echo &quot; =&gt; $box: Moving Primary/secondary image file to good.* inside $ExecutorIMGRootDir/$CRD&quot;
   echo &quot;   (needs to be done because SNAP github script does not manage Primary/Secondary files for the moment)&quot;
-  echo;echo &quot;Cleaning up ${TARGET_DIR} from ${box} (`date`)&quot;
+
+  echo;echo &quot;+ Cleaning up working directory ${TARGET_DIR} from ${box}&quot;
   ssh ${HWUser}@${box} rm -rf ${TARGET_DIR}
 
-  echo;echo &quot;FABRICE- NOT Removing $mopIMGDir/$IMGPrimaryName (for debug)&quot;
-  #echo;echo &quot;Deleting $mopIMGDir/$IMGPrimaryName&quot;
+# FAB: a laisser ou remettre le rm ? Si rm il y a , cela veut dire qu&apos;on efface les images testées correctement ?! 
+# FAB: et on les garde en &quot;good.&quot; sur la $box ?!
+
+  echo;echo &quot;+ FABRICE- NOT Removing $mopIMGDir/$IMGPrimaryName (for debug)&quot;
+  #echo;echo &quot;+ Deleting $box:$mopIMGDir/$IMGPrimaryName&quot;
   #rm $mopIMGDir/$IMGPrimaryName
-  echo &quot;FABRICE- NOT Removing $mopIMGDir/$IMGSecondaryName (for debug)&quot;
-  #echo &quot;Deleting $mopIMGDir/$IMGSecondaryName&quot;
+  echo &quot;+ FABRICE- NOT Removing $mopIMGDir/$IMGSecondaryName (for debug)&quot;
+  #echo &quot;+ Deleting $box:$mopIMGDir/$IMGSecondaryName&quot;
   #rm $mopIMGDir/$IMGSecondaryName
 
-  echo;echo &quot;Renaming good.* primary/secondary files on ${box}&quot;
-  ssh ${HWUser}@${box} &quot;mv \`ls $ExecutorIMGRootDir/$CRD/${IMGPrimaryName}*\` $ExecutorIMGRootDir/$CRD/good.$IMGPrimaryName&quot;
-  ssh ${HWUser}@${box} &quot;mv \`ls $ExecutorIMGRootDir/$CRD/${IMGSecondaryName}*\` $ExecutorIMGRootDir/$CRD/good.$IMGSecondaryName&quot;
+  echo;echo &quot;+ Renaming good.* primary/secondary files on ${box}&quot;
+  echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGPrimaryName&quot;
+  ssh ${HWUser}@${box} &quot;mv $ExecutorIMGRootDir/$CRD/$IMGPrimaryName $ExecutorIMGRootDir/$CRD/good.$IMGPrimaryName&quot;
+  echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGSecondaryName&quot;
+  ssh ${HWUser}@${box} &quot;mv $ExecutorIMGRootDir/$CRD/$IMGSecondaryName $ExecutorIMGRootDir/$CRD/good.$IMGSecondaryName&quot;
 
   echo
 else 
