@@ -124,6 +124,7 @@ mopIMGDir=$(dirname $mopIMGRootDir/$mopIMGFile)
 #ExecutorIMGRootDir=&quot;/home/$HWUser/images/single_test&quot;
 ExecutorIMGRootDir=&quot;/data/Images/single_test&quot;
 CapiUtilsURL=&quot;git@github.com:ibm-capi/capi-utils.git&quot;
+SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not needed to access /dev/cxl
 
 echo &quot;testboxes now     : ${TESTBOXES[@]}&quot;
 echo &quot;Cards list        : ${CARDSList[*]}&quot;
@@ -504,7 +505,7 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?
 	cd ${TARGET_DIR}
 	set -f
     ulimit -c unlimited               # limit core dumps
-    sudo ${RUN}
+    $SudoOrNotSudo ${RUN}
 EOF
 
 ssh ${HWUser}@${box} &quot;echo Exit: $JOB_NAME RC = $RC at:\      &gt;&gt; jenkins.log&quot;

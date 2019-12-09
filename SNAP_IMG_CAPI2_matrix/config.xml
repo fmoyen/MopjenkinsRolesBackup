@@ -572,6 +572,7 @@ CapiUtilsURL=&quot;git@github.com:ibm-capi/capi-utils.git&quot;
 # FAB: prb pour passer la liste entre script1 et script2
 # SendAnEmail échoue car il essaye d&apos;envoyer à ( et à )
 unset EmailDestinationList; EmailDestinationList=( fabrice_moyen@fr.ibm.com )
+SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not needed to access /dev/cxl
 
 #echo;echo &quot;****************************************************************************************&quot;
 #echo &quot;J:LSF SETUP ...&quot;
@@ -1244,9 +1245,6 @@ if [ ! -f $RUN ];then
   exit 100
 fi
 
-# FAB: Copie de OC_IMG_matrix. Le sudo est-il necessaire avec /dev/cxl ? On va supposer que non
-#RUN=&quot;sudo $RUN&quot; #sudo used to get access to /dev/ocxl directory
-
 RUN+=&quot; -D ${TARGET_DIR}&quot;
 
 BinFilesList=( $BINFILES )
@@ -1307,7 +1305,7 @@ RC=0;ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?
 	cd ${TARGET_DIR}
     pwd
 	set -f  # the set -f command disables file name generation (&quot;path name expansion&quot;), meaning &quot;*.zip&quot; stays &quot;*.zip&quot;
-    ${RUN}
+    $SudoOrNotSudo ${RUN}
 EOF
 
 

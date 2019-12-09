@@ -441,6 +441,7 @@ export OCACCEL_ROOT=$USERHOME/oc-accel
 TESTBOXES=( ${mopBoxes[*]} ${austinBoxes[*]} ) # init array of systems
 echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
 RootSaveDir=/data/Images
+SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not needed to access /dev/cxl
 
 #echo;echo &quot;********************************************************************************&quot;
 #echo &quot;J: LSF SETUP ...&quot;
@@ -1064,7 +1065,6 @@ if [ ! -f $RUN ];then
   exit 100
 fi
 
-RUN=&quot;sudo $RUN&quot; #sudo used to get access to /dev/ocxl directory
 RUN+=&quot; -D ${TARGET_DIR}&quot;
 
 BinFilesList=( $BINFILES )
@@ -1116,7 +1116,7 @@ RC=0;ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?
 	cd ${TARGET_DIR}
     pwd
 	set -f  # the set -f command disables file name generation (&quot;path name expansion&quot;), meaning &quot;*.zip&quot; stays &quot;*.zip&quot;
-    ${RUN}
+    $SudoOrNotSudo ${RUN}
 EOF
 
 
