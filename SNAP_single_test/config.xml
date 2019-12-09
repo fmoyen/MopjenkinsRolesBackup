@@ -504,7 +504,7 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?
 	cd ${TARGET_DIR}
 	set -f
     ulimit -c unlimited               # limit core dumps
-    ${RUN}
+    sudo ${RUN}
 EOF
 
 ssh ${HWUser}@${box} &quot;echo Exit: $JOB_NAME RC = $RC at:\      &gt;&gt; jenkins.log&quot;
