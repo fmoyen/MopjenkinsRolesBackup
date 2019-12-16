@@ -492,7 +492,7 @@ ssh ${HWUser}@${box} git clone $CapiUtilsURL
 
 # FAB: linking capi-utils/psl-devices to /lib/capi-utils/psl-devices modified by Alexandre
 echo &quot;  -&gt; Linking ~/capi-utils/psl-devices to /lib/capi-utils/psl-devices modified by Alexandre&quot;
-ssh ${HWUser}@${box} &quot;rm capi-utils/psl-devices; ln -s /lib/capi-utils/psl-devices capi-utils/psl-devices&quot;
+ssh ${HWUser}@${box} &quot;if [ -f /lib/capi-utils/psl-devices ]; then rm capi-utils/psl-devices; ln -s /lib/capi-utils/psl-devices capi-utils/psl-devices; fi&quot;
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Build the capi-utils software into $box:/home/$HWUser/capi-utils on the $box
@@ -553,9 +553,9 @@ if [ $RC -eq 0 ]; then :
 
   echo;echo &quot;+ Renaming good.* primary/secondary files on ${box}&quot;
   echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGPrimaryName&quot;
-  ssh ${HWUser}@${box} &quot;mv `ls $ExecutorIMGRootDir/$CRD/$IMGPrimaryName.\*` $ExecutorIMGRootDir/$CRD/good.$IMGPrimaryName&quot;
+  ssh ${HWUser}@${box} &quot;mv \`ls $ExecutorIMGRootDir/$CRD/${IMGPrimaryName}*\` $ExecutorIMGRootDir/$CRD/good.$IMGPrimaryName&quot;
   echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGSecondaryName&quot;
-  ssh ${HWUser}@${box} &quot;mv `ls $ExecutorIMGRootDir/$CRD/$IMGSecondaryName.\*` $ExecutorIMGRootDir/$CRD/good.$IMGSecondaryName&quot;
+  ssh ${HWUser}@${box} &quot;mv \`ls $ExecutorIMGRootDir/$CRD/${IMGSecondaryName}*\` $ExecutorIMGRootDir/$CRD/good.$IMGSecondaryName&quot;
 
   echo
 else 
