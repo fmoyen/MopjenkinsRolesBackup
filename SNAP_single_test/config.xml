@@ -558,12 +558,17 @@ if [ $RC -eq 0 ]; then :
   #echo &quot;+ Deleting $box:$mopIMGDir/$IMGSecondaryName&quot;
   #rm $mopIMGDir/$IMGSecondaryName
 
-  echo;echo &quot;+ Renaming good.* primary/secondary files on ${box}&quot;
-  echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGPrimaryName&quot;
-  ssh ${HWUser}@${box} &quot;mv \`ls $ExecutorIMGRootDir/$CRD/${IMGPrimaryName}*\` $ExecutorIMGRootDir/$CRD/good.$IMGPrimaryName&quot;
-  echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGSecondaryName&quot;
-  ssh ${HWUser}@${box} &quot;mv \`ls $ExecutorIMGRootDir/$CRD/${IMGSecondaryName}*\` $ExecutorIMGRootDir/$CRD/good.$IMGSecondaryName&quot;
-
+  if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
+    echo;echo &quot;+ Renaming primary/secondary files to good.* on ${box}&quot;
+    echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGPrimaryName&quot;
+    ssh ${HWUser}@${box} &quot;mv \`ls $ExecutorIMGRootDir/$CRD/${IMGPrimaryName}*\` $ExecutorIMGRootDir/$CRD/good.$IMGPrimaryName&quot;
+    echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGSecondaryName&quot;
+    ssh ${HWUser}@${box} &quot;mv \`ls $ExecutorIMGRootDir/$CRD/${IMGSecondaryName}*\` $ExecutorIMGRootDir/$CRD/good.$IMGSecondaryName&quot;
+  else
+    echo;echo &quot;+ Renaming binary file to good.* on ${box}&quot;
+    echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGFileName&quot;
+    ssh ${HWUser}@${box} &quot;mv \`ls $ExecutorIMGRootDir/$CRD/${IMGFileName}*\` $ExecutorIMGRootDir/$CRD/good.$IMGFileName&quot;
+  fi
   echo
 else 
   die 100 &quot;Job return code indicates FAILURE RC = $RC (`date`) =&gt; exit UNSTABLE&quot;
