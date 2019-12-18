@@ -134,7 +134,6 @@ echo &quot;  Testing Binary    : $mopIMGDir/$IMGFileName&quot;
 echo
 echo &quot;  testboxes now     : ${TESTBOXES[@]}&quot;
 echo &quot;  Cards list        : ${CARDSList[*]}&quot;
-echo &quot;  working directory : $(pwd)&quot;
 echo &quot;***************************************************************************************&quot;
 echo &quot;***************************************************************************************&quot;; echo
 
@@ -514,7 +513,8 @@ ssh ${HWUser}@${box} make -C /home/$HWUser/capi-utils
 # Execute the $RUN command on the $box
 
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Execute Test: $RUN on $box (`date`)&quot;
+echo &quot;J: Executing Test: $RUN&quot;
+echo &quot;   on $box (`date`)&quot;
 
 RC=0
 ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?
