@@ -30,7 +30,7 @@ for Questions: please contact  A.Castellane or F.Moyen</description>
             <includePattern>*/fw*bin</includePattern>
             <scanType>File</scanType>
             <excludePattern></excludePattern>
-            <reverseOrder>false</reverseOrder>
+            <reverseOrder>true</reverseOrder>
             <emptyChoiceType>None</emptyChoiceType>
           </choiceListProvider>
         </jp.ikedam.jenkins.plugins.extensible__choice__parameter.ExtensibleChoiceParameterDefinition>
@@ -127,10 +127,16 @@ ExecutorIMGRootDir=&quot;/home/$HWUser/images/single_test&quot;
 CapiUtilsURL=&quot;https://github.com/ibm-capi/capi-utils.git&quot;
 SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not needed to access /dev/cxl
 
-echo &quot;testboxes now     : ${TESTBOXES[@]}&quot;
-echo &quot;Cards list        : ${CARDSList[*]}&quot;
-echo &quot;running           : $mopIMGDir/$IMGFileName&quot;
-echo &quot;working directory : $(pwd)&quot;
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;***************************************************************************************&quot;
+echo &quot;JENKINS:&quot;
+echo &quot;  Testing Binary    : $mopIMGDir/$IMGFileName&quot;
+echo
+echo &quot;  testboxes now     : ${TESTBOXES[@]}&quot;
+echo &quot;  Cards list        : ${CARDSList[*]}&quot;
+echo &quot;  working directory : $(pwd)&quot;
+echo &quot;***************************************************************************************&quot;
+echo &quot;***************************************************************************************&quot;; echo
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Functions
