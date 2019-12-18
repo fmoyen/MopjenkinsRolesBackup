@@ -33,7 +33,8 @@ hls_vector_generator&#xd;
 test</description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.4">
+    <hudson.plugins.jira.JiraProjectProperty plugin="jira@3.0.11"/>
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.5">
       <projectUrl>https://github.com/open-power/snap/</projectUrl>
       <displayName></displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
@@ -68,7 +69,7 @@ test</description>
         <hudson.model.BooleanParameterDefinition>
           <name>AD9V3</name>
           <description>enable/disable the AD9V3 card</description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>AD9H3</name>
@@ -78,7 +79,7 @@ test</description>
         <hudson.model.BooleanParameterDefinition>
           <name>N250SP</name>
           <description>enable/disable the N250SP card</description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>FX609</name>
@@ -154,7 +155,7 @@ test</description>
       <paramsToUseForLimit></paramsToUseForLimit>
     </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.9.3">
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.0.0">
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
@@ -178,6 +179,7 @@ test</description>
         <trackingSubmodules>false</trackingSubmodules>
         <reference></reference>
         <parentCredentials>false</parentCredentials>
+        <shallow>false</shallow>
       </hudson.plugins.git.extensions.impl.SubmoduleOption>
     </extensions>
   </scm>
@@ -187,7 +189,7 @@ test</description>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
-    <com.cloudbees.jenkins.GitHubPushTrigger plugin="github@1.29.4">
+    <com.cloudbees.jenkins.GitHubPushTrigger plugin="github@1.29.5">
       <spec></spec>
     </com.cloudbees.jenkins.GitHubPushTrigger>
     <hudson.triggers.SCMTrigger>
@@ -567,7 +569,7 @@ RootSaveDir=/data/Images
 PSLSE_BRANCH=master
 #PSL9File=/opt/IBM/PSL9/v2.00/ibm.com_CAPI_PSL9_WRAP_2.00.zip # v2.00: original ibm zip file
 PSL9File=/opt/IBM/PSL9/v2.01/ibm.com_CAPI_PSL9_WRAP_2.01.zip # v2.01: Added virtexuplushbm supportedFamilies
-CapiUtilsURL=&quot;git@github.com:ibm-capi/capi-utils.git&quot;
+CapiUtilsURL=&quot;https://github.com/ibm-capi/capi-utils.git&quot;
 
 # FAB: prb pour passer la liste entre script1 et script2
 # SendAnEmail échoue car il essaye d&apos;envoyer à ( et à )
@@ -1336,7 +1338,7 @@ fi
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.23">
+    <hudson.tasks.Mailer plugin="mailer@1.29">
       <recipients>fabrice_moyen@fr.ibm.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
@@ -1357,8 +1359,8 @@ fi
         <hudson.plugins.build__timeout.operations.FailOperation/>
       </operationList>
     </hudson.plugins.build__timeout.BuildTimeoutWrapper>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
-    <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.1">
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.10"/>
+    <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.3">
       <template>#${BUILD_NUMBER} ${GIT_BRANCH} Vivado=${ENV,var=&quot;VIVADO_CHOICE&quot;} HWTest=${ENV,var=&quot;TEST_ON_HW&quot;} HWCards= ${ENV,var=&quot;LIST_TEST_CARDS&quot;}</template>
       <descriptionTemplate></descriptionTemplate>
       <runAtStart>true</runAtStart>

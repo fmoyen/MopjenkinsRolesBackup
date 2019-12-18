@@ -5,6 +5,7 @@
 for Questions: please contact  A.Castellane or F.Moyen</description>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <hudson.plugins.jira.JiraProjectProperty plugin="jira@3.0.11"/>
     <jenkins.model.BuildDiscarderProperty>
       <strategy class="hudson.tasks.LogRotator">
         <daysToKeep>3</daysToKeep>
@@ -13,7 +14,7 @@ for Questions: please contact  A.Castellane or F.Moyen</description>
         <artifactNumToKeep>-1</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
-    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.4">
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.5">
       <projectUrl>https://github.com/open-power/snap/</projectUrl>
       <displayName></displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
@@ -44,7 +45,7 @@ for Questions: please contact  A.Castellane or F.Moyen</description>
           <description>List of Montpellier systems available for testing
 Marennes is a P8 (CAPI1 cards)
 Orpington and Lewen05 are P9 (CAPI2.0 cards)</description>
-          <defaultValue>orpington</defaultValue>
+          <defaultValue>orpington lewen05</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -58,7 +59,7 @@ Orpington and Lewen05 are P9 (CAPI2.0 cards)</description>
         <hudson.model.StringParameterDefinition>
           <name>CARDS</name>
           <description>CARDS=(ADKU3 AD8K5 S121B N250S N250SP AD9V3)</description>
-          <defaultValue>AD9V3 AD9H3</defaultValue>
+          <defaultValue>AD9V3 AD9H3 N250SP</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
@@ -73,7 +74,7 @@ Orpington and Lewen05 are P9 (CAPI2.0 cards)</description>
       <paramsToUseForLimit></paramsToUseForLimit>
     </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.9.3">
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.0.0">
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
@@ -123,7 +124,7 @@ mopIMGDir=$(dirname $mopIMGRootDir/$mopIMGFile)
 
 ExecutorIMGRootDir=&quot;/home/$HWUser/images/single_test&quot;
 
-CapiUtilsURL=&quot;git@github.com:ibm-capi/capi-utils.git&quot;
+CapiUtilsURL=&quot;https://github.com/ibm-capi/capi-utils.git&quot;
 SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not needed to access /dev/cxl
 
 echo &quot;testboxes now     : ${TESTBOXES[@]}&quot;
@@ -564,7 +565,7 @@ fi</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <org.jenkinsci.plugins.github.status.GitHubCommitStatusSetter plugin="github@1.29.4">
+    <org.jenkinsci.plugins.github.status.GitHubCommitStatusSetter plugin="github@1.29.5">
       <commitShaSource class="org.jenkinsci.plugins.github.status.sources.BuildDataRevisionShaSource"/>
       <reposSource class="org.jenkinsci.plugins.github.status.sources.AnyDefinedRepositorySource"/>
       <contextSource class="org.jenkinsci.plugins.github.status.sources.ManuallyEnteredCommitContextSource">
@@ -626,7 +627,7 @@ fi</command>
       </strategy>
       <operationList/>
     </hudson.plugins.build__timeout.BuildTimeoutWrapper>
-    <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.1">
+    <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.3">
       <template>${PROJECT_NAME} #${BUILD_NUMBER} ${GIT_BRANCH}</template>
       <descriptionTemplate></descriptionTemplate>
       <runAtStart>true</runAtStart>
