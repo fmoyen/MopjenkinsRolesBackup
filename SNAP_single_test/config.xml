@@ -564,12 +564,24 @@ if [ $RC -eq 0 ]; then :
     ssh ${HWUser}@${box} &quot;mv \`ls $ExecutorIMGRootDir/$CRD/${IMGPrimaryName}*\` $ExecutorIMGRootDir/$CRD/good.$IMGPrimaryName&quot;
     echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGSecondaryName&quot;
     ssh ${HWUser}@${box} &quot;mv \`ls $ExecutorIMGRootDir/$CRD/${IMGSecondaryName}*\` $ExecutorIMGRootDir/$CRD/good.$IMGSecondaryName&quot;
+    echo;echo &quot;+ FABRICE- NOT Removing $mopIMGDir/$IMGPrimaryName (for debug)&quot;
+
+    #echo;echo &quot;+ Deleting $box:$mopIMGDir/$IMGPrimaryName&quot;
+    #rm $mopIMGDir/$IMGPrimaryName
+    echo &quot;+ FABRICE- NOT Removing $mopIMGDir/$IMGSecondaryName (for debug)&quot;
+    #echo &quot;+ Deleting $box:$mopIMGDir/$IMGSecondaryName&quot;
+    #rm $mopIMGDir/$IMGSecondaryName
   else
     echo;echo &quot;+ Renaming binary file to good.* on ${box}&quot;
     echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGFileName&quot;
     ssh ${HWUser}@${box} &quot;mv \`ls $ExecutorIMGRootDir/$CRD/${IMGFileName}*\` $ExecutorIMGRootDir/$CRD/good.$IMGFileName&quot;
+    
+    echo;echo &quot;+ FABRICE- NOT Removing $mopIMGDir/$IMGFileName (for debug)&quot;
+    #echo;echo &quot;+ Deleting $box:$mopIMGDir/$IMGFileName&quot;
+    #rm $mopIMGDir/$IMGFileName
   fi
   echo
+  
 else 
   die 100 &quot;Job return code indicates FAILURE RC = $RC (`date`) =&gt; exit UNSTABLE&quot;
 fi</command>
