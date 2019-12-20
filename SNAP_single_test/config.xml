@@ -539,6 +539,9 @@ echo
 
 if [ $RC -eq 0 ]; then
   mopIMGGoodDir=${mopIMGRootDir}/tested_and_good
+  mkdir -p $mopIMGGoodDir
+  chmod 777 $mopIMGGoodDir
+  
   echo &quot;Job return code is good ==&gt;&quot;
   echo &quot; =&gt; $box: Cleaning working directory&quot;
   echo &quot; =&gt; Jenkins: Cleaning images from $mopIMGDir&quot;
@@ -548,9 +551,6 @@ if [ $RC -eq 0 ]; then
 
   echo;echo &quot;+ Cleaning up working directory ${TARGET_DIR} from ${box}&quot;
   ssh ${HWUser}@${box} rm -rf ${TARGET_DIR}
-
-# FAB: a laisser ou remettre le rm ? Si rm il y a , cela veut dire qu&apos;on efface les images testées correctement ?! 
-# FAB: et on les garde en &quot;good.&quot; sur la $box ?!
 
   if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
     echo;echo &quot;+ Renaming primary/secondary files to good.* on ${box}&quot;
