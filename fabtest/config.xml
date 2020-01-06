@@ -4,6 +4,7 @@
   <description>Testing pipeline for Fabrice MOYEN</description>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <hudson.plugins.jira.JiraProjectProperty plugin="jira@3.0.11"/>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.BooleanParameterDefinition>
@@ -34,7 +35,6 @@
     <hudson.tasks.Shell>
       <command>#!/bin/bash
 
-set -x
 
 if [ ${OC-FABTEST} == &quot;true&quot; ]
 then
@@ -42,6 +42,9 @@ then
 else
   echo non
 fi
+
+echo &quot;job name:&quot;
+echo $JOB_NAME
 </command>
     </hudson.tasks.Shell>
   </builders>
