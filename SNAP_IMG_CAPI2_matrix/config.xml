@@ -4,11 +4,11 @@
   <description>Builds bitstreams with many different configurations and tests this images on real HW if possible.&#xd;
 In case of problems: please contact alexandre.castellane@fr.ibm.com or fabrice_moyen@fr.ibm.com&#xd;
 WARNING !!! &#xd;
-=&gt;&gt; FX609, S241, RCXVUP, U200 cards are not available for test =&gt; only binary generation are performed (no hw test)  &#xd;
-=&gt;&gt; TIMING increased to 300ps for CAPI2&#xd;
-==&gt; Orpington hosts 2 AD9V3&#xd;
+=&gt;&gt; FX609, S241, U200 cards are not available for test =&gt; only binary generation are performed (no hw test)  &#xd;
+=&gt;&gt; Minimum TIMING increased to 300ps for CAPI2&#xd;
+==&gt; Orpington hosts 2 AD9V3 (1 is OpenCAPI)&#xd;
+==&gt; Lewen05 hosts 1 N250SP&#xd;
 &#xd;
-RCXVUP_nCL removed from matrix to reduce load&#xd;
 hdl_example.NORAM temporarily removed (generates junk on jenkins log)&#xd;
 hls_parallel_memcpy removed (fails)&#xd;
 &#xd;
@@ -119,7 +119,7 @@ test</description>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>NO_TEST_CARDS</name>
-          <description>The list of CAPI2.0 cards we do NOT want to HW test for different reasons (format: &quot;AD9V3 AD9H3&quot;).</description>
+          <description>The list of CAPI2.0 cards we do NOT want to HW test for different reasons (please see README for default reasons) </description>
           <defaultValue>S241</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
@@ -128,7 +128,7 @@ test</description>
           <description>List of Montpellier systems available for testing :
   - orpington: AC922 8335-GTH with one CAPI2 AD9V3 and 1 OC-AD9V3
 (it needs to define capimop user with authorized_keys)</description>
-          <defaultValue>orpington</defaultValue>
+          <defaultValue>orpington lewen05</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -935,15 +935,15 @@ case ${TEST_ON_HW} in
     echo;echo &quot;****************************************************************************************&quot;
     echo &quot;J: Checking if we can test the generated binaries on POWER Hardware (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot;
     echo
-    TestCardAvailable=1
+    TestCardAllowed=1
     for i in ${NO_TEST_CARDS[@]}
     do
-      if [ &quot;$CRD&quot; == &quot;$i&quot; ];then TestCardAvailable=0;fi
+      if [ &quot;$CRD&quot; == &quot;$i&quot; ];then TestCardAllowed=0;fi
     done
 
-    if [ $TestCardAvailable -eq 0 ]
+    if [ $TestCardAllowed -eq 0 ]
     then
-      SaveDir=$RootSaveDir/${CRD}_missing
+      SaveDir=$RootSaveDir/${CRD}_test_prohibited
       echo &quot;  -&gt; No test CARD $CRD available, copying $CRD bin-file(s) &amp; bit-file(s) images to $SaveDir&quot;
       mkdir -p $SaveDir
       cp -rp $BINFILES $SaveDir
@@ -963,7 +963,7 @@ case ${TEST_ON_HW} in
     echo;echo &quot;****************************************************************************************&quot;
     echo &quot;J: No test on POWER Hardware requested (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot; 
     echo
-    SaveDir=$RootSaveDir/no_test_required
+    SaveDir=$RootSaveDir/${CRD}_no_test_requested
     mkdir -p $SaveDir
 
     echo &quot;  -&gt; No test required, copying image to $SaveDir&quot;
@@ -1180,7 +1180,7 @@ if [ $loop -eq $maxloop ];then
   echo;echo &quot;***************************************************************************************&quot;
   echo &quot;J: No card $CRD available with TESTBOXES= ${TESTBOXES[*]}&quot;
   echo
-  SaveDir=&quot;$RootSaveDir/${CRD}_card_not_avail&quot;
+  SaveDir=&quot;$RootSaveDir/${CRD}_not_available&quot;
   mkdir -p $SaveDir
   echo &quot;  -&gt; Copying image to $SaveDir&quot;
   cp -rp $BINFILES $SaveDir
@@ -1336,6 +1336,14 @@ fi
 if [ $RC -ne 0 ]; then
   echo;echo &quot;***************************************************************************************&quot;
   echo &quot;J: Test FAILED RC= $RC (`date`)&quot;
+  
+  SaveDir=$RootSaveDir/${CRD}_test_failure
+  echo &quot;  -&gt;  CARD $CRD Hardware test failed, copying $CRD bin-file(s) &amp; bit-file(s) images to $SaveDir&quot;
+  mkdir -p $SaveDir
+  cp -rp $BINFILES $SaveDir
+  echo $BINFILES
+  if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; echo $BITFILES; fi
+  
   echo &quot;  -&gt; EXITING !&quot;
   exit 100
 fi 
