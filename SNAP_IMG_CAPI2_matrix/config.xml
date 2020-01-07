@@ -546,6 +546,9 @@ echo</command>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
 
+# Advanced Execute shell option:
+#  	Exit code to set build unstable =100
+
 set +x                            # reduce Jenkins output
 ulimit -c unlimited               # limit core dumps
 
@@ -1191,6 +1194,8 @@ fi
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Preparing $CRD card image(s) test onto $box system&quot;
+echo
+echo -e &quot;  -&gt; Power OS release: \c&quot;; grep PRETTY_NAME /etc/os-release | cut -d= -f2
 echo
 ssh ${HWUser}@${box} &quot;echo ------ START of JOB on $box ----&gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;date                                 &gt;&gt; jenkins.log&quot;
