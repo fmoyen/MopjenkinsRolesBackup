@@ -538,7 +538,7 @@ echo &quot;J: Checking RUN return code (`date`)...&quot;
 echo
 
 if [ $RC -eq 0 ]; then
-  mopIMGGoodDir=${mopIMGRootDir}/tested_and_good
+  mopIMGGoodDir=${mopIMGRootDir}/${CRD}_test_OK
   mkdir -p $mopIMGGoodDir
   chmod 777 $mopIMGGoodDir
   
