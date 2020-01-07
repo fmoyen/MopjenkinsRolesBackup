@@ -1333,7 +1333,19 @@ else
   echo &quot;  -&gt; Cleaning operation: FAILED&quot;
 fi
   
-if [ $RC -ne 0 ]; then
+if [ $RC -eq 0 ]; then
+  echo;echo &quot;***************************************************************************************&quot;
+  echo &quot;J: Test SUCCEEDED RC= $RC (`date`)&quot;
+  
+  SaveDir=$RootSaveDir/${CRD}_test_OK
+  echo &quot;  -&gt;  CARD $CRD Hardware test succeeded, copying $CRD bin-file(s) &amp; bit-file(s) images to $SaveDir&quot;
+  mkdir -p $SaveDir
+  cp -rp $BINFILES $SaveDir
+  echo $BINFILES
+  if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; echo $BITFILES; fi
+
+
+else
   echo;echo &quot;***************************************************************************************&quot;
   echo &quot;J: Test FAILED RC= $RC (`date`)&quot;
   
