@@ -1135,7 +1135,7 @@ for loop in `seq 1 $maxloop`;do
       # found something else than 1,2,3 or 4 cards =&gt; meaning BAD $found return code
       *:0)      
         echo &quot;  --&gt; unknown found_RC=$found from $FindCardTool=$cards. EXITING...&quot;
-        exit 100
+        exit 1
       ;;
 
       #------------------------------------
@@ -1210,7 +1210,7 @@ if [ $RC -ne 0 ];then
     echo &quot;  -&gt; git clone ${GIT_URL} ${TARGET_DIR} failed at ${box} =&gt; copying image to $SaveDir&quot;
 	cp -rp $BINFILES $SaveDir
 	echo &quot;  -&gt; EXITING !&quot;
-	exit 100
+	exit 1
 fi
 
 echo &quot;  -&gt; Copying image(s) to ${box}:/home/${HWUser}/images/${CRD}/${ACT}&quot;
@@ -1236,7 +1236,7 @@ if [ $RSYNC_RC -ne 0 ]; then
   mkdir -p $SaveDir
   cp -rp $BINFILES $SaveDir
   echo &quot;EXITING !&quot;
-  exit 100
+  exit 1
 fi
 
 echo;echo &quot;***************************************************************************************&quot;
@@ -1249,7 +1249,7 @@ echo &quot;  -&gt; Preparing command ...&quot;
 RUN=&quot;./actions/scripts/snap_jenkins.sh&quot;
 if [ ! -f $RUN ];then 
   echo &quot;  -&gt; Shell Script $RUN not found =&gt; EXITING !&quot;
-  exit 100
+  exit 1
 fi
 
 RUN+=&quot; -D ${TARGET_DIR}&quot;
@@ -1291,7 +1291,7 @@ RC=0;ssh ${HWUser}@$box make -C ${TARGET_DIR} clean software actions || RC=$?
 if [ $RC -ne 0 ]; then
   echo;echo &quot;  -&gt; make clean software actions FAILED&quot;
   echo &quot;  -&gt; EXITING !&quot;
-  exit 100
+  exit 1
 fi
 
 # Git clone capi-utils tools into $box:/home/$HWUser
@@ -1357,9 +1357,10 @@ else
   if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; echo $BITFILES; fi
   
   echo &quot;  -&gt; EXITING !&quot;
-  exit 100
+  exit 1
 fi 
 </command>
+      <unstableReturn>100</unstableReturn>
     </hudson.tasks.Shell>
   </builders>
   <publishers>

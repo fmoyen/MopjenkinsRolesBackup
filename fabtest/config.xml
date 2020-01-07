@@ -45,7 +45,9 @@ fi
 
 echo &quot;job name:&quot;
 echo $JOB_NAME
-</command>
+
+exit 101</command>
+      <unstableReturn>100</unstableReturn>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
