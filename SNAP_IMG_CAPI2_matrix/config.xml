@@ -115,12 +115,12 @@ test</description>
         <hudson.model.BooleanParameterDefinition>
           <name>TEST_ON_HW</name>
           <description>enable/disable testing on HW</description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>LIST_TEST_CARDS</name>
-          <description>The list of available CAPI2.0 cards for HW testing (format: &quot;AD9V3 AD9H3&quot;)</description>
-          <defaultValue>AD9H3</defaultValue>
+          <name>NO_TEST_CARDS</name>
+          <description>The list of CAPI2.0 cards we do NOT want to HW test for different reasons (format: &quot;AD9V3 AD9H3&quot;).</description>
+          <defaultValue>S241</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -927,7 +927,7 @@ esac
 
 
 #==============================================================================================
-# Checking if we can test the generated binaries on POWER Hardware (checking LIST_TEST_CARDS list)
+# Checking if we can test the generated binaries on POWER Hardware (checking NO_TEST_CARDS list)
 
 case ${TEST_ON_HW} in
 
@@ -935,10 +935,10 @@ case ${TEST_ON_HW} in
     echo;echo &quot;****************************************************************************************&quot;
     echo &quot;J: Checking if we can test the generated binaries on POWER Hardware (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot;
     echo
-    TestCardAvailable=0
-    for i in ${LIST_TEST_CARDS[@]}
+    TestCardAvailable=1
+    for i in ${NO_TEST_CARDS[@]}
     do
-      if [ &quot;$CRD&quot; == &quot;$i&quot; ];then TestCardAvailable=1;fi
+      if [ &quot;$CRD&quot; == &quot;$i&quot; ];then TestCardAvailable=0;fi
     done
 
     if [ $TestCardAvailable -eq 0 ]
@@ -986,7 +986,7 @@ esac
 
 #==============================================================================================
 # Testing the generated binaries on POWER Hardware
-# (if $TEST_ON_HW==true and $CRD into $LIST_TEST_CARDS[*])
+# (if $TEST_ON_HW==true and $CRD NOT into $NO_TEST_CARDS[*])
 
 # Set unique target directory such that parallel builds do not disturb each other.
 # Well, we might to clean up those from time to time ...
@@ -1366,7 +1366,7 @@ fi
     </hudson.plugins.build__timeout.BuildTimeoutWrapper>
     <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.10"/>
     <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.3">
-      <template>#${BUILD_NUMBER} ${GIT_BRANCH} Vivado=${ENV,var=&quot;VIVADO_CHOICE&quot;} HWTest=${ENV,var=&quot;TEST_ON_HW&quot;} HWCards= ${ENV,var=&quot;LIST_TEST_CARDS&quot;}</template>
+      <template>#${BUILD_NUMBER} ${GIT_BRANCH} Vivado=${ENV,var=&quot;VIVADO_CHOICE&quot;} HWTest=${ENV,var=&quot;TEST_ON_HW&quot;} NOHWCards= ${ENV,var=&quot;NO_TEST_CARDS&quot;}</template>
       <descriptionTemplate></descriptionTemplate>
       <runAtStart>true</runAtStart>
       <runAtEnd>true</runAtEnd>
