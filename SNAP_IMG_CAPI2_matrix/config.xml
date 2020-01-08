@@ -1030,7 +1030,7 @@ if [ $RC -eq 0 ]; then
     echo &quot;FAILED !&quot;
     for i in &quot;${TESTBOXES[@]}&quot;; do [[ $i != $box ]] &amp;&amp; new+=($i);done   # generate new test array without unreachable box
     unset TESTBOXES;TESTBOXES=(&quot;${new[@]}&quot;);unset new                   # reassign to original array name
-    echo &quot;$box not reachable, remove from testing&quot;
+    echo &quot;$box not reachable =&gt; removed from testing boxes list&quot;
     echo &quot;testboxes remaining = ${TESTBOXES[@]}&quot;
     if [[ &quot;${TESTBOXES[@]}&quot; == &quot;&quot; ]];then echo &quot;no test machines available anymore&quot;;exit 1;fi
   fi
