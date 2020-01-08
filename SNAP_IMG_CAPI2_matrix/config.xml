@@ -946,7 +946,7 @@ case ${TEST_ON_HW} in
 
     if [ $TestCardAllowed -eq 0 ]
     then
-      SaveDir=$RootSaveDir/${CRD}_test_prohibited
+      SaveDir=$RootSaveDir/${CRD}_test_bypassed
       echo &quot;  -&gt; No test CARD $CRD available, copying $CRD bin-file(s) &amp; bit-file(s) images to $SaveDir&quot;
       mkdir -p $SaveDir
       cp -rp $BINFILES $SaveDir
