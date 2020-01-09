@@ -6,8 +6,8 @@ In case of problems: please contact alexandre.castellane@fr.ibm.com or fabrice_m
 WARNING !!! &#xd;
 =&gt;&gt; FX609, S241, U200 cards are not available for test =&gt; only binary generation are performed (no hw test)  &#xd;
 =&gt;&gt; Minimum TIMING increased to 300ps for CAPI2&#xd;
-==&gt; Orpington hosts 2 AD9V3 (1 is OpenCAPI)&#xd;
-==&gt; Lewen05 hosts 1 N250SP&#xd;
+==&gt; Orpington hosts 2 AD9V3 (1 is also OpenCAPI capable)&#xd;
+==&gt; Lewen05 hosts 1 N250SP and 1 Mellanox INNOVA2&#xd;
 &#xd;
 hdl_example.NORAM temporarily removed (generates junk on jenkins log)&#xd;
 hls_parallel_memcpy removed (fails)&#xd;
