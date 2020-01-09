@@ -653,13 +653,14 @@ function SendAnEmail
 }
 
 # Function to copy BINFILES and BITFILES to the right directory
-# Example 1: CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s -u $HWUser
+# Example 1: CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s jtagx86 -u $HWUser
 # Example 2: CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;jtagx86 orpington&quot; -u $HWUser
+# -b &amp; -B (maybe not -B) should use &quot;&quot; as $BINFILES &amp; $BITFILES are usually lists of files like &quot;primary.bin secondary.bin&quot;
 
 function CopyToDir
 {
   local OPTIND opt FPGACard Bin Bit ToDir SSHDest SSHUser
-  while getopts &quot;c:b:B:d:s:&quot; opt
+  while getopts &quot;c:b:B:d:s:u:&quot; opt
   do
       case $opt in
       b)
@@ -993,14 +994,8 @@ case ${TEST_ON_HW} in
     if [ $TestCardAllowed -eq 0 ]
     then
       SaveDir=$RootSaveDir/${CRD}_test_bypassed
-      echo &quot;  -&gt; No test CARD $CRD available, copying $CRD bin-file(s) &amp; bit-file(s) images to $SaveDir&quot;
-      mkdir -p $SaveDir
-      cp -rp $BINFILES $SaveDir
-      echo $BINFILES
-      if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; echo $BITFILES; fi
-      echo;echo &quot;  -&gt; Copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
-      ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
-      scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
+      echo &quot;  -&gt; No test CARD $CRD available...&quot;
+      CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s jtagx86 -u $HWUser
       echo &quot;  -&gt; EXITING !&quot;
       exit 0
     else
@@ -1013,15 +1008,7 @@ case ${TEST_ON_HW} in
     echo &quot;J: No test on POWER Hardware requested (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot; 
     echo
     SaveDir=$RootSaveDir/${CRD}_no_test_requested
-    mkdir -p $SaveDir
-
-    echo &quot;  -&gt; No test required, copying image to $SaveDir&quot;
-    cp -rp $BINFILES $SaveDir
-    echo $BINFILES
-    if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; echo $BITFILES; fi
-    echo;echo &quot;  -&gt; Copying $CRD image to jtagx86:$SaveDir&quot;
-    ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
-    scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
+    CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s jtagx86 -u $HWUser
     exit 0
   ;;
 
@@ -1230,12 +1217,7 @@ if [ $loop -eq $maxloop ];then
   echo &quot;J: No card $CRD available with TESTBOXES= ${TESTBOXES[*]}&quot;
   echo
   SaveDir=&quot;$RootSaveDir/${CRD}_not_available&quot;
-  mkdir -p $SaveDir
-  echo &quot;  -&gt; Copying image to $SaveDir&quot;
-  cp -rp $BINFILES $SaveDir
-  echo;echo &quot;  -&gt; Copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
-  ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
-  scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir  
+  CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s jtagx86 -u $HWUser
   echo &quot;  -&gt; EXITING !&quot;
   exit 100
 fi
@@ -1261,11 +1243,7 @@ RC=0; ssh ${HWUser}@${box} &quot;git clone ${GIT_URL} ${TARGET_DIR};cd ${TARGET_
 
 if [ $RC -ne 0 ];then 
 	SaveDir=&quot;$RootSaveDir/gitclone_error&quot;
-    echo &quot;  -&gt; git clone ${GIT_URL} ${TARGET_DIR} failed at ${box} =&gt; copying image to $SaveDir&quot;
-	cp -rp $BINFILES $SaveDir
-    echo;echo &quot;  -&gt; Copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
-    ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
-    scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
+    CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s jtagx86 -u $HWUser
 	echo &quot;  -&gt; EXITING !&quot;
 	exit 1
 fi
@@ -1289,12 +1267,7 @@ done
 
 if [ $RSYNC_RC -ne 0 ]; then
   SaveDir=&quot;$RootSaveDir/rsync_error&quot;
-  echo &quot;  -&gt; copying image(s) to $SaveDir&quot;;
-  mkdir -p $SaveDir
-  cp -rp $BINFILES $SaveDir
-  echo;echo &quot;  -&gt; Copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
-  ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
-  scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
+  CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s jtagx86 -u $HWUser
   echo &quot;EXITING !&quot;
   exit 1
 fi
@@ -1398,30 +1371,16 @@ if [ $RC -eq 0 ]; then
   echo &quot;J: Test SUCCEEDED RC= $RC (`date`)&quot;
   
   SaveDir=$RootSaveDir/${CRD}_test_OK
-  echo &quot;  -&gt;  CARD $CRD Hardware test succeeded, copying $CRD bin-file(s) &amp; bit-file(s) images to $SaveDir&quot;
-  mkdir -p $SaveDir
-  cp -rp $BINFILES $SaveDir
-  echo $BINFILES
-  if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; echo $BITFILES; fi
-  echo;echo &quot;  -&gt; Copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
-  ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
-  scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
-
+  echo &quot;  -&gt;  CARD $CRD Hardware test succeeded...&quot;
+  CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s jtagx86 -u $HWUser
 
 else
   echo;echo &quot;***************************************************************************************&quot;
   echo &quot;J: Test FAILED RC= $RC (`date`)&quot;
   
   SaveDir=$RootSaveDir/${CRD}_test_failure
-  echo &quot;  -&gt;  CARD $CRD Hardware test failed, copying $CRD bin-file(s) &amp; bit-file(s) images to $SaveDir&quot;
-  mkdir -p $SaveDir
-  cp -rp $BINFILES $SaveDir
-  echo $BINFILES
-  if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; echo $BITFILES; fi
-  echo;echo &quot;  -&gt; Copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
-  ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
-  scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
-  
+  echo &quot;  -&gt;  CARD $CRD Hardware test failed...&quot;
+  CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s jtagx86 -u $HWUser
   echo &quot;  -&gt; EXITING !&quot;
   exit 1
 fi 
