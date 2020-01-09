@@ -1187,6 +1187,9 @@ if [ $loop -eq $maxloop ];then
   mkdir -p $SaveDir
   echo &quot;  -&gt; Copying image to $SaveDir&quot;
   cp -rp $BINFILES $SaveDir
+  echo;echo &quot;  -&gt; Copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
+  ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
+  scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir  
   echo &quot;  -&gt; EXITING !&quot;
   exit 100
 fi
@@ -1214,6 +1217,9 @@ if [ $RC -ne 0 ];then
 	SaveDir=&quot;$RootSaveDir/gitclone_error&quot;
     echo &quot;  -&gt; git clone ${GIT_URL} ${TARGET_DIR} failed at ${box} =&gt; copying image to $SaveDir&quot;
 	cp -rp $BINFILES $SaveDir
+    echo;echo &quot;  -&gt; Copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
+    ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
+    scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
 	echo &quot;  -&gt; EXITING !&quot;
 	exit 1
 fi
@@ -1240,6 +1246,9 @@ if [ $RSYNC_RC -ne 0 ]; then
   echo &quot;  -&gt; copying image(s) to $SaveDir&quot;;
   mkdir -p $SaveDir
   cp -rp $BINFILES $SaveDir
+  echo;echo &quot;  -&gt; Copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
+  ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
+  scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
   echo &quot;EXITING !&quot;
   exit 1
 fi
@@ -1348,6 +1357,9 @@ if [ $RC -eq 0 ]; then
   cp -rp $BINFILES $SaveDir
   echo $BINFILES
   if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; echo $BITFILES; fi
+  echo;echo &quot;  -&gt; Copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
+  ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
+  scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
 
 
 else
@@ -1360,6 +1372,9 @@ else
   cp -rp $BINFILES $SaveDir
   echo $BINFILES
   if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; echo $BITFILES; fi
+  echo;echo &quot;  -&gt; Copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
+  ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
+  scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
   
   echo &quot;  -&gt; EXITING !&quot;
   exit 1
