@@ -630,6 +630,7 @@ SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not n
 # Function for sending alerting emails
 # Example 1: SendAnEmail -s &quot;This is the subject/alert&quot; -d firstDest@gmail.com -d SecondDest@free.fr
 # Example 2: SendAnEmail -s &quot;This is the subject/alert&quot; -d &quot;${EmailDestinationList[*]}&quot;
+
 function SendAnEmail
 {
   local OPTIND opt DestList
@@ -651,6 +652,51 @@ function SendAnEmail
   done
 }
 
+# Function to copy BINFILES and BITFILES to the right directory
+# Example 1: CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s -u $HWUser
+# Example 2: CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;jtagx86 orpington&quot; -u $HWUser
+
+function CopyToDir
+{
+  local OPTIND opt FPGACard Bin Bit ToDir SSHDest SSHUser
+  while getopts &quot;c:b:B:d:s:&quot; opt
+  do
+      case $opt in
+      b)
+        Bin=&quot;$OPTARG&quot;
+      ;;
+      B)
+        Bit=&quot;$OPTARG&quot;
+      ;;
+      d)
+        ToDir=&quot;$OPTARG&quot;
+      ;;
+      c)
+        FPGACard=&quot;$OPTARG&quot;
+      ;;
+      s)
+        SSHDest=&quot;$OPTARG&quot;
+      ;;
+      u)
+        SSHUser=&quot;$OPTARG&quot;
+      ;;
+    esac
+  done
+
+      echo &quot;  -&gt; Copying $FPGACard bin-file(s) &amp; bit-file(s) images to $ToDir&quot;
+      mkdir -p $ToDir
+      cp -rp $Bin $ToDir
+      echo $Bin
+      if [ &quot;$Bit&quot; != &quot;&quot; ]; then cp -rp $Bit $ToDir; echo $Bit; fi
+      
+      for i in $SSHDest
+      do
+        echo;echo &quot;  -&gt; Copying $FPGACard bin-file(s) &amp; bit-file(s) images to $i:$ToDir&quot;
+        ssh ${SSHUser}@$i &quot;mkdir -p $ToDir&quot;
+        scp -rp $Bin ${SSHUser}@$i:$ToDir
+        if [ &quot;$Bit&quot; != &quot;&quot; ]; then scp -rp $Bit ${SSHUser}@$i:$ToDir; echo $Bit; fi
+      done
+}
 
 #==============================================================================================
 # Power Service Layer Simulation Engine (pslse) setup
