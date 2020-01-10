@@ -42,8 +42,14 @@ test</description>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
           <name>BRANCH</name>
-          <description>Choose the branch for github.com:open-power/snap you want to test. Please do not use wildcards!!</description>
+          <description>Choose the branch for https://github.com:open-power/snap you want to test. Please do not use wildcards!!</description>
           <defaultValue>master</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>CAPIUTILS_BRANCH</name>
+          <description>Choose the branch for https://github.com/ibm-capi/capi-utils you want to test. Please do not use wildcards!!</description>
+          <defaultValue>capi-flash-script.sh_Issue</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
@@ -1332,7 +1338,7 @@ fi
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Git cloning Capi-Utils tools into $box:/home/$HWUser...&quot;
 echo &quot;  (capi-flash-script.sh used by command `echo $RUN | cut -d&apos; &apos; -f1` )&quot;
-ssh ${HWUser}@${box} git clone $CapiUtilsURL
+ssh ${HWUser}@${box} git clone -b $CAPIUTILS_BRANCH $CapiUtilsURL
 
 
 echo;echo &quot;***************************************************************************************&quot;
