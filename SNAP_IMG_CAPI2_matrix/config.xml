@@ -43,7 +43,7 @@ test</description>
         <hudson.model.StringParameterDefinition>
           <name>BRANCH</name>
           <description>Choose the branch for github.com:open-power/snap you want to test. Please do not use wildcards!!</description>
-          <defaultValue>jenkins_hls_latency_eval</defaultValue>
+          <defaultValue>master</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
