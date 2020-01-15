@@ -196,6 +196,8 @@ function SendAnEmail
 }
 
 
+
+
 #------------------------------------------------------------------------------------------------------------------------------
 # Test if file size is coherent
 
@@ -247,19 +249,26 @@ fi
 
 echo;echo &quot;****************************************************************************************&quot;
 echo &quot;J: Reducing Image name to get the base name&quot;
+
+ReducedFileName=&quot;${IMGFileName%_*}&quot;        # Get all the beginning up to the last &quot;_&quot; (removing &quot;_primary.bin&quot; or &quot;_secondary.bin&quot;)
+IMGBitName=&quot;$(echo ${ReducedFileName}| sed &apos;s/ //g&apos;).bit&quot;
+
 if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
         echo &quot;   SPI8 =&gt; Memorizing the primary and secondary image names&quot;
-        ReducedFileName=&quot;${IMGFileName%_*}&quot;        # Get all the beginning up to the last &quot;_&quot; (removing &quot;_primary.bin&quot; or &quot;_secondary.bin&quot;)
+        ReducedFileName=&quot;${IMGFileName%_*}&quot;  # Get all the beginning up to the last &quot;_&quot; (removing &quot;_primary.bin&quot; or &quot;_secondary.bin&quot;)
         echo $ReducedFileName
         IMGPrimaryName=&quot;$(echo ${ReducedFileName}| sed &apos;s/ //g&apos;)_primary.bin&quot;  # need to remove blank in prefix
         IMGSecondaryName=&quot;$(echo ${ReducedFileName}| sed &apos;s/ //g&apos;)_secondary.bin&quot;
-        echo &quot;CARD detected  is : $CRD&quot;
-        echo &quot;Primary   file is : $IMGPrimaryName&quot;
-        echo &quot;Secondary file is : $IMGSecondaryName&quot;
+        IMGBitName=&quot;$(echo ${ReducedFileName}| sed &apos;s/ //g&apos;).bit&quot;
+        echo &quot;CARD detected  is       : $CRD&quot;
+        echo &quot;Primary   file is       : $IMGPrimaryName&quot;
+        echo &quot;Secondary file is       : $IMGSecondaryName&quot;
+        echo &quot;Bit file (if exists) is : $IMGBitName&quot;
 
   else
-        ReducedFileName=&quot;${IMGFileName%_*}&quot;;       # Get all the beginning up to the last &quot;_&quot; (removing &quot;_primary.bin&quot; or &quot;_secondary.bin&quot;)
+        ReducedFileName=&quot;${IMGFileName%.bin}&quot;        # Get all the beginning up to the .bin
         echo $ReducedFileName;
+        IMGBitName=&quot;$(echo ${ReducedFileName}| sed &apos;s/ //g&apos;).bit&quot;
 fi
 
 
@@ -568,6 +577,11 @@ if [ $RC -eq 0 ]; then
     mv $mopIMGDir/$IMGPrimaryName $mopIMGGoodDir
     echo &quot;+ Moving $mopIMGDir/$IMGSecondaryName to $mopIMGGoodDir&quot;
     mv $mopIMGDir/$IMGSecondaryName $mopIMGGoodDir
+    
+    if [ -f $mopIMGDir/$IMGBitName ]; then
+      echo &quot;+ Moving $mopIMGDir/$IMGBitName to $mopIMGGoodDir&quot;
+      mv $mopIMGDir/$IMGBitName $mopIMGGoodDir
+    fi
 
   else
     echo;echo &quot;+ Renaming binary file to good.* on ${box}&quot;
@@ -576,6 +590,12 @@ if [ $RC -eq 0 ]; then
 
     echo;echo &quot;+ Moving $mopIMGDir/$IMGFileName to $mopIMGGoodDir&quot;
     mv $mopIMGDir/$IMGFileName $mopIMGGoodDir
+
+    if [ -f $mopIMGDir/$IMGBitName ]; then
+      echo &quot;+ Moving $mopIMGDir/$IMGBitName to $mopIMGGoodDir&quot;
+      mv $mopIMGDir/$IMGBitName $mopIMGGoodDir
+    fi
+
 
   fi
   echo
