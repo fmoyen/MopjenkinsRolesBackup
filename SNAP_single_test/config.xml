@@ -37,7 +37,7 @@ for Questions: please contact  A.Castellane or F.Moyen</description>
         <hudson.model.StringParameterDefinition>
           <name>BRANCH</name>
           <description>Choose the branch for github.com:open-power/snap you want to test. Please do not use wildcards!!</description>
-          <defaultValue>snap_jenkins_side_effect</defaultValue>
+          <defaultValue>master</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -400,7 +400,7 @@ for loop in `seq 1 $maxloop`;do
       	  echo &quot;  --&gt; hours=$hours (day), nusers=$nusers, try other box&quot;
           if [ $box == ${TESTBOXES[*]:(-1)} ];then
             echo &quot;  --&gt; $box is the last system to test; Warning users and waiting for 60s...&quot;
-            ssh ${HWUser}@$box wall &quot;JENKINS WANTS TO DO A TEST on FPGA CARD=$CRD ID=$cards. PLEASE LOGOUT IF YOU CAN ;-P ...&quot;
+            ssh ${HWUser}@$box wall &quot;JENKINS WANTS TO DO A TEST on FPGA CARD=$CRD ID=$cards. PLEASE LOGOUT IF YOU CAN ...&quot;
             sleep 60 # Last box of the list TESBOXES =&gt; Waiting 60s and go to next loop
           fi
           continue # next box or next loop (if it was the last box of the list)
@@ -669,7 +669,7 @@ fi</command>
       <operationList/>
     </hudson.plugins.build__timeout.BuildTimeoutWrapper>
     <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.3">
-      <template>${PROJECT_NAME} #${BUILD_NUMBER} ${GIT_BRANCH}</template>
+      <template>${PROJECT_NAME} #${BUILD_NUMBER} SNAP=${GIT_BRANCH} CAPI-UTILS=${CAPIUTILS_BRANCH}</template>
       <descriptionTemplate></descriptionTemplate>
       <runAtStart>true</runAtStart>
       <runAtEnd>true</runAtEnd>
