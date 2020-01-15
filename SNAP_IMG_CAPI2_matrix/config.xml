@@ -43,7 +43,7 @@ test</description>
         <hudson.model.StringParameterDefinition>
           <name>BRANCH</name>
           <description>Choose the branch for https://github.com:open-power/snap you want to test. Please do not use wildcards!!</description>
-          <defaultValue>snap_jenkins_side_effect</defaultValue>
+          <defaultValue>master</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -587,6 +587,8 @@ CapiUtilsURL=&quot;https://github.com/ibm-capi/capi-utils.git&quot;
 unset EmailDestinationList; EmailDestinationList=( fabrice_moyen@fr.ibm.com )
 SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not needed to access /dev/cxl
 
+IMGServers=&quot;jtagx86&quot; # List of servers when to push generated images.
+
 #echo;echo &quot;****************************************************************************************&quot;
 #echo &quot;J:LSF SETUP ...&quot;
 
@@ -661,6 +663,7 @@ function SendAnEmail
 # Function to copy BINFILES and BITFILES to the right directory
 # Example 1: CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s jtagx86 -u $HWUser
 # Example 2: CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;jtagx86 orpington&quot; -u $HWUser
+# Example 3: CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
 # -b &amp; -B (maybe not -B) should use &quot;&quot; as $BINFILES &amp; $BITFILES are usually lists of files like &quot;primary.bin secondary.bin&quot;
 
 function CopyToDir
@@ -1001,7 +1004,7 @@ case ${TEST_ON_HW} in
     then
       SaveDir=$RootSaveDir/${CRD}_test_bypassed
       echo &quot;  -&gt; No test CARD $CRD available...&quot;
-      CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s jtagx86 -u $HWUser
+      CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
       echo &quot;  -&gt; EXITING !&quot;
       exit 0
     else
@@ -1014,7 +1017,7 @@ case ${TEST_ON_HW} in
     echo &quot;J: No test on POWER Hardware requested (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot; 
     echo
     SaveDir=$RootSaveDir/${CRD}_no_test_requested
-    CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s jtagx86 -u $HWUser
+    CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
     exit 0
   ;;
 
@@ -1223,7 +1226,7 @@ if [ $loop -eq $maxloop ];then
   echo &quot;J: No card $CRD available with TESTBOXES= ${TESTBOXES[*]}&quot;
   echo
   SaveDir=&quot;$RootSaveDir/${CRD}_not_available&quot;
-  CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s jtagx86 -u $HWUser
+  CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
   echo &quot;  -&gt; EXITING !&quot;
   exit 100
 fi
@@ -1249,7 +1252,7 @@ RC=0; ssh ${HWUser}@${box} &quot;git clone ${GIT_URL} ${TARGET_DIR};cd ${TARGET_
 
 if [ $RC -ne 0 ];then 
 	SaveDir=&quot;$RootSaveDir/gitclone_error&quot;
-    CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s jtagx86 -u $HWUser
+    CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
 	echo &quot;  -&gt; EXITING !&quot;
 	exit 1
 fi
@@ -1273,7 +1276,7 @@ done
 
 if [ $RSYNC_RC -ne 0 ]; then
   SaveDir=&quot;$RootSaveDir/rsync_error&quot;
-  CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s jtagx86 -u $HWUser
+  CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
   echo &quot;EXITING !&quot;
   exit 1
 fi
@@ -1378,7 +1381,7 @@ if [ $RC -eq 0 ]; then
   
   SaveDir=$RootSaveDir/${CRD}_test_OK
   echo &quot;  -&gt;  CARD $CRD Hardware test succeeded...&quot;
-  CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s jtagx86 -u $HWUser
+  CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
 
 else
   echo;echo &quot;***************************************************************************************&quot;
@@ -1386,7 +1389,7 @@ else
   
   SaveDir=$RootSaveDir/${CRD}_test_failure
   echo &quot;  -&gt;  CARD $CRD Hardware test failed...&quot;
-  CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s jtagx86 -u $HWUser
+  CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
   echo &quot;  -&gt; EXITING !&quot;
   exit 1
 fi 
