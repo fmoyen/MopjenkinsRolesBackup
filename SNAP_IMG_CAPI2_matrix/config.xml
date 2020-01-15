@@ -107,9 +107,9 @@ test</description>
           <description>Choose the TIMING_LABLIMIT parameter. If timing is higher than your choice when doing a make image, the run will failed.</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
-              <string>-1000</string>
+              <string>-200</string>
               <string>-300</string>
-              <string>-600</string>
+              <string>-1000</string>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>

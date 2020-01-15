@@ -37,13 +37,13 @@ for Questions: please contact  A.Castellane or F.Moyen</description>
         <hudson.model.StringParameterDefinition>
           <name>BRANCH</name>
           <description>Choose the branch for github.com:open-power/snap you want to test. Please do not use wildcards!!</description>
-          <defaultValue>master</defaultValue>
+          <defaultValue>snap_jenkins_side_effect</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>CAPIUTILS_BRANCH</name>
           <description>Choose the branch for https://github.com/ibm-capi/capi-utils you want to test. Please do not use wildcards!!</description>
-          <defaultValue>capi-flash-script.sh_Issue</defaultValue>
+          <defaultValue>master</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
