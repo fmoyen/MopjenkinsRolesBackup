@@ -29,11 +29,6 @@
             <hudson.plugins.matrix__configuration__parameter.shortcut.MatrixCombinationsShortcut_-None/>
           </shortcutList>
         </hudson.plugins.matrix__configuration__parameter.MatrixCombinationsParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>HDL</name>
-          <description>toto</description>
-          <defaultValue>false</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
