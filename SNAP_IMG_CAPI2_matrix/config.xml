@@ -584,7 +584,7 @@ TESTBOXES=( ${mopBoxes[*]} ${austinBoxes[*]} ) # init array of systems
 echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
 RootSaveDir=/data/Images
 RootLogsDir=/data/LogsWhenFailed
-LogsDir=$RootLogsDir/`echo $SNAP_ROOT | awk -F&quot;$JOB_NAME&quot; &apos;{print $2}&apos;`/hardware/logs
+LogsDir=$RootLogsDir/`echo $SNAP_ROOT | awk -F&quot;workspace&quot; &apos;{print $2}&apos;`/hardware/logs
 PSLSE_BRANCH=master
 #PSL9File=/opt/IBM/PSL9/v2.00/ibm.com_CAPI_PSL9_WRAP_2.00.zip # v2.00: original ibm zip file
 PSL9File=/opt/IBM/PSL9/v2.01/ibm.com_CAPI_PSL9_WRAP_2.01.zip # v2.01: Added virtexuplushbm supportedFamilies
@@ -1049,7 +1049,7 @@ esac
 # Well, we might to clean up those from time to time ...
 
 TARGET_DIR=&quot;${JOB_NAME}-${BUILD_NUMBER}-${GIT_BRANCH}&quot;
-export TARGET_DIR=`echo $TARGET_DIR | sed -e &apos;s/[=,\/]/-/g&apos;`
+
 echo &quot;TARGET_DIR=${TARGET_DIR}&quot;
 echo &quot;Current Dir is &quot; `pwd`
 echo &quot;  -&gt; JOB_NAME:        ${JOB_NAME}&quot;
