@@ -595,7 +595,7 @@ CapiUtilsURL=&quot;https://github.com/ibm-capi/capi-utils.git&quot;
 unset EmailDestinationList; EmailDestinationList=( fabrice_moyen@fr.ibm.com )
 SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not needed to access /dev/cxl
 
-IMGServers=&quot;jtagx86&quot; # List of servers when to push generated images.
+IMGServers=&quot;jtagx86&quot; # List of servers where to push generated images.
 
 #echo;echo &quot;****************************************************************************************&quot;
 #echo &quot;J:LSF SETUP ...&quot;

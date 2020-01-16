@@ -127,11 +127,14 @@ HWUser=&quot;capimop&quot;
 mopIMGRootDir=&quot;/data/Images&quot;
 IMGFileName=$(basename $mopIMGFile)
 mopIMGDir=$(dirname $mopIMGRootDir/$mopIMGFile)
+IMGServers=&quot;jtagx86&quot; # List of servers where to push generated images.
 
 ExecutorIMGRootDir=&quot;/home/$HWUser/images/single_test&quot;
 
 CapiUtilsURL=&quot;https://github.com/ibm-capi/capi-utils.git&quot;
 SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not needed to access /dev/cxl
+
+HWUser=&quot;capimop&quot;
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;***************************************************************************************&quot;
@@ -195,6 +198,53 @@ function SendAnEmail
   done
 }
 
+
+# Function to move BINFILES and BITFILES to the right directory
+# Example 1: MoveToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s jtagx86 -u $HWUser
+# Example 2: MoveToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;jtagx86 orpington&quot; -u $HWUser
+# Example 3: MoveToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
+# -b &amp; -B (maybe not -B) should use &quot;&quot; as $BINFILES &amp; $BITFILES are usually lists of files like &quot;primary.bin secondary.bin&quot;
+
+function MoveToDir
+{
+  local OPTIND opt FPGACard Bin Bit ToDir SSHDest SSHUser
+  while getopts &quot;c:b:B:d:s:u:&quot; opt
+  do
+      case $opt in
+      b)
+        Bin=&quot;$OPTARG&quot;
+      ;;
+      B)
+        Bit=&quot;$OPTARG&quot;
+      ;;
+      d)
+        ToDir=&quot;$OPTARG&quot;
+      ;;
+      c)
+        FPGACard=&quot;$OPTARG&quot;
+      ;;
+      s)
+        SSHDest=&quot;$OPTARG&quot;
+      ;;
+      u)
+        SSHUser=&quot;$OPTARG&quot;
+      ;;
+    esac
+  done
+
+      echo &quot;  -&gt; Moving $FPGACard bin-file(s) &amp; bit-file(s) images to $ToDir&quot;
+      mkdir -p $ToDir
+      mv $Bin $ToDir
+      echo $Bin
+      if [ &quot;$Bit&quot; != &quot;&quot; ]; then mv $Bit $ToDir; echo $Bit; fi
+      
+      for i in $SSHDest
+      do
+        echo;echo &quot;  -&gt; Moving $FPGACard bin-file(s) &amp; bit-file(s) images to $i:$ToDir&quot;
+        ssh ${SSHUser}@$i &quot;mkdir -p $ToDir; mv $Bin $ToDir&quot;
+        if [ &quot;$Bit&quot; != &quot;&quot; ]; then ssh ${SSHUser}@$i &quot;mv $Bit $ToDir&quot;; echo $Bit; fi
+      done      
+}
 
 
 
@@ -573,28 +623,32 @@ if [ $RC -eq 0 ]; then
     echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGSecondaryName&quot;
     ssh ${HWUser}@${box} &quot;mv \`ls $ExecutorIMGRootDir/$CRD/${IMGSecondaryName}*\` $ExecutorIMGRootDir/$CRD/good.$IMGSecondaryName&quot;
 
-    echo;echo &quot;+ Moving $mopIMGDir/$IMGPrimaryName to $mopIMGGoodDir&quot;
-    mv $mopIMGDir/$IMGPrimaryName $mopIMGGoodDir
-    echo &quot;+ Moving $mopIMGDir/$IMGSecondaryName to $mopIMGGoodDir&quot;
-    mv $mopIMGDir/$IMGSecondaryName $mopIMGGoodDir
+    MoveToDir -c $CRD -b &quot;$mopIMGDir/$IMGPrimaryName $mopIMGDir/$IMGSecondaryName&quot; -B &quot;$mopIMGDir/$IMGBitName&quot; -d $mopIMGGoodDir -s &quot;$IMGServers&quot; -u $HWUser
+
+#    echo;echo &quot;+ Moving $mopIMGDir/$IMGPrimaryName to $mopIMGGoodDir&quot;
+#    mv $mopIMGDir/$IMGPrimaryName $mopIMGGoodDir
+#    echo &quot;+ Moving $mopIMGDir/$IMGSecondaryName to $mopIMGGoodDir&quot;
+#    mv $mopIMGDir/$IMGSecondaryName $mopIMGGoodDir
     
-    if [ -f $mopIMGDir/$IMGBitName ]; then
-      echo &quot;+ Moving $mopIMGDir/$IMGBitName to $mopIMGGoodDir&quot;
-      mv $mopIMGDir/$IMGBitName $mopIMGGoodDir
-    fi
+#    if [ -f $mopIMGDir/$IMGBitName ]; then
+#      echo &quot;+ Moving $mopIMGDir/$IMGBitName to $mopIMGGoodDir&quot;
+#      mv $mopIMGDir/$IMGBitName $mopIMGGoodDir
+#    fi
 
   else
     echo;echo &quot;+ Renaming binary file to good.* on ${box}&quot;
     echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGFileName&quot;
     ssh ${HWUser}@${box} &quot;mv \`ls $ExecutorIMGRootDir/$CRD/${IMGFileName}*\` $ExecutorIMGRootDir/$CRD/good.$IMGFileName&quot;
 
-    echo;echo &quot;+ Moving $mopIMGDir/$IMGFileName to $mopIMGGoodDir&quot;
-    mv $mopIMGDir/$IMGFileName $mopIMGGoodDir
+    MoveToDir -c $CRD -b &quot;$mopIMGDir/$IMGFileName&quot; -B &quot;$mopIMGDir/$IMGBitName&quot; -d $mopIMGGoodDir -s &quot;$IMGServers&quot; -u $HWUser
 
-    if [ -f $mopIMGDir/$IMGBitName ]; then
-      echo &quot;+ Moving $mopIMGDir/$IMGBitName to $mopIMGGoodDir&quot;
-      mv $mopIMGDir/$IMGBitName $mopIMGGoodDir
-    fi
+#    echo;echo &quot;+ Moving $mopIMGDir/$IMGFileName to $mopIMGGoodDir&quot;
+#    mv $mopIMGDir/$IMGFileName $mopIMGGoodDir
+
+#    if [ -f $mopIMGDir/$IMGBitName ]; then
+#      echo &quot;+ Moving $mopIMGDir/$IMGBitName to $mopIMGGoodDir&quot;
+#      mv $mopIMGDir/$IMGBitName $mopIMGGoodDir
+#    fi
 
 
   fi
