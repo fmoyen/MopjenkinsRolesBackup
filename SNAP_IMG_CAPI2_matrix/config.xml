@@ -1168,7 +1168,10 @@ for loop in `seq 1 $maxloop`;do
       #------------------------------------
       # no card available =&gt; try other box
       0:*)
-        echo &quot;  --&gt; No $CRD card available. Trying next box / loop...&quot;
+        for i in &quot;${TESTBOXES[@]}&quot;; do [[ $i != $box ]] &amp;&amp; new+=($i);done   # generate new test array without unreachable box
+        unset TESTBOXES;TESTBOXES=(&quot;${new[@]}&quot;);unset new                   # reassign to original array name
+        echo &quot;  --&gt; No $CRD card available in $box =&gt; removed from Boxes testing list, remaining=${TESTBOXES[@]}&quot;        
+        echo &quot;  --&gt; Trying next box / loop...&quot;
       ;;
 
       #------------------------------------

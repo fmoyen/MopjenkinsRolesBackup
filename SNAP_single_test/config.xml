@@ -430,7 +430,7 @@ for loop in `seq 1 $maxloop`;do
 		    trap finish EXIT  # register finish/unlock function, after lock is set
 		    break 3 # found card and no user =&gt; going out of $box for-loop and $loop for-loop
 	      else 
-		    echo &quot;  --&gt; box=$box lock=$LOCK already locked, try next card&quot;
+		    echo &quot;  --&gt; box=$box lock=$LOCK already locked, trying next card&quot;
 		  fi    
 		done
       ;;
@@ -447,7 +447,7 @@ for loop in `seq 1 $maxloop`;do
       *)      
       	if (( 9&lt;=hours &amp;&amp; hours&lt;=19 ));then
           # It is day time =&gt; priority to interactive users
-      	  echo &quot;  --&gt; hours=$hours (day), nusers=$nusers, try other box&quot;
+      	  echo &quot;  --&gt; $CRD card found but day time (hours=$hours) and users connected (nusers=$nusers), trying next box / loop...&quot;
           if [ $box == ${TESTBOXES[*]:(-1)} ];then
             echo &quot;  --&gt; $box is the last system to test; Warning users and waiting for 60s...&quot;
             ssh ${HWUser}@$box wall &quot;JENKINS WANTS TO DO A TEST on FPGA CARD=$CRD ID=$cards. PLEASE LOGOUT IF YOU CAN ...&quot;
