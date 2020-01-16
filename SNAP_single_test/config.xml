@@ -625,31 +625,12 @@ if [ $RC -eq 0 ]; then
 
     MoveToDir -c $CRD -b &quot;$mopIMGDir/$IMGPrimaryName $mopIMGDir/$IMGSecondaryName&quot; -B &quot;$mopIMGDir/$IMGBitName&quot; -d $mopIMGGoodDir -s &quot;$IMGServers&quot; -u $HWUser
 
-#    echo;echo &quot;+ Moving $mopIMGDir/$IMGPrimaryName to $mopIMGGoodDir&quot;
-#    mv $mopIMGDir/$IMGPrimaryName $mopIMGGoodDir
-#    echo &quot;+ Moving $mopIMGDir/$IMGSecondaryName to $mopIMGGoodDir&quot;
-#    mv $mopIMGDir/$IMGSecondaryName $mopIMGGoodDir
-    
-#    if [ -f $mopIMGDir/$IMGBitName ]; then
-#      echo &quot;+ Moving $mopIMGDir/$IMGBitName to $mopIMGGoodDir&quot;
-#      mv $mopIMGDir/$IMGBitName $mopIMGGoodDir
-#    fi
-
   else
     echo;echo &quot;+ Renaming binary file to good.* on ${box}&quot;
     echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGFileName&quot;
     ssh ${HWUser}@${box} &quot;mv \`ls $ExecutorIMGRootDir/$CRD/${IMGFileName}*\` $ExecutorIMGRootDir/$CRD/good.$IMGFileName&quot;
 
     MoveToDir -c $CRD -b &quot;$mopIMGDir/$IMGFileName&quot; -B &quot;$mopIMGDir/$IMGBitName&quot; -d $mopIMGGoodDir -s &quot;$IMGServers&quot; -u $HWUser
-
-#    echo;echo &quot;+ Moving $mopIMGDir/$IMGFileName to $mopIMGGoodDir&quot;
-#    mv $mopIMGDir/$IMGFileName $mopIMGGoodDir
-
-#    if [ -f $mopIMGDir/$IMGBitName ]; then
-#      echo &quot;+ Moving $mopIMGDir/$IMGBitName to $mopIMGGoodDir&quot;
-#      mv $mopIMGDir/$IMGBitName $mopIMGGoodDir
-#    fi
-
 
   fi
   echo
