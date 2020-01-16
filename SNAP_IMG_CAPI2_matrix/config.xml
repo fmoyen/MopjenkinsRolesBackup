@@ -104,11 +104,12 @@ test</description>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>TIMING_LABLIMIT_CHOICE</name>
-          <description>Choose the TIMING_LABLIMIT parameter. If timing is higher than your choice when doing a make image, the run will failed.</description>
+          <description>Choose the TIMING_LABLIMIT parameter for building images. If achieved timing is worst than your choice, the run will failed.
+Warning: -200ps is not easy to reach and needs several attempts (sometimes 5 attempts are not enough).</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
-              <string>-200</string>
               <string>-300</string>
+              <string>-200</string>
               <string>-1000</string>
             </a>
           </choices>
