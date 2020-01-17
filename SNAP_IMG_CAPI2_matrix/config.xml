@@ -319,12 +319,11 @@ echo &quot;J: Do not run (abort) non-desired cases (action types, actions, cards
 
 BSKIP=0
 
-if [ &quot;${!ACTION_TYPE}&quot; == &quot;false&quot; ]; then BSKIP=1;fi # if ACTION_TYPE=&quot;HLS&quot;, ${!ACTION_TYPE} is identical to $HLS
-if [ &quot;${!CRD}&quot;         == &quot;false&quot; ]; then BSKIP=1;fi # if CRD=&quot;AD9V3&quot;, ${!CRD} is identical to $AD9V3
-if [ &quot;$ACT&quot;            == &quot;test&quot;  ]; then BSKIP=0;fi
+if [ &quot;${!ACTION_TYPE}&quot; == &quot;false&quot; ]; then BSKIP=1; fi # if ACTION_TYPE=&quot;HLS&quot;, ${!ACTION_TYPE} is identical to $HLS
+if [ &quot;${!CRD}&quot;         == &quot;false&quot; ]; then BSKIP=1; fi # if CRD=&quot;AD9V3&quot;, ${!CRD} is identical to $AD9V3
+if [ &quot;$ACT&quot;            == &quot;test&quot;  ]; then BSKIP=0; fi # test action always run
 
 echo &quot;  -&gt; action_types (hdl,hls)=$ACTION_TYPE enabled_cards=$CRD BSKIP=$BSKIP&quot;
-
 
 # ASKIP stands for ACTION skip
 
