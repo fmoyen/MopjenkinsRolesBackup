@@ -1049,7 +1049,7 @@ esac
 # Well, we might to clean up those from time to time ...
 
 TARGET_DIR=&quot;${JOB_NAME}-${BUILD_NUMBER}-${GIT_BRANCH}&quot;
-
+export TARGET_DIR=`echo $TARGET_DIR | sed -e &apos;s/[=,\/]/-/g&apos;`
 echo &quot;TARGET_DIR=${TARGET_DIR}&quot;
 echo &quot;Current Dir is &quot; `pwd`
 echo &quot;  -&gt; JOB_NAME:        ${JOB_NAME}&quot;
