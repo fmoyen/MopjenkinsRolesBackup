@@ -91,6 +91,8 @@ echo &quot;Working dir is : `pwd`&quot; &gt;&gt; output.txt
 
 echo &quot;X: $X, Y: $Y&quot;
 
+echo &quot;BUILD_URL= $BUILD_URL&quot;
+
 sleep 10</command>
     </hudson.tasks.Shell>
   </builders>
