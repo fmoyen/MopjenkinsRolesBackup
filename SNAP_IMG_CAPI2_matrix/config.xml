@@ -1171,7 +1171,7 @@ for loop in `seq 1 $maxloop`;do
       0:*)
         for i in &quot;${TESTBOXES[@]}&quot;; do [[ $i != $box ]] &amp;&amp; new+=($i);done   # generate new test array without unreachable box
         unset TESTBOXES;TESTBOXES=(&quot;${new[@]}&quot;);unset new                   # reassign to original array name
-        echo &quot;  --&gt; No $CRD card available in $box =&gt; removed from Boxes testing list, remaining=${TESTBOXES[@]}&quot;        
+        echo &quot;  --&gt; No $CRD card available in $box =&gt; removed from Boxes testing list, remaining list= ${TESTBOXES[@]}&quot;        
         echo &quot;  --&gt; Trying next box / loop...&quot;
       ;;
 
@@ -1226,7 +1226,7 @@ for loop in `seq 1 $maxloop`;do
       
     esac
     
-  if [ $box == ${TESTBOXES[*]:(-1)} ] &amp;&amp; [ $global_found -gt 0 ]; then
+  if [[ $box == ${TESTBOXES[*]:(-1)} ]] &amp;&amp; [[ $global_found -gt 0 ]]; then
     echo &quot;J: $box was the last system to test. We globally found $global_found $CRD card(s) but user(s) were connected&quot;
     echo &quot;   Waiting for 60s and go to next loop...&quot;
     sleep 60
