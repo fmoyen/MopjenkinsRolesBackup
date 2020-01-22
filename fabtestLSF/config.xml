@@ -41,6 +41,7 @@ hdclp026.boeblingen.de.ibm.com</defaultValue>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
 
+AFSUser=capimop
 MyJob=myjob
 JobOutput=joboutput.txt
 
@@ -58,12 +59,19 @@ else
   exit 1
 fi
 
+# Build the job
+cat &lt;&lt; EOF &gt; $MyJob
+sleep 10
+date &gt; $JobOutput
+uname -a &gt;&gt; $JobOutput
+EOF
+
 # with myjob in local homedir
-ping -c1 $LoginServer &gt; /dev/null &amp;&amp; sshpass -e ssh fmoyen@$LoginServer &apos;bsub -q desktop -P hdwb -R &quot;select [type==X86_64 &amp;&amp; osver == rh7]&quot;&apos; &lt; $MyJob | tee lastrunjob.txt
+ping -c1 $LoginServer &gt; /dev/null &amp;&amp; sshpass -e ssh $AFSUser@$LoginServer &apos;bsub -q desktop -P hdwb -R &quot;select [type==X86_64 &amp;&amp; osver == rh7]&quot;&apos; &lt; $MyJob | tee lastrunjob.txt
 JobID=`awk -F&quot;&gt;&quot; &apos;{print $1}&apos; lastrunjob.txt | awk -F&quot;&lt;&quot; &apos;{print $2}&apos;`
 
 # Waiting for job to be marked as DONE
-while ! sshpass -e ssh fmoyen@$LoginServer bjobs $JobID 2&gt; /dev/null | grep $JobID | grep DONE &gt; /dev/null
+while ! sshpass -e ssh $AFSUser@$LoginServer bjobs $JobID 2&gt; /dev/null | grep $JobID | grep DONE &gt; /dev/null
 do
   echo -e &quot;.\c&quot;
   sleep 1
@@ -71,7 +79,7 @@ done
 echo
 
 # Getting back Job file result
-sshpass -e scp fmoyen@$LoginServer:./$JobOutput . 
+sshpass -e scp AFSUser@$LoginServer:./$JobOutput . 
 echo
 cat $JobOutput
 </command>
