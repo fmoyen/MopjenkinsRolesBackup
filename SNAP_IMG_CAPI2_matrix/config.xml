@@ -416,7 +416,7 @@ then
     ;;
     
   *&quot;hls_intersect&quot;* )    
-    echo &quot;J: ACT=$ACT =&gt; Checking oc-accel/defconfig/$CRD.hls_intersect.defconfig existence&quot;
+    echo &quot;J: ACT=$ACT =&gt; Checking snap/defconfig/$CRD.hls_intersect.defconfig existence&quot;
     if [ -f snap/defconfig/$CRD.hls_intersect.defconfig ];then
       echo &quot; --&gt; OK&quot;
       DSKIP=0
@@ -428,9 +428,6 @@ then
       echo;echo &quot;defconfig directory content:&quot;
       echo &quot;----------------------------&quot;
       ls snap/defconfig/
-      # automated mail
-      echo &quot;mail sent to castella Initial Test Failure&quot;
-      mail -s &quot;Initial Test Failure : $CRD.hls_intersect.defconfig does not exist&quot; castella
       DSKIP=1
     fi;;
 
@@ -461,7 +458,7 @@ then
 #     fi;;   
 
   * )    
-    echo &quot;J: Checking oc-accel/defconfig/$CRD.$ACT.defconfig existence&quot;
+    echo &quot;J: Checking snap/defconfig/$CRD.$ACT.defconfig existence&quot;
     if [ -f snap/defconfig/$CRD.$ACT.defconfig ];then
       echo &quot; --&gt; OK&quot;
       DSKIP=0

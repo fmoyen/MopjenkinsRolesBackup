@@ -277,86 +277,95 @@ if [ &quot;$ACT&quot;            == &quot;test&quot;  ]; then BSKIP=0; fi # test
 
 echo &quot;build(nCL,CL)=$BUILD_NON_CLOUD $BUILD_CLOUD action_types (hdl,hls)=$ACTION_TYPE enabled_cards=$CRD BSKIP=$BSKIP&quot;
 
-#### FAB
 
-#debug AC
-  case &quot;$BSKIP&quot; in
-    1 )
-#        echo &quot;mail sent to castella informing BSKIPPING&quot;
-#        mail -s &quot;DEBUG! BSKIP SET TO 1 build(nCL,CL)=$BUILD_NON_CLOUD $BUILD_CLOUD examples(hdl,hls)=$HDL $HLS card_enabled(ku3,8k5,250S,S121B)=$ADKU3 $AD8K5 $N250S $S121B&quot; castella
-        ;;
-  esac
-#debug AC  
-
-
-# Following filtering will stop the current test if not required or not possible
-# This will lead to a brown colored result meaning : aborted
 # ASKIP may stand for ACTION skip
+
+# FAB: faire le tri dans ces cases
 case &quot;$CRD:$ACT&quot; in
   *:scatter_gather* )    C=&quot;scc1&quot;;ASKIP=1;; # no scatter_gather for CAPI1 cards
   N250S:*NVME* )         C=&quot;N2NV&quot;;ASKIP=0;;
   N250S:*nvme* )         C=&quot;N2nv&quot;;ASKIP=0;;
-  #*:*NVME* )             C=&quot;NVME&quot;;ASKIP=1;;
-  #*:*nvme* )             C=&quot;nvme&quot;;ASKIP=1;;
-# *:hdl_example* )       C=&quot;exmp&quot;;ASKIP=0;;
-# *:hls_memcopy )        C=&quot;memc&quot;;ASKIP=0;;
-# *:hls_bfs )            C=&quot;bfs &quot;;ASKIP=0;;
-# *:hls_hashjoin )       C=&quot;join&quot;;ASKIP=0;;
   *:hls_intersect_h )    C=&quot;inth&quot;;ASKIP=1;;
   *:hls_intersect_s )    C=&quot;ints&quot;;ASKIP=1;;
-# *:hls_search )         C=&quot;srch&quot;;ASKIP=0;;
-# *:hls_sponge )         C=&quot;spng&quot;;ASKIP=0;;
   *:hls_blowfish )       C=&quot;blow&quot;;ASKIP=1;; # no maintenance for blowfish
-# *:hls_helloworld )     C=&quot;helw&quot;;ASKIP=0;;
-# *:test )               C=&quot;test&quot;;ASKIP=0;;
   * )                      C=&quot;def &quot;;ASKIP=0;;
 esac            
+
 echo &quot;card=$CRD action=$ACT case=$C ASKIP=$ASKIP&quot;
+
+
+#==============================================================================================
+# Cleaning directories if ACT=test,
+# else checking $CRD.$ACT.defconfig file existence
+
+echo;echo &quot;*******************************************************************************&quot;
 
 if [ $ASKIP -eq 0 ]
 then 
 
  case &quot;$ACT&quot; in
+ 
   test ) 
+    echo &quot;J: ACT=test&quot;
     gitnames=`git ls-remote https://github.com/open-power/snap|grep &quot;refs/heads/&quot;|awk &apos;{print $2}&apos;`
     echo &quot;gitnames=$gitnames&quot;
-    for dir in &quot;/afs/bb/proj/fpga/framework/CI_ws/SNAP_IMG_CAPI1_matrix&quot;/*;do
+    
+    echo
+    for dir in &quot;/var/jenkins/workspace/SNAP_IMG_CAPI1_matrix&quot;/*;do
       if [ -d &quot;$dir&quot; ];then
         branch=&quot;refs/heads/&quot;`basename $dir`
-        if [[ &quot;$gitnames&quot; =~ &quot;$branch&quot; ]];then echo &quot;branch=$branch found in gitnames, keep dir=$dir&quot;
+        if [[ &quot;$gitnames&quot; =~ &quot;$branch&quot; ]];then echo &quot;branch=$branch found in gitnames, keeping dir=$dir&quot;
         else 
-          echo &quot;branch=$branch not found in gitnames, delete dir=\&apos;$dir\&apos;&quot;
+          echo &quot;branch=$branch not found in gitnames, deleting dir=\&apos;$dir\&apos;&quot;
           rm -rf &quot;$dir&quot;     # put in quotes to work for directories with blanks
         fi        
       else echo &quot;$dir is not a directory, continuing&quot;
       fi
     done
-    echo &quot;mail informing castella test triggered&quot;
-    mail -s &quot;Jenkins Test on going : CLOUD_build=$CL branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX test_on_hw=$TEST_ON_HW&quot; castella
-    DSKIP=0;;
-  *&quot;hls_intersect&quot;* )     
-    if [ -f snap/defconfig/$CRD.hls_intersect.defconfig ];then DSKIP=0
+    DSKIP=0
+    ;;
+    
+  *&quot;hls_intersect&quot;* )   
+    echo &quot;J: ACT=$ACT =&gt; Checking snap/defconfig/$CRD.hls_intersect.defconfig existence&quot;  
+    if [ -f snap/defconfig/$CRD.hls_intersect.defconfig ];then
+      echo &quot; --&gt; OK&quot;
+      DSKIP=0
     else 
+      echo;echo &quot;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!&quot;
       echo &quot;$CRD.hls_intersect.defconfig does not exist&quot;
+      echo &quot;Aborting...&quot;
+      echo;echo &quot;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!&quot;
+      echo;echo &quot;defconfig directory content:&quot;
+      echo &quot;----------------------------&quot;
       ls snap/defconfig/
-      # automated mail
-      echo &quot;mail sent to castella Initial Test Failure&quot;
-      mail -s &quot;Initial Test Failure : $CRD.hls_intersect.defconfig does not exist&quot; castella
       DSKIP=1
-    fi;;
+    fi
+    ;;
 
   * )    
-    if [ -f snap/defconfig/$CRD.$ACT.defconfig ];then DSKIP=0
-    else 
+    echo &quot;J: Checking snap/defconfig/$CRD.$ACT.defconfig existence&quot;
+    if [ -f snap/defconfig/$CRD.$ACT.defconfig ];then
+      echo &quot; --&gt; OK&quot;
+      DSKIP=0
+    else
+      echo;echo &quot;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!&quot;
+      echo &quot;$CRD.$ACT.defconfig does not exist&quot;
+      echo &quot;Aborting...&quot;
+      echo;echo &quot;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!&quot;
+      echo;echo &quot;defconfig directory content:&quot;
+      echo &quot;----------------------------&quot;
       echo &quot;$CRD.$ACT.defconfig does not exist&quot;
       ls snap/defconfig/
-      # automated mail
-         echo &quot;mail sent to castella Initial Test Failure&quot;
-      mail -s &quot;Initial Test Failure : $CRD.$ACT.defconfig does not exist&quot; castella
       DSKIP=1
-    fi;;  
+    fi
+    ;;  
+
 esac
-echo &quot;defconfig SKIP=$DSKIP&quot;
+
+echo;echo &quot;defconfig SKIP=$DSKIP&quot;
+
+#### FAB J&apos;en suis là
+
 
 AFSused=`fs lq /afs/bb/proj/fpga/framework/CI_ws/SNAP_IMG_TEST_matrix/|grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
 echo &quot;AFS spaced currently used=${AFSused}%&quot;
