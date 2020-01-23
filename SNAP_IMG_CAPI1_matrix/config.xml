@@ -582,6 +582,22 @@ function CopyToDir
 }
 
 
+# define function to unlock in case of error, executed after registering with &quot;trap finish EXIT&quot;
+function finish {
+  echo;echo &quot;***************************************************************************************&quot;
+  echo &quot;J: FINISH function&quot;
+  
+  echo &quot;RC=$?&quot;
+  echo;echo &quot;  -&gt; unlocking ${LOCK}&quot;
+  UNLOCK_RC=0;ssh ${HWUser}@$box rmdir ${LOCK} || UNLOCK_RC=$?
+  echo &quot;box=$box lock=$LOCK unlock RC=$UNLOCK_RC (`date`)&quot;
+  echo;echo &quot;  -&gt; cleaning ${box}@$TARGET_DIR&quot;
+  CLEAN_RC=0;ssh -T ${HWUser}@$box rm -rf ${TARGET_DIR} || CLEAN_RC=$?
+  echo &quot;box=$box clean target_dir=$TARGET_DIR RC=$CLEAN_RC (`date`)&quot;
+  echo;echo &quot;  -&gt; EXITING !&quot;  
+}
+
+
 #==============================================================================================
 # Power Service Layer Simulation Engine (pslse) setup
 # Should not be used but may be required by ??
@@ -855,126 +871,184 @@ esac
 # Testing the generated binaries on POWER Hardware
 # (if $TEST_ON_HW==true and $CRD NOT into $NO_TEST_CARDS[*])
 
-#### FAB J&apos;en suis là
+echo &quot;TARGET_DIR=${TARGET_DIR}&quot;
+echo &quot;Current Dir is &quot; `pwd`
+echo &quot;  -&gt; JOB_NAME:        ${JOB_NAME}&quot;
+echo &quot;  -&gt; IMAGE:           ${IMAGE}&quot;
+echo &quot;  -&gt; CARD_TO_TEST:    ${CRD}&quot;
+echo &quot;  -&gt; ACTION:          ${ACT}&quot;
+echo &quot;  -&gt; GIT_Branch:      ${GIT_BRANCH}&quot;
+echo &quot;  -&gt; GIT_Commit:      ${GIT_COMMIT}&quot;
 
-#
-# Set unique target directory such that parallel builds do not disturb each other.
-# Well, we might to clean up those from time to time ...
-#
-TARGET_DIR=&quot;${JOB_NAME}-${BUILD_NUMBER}-${GIT_BRANCH}&quot;
-export TARGET_DIR=`echo $TARGET_DIR | sed -e &apos;s/[=,\/]/-/g&apos;`
-echo &quot;J:TARGET_DIR=${TARGET_DIR}&quot;
-echo &quot;J:Current Dir is &quot; `pwd`
-#echo &quot;************ Parent Job Data **********************************************************&quot;
-#echo &quot;J:--&gt; PARENT_JOB_NAME: ${PARENT_JOB_NAME}&quot;
-echo &quot;J:--&gt; JOB_NAME:        ${JOB_NAME}&quot;
-echo &quot;J:--&gt; IMAGE:           ${IMAGE}&quot;
-#echo &quot;J:--&gt; CARD_TO_TEST:    ${CARD_TO_TEST}&quot;
-#echo &quot;J:--&gt; ACTION:          ${ACTION}&quot;
-echo &quot;J:--&gt; GIT_Branch:      ${GIT_BRANCH}&quot;
-echo &quot;J:--&gt; GIT_Commit:      ${GIT_COMMIT}&quot;
-#echo &quot;************ User Input Data **********************************************************&quot;
-#echo &quot;J:--&gt; MY_IMAGE:        ${MY_IMAGE}&quot;
-#echo &quot;J:--&gt; MY_CARD:         ${MY_CARD}&quot;
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Checking TestBoxes reachability (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot;
+echo
+echo &quot;  -&gt; testboxes now = ${TESTBOXES[@]}&quot;
+echo
 
-echo &quot;***************************************************************************************&quot;
-RC=0;ssh dim1 ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 ||RC=$?
-if [ $RC == &quot;0&quot; ]; then echo &quot;dim1 ping ok&quot;; else echo &quot;dim1 not pingable&quot;;exit 100;fi
-echo &quot;testboxes2=${TESTBOXES[@]}&quot;
+
 for box in &quot;${TESTBOXES[@]}&quot;;do
-  case $box in
-    marennes|brahma)
-        RC=0;ssh $box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$? # cannot reach MOP (marennes or Brahma) from dim1
-        ;;
-    *)
-      RC=0;ssh dim1 ping $box -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$? # ping BOE machines from dim1
-      ;;        
-  esac
-  if [ &quot;$RC&quot; == &quot;0&quot; ]; then : 
-    echo &quot;$box ping ok&quot;;
+  echo &quot;----------------------------------------------------&quot;
+  if [[ ${mopBoxes[*]} =~ $box ]]
+  then
+    # $box is a Montpellier server
+    echo -e &quot;MOP   : $box -&gt; \c&quot;
+    RC=0;ssh ${HWUser}@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
+  fi
+
+if [ $RC -eq 0 ]; then
+    echo &quot;OK&quot;
   else
+    echo &quot;FAILED !&quot;
     for i in &quot;${TESTBOXES[@]}&quot;; do [[ $i != $box ]] &amp;&amp; new+=($i);done   # generate new test array without unreachable box
     unset TESTBOXES;TESTBOXES=(&quot;${new[@]}&quot;);unset new                   # reassign to original array name
-    echo &quot;$box not pingable, remove from testing, remaining=${TESTBOXES[@]}&quot;
-    if [[ &quot;${TESTBOXES[@]}&quot; == &quot;&quot; ]];then echo &quot;no test machines avail anymore&quot;;exit 1;fi
+    echo &quot;$box not reachable =&gt; removed from testing boxes list&quot;
+    echo &quot;testboxes remaining = ${TESTBOXES[@]}&quot;
+    if [[ &quot;${TESTBOXES[@]}&quot; == &quot;&quot; ]];then echo &quot;no test machines available anymore&quot;;exit 1;fi
   fi
 done # for box
-echo &quot;testboxes3=${TESTBOXES[@]}&quot;
 
-function finish {  # define function to unlock in case of error, executed after registering with &quot;trap finish EXIT&quot;
-    echo &quot;RC=$?, now unlock ${LOCK} and end&quot;
-	SSH_RC=0;ssh fpga@$box rmdir ${LOCK} || SSH_RC=$?
-	echo &quot;`date` box=$box $LOCK unlock RC=$SSH_RC&quot;
-}
-echo &quot;testboxes4=${TESTBOXES[@]}&quot;
-maxloop=60; echo &quot;Wait (max $maxloop min) for free card=$CRD in ${TESTBOXES[@]} iam=`whoami`&quot;
+echo;echo &quot;----------------------------------------------------&quot;
+echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
+
+
+maxloop=60
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Searching (max $maxloop min) for free card=$CRD into ( ${TESTBOXES[@]} ) (`date`)&quot;
+
+FindCardTool=&quot;snap_find_card&quot;
+
 for loop in `seq 1 $maxloop`;do
+
+  echo;echo &quot;*************************************************&quot;
+  echo &quot;J: LOOP $loop/$maxloop (`date`)&quot;
+
+  global_found=0
+
   for box in &quot;${TESTBOXES[@]}&quot;;do
-    nusers=`ssh fpga@${box} who|grep -v root|grep -v fpga|wc -l`
-#   echo &quot;remote homespace content:&quot;; ssh $box ls -al /home/fpga
-    find_card=snap_find_card.${GIT_COMMIT}.`date +%H%M%S`.`basename $BINFILES`
-    echo  &quot;J:copy $find_card to $box:/home/fpga&quot;;  # watch out &quot;single_test&quot; need to have this cp done before!
-    RC=0;scp ./software/tools/snap_find_card fpga@$box:/home/fpga/$find_card ; RC=$?
-    if
-      [ &quot;$RC&quot; -gt &quot;0&quot; ];then echo &quot;copy $find_card to $box result : RC=$RC, continue anyway&quot;;
+
+    echo;echo &quot;-------------------------------------------------&quot;
+    echo &quot;$box&quot;
+
+    nusers=`ssh ${HWUser}@${box} who|grep -v root|grep -v ${HWUser}|wc -l`
+
+    find_card=$FindCardTool.${GIT_COMMIT}.`date +%H%M%S`.`basename $BINFILES`
+
+    echo  &quot;  --&gt; Copying the tool $FindCardTool ($find_card) to $box:/home/${HWUser}&quot;
+    RC=0;scp ./software/tools/$FindCardTool ${HWUser}@$box:/home/${HWUser}/$find_card ; RC=$?
+    if [ $RC -gt 0 ];then
+      echo &quot;     -&gt; copy $find_card to $box FAILED, continuing anyway...&quot;;
     fi
-    # Checking with temporary snap_find_card_our_reference if we have a $CRD available
-    found=0;cards=`ssh -ttq fpga@${box} /home/fpga/$find_card -A ${CRD}`||found=$?
-    SSH_RC=0;ssh -ttq fpga@${box} rm /home/fpga/$find_card || SSH_RC=$?
-    echo &quot;J:`date` removed $find_card ./from $box RC=$SSH_RC&quot;
+
+    echo -e &quot;  --&gt; Using the tool, looking for $CRD inside ${box}: \c&quot;
+    found=0;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} &gt; /dev/null 2&gt;&amp;1 ||found=$?
+    # ($find_card gives the number of found cards inside $?)
+    
+    if [ $found -ne 0 ];then
+      echo -e &quot;OK: $found CARD(S) FOUND &quot;
+      global_found=$((global_found+found))
+      cards=`ssh -ttq ${HWUser}@${box} &quot;/home/${HWUser}/$find_card -A ${CRD} 2&gt;/dev/null&quot; | head -n1`   
+      echo &quot;(card-IDs= $cards)&quot;
+      # (head is needed because if more than 1 card, $find_card returns something like &quot;0 0&quot; and second line with &quot;Total 2 cards detected&quot;)
+    else
+      echo &quot;FAILED: NO CARD FOUND&quot;
+      unset cards
+    fi
+
+    echo &quot;  --&gt; Removing the tool $FindCardTool ($find_card) from $box&quot;
+    SSH_RC=0;ssh -ttq ${HWUser}@${box} rm /home/${HWUser}/$find_card || SSH_RC=$?
+    if [ $SSH_RC -gt 0 ];then
+      echo &quot;    -&gt; Delete $find_card to $box FAILED, continuing anyway...&quot;;
+    fi
+
+	echo;echo &quot;J: loop=$loop box=$box nusers=$nusers card=$CRD $FindCardTool found=$found (`date`)&quot;
+    echo
+
     hours=`date +%H`
-	echo &quot;J:`date` loop=$loop box=$box nusers=$nusers card=$CRD snap_find_card found=$found&quot;
+
     case $found:$nusers in
-      0:*)      
-#       echo &quot;no card avail, try other box&quot;;
-        if [ $box == ${TESTBOXES[*]:(-1)} ];then echo &quot;wait...&quot;;sleep 60;fi
-        continue;;
-      [1234]:0) 
-#	    echo &quot;card avail, no user, now lock &amp; test&quot;
+
+      #------------------------------------
+      # no card available =&gt; try other box
+      0:*)
+        for i in &quot;${TESTBOXES[@]}&quot;; do [[ $i != $box ]] &amp;&amp; new+=($i);done   # generate new test array without unreachable box
+        unset TESTBOXES;TESTBOXES=(&quot;${new[@]}&quot;);unset new                   # reassign to original array name
+        echo &quot;  --&gt; No $CRD card available in $box =&gt; removed from Boxes testing list, remaining list= ${TESTBOXES[@]}&quot;        
+        echo &quot;  --&gt; Trying next box / loop...&quot;
+      ;;
+
+      #------------------------------------
+      # card available &amp; no user =&gt; now lock &amp; test
+      [1234]:0)
 		for cardid in $cards;do
-      	  LOCK=&quot;jenkins_lock_card&quot;$cardid
-		  RC=0;ssh $box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
+      	  LOCK=&quot;jenkins_lock_card$cardid&quot;
+		  RC=0;ssh ${HWUser}@$box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
 		  if [ $RC == &quot;0&quot; ]; then :
-		    echo &quot;J:`date` box=$box $LOCK lock RC=$RC&quot;; 
+		    echo &quot;  --&gt; box=$box lock=$LOCK lock RC=$RC (`date`)&quot;; 
 		    trap finish EXIT  # register finish/unlock function, after lock is set
-		    break 3
+		    break 3 # found card and no user =&gt; going out of $box for-loop and $loop for-loop
 	      else 
-		    echo &quot;J:box=$box $LOCK already locked, try next card&quot;
+		    echo &quot;  --&gt; box=$box lock=$LOCK already locked, try next card&quot;
 		  fi    
-		done;;
+		done
+      ;;
+
+      #------------------------------------
+      # found something else than 1,2,3 or 4 cards =&gt; meaning BAD $found return code
       *:0)      
-        echo &quot;J:unknown found_RC=$found from snap_find_card=$cards&quot;; 
-        exit 100;;
+        echo &quot;  --&gt; unknown found_RC=$found from $FindCardTool=$cards. EXITING...&quot;
+        exit 1
+      ;;
+
+      #------------------------------------
+      # card available but user(s) connected...
       *)      
       	if (( 9&lt;=hours &amp;&amp; hours&lt;=19 ));then
-      	  echo &quot;J:hours=$hours, nusers=$nusers, try other box&quot;
-          if [ $box == ${TESTBOXES[*]:(-1)} ];then echo &quot;wait...&quot;;sleep 60;fi
-          continue
+          # It is day time =&gt; priority to interactive users
+      	  echo &quot;  --&gt; $CRD card found but day time (hours=$hours) and users connected (nusers=$nusers), trying next box / loop...&quot;
+
         else
-          ssh fpga@${box} who|grep -v root|grep -v fpga
-      	  echo &quot;J:hours=$hours, nusers=$nusers, now lock &amp; notify &amp; test&quot;
+          # It is night =&gt; running on $box even if there are connected users
+          ssh ${HWUser}@${box} who|grep -v root|grep -v ${HWUser}
+      	  echo &quot;  --&gt; hours=$hours (night), nusers=$nusers, now lock &amp; notify &amp; test&quot;
 		  for cardid in $cards;do
-      	    LOCK=&quot;jenkins_lock_card&quot;$cardid
-		    RC=0;ssh $box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
+      	    LOCK=&quot;jenkins_lock_card$cardid&quot;
+		    RC=0;ssh ${HWUser}@$box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
 		    if [ $RC == &quot;0&quot; ]; then :
-	  	      echo &quot;J:`date` box=$box $LOCK lock RC=$RC&quot;; 
+	  	      echo &quot;  --&gt; box=$box lock=$LOCK lock RC=$RC (`date`)&quot;; 
 	   	      trap finish EXIT  # register finish/unlock function, after lock is set
-              ssh $box wall &quot;WARNING: JENKINS TEST on FPGA CARD=$CRD ID=$cards&quot;
-		      break 3
+              ssh ${HWUser}@$box wall &quot;WARNING: JENKINS CAPI2 TEST STARTING NOW on FPGA CARD=$CRD ID=$cards&quot;
+		      break 3 # found card and it is the night =&gt; going out of $box for-loop and $loop for-loop
 			else 
-			  echo &quot;J:box=$box $LOCK already locked, try next card&quot;
+			  echo &quot;  --&gt; box=$box lock=$LOCK already locked, try next card&quot;
 			fi    
           done
-        fi;;
+        fi
+      ;;
+      
     esac
+    
+  if [[ $box == ${TESTBOXES[*]:(-1)} ]] &amp;&amp; [[ $global_found -gt 0 ]]; then
+    echo &quot;J: $box was the last system to test. We globally found $global_found $CRD card(s) but user(s) were connected&quot;
+    echo &quot;   Waiting for 60s and go to next loop...&quot;
+    sleep 60
+  fi
+    
   done # for box
+  
 done #for loop
-if [ &quot;$loop&quot; == &quot;$maxloop&quot; ];then 
-  SAVE=&quot;/data/Images/card_not_avail&quot;
-  echo &quot;no card avail, copy image to $SAVE&quot;
-  cp -rp $BINFILES $SAVE            
+
+if [ $loop -eq $maxloop ];then
+  echo;echo &quot;***************************************************************************************&quot;
+  echo &quot;J: No card $CRD available with TESTBOXES= ${TESTBOXES[*]}&quot;
+  echo
+  SaveDir=&quot;$RootSaveDir/${CRD}_not_available&quot;
+  CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
+  echo &quot;  -&gt; EXITING !&quot;
   exit 100
 fi
+
+#### FAB J&apos;en suis là
 
 ssh fpga@${box} &quot;echo ------ START of JOB on $box ----&gt;&gt; jenkins.log&quot;
 ssh fpga@${box} &quot;date                                 &gt;&gt; jenkins.log&quot;

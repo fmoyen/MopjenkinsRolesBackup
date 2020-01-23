@@ -1053,8 +1053,8 @@ echo &quot;TARGET_DIR=${TARGET_DIR}&quot;
 echo &quot;Current Dir is &quot; `pwd`
 echo &quot;  -&gt; JOB_NAME:        ${JOB_NAME}&quot;
 echo &quot;  -&gt; IMAGE:           ${IMAGE}&quot;
-echo &quot;  -&gt; CARD_TO_TEST:    ${CARD_TO_TEST}&quot;
-echo &quot;  -&gt; ACTION:          ${ACTION}&quot;
+echo &quot;  -&gt; CARD_TO_TEST:    ${CRD}&quot;
+echo &quot;  -&gt; ACTION:          ${ACT}&quot;
 echo &quot;  -&gt; GIT_Branch:      ${GIT_BRANCH}&quot;
 echo &quot;  -&gt; GIT_Commit:      ${GIT_COMMIT}&quot;
 
@@ -1255,7 +1255,7 @@ ssh ${HWUser}@${box} &quot;echo ------ START of JOB on $box ----&gt;&gt; jenkins
 ssh ${HWUser}@${box} &quot;date                                 &gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;echo JOB_NAME  : $JOB_NAME           &gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;echo Card      : $CRD[$cardid]       &gt;&gt; jenkins.log&quot;
-ssh ${HWUser}@${box} &quot;echo Image     : ${IMAGE[*]}              &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;echo Image     : ${IMAGE[*]}         &gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;echo Build No  : ${BUILD_NUMBER}     &gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;echo Git Branch: ${GIT_BRANCH}       &gt;&gt; jenkins.log&quot;
 
