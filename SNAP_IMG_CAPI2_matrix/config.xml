@@ -732,7 +732,7 @@ ls -al
 echo;echo &quot;  -&gt; Deleting old ./pslse (Power Service Layer Simulation Engine) directory&quot;
 rm -rf pslse
 
-echo;echo &quot;Getting (git clone) Pwoer Service Layer Simulation Environment (pslse) branch=$PSLSE_BRANCH for card=$CRD...&quot;
+echo;echo &quot;Getting (git clone) Power Service Layer Simulation Environment (pslse) branch=$PSLSE_BRANCH for card=$CRD...&quot;
 git clone -b $PSLSE_BRANCH https://github.com/ibm-capi/pslse pslse;echo &quot;git clone PSLSE RC=$?&quot;
 
 
