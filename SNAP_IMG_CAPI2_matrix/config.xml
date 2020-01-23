@@ -1251,7 +1251,7 @@ fi
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Preparing $CRD card image(s) test onto $box system&quot;
 echo
-echo -e &quot;  -&gt; Power OS release: \c&quot;; grep PRETTY_NAME /etc/os-release | cut -d= -f2
+echo -e &quot;  -&gt; Power OS release: \c&quot;; ssh ${HWUser}@${box} &quot;grep PRETTY_NAME /etc/os-release | cut -d= -f2&quot;
 echo
 ssh ${HWUser}@${box} &quot;echo ------ START of JOB on $box ----&gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;date                                 &gt;&gt; jenkins.log&quot;
