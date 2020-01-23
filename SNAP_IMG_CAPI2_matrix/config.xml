@@ -133,7 +133,8 @@ Warning: -200ps is not easy to reach and needs several attempts (sometimes 5 att
         <hudson.model.StringParameterDefinition>
           <name>mopBoxes</name>
           <description>List of Montpellier systems available for testing :
-  - orpington: AC922 8335-GTH with one CAPI2 AD9V3 and 1 OC-AD9V3
+  - orpington: AC922 8335-GTH with 1 CAPI2 AD9V3 and 1 OC-AD9V3
+  - Lewen05 hosts 1 N250SP and 1 Mellanox INNOVA2
 (it needs to define capimop user with authorized_keys)</description>
           <defaultValue>orpington lewen05</defaultValue>
           <trim>false</trim>
