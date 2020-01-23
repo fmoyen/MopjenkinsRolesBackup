@@ -776,37 +776,86 @@ else # case of Cloud Build
 fi
 
 
-#### FAB J&apos;en suis là
 #==============================================================================================
 # Checking generated binaries
 
 # when using a parallel flash we have only 1 binary file
 # when using a SPI8 flash we have 2 binary files to deal with
 
-  #BINFILES contains binary name or &quot;primary and secondary&quot; names
-  BINFILES=`ls $SNAP_ROOT/hardware/build/Images/*.bin`
-  
-  if [ &quot;$BINFILES&quot; == &quot;&quot; ]; then echo &quot;cannot find binfile $BINFILES&quot;;exit 1
-  fi
+echo;echo &quot;****************************************************************************************&quot;
+echo &quot;J: Checking generated $ACT binaries for $CRD... (`date`)&quot;
+echo
+
+#BINFILES contains binary name (In SPI : &quot;primary and secondary&quot; names)
+BINFILES=`ls ${SNAP_ROOT}/hardware/build/Images/*.bin`
+BITFILES=`ls ${SNAP_ROOT}/hardware/build/Images/*.bit`
+
+if [ &quot;$BINFILES&quot; == &quot;&quot; ]; then echo &quot;  --&gt; cannot find binary files&quot;;exit 1
+fi
+
+COUNT_IMAGE=0
+unset IMAGE
 for  f in $BINFILES
 do                   
-    size=`ls -al $f | awk &apos;{print $5}&apos;`
-    echo &quot;binfile=$f size=$size&quot;
-  # if (( size &lt; 100000 ));then echo &quot;ERROR: image is too small to burn&quot;;exit 1;fi  
-    (( size &lt; 100000 )) &amp;&amp; die 1 &quot;image $f is too small $size to burn&quot;
-    # We assign IMAGE for log purpose, it eventually takes the name of secondary if SPI8
-    IMAGE=&quot;/home/fpga/images/${CRD}/${ACT}/&quot;`basename $f` 
+  size=`ls -al $f | awk &apos;{print $5}&apos;`
+  echo &quot;binfile=$f&quot;
+  echo &quot;   -&gt; size=$size&quot;
+  (( size &lt; 100000 )) &amp;&amp; die 1 &quot;image $f is too small $size to burn&quot;
+
+  IMAGE[$COUNT_IMAGE]=&quot;/home/${HWUser}/images/${CRD}/${ACT}/&quot;`basename $f` 
+  COUNT_IMAGE=`expr $COUNT_IMAGE + 1`
 done
 
-echo &quot;****************************************************************************************&quot;
-echo &quot;test_on_hw=${TEST_ON_HW} for card=$CRD&quot;
-case $CRD:${TEST_ON_HW} in
 
-# AD8K5:* )  SAVE=&quot;/data/Images/AD8K5_missing&quot;;   echo &quot;no test required, copy image to $SAVE&quot;;cp -rp $BINFILES $SAVE;exit 0;;
-  ADKU3:* )  SAVE=&quot;/data/Images/ADKU3_missing&quot;;   echo &quot;no test required, copy image to $SAVE&quot;;cp -rp $BINFILES $SAVE;exit 0;;
-  S121B:* )  SAVE=&quot;/data/Images/S121B_missing&quot;;   echo &quot;no test required, copy image to $SAVE&quot;;cp -rp $BINFILES $SAVE;exit 0;;
-  *:false )  SAVE=&quot;/data/Images/no_test_required&quot;;echo &quot;no test required, copy image to $SAVE&quot;;cp -rp $BINFILES $SAVE;exit 0;;
+#==============================================================================================
+# Checking if we can test the generated binaries on POWER Hardware (checking NO_TEST_CARDS list)
+
+case ${TEST_ON_HW} in
+
+  true )
+    echo;echo &quot;****************************************************************************************&quot;
+    echo &quot;J: Checking if we can test the generated binaries on POWER Hardware (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot;
+    echo
+    TestCardAllowed=1
+    for i in ${NO_TEST_CARDS[@]}
+    do
+      if [ &quot;$CRD&quot; == &quot;$i&quot; ];then TestCardAllowed=0;fi
+    done
+
+    if [ $TestCardAllowed -eq 0 ]
+    then
+      SaveDir=$RootSaveDir/${CRD}_test_bypassed
+      echo &quot;  -&gt; No test CARD $CRD available...&quot;
+      CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
+      echo &quot;  -&gt; EXITING !&quot;
+      exit 0
+    else
+      echo &quot;  -&gt; OK&quot;
+    fi
+  ;;
+
+  false )
+    echo;echo &quot;****************************************************************************************&quot;
+    echo &quot;J: No test on POWER Hardware requested (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot; 
+    echo
+    SaveDir=$RootSaveDir/${CRD}_no_test_requested
+    CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
+    exit 0
+  ;;
+
 esac
+
+
+#==============================================================================================
+#==============================================================================================
+#==============================================================================================
+
+
+#==============================================================================================
+# Testing the generated binaries on POWER Hardware
+# (if $TEST_ON_HW==true and $CRD NOT into $NO_TEST_CARDS[*])
+
+#### FAB J&apos;en suis là
 
 #
 # Set unique target directory such that parallel builds do not disturb each other.
