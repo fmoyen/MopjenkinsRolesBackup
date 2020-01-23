@@ -646,100 +646,139 @@ source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
 #echo &quot;IES_LIBS=$IES_LIBS&quot;
 #echo &quot;CDS_LIC_FILE=$CDS_LIC_FILE&quot;
 
-#### FAB J&apos;en suis là
 
-echo &quot;****************************************************************************************&quot;
-echo &quot;J:Configure Image ...&quot;
+#==============================================================================================
+# Testing POWER servers accessibility if ACT=test and TEST_ON_HW=true,
+# else making $CRD.$ACT.defconfig 
+
+echo;echo &quot;****************************************************************************************&quot;
+
 case $ACT in          # select config &amp; compile action
+
   &quot;test&quot;)
-    echo &quot;*T E S T  **skip image build /test&quot;
-  	if [ &quot;$TEST_ON_HW&quot; == &quot;true&quot; ]; then 
-      RC=0;ssh dim1 ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 ||RC=$?
-      if [ $RC == &quot;0&quot; ]; then echo &quot;dim1 ping ok&quot;; else echo &quot;dim1 not reachable&quot;;exit 1;fi
+    echo &quot;J: ACT=$ACT ==&gt; skiping image building&quot;;echo
+
+    if [ &quot;$TEST_ON_HW&quot; == &quot;true&quot; ]; then 
+
+      echo &quot;Test on Hardware selected ==&gt; testing POWER servers accessibility:&quot;
+      # Cleaning will occur at this step, remote fw*.bin* files older than $days will be removed
       days=30;srch=&quot;&apos;fw*.bin*&apos;&quot;
+
       for box in &quot;${TESTBOXES[@]}&quot;;do
-        case $box in
-          marennes)                # first remote machine tries to restart VPN, if ping doesnt work
-            bindir=&quot;/home/fpga/&quot;
-			RC=0;ssh $box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$? # cannot reach marennes from dim1
-            if [ $RC != &quot;0&quot; ]; then :
-              echo &quot;$box not reachable, retry VPN connection&quot;
-              mail -s &quot;$box not reachable, retriing VPN connection&quot; castella
-              echo &quot;VPN processes=`ps -ef|grep vpn`&quot;
-              RC=0;sudo /root/fpga_vpn/stop_openvpn.sh  &amp;&amp; sleep 10||RC=$?; echo &quot;sudo stopvpn  RC=$RC&quot;
-              echo &quot;VPN processes=`ps -ef|grep vpn`&quot;
-              RC=0;sudo /root/fpga_vpn/start_openvpn.sh &amp;&amp; sleep 60||RC=$?; echo &quot;sudo startvpn RC=$RC&quot;
-              echo &quot;VPN processes=`ps -ef|grep vpn`&quot;
-              RC=0;ssh $box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1||RC=$?
-            fi
-            ;;
-          brahma)                   # other remote machines should not restart VPN again (too often)
-            bindir=&quot;/home/fpga/&quot;
-			RC=0;ssh $box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$? # cannot reach Brahma from dim1
-            ;;
-          *) 
-            bindir=&quot;/opt/fpga/&quot;
-            RC=0;ssh dim1 ping $box -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
-            ;;                                       
-        esac
-        if [ $RC == &quot;0&quot; ]; then echo &quot;$box ping ok&quot;; else echo &quot;$box not reachable&quot;;continue;fi
-        echo &quot;CLEANING Process : ssh $box find &amp; delete $srch in $bindir older than $days days&quot;
-        ssh $box &quot;find $bindir -type f -name $srch -mtime +$days -ls -delete&quot;
-        nusers=`ssh fpga@${box} who|grep -v root|grep -v fpga|wc -l`
-        echo &quot;`date` box=$box nusers=$nusers&quot;
+      
+        if [[ ${mopBoxes[*]} =~ $box ]]
+        then
+          # $box is a Montpellier server
+          echo -e &quot;MOP   : $box -&gt; \c&quot;
+          RC=0;ssh ${HWUser}@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
+        fi
+
+        if [ $RC == &quot;0&quot; ]; then echo &quot;OK&quot;; else echo &quot;FAILED&quot;;continue;fi
+
+        echo &quot;Cleaning process : ssh ${HWUser}@$box find &amp; delete $srch in /home/$HWUser older than $days days&quot;
+        ssh ${HWUser}@$box &quot;find /home/$HWUser -type f -name $srch -mtime +$days -ls -delete&quot;
+        nusers=`ssh ${HWUser}@${box} who|grep -v root|grep -v ${HWUser}|wc -l`
+        echo &quot;box=$box nusers=$nusers (`date`)&quot;                
       done
     fi                          
     exit 0                     
     ;;
-  &apos;hls_intersect_h&apos;)
+
+&apos;hls_intersect_h&apos;)
+    echo &quot;J: ACT=$ACT ==&gt; Configuring image thanks to $CRD.hls_intersect.defconfig file &amp; action compile intersect hash (clean_config_h) ...&quot;;echo
     make -s $CRD.hls_intersect.defconfig
     source ./snap_env.sh        # execute to exploit ACTION_ROOT
     echo &quot;action compile intersect hash&quot;;
     make -C ${ACTION_ROOT} clean config_h
     ;;
   &apos;hls_intersect_s&apos;)
+    echo &quot;J: ACT=$ACT ==&gt; Configuring image thanks to $CRD.hls_intersect.defconfig file &amp; action compile intersect sort (clean_config_s) ...&quot;;echo
     make -s $CRD.hls_intersect.defconfig
     source ./snap_env.sh        # execute to exploit ACTION_ROOT
     echo &quot;action compile intersect sort&quot;;
     make -C ${ACTION_ROOT} clean config_s
     ;;
   *&quot;nvme&quot;*|*&quot;NVME&quot;*)
+    echo &quot;J: ACT=*NVME* ==&gt; SIMULATOR=nosim &amp; Configuring image thanks to $CRD.$ACT.defconfig file ...&quot;;echo
     echo &quot;export SIMULATOR=nosim&quot; &gt;&gt; snap_env.sh
     make -s $CRD.$ACT.defconfig
     ;;
   *)
+    echo &quot;J: Generic case ==&gt; Just configuring image thanks to $CRD.$ACT.defconfig file ...&quot;;echo
     make -s $CRD.$ACT.defconfig
     ;;
 esac
 
-echo &quot;****************************************************************************************&quot;
-if [ &quot;$CL&quot; == &quot;nCL&quot; ]; then
-    maxloop=5;
-    for loop in `seq 1 $maxloop`;do  
-      echo &quot;J:`date` Build Non_Cloud Image for $CRD, Loop $loop&quot;
-      RC=0; bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot; &amp;&amp; break || RC=$?
-    done
-    if [ $RC = &quot;0&quot; ] &amp;&amp; [ $loop -gt 1 ]; then mail -s &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot; castella;  fi
-    if [ $RC != &quot;0&quot; ]; then mail -s &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot; castella; exit 1;  fi
 
+#==============================================================================================
+# Building image (make image/ make cloud...)
+
+if [ &quot;$CL&quot; == &quot;nCL&quot; ]; then
+
+  maxloop=5;
+  for loop in `seq 1 $maxloop`
+  do  
+    echo;echo &quot;****************************************************************************************&quot;
+    echo &quot;J: Build Non-Cloud Image (make image) for $CRD, Loop ${loop}/$maxloop (`date`)&quot;
+    echo
+    #RC=0; bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot; &amp;&amp; break || RC=$?
+    RC=0; make image &amp;&amp; break || RC=$?
+  done
+
+  if [ $RC -eq 0 ] &amp;&amp; [ $loop -eq 1 ]; then 
+    echo &quot;OK : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED at the first try (loop=$loop)&quot;
+
+  elif [ $RC -eq 0 ] &amp;&amp; [ $loop -gt 1 ]; then
+    echo &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot;
+    if [ $EmailOrNotEmail -eq 1 ]; then
+      echo &quot;  -&gt; Sending an email to ${EmailDestinationList[*]}&quot;
+      SendAnEmail -s &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot; -d &quot;${EmailDestinationList[*]}&quot;
+    fi
+
+  elif [ $RC -ne 0 ]; then
+    echo &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot;
+    if [ $EmailOrNotEmail -eq 1 ]; then
+      echo &quot;  -&gt; Sending an email to ${EmailDestinationList[*]}&quot;    
+      SendAnEmail -s &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot; -d &quot;${EmailDestinationList[*]}&quot;
+    fi
+    echo &quot;  -&gt; Backuping Build logs into $LogsDir&quot;
+    mkdir -p $LogsDir # rsync does not do &quot;mkdir -p $LogsDir&quot; but &quot;mkdir $LogsDir&quot; only (which will fail if more than one step dir to create)
+    rsync -av $SNAP_ROOT/hardware/logs/* $LogsDir  # rsync first does mkdir -p $LogsDir
+    
+    exit 1
+  fi
+
+# FAB: do up to $maxloop loop ??
 else # case of Cloud Build
+  echo;echo &quot;****************************************************************************************&quot;
+  echo &quot;J: Build Cloud Image (make cloud) for $CRD (`date`)&quot;
+  echo
   mkdir -p ${SNAP_ROOT}/hardware/DCPs
-  echo &quot;J:`date` Build Cloud Image ...&quot;
   echo &quot;export DCP_ROOT=${SNAP_ROOT}/hardware/DCPs/&quot;              &gt;&gt; snap_env.sh
   echo &quot;ENABLE_PRFLOW=y&quot;                                          &gt;&gt; .snap_config
   echo &quot;ENABLE_CLOUD_USER_FLOW=n&quot;                                 &gt;&gt; .snap_config
   echo &quot;ENABLE_CLOUD_BUILD_BITFILE=n&quot;                             &gt;&gt; .snap_config
   make -s oldconfig
-  echo &quot;J:Build Static Region ...&quot;
-  bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_base&quot; || exit
-  echo &quot;J:Build Action Region ...&quot;
-  bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_action&quot; || exit
-  echo &quot;J:Merge Static and Action Region ...&quot;
+
+  echo &quot;Building Static Region ...&quot;
+  #bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_base&quot; || exit
+  make cloud_base || exit
+
+  echo &quot;Building Action Region ...&quot;
+  #bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_action&quot; || exit
+  make cloud_action || exit
+
+  echo &quot;Merging Static and Action Region ...&quot;
   echo &quot;ENABLE_CLOUD_BUILD_BITFILE=y&quot;                             &gt;&gt; .snap_config
   make -s oldconfig
-  bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_merge&quot; || exit
+  #bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_merge&quot; || exit
+  make cloud_merge || exit
 fi
 
+
+#### FAB J&apos;en suis là
+#==============================================================================================
+# Checking generated binaries
 
 # when using a parallel flash we have only 1 binary file
 # when using a SPI8 flash we have 2 binary files to deal with
