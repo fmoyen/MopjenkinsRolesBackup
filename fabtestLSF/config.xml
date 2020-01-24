@@ -18,13 +18,6 @@ hdcl060.boeblingen.de.ibm.com
 hdclp026.boeblingen.de.ibm.com</defaultValue>
           <trim>false</trim>
         </hudson.model.TextParameterDefinition>
-        <com.cloudbees.plugins.credentials.CredentialsParameterDefinition plugin="credentials@2.3.0">
-          <name>LSFUser</name>
-          <description></description>
-          <defaultValue>LSFUser</defaultValue>
-          <credentialType>com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl</credentialType>
-          <required>false</required>
-        </com.cloudbees.plugins.credentials.CredentialsParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
@@ -48,8 +41,11 @@ hdclp026.boeblingen.de.ibm.com</defaultValue>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
 
-AFSUser=capimop
-AFSPass=jap1sdlhdqjalsda
+
+echo &quot;Defined Credentials:&quot;
+echo $AFSUser
+echo $AFSPass
+
 MyJob=myjob
 JobOutput=joboutput.txt
 
@@ -71,6 +67,7 @@ fi
 cat &lt;&lt; EOF &gt; $MyJob
 sleep 10
 date &gt; $JobOutput
+id &gt;&gt; $JobOutput
 uname -a &gt;&gt; $JobOutput
 EOF
 
@@ -94,5 +91,15 @@ cat $JobOutput
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
-  <buildWrappers/>
+  <buildWrappers>
+    <org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper plugin="credentials-binding@1.20">
+      <bindings>
+        <org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
+          <credentialsId>LSFUser</credentialsId>
+          <usernameVariable>AFSUser</usernameVariable>
+          <passwordVariable>AFSPass</passwordVariable>
+        </org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
+      </bindings>
+    </org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper>
+  </buildWrappers>
 </project>
