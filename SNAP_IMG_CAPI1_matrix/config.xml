@@ -1043,6 +1043,10 @@ if [ $loop -eq $maxloop ];then
 fi
 
 echo;echo &quot;***************************************************************************************&quot;
+echo &quot; running test --&gt; $box&quot;  | tr &apos;[:lower:]&apos; &apos;[:upper:]&apos;
+echo &quot;***************************************************************************************&quot;
+
+echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Preparing $CRD card image(s) test onto $box system&quot;
 echo
 echo -e &quot;  -&gt; Power OS release: \c&quot;; ssh ${HWUser}@${box} &quot;grep PRETTY_NAME /etc/os-release | cut -d= -f2&quot;

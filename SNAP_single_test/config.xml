@@ -492,6 +492,10 @@ fi
 
 
 echo;echo &quot;***************************************************************************************&quot;
+echo &quot; running test --&gt; $box&quot;  | tr &apos;[:lower:]&apos; &apos;[:upper:]&apos;
+echo &quot;***************************************************************************************&quot;
+
+echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Preparing $CRD card image(s) test onto $box system&quot;
 echo
 ssh ${HWUser}@${box} &quot;echo ------ START of JOB on $box ----&gt;&gt; jenkins.log&quot;
