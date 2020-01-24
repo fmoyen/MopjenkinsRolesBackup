@@ -49,9 +49,9 @@ for Questions: please contact  A.Castellane or F.Moyen</description>
         <hudson.model.StringParameterDefinition>
           <name>mopBoxes</name>
           <description>List of Montpellier systems available for testing
-Marennes is a P8 (CAPI1 cards)
+Antipode and Marennes are P8 (CAPI1 cards)
 Orpington and Lewen05 are P9 (CAPI2.0 cards)</description>
-          <defaultValue>orpington lewen05</defaultValue>
+          <defaultValue>antipode marennes orpington lewen05</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -64,8 +64,9 @@ Orpington and Lewen05 are P9 (CAPI2.0 cards)</description>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>CARDS</name>
-          <description>CARDS=(ADKU3 AD8K5 S121B N250S N250SP AD9V3)</description>
-          <defaultValue>AD9V3 AD9H3 N250SP</defaultValue>
+          <description>List of available cards for Hardware test
+CARDS=(ADKU3 AD8K5 S121B N250S N250SP AD9V3)</description>
+          <defaultValue>ADKU3 AD8K5 N250SAD9V3 AD9H3 N250SP</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
