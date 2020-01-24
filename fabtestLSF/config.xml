@@ -18,6 +18,13 @@ hdcl060.boeblingen.de.ibm.com
 hdclp026.boeblingen.de.ibm.com</defaultValue>
           <trim>false</trim>
         </hudson.model.TextParameterDefinition>
+        <com.cloudbees.plugins.credentials.CredentialsParameterDefinition plugin="credentials@2.3.0">
+          <name>LSFUser</name>
+          <description></description>
+          <defaultValue>LSFUser</defaultValue>
+          <credentialType>com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl</credentialType>
+          <required>false</required>
+        </com.cloudbees.plugins.credentials.CredentialsParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
@@ -40,8 +47,6 @@ hdclp026.boeblingen.de.ibm.com</defaultValue>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
-
-set -x
 
 AFSUser=capimop
 AFSPass=jap1sdlhdqjalsda
@@ -82,7 +87,7 @@ done
 echo
 
 # Getting back Job file result
-sshpass -e scp AFSUser@$LoginServer:./$JobOutput . 
+sshpass -p $AFSPass scp $AFSUser@$LoginServer:./$JobOutput . 
 echo
 cat $JobOutput
 </command>
