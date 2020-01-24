@@ -615,6 +615,7 @@ echo &quot;export PSLSE_ROOT=$USERHOME/pslse&quot; &gt;snap_env.sh
 
 echo;echo &quot;  -&gt; Exporting XILINX_LOCAL_USER_DATA=no into snap_env.sh&quot;
 #echo &quot;export PSL_DCP=/afs/bb/proj/fpga/framework/cards/$CRD/current/b_route_design.dcp&quot; &gt;&gt;snap_env.sh
+echo &quot;export PSL_DCP=/opt/IBM/PSL_DCP/$CRD/b_route_design.dcp&quot; &gt;&gt;snap_env.sh
 echo &quot;#setup: XILINX_LOCAL_USER_DATA=${XILINX_LOCAL_USER_DATA}, overwrite=no to prevent write access error in XilincTclStore (tclapp:load_apps)&quot; &gt;&gt;snap_env.sh
 echo &quot;export XILINX_LOCAL_USER_DATA=no&quot; &gt;&gt; snap_env.sh
 echo
