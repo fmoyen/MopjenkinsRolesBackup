@@ -235,6 +235,7 @@ function MoveToDir
 
       echo &quot;  -&gt; Moving $FPGACard bin-file(s) &amp; bit-file(s) images to $ToDir&quot;
       mkdir -p $ToDir
+      chmod g+w $ToDir
       mv $Bin $ToDir
       echo $Bin
       if [ &quot;$Bit&quot; != &quot;&quot; ]; then mv $Bit $ToDir; echo $Bit; fi
@@ -242,7 +243,7 @@ function MoveToDir
       for i in $SSHDest
       do
         echo;echo &quot;  -&gt; Moving $FPGACard bin-file(s) &amp; bit-file(s) images to $i:$ToDir&quot;
-        ssh ${SSHUser}@$i &quot;mkdir -p $ToDir; mv $Bin $ToDir&quot;
+        ssh ${SSHUser}@$i &quot;mkdir -p $ToDir; chmod g+w $ToDir; mv $Bin $ToDir&quot;
         if [ &quot;$Bit&quot; != &quot;&quot; ]; then ssh ${SSHUser}@$i &quot;mv $Bit $ToDir&quot;; echo $Bit; fi
       done      
 }

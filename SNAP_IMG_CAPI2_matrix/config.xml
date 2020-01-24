@@ -705,6 +705,7 @@ function CopyToDir
 
       echo &quot;  -&gt; Copying $FPGACard bin-file(s) &amp; bit-file(s) images to $ToDir&quot;
       mkdir -p $ToDir
+      chmod g+w $ToDir
       cp -rp $Bin $ToDir
       echo $Bin
       if [ &quot;$Bit&quot; != &quot;&quot; ]; then cp -rp $Bit $ToDir; echo $Bit; fi
@@ -712,7 +713,7 @@ function CopyToDir
       for i in $SSHDest
       do
         echo;echo &quot;  -&gt; Copying $FPGACard bin-file(s) &amp; bit-file(s) images to $i:$ToDir&quot;
-        ssh ${SSHUser}@$i &quot;mkdir -p $ToDir&quot;
+        ssh ${SSHUser}@$i &quot;mkdir -p $ToDir; chmod g+w $ToDir&quot;
         scp -rp $Bin ${SSHUser}@$i:$ToDir
         if [ &quot;$Bit&quot; != &quot;&quot; ]; then scp -rp $Bit ${SSHUser}@$i:$ToDir; echo $Bit; fi
       done
