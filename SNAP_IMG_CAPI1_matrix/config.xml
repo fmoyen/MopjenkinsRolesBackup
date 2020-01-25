@@ -770,19 +770,112 @@ else # case of Cloud Build
   echo &quot;ENABLE_CLOUD_BUILD_BITFILE=n&quot;                             &gt;&gt; .snap_config
   make -s oldconfig
 
-  echo &quot;Building Static Region ...&quot;
-  #bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_base&quot; || exit
-  make cloud_base || exit
+  echo;echo &quot;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * &quot;
+  echo &quot;   -&gt; Build Cloud Base (make cloud_base) for $CRD (`date`)&quot;
+  echo
+  maxloop=5;
+  for loop in `seq 1 $maxloop`
+  do  
+    echo &quot;Building Static Region ...&quot;
+    #RC=0;bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_base&quot; &amp;&amp; break || RC=$?
+    RC=0;make cloud_base &amp;&amp; break || RC=$?
+  done
 
-  echo &quot;Building Action Region ...&quot;
-  #bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_action&quot; || exit
-  make cloud_action || exit
+  if [ $RC -eq 0 ] &amp;&amp; [ $loop -eq 1 ]; then 
+    echo &quot;OK : ${CRD}_${ACT}_image :-make cloud_base- : TIMING SUCCEEDED at the first try (loop=$loop)&quot;
 
-  echo &quot;Merging Static and Action Region ...&quot;
+  elif [ $RC -eq 0 ] &amp;&amp; [ $loop -gt 1 ]; then
+    echo &quot;WARNING : ${CRD}_${ACT}_image :-make cloud_base- : TIMING SUCCEEDED after $loop loop(s)&quot;
+    if [ $EmailOrNotEmail -eq 1 ]; then
+      echo &quot;  -&gt; Sending an email to ${EmailDestinationList[*]}&quot;
+      SendAnEmail -s &quot;WARNING : ${CRD}_${ACT}_image :-make cloud_base- : TIMING SUCCEEDED after $loop loop(s)&quot; -d &quot;${EmailDestinationList[*]}&quot;
+    fi
+
+  elif [ $RC -ne 0 ]; then
+    echo &quot;ERROR : ${CRD}_${ACT}_image :-make cloud_base- : TIMING FAILED after $maxloop loop(s)&quot;
+    if [ $EmailOrNotEmail -eq 1 ]; then
+      echo &quot;  -&gt; Sending an email to ${EmailDestinationList[*]}&quot;    
+      SendAnEmail -s &quot;ERROR : ${CRD}_${ACT}_image :-make cloud_base- : TIMING FAILED after $maxloop loop(s)&quot; -d &quot;${EmailDestinationList[*]}&quot;
+    fi
+    echo &quot;  -&gt; Backuping Build logs into $LogsDir&quot;
+    mkdir -p $LogsDir # rsync does not do &quot;mkdir -p $LogsDir&quot; but &quot;mkdir $LogsDir&quot; only (which will fail if more than one step dir to create)
+    rsync -av $SNAP_ROOT/hardware/logs/* $LogsDir  # rsync first does mkdir -p $LogsDir
+    
+    exit 1
+  fi
+
+  echo;echo &quot;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * &quot;
+  echo &quot;   -&gt; Build Cloud Action (make cloud_action) for $CRD (`date`)&quot;
+  echo
+  maxloop=5;
+  for loop in `seq 1 $maxloop`
+  do  
+    echo &quot;Building Action Region ...&quot;
+    #RC=0;bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_action&quot; &amp;&amp; break || RC=$?
+    RC=0;make cloud_action &amp;&amp; break || RC=$?
+  done
+  
+  if [ $RC -eq 0 ] &amp;&amp; [ $loop -eq 1 ]; then 
+    echo &quot;OK : ${CRD}_${ACT}_image :-make cloud_action- : TIMING SUCCEEDED at the first try (loop=$loop)&quot;
+
+  elif [ $RC -eq 0 ] &amp;&amp; [ $loop -gt 1 ]; then
+    echo &quot;WARNING : ${CRD}_${ACT}_image :-make cloud_action- : TIMING SUCCEEDED after $loop loop(s)&quot;
+    if [ $EmailOrNotEmail -eq 1 ]; then
+      echo &quot;  -&gt; Sending an email to ${EmailDestinationList[*]}&quot;
+      SendAnEmail -s &quot;WARNING : ${CRD}_${ACT}_image :-make cloud_action- : TIMING SUCCEEDED after $loop loop(s)&quot; -d &quot;${EmailDestinationList[*]}&quot;
+    fi
+
+  elif [ $RC -ne 0 ]; then
+    echo &quot;ERROR : ${CRD}_${ACT}_image :-make cloud_action- : TIMING FAILED after $maxloop loop(s)&quot;
+    if [ $EmailOrNotEmail -eq 1 ]; then
+      echo &quot;  -&gt; Sending an email to ${EmailDestinationList[*]}&quot;    
+      SendAnEmail -s &quot;ERROR : ${CRD}_${ACT}_image :-make cloud_action- : TIMING FAILED after $maxloop loop(s)&quot; -d &quot;${EmailDestinationList[*]}&quot;
+    fi
+    echo &quot;  -&gt; Backuping Build logs into $LogsDir&quot;
+    mkdir -p $LogsDir # rsync does not do &quot;mkdir -p $LogsDir&quot; but &quot;mkdir $LogsDir&quot; only (which will fail if more than one step dir to create)
+    rsync -av $SNAP_ROOT/hardware/logs/* $LogsDir  # rsync first does mkdir -p $LogsDir
+    
+    exit 1
+  fi
+
+
+  echo;echo &quot;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * &quot;
+  echo &quot;   -&gt; Cloud Merge (make cloud_merge) for $CRD (`date`)&quot;
+  echo &quot;      Merging Static and Action Region ...&quot;
+  echo
   echo &quot;ENABLE_CLOUD_BUILD_BITFILE=y&quot;                             &gt;&gt; .snap_config
   make -s oldconfig
-  #bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_merge&quot; || exit
-  make cloud_merge || exit
+    
+  maxloop=5;
+  for loop in `seq 1 $maxloop`
+  do  
+    #RC=0;bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_merge&quot; &amp;&amp; break || RC=$?
+    RC=0;make cloud_merge &amp;&amp; break || RC=$?
+  done
+  
+  if [ $RC -eq 0 ] &amp;&amp; [ $loop -eq 1 ]; then 
+    echo &quot;OK : ${CRD}_${ACT}_image :-make cloud_merge- : TIMING SUCCEEDED at the first try (loop=$loop)&quot;
+
+  elif [ $RC -eq 0 ] &amp;&amp; [ $loop -gt 1 ]; then
+    echo &quot;WARNING : ${CRD}_${ACT}_image :-make cloud_merge- : TIMING SUCCEEDED after $loop loop(s)&quot;
+    if [ $EmailOrNotEmail -eq 1 ]; then
+      echo &quot;  -&gt; Sending an email to ${EmailDestinationList[*]}&quot;
+      SendAnEmail -s &quot;WARNING : ${CRD}_${ACT}_image :-make cloud_merge- : TIMING SUCCEEDED after $loop loop(s)&quot; -d &quot;${EmailDestinationList[*]}&quot;
+    fi
+
+  elif [ $RC -ne 0 ]; then
+    echo &quot;ERROR : ${CRD}_${ACT}_image :-make cloud_merge- : TIMING FAILED after $maxloop loop(s)&quot;
+    if [ $EmailOrNotEmail -eq 1 ]; then
+      echo &quot;  -&gt; Sending an email to ${EmailDestinationList[*]}&quot;    
+      SendAnEmail -s &quot;ERROR : ${CRD}_${ACT}_image :-make cloud_merge- : TIMING FAILED after $maxloop loop(s)&quot; -d &quot;${EmailDestinationList[*]}&quot;
+    fi
+    echo &quot;  -&gt; Backuping Build logs into $LogsDir&quot;
+    mkdir -p $LogsDir # rsync does not do &quot;mkdir -p $LogsDir&quot; but &quot;mkdir $LogsDir&quot; only (which will fail if more than one step dir to create)
+    rsync -av $SNAP_ROOT/hardware/logs/* $LogsDir  # rsync first does mkdir -p $LogsDir
+    
+    exit 1
+  fi
+  
 fi
 
 
