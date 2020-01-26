@@ -927,7 +927,7 @@ case ${TEST_ON_HW} in
 
     if [ $TestCardAllowed -eq 0 ]
     then
-      SaveDir=$RootSaveDir/${CRD}_test_bypassed
+      SaveDir=$RootSaveDir/${CRD_CL}_test_bypassed
       echo &quot;  -&gt; No test CARD $CRD available...&quot;
       CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
       echo &quot;  -&gt; EXITING !&quot;
@@ -941,7 +941,7 @@ case ${TEST_ON_HW} in
     echo;echo &quot;****************************************************************************************&quot;
     echo &quot;J: No test on POWER Hardware requested (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot; 
     echo
-    SaveDir=$RootSaveDir/${CRD}_no_test_requested
+    SaveDir=$RootSaveDir/${CRD_CL}_no_test_requested
     CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
     exit 0
   ;;
@@ -1129,7 +1129,7 @@ if [ $loop -eq $maxloop ];then
   echo;echo &quot;***************************************************************************************&quot;
   echo &quot;J: No card $CRD available with TESTBOXES= ${TESTBOXES[*]}&quot;
   echo
-  SaveDir=&quot;$RootSaveDir/${CRD}_not_available&quot;
+  SaveDir=&quot;$RootSaveDir/${CRD_CL}_not_available&quot;
   CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
   echo &quot;  -&gt; EXITING !&quot;
   exit 100
@@ -1288,7 +1288,7 @@ if [ $RC -eq 0 ]; then
   echo;echo &quot;***************************************************************************************&quot;
   echo &quot;J: Test SUCCEEDED RC= $RC (`date`)&quot;
   
-  SaveDir=$RootSaveDir/${CRD}_test_OK
+  SaveDir=$RootSaveDir/${CRD_CL}_test_OK
   echo &quot;  -&gt;  CARD $CRD Hardware test succeeded...&quot;
   CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
 
@@ -1296,7 +1296,7 @@ else
   echo;echo &quot;***************************************************************************************&quot;
   echo &quot;J: Test FAILED RC= $RC (`date`)&quot;
   
-  SaveDir=$RootSaveDir/${CRD}_test_failure
+  SaveDir=$RootSaveDir/${CRD_CL}_test_failure
   echo &quot;  -&gt;  CARD $CRD Hardware test failed...&quot;
   CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
   echo &quot;  -&gt; EXITING !&quot;
