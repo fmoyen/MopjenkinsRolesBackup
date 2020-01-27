@@ -468,7 +468,7 @@ export TARGET_DIR=`echo $TARGET_DIR | sed -e &apos;s/[=,\/]/-/g&apos;`
 
 RootSaveDir=/data/Images
 RootLogsDir=/data/LogsWhenFailed
-LogsDir=$RootLogsDir/$TARGET_DIR/hardware/logs
+LogsDir=$RootLogsDir/$TARGET_DIR/hardware
 PSLSE_BRANCH=master
 
 CapiUtilsURL=&quot;https://github.com/ibm-capi/capi-utils.git&quot;
@@ -752,8 +752,11 @@ if [ &quot;$CL&quot; == &quot;nCL&quot; ]; then
       SendAnEmail -s &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot; -d &quot;${EmailDestinationList[*]}&quot;
     fi
     echo &quot;  -&gt; Backuping Build logs into $LogsDir&quot;
-    mkdir -p $LogsDir # rsync does not do &quot;mkdir -p $LogsDir&quot; but &quot;mkdir $LogsDir&quot; only (which will fail if more than one step dir to create)
-    rsync -av $SNAP_ROOT/hardware/logs/* $LogsDir  # rsync first does mkdir -p $LogsDir
+    mkdir -p $LogsDir/logs # rsync does not do &quot;mkdir -p $LogsDir/logs&quot; but &quot;mkdir $LogsDir/logs&quot; only (which will fail if more than one step dir to create)
+    rsync -av $SNAP_ROOT/hardware/logs/* $LogsDir/logs
+    mkdir -p $LogsDir/build/Reports
+    rsync -av $SNAP_ROOT/hardware/build/Reports/* $LogsDir/build/Reports
+
     
     exit 1
   fi
