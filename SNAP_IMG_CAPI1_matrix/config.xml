@@ -825,10 +825,10 @@ else # case of Cloud Build
 
     elif [ $RC -eq 0 ] &amp;&amp; [ $loop -gt 1 ]; then
       echo &quot;WARNING : ${CRD}_${ACT}_image :-make cloud_action- : TIMING SUCCEEDED after $loop loop(s)&quot;
-    if [ $EmailOrNotEmail -eq 1 ]; then
-      echo &quot;  -&gt; Sending an email to ${EmailDestinationList[*]}&quot;
-      SendAnEmail -s &quot;WARNING : ${CRD}_${ACT}_image :-make cloud_action- : TIMING SUCCEEDED after $loop loop(s)&quot; -d &quot;${EmailDestinationList[*]}&quot;
-    fi
+      if [ $EmailOrNotEmail -eq 1 ]; then
+        echo &quot;  -&gt; Sending an email to ${EmailDestinationList[*]}&quot;
+        SendAnEmail -s &quot;WARNING : ${CRD}_${ACT}_image :-make cloud_action- : TIMING SUCCEEDED after $loop loop(s)&quot; -d &quot;${EmailDestinationList[*]}&quot;
+      fi
 
     elif [ $RC -ne 0 ] &amp;&amp; [ $loop -lt $maxloop ]; then
       echo &quot;WARNING : ${CRD}_${ACT}_image :-make cloud_action- : TIMING FAILED. Loop $loop/$maxloop) =&gt; Retrying...&quot;
@@ -868,7 +868,7 @@ else # case of Cloud Build
         SendAnEmail -s &quot;WARNING : ${CRD}_${ACT}_image :-make cloud_merge- : TIMING SUCCEEDED after $loop loop(s)&quot; -d &quot;${EmailDestinationList[*]}&quot;
       fi
 
-      elif [ $RC -ne 0 ] &amp;&amp; [ $loop -lt $maxloop ]; then
+    elif [ $RC -ne 0 ] &amp;&amp; [ $loop -lt $maxloop ]; then
         echo &quot;WARNING : ${CRD}_${ACT}_image :-make cloud_merge- : TIMING FAILED. Loop $loop/$maxloop) =&gt; Retrying...&quot;
         continue
 
@@ -885,9 +885,9 @@ else # case of Cloud Build
       exit 1
     fi
   
-  fi
+  done
   
-done
+fi
 
 
 #==============================================================================================
