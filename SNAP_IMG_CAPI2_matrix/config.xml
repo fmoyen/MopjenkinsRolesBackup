@@ -929,6 +929,10 @@ then
 else # case of Cloud Build
 # The following was copied from CAPI1.0 )&gt; not UPDATED YET AS CAPI2.0 DOES NOT OFFER Partial RECONFIGURATION
 # FAB never for the moment but if needed, needs to adapt (BSUB, etc)
+  echo &quot;CAPI2 Partiel Reconfiguration not available&quot;
+  echo &quot;Exiting...&quot;
+  exit 1
+  
   mkdir -p ${SNAP_ROOT}/hardware/DCPs
   echo &quot;J:`date` Build Cloud Image ...&quot;
   echo &quot;export DCP_ROOT=${SNAP_ROOT}/hardware/DCPs/&quot;              &gt;&gt; snap_env.sh

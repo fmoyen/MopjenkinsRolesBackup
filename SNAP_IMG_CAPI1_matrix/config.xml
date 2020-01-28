@@ -782,8 +782,8 @@ else # case of Cloud Build
     echo &quot;      (Building Static Region)&quot;
     echo
 
-    #RC=0;bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_base&quot; &amp;&amp; break || RC=$?
-    RC=0;make cloud_base &amp;&amp; break || RC=$?
+    #RC=0;bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_base&quot; || RC=$?
+    RC=0;make cloud_base || RC=$?
 
     if [ $RC -eq 0 ] &amp;&amp; [ $loop -eq 1 ]; then 
       echo &quot;OK : ${CRD}_${ACT}_image :-make cloud_base- : TIMING SUCCEEDED at the first try (loop=$loop)&quot;
@@ -817,8 +817,8 @@ else # case of Cloud Build
     echo &quot;      (Building Action Region)&quot;
     echo
  
-    #RC=0;bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_action&quot; &amp;&amp; break || RC=$?
-    RC=0;make cloud_action &amp;&amp; break || RC=$?
+    #RC=0;bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_action&quot; || RC=$?
+    RC=0;make cloud_action || RC=$?
   
     if [ $RC -eq 0 ] &amp;&amp; [ $loop -eq 1 ]; then 
       echo &quot;OK : ${CRD}_${ACT}_image :-make cloud_action- : TIMING SUCCEEDED at the first try (loop=$loop)&quot;
@@ -855,8 +855,8 @@ else # case of Cloud Build
     echo &quot;ENABLE_CLOUD_BUILD_BITFILE=y&quot;                             &gt;&gt; .snap_config
     make -s oldconfig
     
-    #RC=0;bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_merge&quot; &amp;&amp; break || RC=$?
-    RC=0;make cloud_merge &amp;&amp; break || RC=$?
+    #RC=0;bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_merge&quot; || RC=$?
+    RC=0;make cloud_merge || RC=$?
   
     if [ $RC -eq 0 ] &amp;&amp; [ $loop -eq 1 ]; then 
       echo &quot;OK : ${CRD}_${ACT}_image :-make cloud_merge- : TIMING SUCCEEDED at the first try (loop=$loop)&quot;
