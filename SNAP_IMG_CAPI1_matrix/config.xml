@@ -776,6 +776,9 @@ else # case of Cloud Build
   maxloop=5;
   for loop in `seq 1 $maxloop`
   do  
+    echo;echo &quot;****************************************************************************************&quot;
+    echo &quot;J: LOOP ${loop}/$maxloop (`date`)&quot;
+    echo
   
     echo;echo &quot;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * &quot;
     echo &quot;   -&gt; Build Cloud Base (make cloud_base) for $CRD (`date`)&quot;
@@ -855,8 +858,8 @@ else # case of Cloud Build
     echo &quot;ENABLE_CLOUD_BUILD_BITFILE=y&quot;                             &gt;&gt; .snap_config
     make -s oldconfig
     
-    #RC=0;bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_merge&quot; || RC=$?
-    RC=0;make cloud_merge || RC=$?
+    #RC=0;bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_merge&quot; &amp;&amp; break || RC=$?
+    RC=0;make cloud_merge &amp;&amp; break || RC=$?
   
     if [ $RC -eq 0 ] &amp;&amp; [ $loop -eq 1 ]; then 
       echo &quot;OK : ${CRD}_${ACT}_image :-make cloud_merge- : TIMING SUCCEEDED at the first try (loop=$loop)&quot;
