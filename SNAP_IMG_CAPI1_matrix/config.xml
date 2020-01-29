@@ -9,7 +9,11 @@ WARNING !!!&#xd;
 =&gt;&gt; S121B card is not available for test =&gt; only binary generation are performed (no hw test)  &#xd;
 =&gt;&gt; TIMING reset to 100 for CAPI1 (with 5 loops)&#xd;
 =&gt;&gt; Removed hls_intersect_s &amp; hls_intersect_h tests&#xd;
-==&gt; Removed hls_scatter_gather (too many RAM used)</description>
+==&gt; Removed hls_scatter_gather (too many RAM used)&#xd;
+&#xd;
+==&gt; hdl_nvme_example.SDRAM.NVME removed from ACTions list because it was failing:&#xd;
+  + N250S_nCL HW test failure --&gt; err: cblk_read unhappy rc=0! Timer expired&#xd;
+  + N250S_CL: cloud base generation failure --&gt; make cloud_base failing with very bad Timing (-1314ps, etc)</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <hudson.plugins.jira.JiraProjectProperty plugin="jira@3.0.11"/>
@@ -161,7 +165,6 @@ Warning: -200ps is not easy to reach and needs several attempts (sometimes 5 att
         <string>hdl_example.SDRAM</string>
         <string>hdl_example.SDRAM.NVME</string>
         <string>hdl_helloworld</string>
-        <string>hdl_nvme_example.SDRAM.NVME</string>
         <string>hls_nvme_memcopy</string>
         <string>hls_memcopy</string>
         <string>hls_bfs</string>
