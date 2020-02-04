@@ -756,9 +756,13 @@ if [ &quot;$CL&quot; == &quot;nCL&quot; ]; then
     fi
     echo &quot;  -&gt; Backuping Build logs into $LogsDir&quot;
     mkdir -p $LogsDir/logs # rsync does not do &quot;mkdir -p $LogsDir/logs&quot; but &quot;mkdir $LogsDir/logs&quot; only (which will fail if more than one step dir to create)
-    rsync -av $SNAP_ROOT/hardware/logs/* $LogsDir/logs
+    RSYNC_CMD=&quot;rsync -av $SNAP_ROOT/hardware/logs/* $LogsDir/logs&quot;
+    echo; echo $RSYNC_CMD
+    $RSYNC_CMD
     mkdir -p $LogsDir/build/Reports
-    rsync -av $SNAP_ROOT/hardware/build/Reports/* $LogsDir/build/Reports
+    RSYNC_CMD=&quot;rsync -av $SNAP_ROOT/hardware/build/Reports/* $LogsDir/build/Reports&quot;
+    echo; echo $RSYNC_CMD
+    $RSYNC_CMD
 
     
     exit 1
