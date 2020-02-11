@@ -59,7 +59,7 @@ Orpington and Lewen05 are P9 (CAPI2.0 cards)</description>
           <description>List of Austin systems available for testing :
 (Assuming no VPN or jump server is needed to access Austin servers, 9.X.X.X addresses)
 (it needs to define capimop user with authorized_keys)</description>
-          <defaultValue>hawklp10.aus.stglabs.ibm.com</defaultValue>
+          <defaultValue>hawklp08.aus.stglabs.ibm.com</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
