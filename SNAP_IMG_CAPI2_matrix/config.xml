@@ -116,7 +116,9 @@ Warning: -200ps is not easy to reach and needs several attempts (sometimes 5 att
         </hudson.model.ChoiceParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>FACTORY</name>
-          <description>To generate a FACTORY image with hdl_example.NORAM cases and to finally copy the hdl_example.NORAM factory &amp; hls_helloworld binaries into /data/Images/$card_FACTORY_MCS directory. These will be used to generate a full MCS image including hld_example.NORAM factory + hls_helloworld user</description>
+          <description>To generate a FACTORY image with hdl_example.NORAM cases
+     and to finally copy the hdl_example.NORAM factory &amp; hls_helloworld binaries into /data/Images/$card_FACTORY_MCS directory.
+These binaries will be used to create a full MCS image including hld_example.NORAM factory image + hls_helloworld user image.</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
