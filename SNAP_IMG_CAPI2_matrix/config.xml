@@ -436,6 +436,8 @@ then
     ;;
 
 
+&lt;&lt; //// # Multi-lines comment
+
   *&quot;hdl_example.NORAM&quot;*)
     if [ &quot;$FACTORY&quot;  == &quot;true&quot; ];then
         echo &quot;J: ACT=$ACT &amp;&amp; FACTORY requested =&gt; adding ENABLE_FACTORY=y and FACTORY_IMAGE=\&quot;TRUE\&quot; to .snap_config&quot;
@@ -460,6 +462,8 @@ then
       DSKIP=1
     fi
     ;;
+
+////
 
   * )    
     echo &quot;J: Checking snap/defconfig/$CRD.$ACT.defconfig existence&quot;
@@ -879,13 +883,11 @@ case $ACT in          # select config &amp; compile action
         echo &apos;FACTORY_IMAGE=&quot;TRUE&quot;&apos; &gt;&gt; $TEMPOFILE
 		mv $TEMPOFILE ./defconfig/$CRD.$ACT.defconfig
 
-
-        echo &quot;ENABLE_FACTORY=y&quot; &gt;&gt; ./defconfig/$CRD.$ACT.defconfig
-        make -s $CRD.$ACT.defconfig      
     else
         echo &quot;  -&gt; Factory NOT requested: Only configuring image thanks to $CRD.$ACT.defconfig file ...&quot;;echo
-        make -s $CRD.$ACT.defconfig      
     fi
+    
+    make -s $CRD.$ACT.defconfig      
     ;;
     
   *)
