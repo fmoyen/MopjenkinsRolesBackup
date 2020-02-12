@@ -871,7 +871,15 @@ case $ACT in          # select config &amp; compile action
   *&quot;hdl_example.NORAM&quot;*)
     echo &quot;J: ACT=$ACT ==&gt; Checking if FACTORY requested...&quot;;echo
     if [ &quot;$FACTORY&quot;  == &quot;true&quot; ];then
-        echo &quot;  -&gt; Factory requested: Configuring image with ENABLE_FACTORY=y thanks to $CRD.$ACT.defconfig file ...&quot;;echo
+        echo &quot;  -&gt; Factory requested: Configuring image with ENABLE_FACTORY=y and FACTORY_IMAGE=\&quot;TRUE\&quot; thanks to $CRD.$ACT.defconfig file ...&quot;;echo
+
+        TEMPOFILE=./defconfig/tempofile
+        cat ./defconfig/$CRD.$ACT.defconfig | egrep  -v &quot;ENABLE_FACTORY|FACTORY_IMAGE&quot; &gt; $TEMPOFILE
+        echo &apos;ENABLE_FACTORY=y&apos; &gt;&gt; $TEMPOFILE
+        echo &apos;FACTORY_IMAGE=&quot;TRUE&quot;&apos; &gt;&gt; $TEMPOFILE
+		mv $TEMPOFILE ./defconfig/$CRD.$ACT.defconfig
+
+
         echo &quot;ENABLE_FACTORY=y&quot; &gt;&gt; ./defconfig/$CRD.$ACT.defconfig
         make -s $CRD.$ACT.defconfig      
     else
