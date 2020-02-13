@@ -436,34 +436,34 @@ then
     ;;
 
 
-&lt;&lt; //// # Multi-lines comment
-
-  *&quot;hdl_example.NORAM&quot;*)
-    if [ &quot;$FACTORY&quot;  == &quot;true&quot; ];then
-        echo &quot;J: ACT=$ACT &amp;&amp; FACTORY requested =&gt; adding ENABLE_FACTORY=y and FACTORY_IMAGE=\&quot;TRUE\&quot; to .snap_config&quot;
-        cat .snap_config | egrep  -v &quot;ENABLE_FACTORY|FACTORY_IMAGE&quot; &gt; tempofile
-        echo &apos;ENABLE_FACTORY=y&apos; &gt;&gt; tempofile
-        echo &apos;FACTORY_IMAGE=&quot;TRUE&quot;&apos; &gt;&gt; tempofile
-		mv tempofile .snap_config
-    fi
-    
-    echo &quot;J: Checking snap/defconfig/$CRD.$ACT.defconfig existence&quot;
-    if [ -f snap/defconfig/$CRD.$ACT.defconfig ];then
-      echo &quot; --&gt; OK&quot;
-      DSKIP=0
-    else 
-      echo;echo &quot;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!&quot;
-      echo &quot;$CRD.$ACT.defconfig does not exist&quot;
-      echo &quot;Aborting...&quot;
-      echo;echo &quot;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!&quot;
-      echo;echo &quot;defconfig directory content:&quot;
-      echo &quot;----------------------------&quot;
-      ls snap/defconfig/
-      DSKIP=1
-    fi
-    ;;
-
-////
+#&lt;&lt; //// # Multi-lines comment
+#
+#  *&quot;hdl_example.NORAM&quot;*)
+#    if [ &quot;$FACTORY&quot;  == &quot;true&quot; ];then
+#        echo &quot;J: ACT=$ACT &amp;&amp; FACTORY requested =&gt; adding ENABLE_FACTORY=y and FACTORY_IMAGE=\&quot;TRUE\&quot; to .snap_config&quot;
+#        cat .snap_config | egrep  -v &quot;ENABLE_FACTORY|FACTORY_IMAGE&quot; &gt; tempofile
+#        echo &apos;ENABLE_FACTORY=y&apos; &gt;&gt; tempofile
+#        echo &apos;FACTORY_IMAGE=&quot;TRUE&quot;&apos; &gt;&gt; tempofile
+#		mv tempofile .snap_config
+#    fi
+#    
+#    echo &quot;J: Checking snap/defconfig/$CRD.$ACT.defconfig existence&quot;
+#    if [ -f snap/defconfig/$CRD.$ACT.defconfig ];then
+#      echo &quot; --&gt; OK&quot;
+#      DSKIP=0
+#    else 
+#      echo;echo &quot;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!&quot;
+#      echo &quot;$CRD.$ACT.defconfig does not exist&quot;
+#      echo &quot;Aborting...&quot;
+#      echo;echo &quot;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!&quot;
+#      echo;echo &quot;defconfig directory content:&quot;
+#      echo &quot;----------------------------&quot;
+#      ls snap/defconfig/
+#      DSKIP=1
+#    fi
+#    ;;
+#
+#////
 
   * )    
     echo &quot;J: Checking snap/defconfig/$CRD.$ACT.defconfig existence&quot;
