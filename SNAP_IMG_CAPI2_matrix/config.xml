@@ -333,7 +333,9 @@ echo &quot;  -&gt; action_types (hdl,hls)=$ACTION_TYPE enabled_cards=$CRD BSKIP=
 # FAB: faire le tri dans ces cases
 case &quot;$CRD:$ACT&quot; in
     
-  AD9H3:hdl_example.SDRAM* | AD9H3:hls_memcopy | AD9H3:hls_search ) # AD9H3 has no SDRAM
+ # AD9H3:hdl_example.SDRAM* | AD9H3:hls_memcopy | AD9H3:hls_search ) # AD9H3 has no SDRAM
+ # AC 20200215 introduced memcopy ready to test HBM !
+    AD9H3:hdl_example.SDRAM* | AD9H3:hls_search ) # AD9H3 has no SDRAM
     C=&quot;hnsd&quot;
     ASKIP=1
     ;; 
