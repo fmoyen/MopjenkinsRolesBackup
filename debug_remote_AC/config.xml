@@ -1,0 +1,734 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>-&gt; Transfer an already built image to the right card and test it&#xd;
+for Questions: please contact  A.Castellane or F.Moyen</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.plugins.jira.JiraProjectProperty plugin="jira@3.0.11"/>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>3</daysToKeep>
+        <numToKeep>50</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.5">
+      <projectUrl>https://github.com/open-power/snap/</projectUrl>
+      <displayName></displayName>
+    </com.coravy.hudson.plugins.github.GithubProjectProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <jp.ikedam.jenkins.plugins.extensible__choice__parameter.ExtensibleChoiceParameterDefinition plugin="extensible-choice-parameter@1.6.0">
+          <name>mopIMGFile</name>
+          <description>which image to load</description>
+          <editable>false</editable>
+          <editableType>NoFilter</editableType>
+          <choiceListProvider class="jp.ikedam.jenkins.plugins.extensible_choice_parameter.FilenameChoiceListProvider">
+            <baseDirPath>/data/Images</baseDirPath>
+            <includePattern>*/fw*bin</includePattern>
+            <scanType>File</scanType>
+            <excludePattern></excludePattern>
+            <reverseOrder>true</reverseOrder>
+            <emptyChoiceType>None</emptyChoiceType>
+          </choiceListProvider>
+        </jp.ikedam.jenkins.plugins.extensible__choice__parameter.ExtensibleChoiceParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>BRANCH</name>
+          <description>Choose the branch for github.com:open-power/snap you want to test. Please do not use wildcards!!</description>
+          <defaultValue>master</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>CAPIUTILS_BRANCH</name>
+          <description>Choose the branch for https://github.com/ibm-capi/capi-utils you want to test. Please do not use wildcards!!</description>
+          <defaultValue>master</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>mopBoxes</name>
+          <description>List of Montpellier systems available for testing
+Antipode and Marennes are P8 (CAPI1 cards)
+Orpington and Lewen05 are P9 (CAPI2.0 cards)</description>
+          <defaultValue>antipode marennes orpington lewen05</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>austinBoxes</name>
+          <description>List of Austin systems available for testing :
+(Assuming no VPN or jump server is needed to access Austin servers, 9.X.X.X addresses)
+(it needs to define capimop user with authorized_keys)</description>
+          <defaultValue>hawklp08.aus.stglabs.ibm.com</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>CARDS</name>
+          <description>List of available cards for Hardware test
+CARDS=(ADKU3 AD8K5 S121B N250S N250SP AD9V3)</description>
+          <defaultValue>ADKU3 AD8K5 N250SAD9V3 AD9H3 N250SP</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
+      <maxConcurrentPerNode>0</maxConcurrentPerNode>
+      <maxConcurrentTotal>0</maxConcurrentTotal>
+      <categories class="java.util.concurrent.CopyOnWriteArrayList"/>
+      <throttleEnabled>false</throttleEnabled>
+      <throttleOption>project</throttleOption>
+      <limitOneJobWithMatchingParams>false</limitOneJobWithMatchingParams>
+      <paramsToUseForLimit></paramsToUseForLimit>
+    </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.0.0">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>git@github.com:open-power/snap.git</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>${BRANCH}</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions>
+      <hudson.plugins.git.extensions.impl.PruneStaleBranch/>
+      <hudson.plugins.git.extensions.impl.CleanCheckout/>
+      <hudson.plugins.git.extensions.impl.CleanBeforeCheckout/>
+      <hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
+        <relativeTargetDir>snap</relativeTargetDir>
+      </hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
+    </extensions>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>true</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>#!/bin/bash
+
+set +x                               # reduce Jenkins output
+ulimit -c unlimited                  # limit core dumps
+
+#------------------------------------------------------------------------------------------------------------------------------
+# Variables
+
+TESTBOXES=( ${mopBoxes[*]} ${austinBoxes[*]} ) # init array of systems
+CARDSList=($CARDS)
+EmailDestinationList=( fabrice_moyen@fr.ibm.com )
+HWUser=&quot;capimop&quot;
+
+mopIMGRootDir=&quot;/data/Images&quot;
+IMGFileName=$(basename $mopIMGFile)
+mopIMGDir=$(dirname $mopIMGRootDir/$mopIMGFile)
+IMGServers=&quot;jtagx86&quot; # List of servers where to push generated images.
+
+ExecutorIMGRootDir=&quot;/home/$HWUser/images/single_test&quot;
+
+CapiUtilsURL=&quot;https://github.com/ibm-capi/capi-utils.git&quot;
+SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not needed to access /dev/cxl
+
+HWUser=&quot;capimop&quot;
+
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;***************************************************************************************&quot;
+echo &quot;JENKINS:&quot;
+echo &quot;  Testing Binary    : $mopIMGDir/$IMGFileName&quot;
+echo
+echo &quot;  testboxes now     : ${TESTBOXES[@]}&quot;
+echo &quot;  Cards list        : ${CARDSList[*]}&quot;
+echo &quot;***************************************************************************************&quot;
+echo &quot;***************************************************************************************&quot;; echo
+
+#------------------------------------------------------------------------------------------------------------------------------
+# Functions
+
+function die {     # define function to exit with msg: call with &quot;die [exit_RC] [msg]&quot;
+  local RC=$1
+  shift;
+  local message=&quot;$@&quot;;
+  [ -z &quot;$message&quot; ] &amp;&amp; message=&quot;Died&quot;
+  echo &quot;$message at ${BASH_SOURCE[1]}:${FUNCNAME[1]} line ${BASH_LINENO[0]}.&quot; &gt;&amp;2
+  exit 1
+}
+
+function finish {  # define function to unlock in case of error, executed after registering with &quot;trap finish EXIT&quot;
+  echo;echo &quot;***************************************************************************************&quot;
+  echo &quot;J: FINISH function&quot;
+  
+  echo &quot;RC=$?&quot;
+  echo;echo &quot;  -&gt; unlocking ${LOCK}&quot;
+  UNLOCK_RC=0;ssh ${HWUser}@${box} rmdir ${LOCK} || UNLOCK_RC=$?
+  echo &quot;box=$box lock=$LOCK unlock RC=$UNLOCK_RC (`date`)&quot;
+  echo;echo &quot;  -&gt; cleaning ${box}@$TARGET_DIR&quot;
+  CLEAN_RC=0;ssh -T ${HWUser}@$box rm -rf ${TARGET_DIR} || CLEAN_RC=$?
+  echo &quot;box=$box clean target_dir=$TARGET_DIR RC=$CLEAN_RC (`date`)&quot;
+  echo;echo &quot;  -&gt; EXITING !&quot;  
+
+}
+
+
+# Function for sending alerting emails
+# Example 1: SendAnEmail -s &quot;This is the subject/alert&quot; -d firstDest@gmail.com -d SecondDest@free.fr
+# Example 2: SendAnEmail -s &quot;This is the subject/alert&quot; -d &quot;${EmailDestinationList[*]}&quot;
+function SendAnEmail
+{
+  local OPTIND opt DestList
+  while getopts &quot;s:d:&quot; opt
+  do 
+    case $opt in
+      s)
+        Subject=&quot;$OPTARG&quot;
+      ;;
+      d)
+        DestList+=(&quot;$OPTARG&quot;)
+      ;;
+    esac
+  done
+  
+  for i in ${DestList[@]}
+  do
+    echo &quot;&quot; | mail -s &quot;$Subject&quot; $i
+  done
+}
+
+
+# Function to move BINFILES and BITFILES to the right directory
+# Example 1: MoveToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s jtagx86 -u $HWUser
+# Example 2: MoveToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;jtagx86 orpington&quot; -u $HWUser
+# Example 3: MoveToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
+# -b &amp; -B (maybe not -B) should use &quot;&quot; as $BINFILES &amp; $BITFILES are usually lists of files like &quot;primary.bin secondary.bin&quot;
+
+function MoveToDir
+{
+  local OPTIND opt FPGACard Bin Bit ToDir SSHDest SSHUser
+  while getopts &quot;c:b:B:d:s:u:&quot; opt
+  do
+      case $opt in
+      b)
+        Bin=&quot;$OPTARG&quot;
+      ;;
+      B)
+        Bit=&quot;$OPTARG&quot;
+      ;;
+      d)
+        ToDir=&quot;$OPTARG&quot;
+      ;;
+      c)
+        FPGACard=&quot;$OPTARG&quot;
+      ;;
+      s)
+        SSHDest=&quot;$OPTARG&quot;
+      ;;
+      u)
+        SSHUser=&quot;$OPTARG&quot;
+      ;;
+    esac
+  done
+
+      echo &quot;&quot;;echo &quot;+ Moving $FPGACard bin-file(s) &amp; bit-file(s) images to $ToDir&quot;
+      mkdir -p $ToDir
+      chmod g+w $ToDir
+      mv $Bin $ToDir
+      echo $ToDir/`basename $Bin`
+      if [ &quot;$Bit&quot; != &quot;&quot; ]; then mv $Bit $ToDir; echo $ToDir/`basename $Bit`; fi
+      
+      for i in $SSHDest
+      do
+        echo;echo &quot;+ Moving $FPGACard bin-file(s) &amp; bit-file(s) images to $i:$ToDir&quot;
+        ssh ${SSHUser}@$i &quot;mkdir -p $ToDir; chmod g+w $ToDir; mv $Bin $ToDir; echo $ToDir/`basename $Bin`&quot;
+        if [ &quot;$Bit&quot; != &quot;&quot; ]; then ssh ${SSHUser}@$i &quot;mv $Bit $ToDir&quot;; echo $ToDir/`basename $Bit`; fi
+      done      
+}
+
+
+
+#------------------------------------------------------------------------------------------------------------------------------
+# Test if file size is coherent
+
+echo;echo &quot;****************************************************************************************&quot;
+echo &quot;J: Testing if file size is coherent ($mopIMGDir/$IMGFileName)...&quot; 
+size=`ls -al $mopIMGDir/$IMGFileName | awk &apos;{print $5}&apos;`
+echo &quot;  -&gt; Size of file is $size&quot;
+(( $size &lt; 100000 ))          &amp;&amp; die 1 &quot;  -&gt; Image $$mopIMGDir/$IMGFileName is too small $size to burn&quot;
+
+#------------------------------------------------------------------------------------------------------------------------------
+# Create a list of Cards sorted by card names&apos; length
+#      This allows to search for N250SP card before N250S card for example
+#      and prevents finding an N250S card when it is an N250SP in the Image file name
+
+SortedCARDSString=$(for card in &quot;${CARDSList[@]}&quot;;do
+  echo $card | awk &apos;{print length,$0}&apos;  
+done | sort --reverse | cut -d&apos; &apos; -f2- )
+
+SortedCARDSList=($SortedCARDSString)
+
+
+#------------------------------------------------------------------------------------------------------------------------------
+# Search for a card in the Image file name
+
+echo;echo &quot;****************************************************************************************&quot;
+echo &quot;J: Searching for the card name in the image file name ($IMGFileName)...&quot; 
+
+for CRD in &quot;${SortedCARDSList[@]}&quot;;do
+  if [[ &quot;$IMGFileName&quot; =~ &quot;$CRD&quot; ]];then echo &quot;  -&gt; Found card=$CRD for image=$IMGFileName size=$size&quot;;break;fi
+  if [ $CRD == ${SortedCARDSList[*]: -1} ];then die 100 &quot;  -&gt; Cannot find card for image=$IMGFileName in cards=${CARDSList[*]}&quot;;fi
+done
+
+
+#------------------------------------------------------------------------------------------------------------------------------
+# SPI8 Cards case: meaning primary and secondary IMG files
+
+echo;echo &quot;****************************************************************************************&quot;
+echo &quot;J: Checking if $CRD card is SPI8...&quot; 
+
+if echo $IMGFileName | egrep &quot;primary|secondary&quot; ; then
+        echo &quot;  -&gt; SPI8 file detected&quot;;SPI8=1;
+  else
+         echo &quot;  -&gt; Not an SPI8 file&quot;;SPI8=0;
+fi
+
+
+#------------------------------------------------------------------------------------------------------------------------------
+# Generating ReducedFileName (without _primary.bin or _secondary.bin)
+
+echo;echo &quot;****************************************************************************************&quot;
+echo &quot;J: Reducing Image name to get the base name&quot;
+
+ReducedFileName=&quot;${IMGFileName%_*}&quot;        # Get all the beginning up to the last &quot;_&quot; (removing &quot;_primary.bin&quot; or &quot;_secondary.bin&quot;)
+IMGBitName=&quot;$(echo ${ReducedFileName}| sed &apos;s/ //g&apos;).bit&quot;
+
+if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
+        echo &quot;   SPI8 =&gt; Memorizing the primary and secondary image names&quot;
+        ReducedFileName=&quot;${IMGFileName%_*}&quot;  # Get all the beginning up to the last &quot;_&quot; (removing &quot;_primary.bin&quot; or &quot;_secondary.bin&quot;)
+        echo $ReducedFileName
+        IMGPrimaryName=&quot;$(echo ${ReducedFileName}| sed &apos;s/ //g&apos;)_primary.bin&quot;  # need to remove blank in prefix
+        IMGSecondaryName=&quot;$(echo ${ReducedFileName}| sed &apos;s/ //g&apos;)_secondary.bin&quot;
+        IMGBitName=&quot;$(echo ${ReducedFileName}| sed &apos;s/ //g&apos;).bit&quot;
+        echo &quot;CARD detected  is       : $CRD&quot;
+        echo &quot;Primary   file is       : $IMGPrimaryName&quot;
+        echo &quot;Secondary file is       : $IMGSecondaryName&quot;
+        echo &quot;Bit file (if exists) is : $IMGBitName&quot;
+
+  else
+        ReducedFileName=&quot;${IMGFileName%.bin}&quot;        # Get all the beginning up to the .bin
+        echo $ReducedFileName;
+        IMGBitName=&quot;$(echo ${ReducedFileName}| sed &apos;s/ //g&apos;).bit&quot;
+fi
+
+
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Checking TestBoxes reachability (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot;
+echo
+echo &quot;  -&gt; testboxes now = ${TESTBOXES[@]}&quot;
+echo
+
+for box in &quot;${TESTBOXES[@]}&quot;;do
+  echo &quot;----------------------------------------------------&quot;
+  if [[ ${mopBoxes[*]} =~ $box ]]
+  then
+    # $box is a Montpellier server
+    echo -e &quot;MOP   : $box -&gt; \c&quot;
+    RC=0;ssh ${HWUser}@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
+  else
+    # $box is an Austin server
+    echo -e &quot;AUSTIN: $box -&gt; \c&quot;
+    RC=0;ssh ${HWUser}@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
+  fi
+
+if [ $RC -eq 0 ]; then
+    echo &quot;OK&quot;
+  else
+    echo &quot;FAILED !&quot;
+    for i in &quot;${TESTBOXES[@]}&quot;; do [[ $i != $box ]] &amp;&amp; new+=($i);done   # generate new test array without unreachable box
+    unset TESTBOXES;TESTBOXES=(&quot;${new[@]}&quot;);unset new                   # reassign to original array name
+    echo &quot;$box not reachable =&gt; removed from testing boxes list&quot;
+    echo &quot;testboxes remaining = ${TESTBOXES[@]}&quot;
+    if [[ &quot;${TESTBOXES[@]}&quot; == &quot;&quot; ]];then echo &quot;no test machines available anymore&quot;;exit 1;fi
+  fi
+done # for box
+
+echo;echo &quot;testboxes now     : ${TESTBOXES[@]}&quot;
+
+
+#------------------------------------------------------------------------------------------------------------------------------
+# Waiting for available $CRD in ${TESTBOXES[*]}
+
+maxloop=60
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Searching (max $maxloop min) for free card=$CRD into ( ${TESTBOXES[@]} ) (`date`)&quot;
+
+FindCardTool=&quot;snap_find_card&quot;
+
+for loop in `seq 1 $maxloop`;do
+
+  echo;echo &quot;*************************************************&quot;
+  echo &quot;J: LOOP $loop/$maxloop (`date`)&quot;
+
+  for box in &quot;${TESTBOXES[@]}&quot;;do
+
+    echo;echo &quot;-------------------------------------------------&quot;
+    echo &quot;$box&quot;
+	
+    nusers=`ssh ${HWUser}@${box} who|grep -v root|grep -v ${HWUser}|wc -l`
+
+    find_card=$FindCardTool.${GIT_COMMIT}.`date +%H%M%S`
+
+    echo  &quot;  --&gt; Copying the tool $FindCardTool ($find_card) to $box:/home/${HWUser}&quot;
+    RC=0;scp snap/software/tools/$FindCardTool ${HWUser}@$box:/home/${HWUser}/$find_card ; RC=$?
+    if [ $RC -gt 0 ];then
+      echo &quot;     -&gt; copy $find_card to $box FAILED, continuing anyway...&quot;;
+    fi
+    
+    echo -e &quot;  --&gt; Using the tool, looking for $CRD inside ${box}: \c&quot;
+    found=0;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} &gt; /dev/null 2&gt;&amp;1 ||found=$?
+    # ($find_card gives the number of found cards inside $?)
+    
+    if [ $found -ne 0 ];then
+      cards=`ssh -ttq ${HWUser}@${box} &quot;/home/${HWUser}/$find_card -A ${CRD} 2&gt;/dev/null&quot; | head -n1`   
+      echo -e &quot;OK: $found CARD(S) FOUND (card-IDs= $cards)&quot;
+      # (head is needed because if more than 1 card, $find_card returns something like &quot;0 0&quot; and second line with &quot;Total 2 cards detected&quot;)
+    else
+      echo &quot;FAILED: NO CARD FOUND&quot;
+      unset cards
+    fi
+
+    echo &quot;  --&gt; Removing the tool $FindCardTool ($find_card) from $box&quot;
+    SSH_RC=0;ssh -ttq ${HWUser}@${box} rm /home/${HWUser}/$find_card || SSH_RC=$?
+    if [ $SSH_RC -gt 0 ];then
+      echo &quot;    -&gt; Delete $find_card to $box FAILED, continuing anyway...&quot;;
+    fi
+
+	echo;echo &quot;J: loop=$loop box=$box nusers=$nusers card=$CRD $FindCardTool found=$found (`date`)&quot;
+    echo
+
+    hours=`date +%H`
+
+    case $found:$nusers in
+
+      #------------------------------------
+      # no card available =&gt; try other box
+      0:*)
+        for i in &quot;${TESTBOXES[@]}&quot;; do [[ $i != $box ]] &amp;&amp; new+=($i);done   # generate new test array without unreachable box
+        unset TESTBOXES;TESTBOXES=(&quot;${new[@]}&quot;);unset new                   # reassign to original array name
+        echo &quot;card not avail in $box =&gt; removed from Boxes testing list, remaining=${TESTBOXES[@]}&quot;        
+        continue # next box or next loop (if it was the last box of the list)
+      ;;
+
+      #------------------------------------
+      # card available &amp; no user =&gt; now lock &amp; test
+      [1234]:0)
+		for cardid in $cards;do
+      	  LOCK=&quot;jenkins_lock_card$cardid&quot;
+		  RC=0;ssh ${HWUser}@$box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
+		  if [ $RC == &quot;0&quot; ]; then :
+		    echo &quot;  --&gt; box=$box lock=$LOCK lock RC=$RC (`date`)&quot;; 
+		    trap finish EXIT  # register finish/unlock function, after lock is set
+		    break 3 # found card and no user =&gt; going out of $box for-loop and $loop for-loop
+	      else 
+		    echo &quot;  --&gt; box=$box lock=$LOCK already locked, trying next card&quot;
+		  fi    
+		done
+      ;;
+
+      #------------------------------------
+      # found something else than 1,2,3 or 4 cards =&gt; meaning BAD $found return code
+      *:0)      
+        echo &quot;  --&gt; unknown found_RC=$found from $FindCardTool=$cards. EXITING...&quot;
+        exit 100
+      ;;
+
+      #------------------------------------
+      # card available but user(s) connected...
+      *)      
+      	if (( 9&lt;=hours &amp;&amp; hours&lt;=19 ));then
+          # It is day time =&gt; priority to interactive users
+      	  echo &quot;  --&gt; $CRD card found but day time (hours=$hours) and users connected (nusers=$nusers), trying next box / loop...&quot;
+          if [ $box == ${TESTBOXES[*]:(-1)} ];then
+            echo &quot;  --&gt; $box is the last system to test; Warning users and waiting for 60s...&quot;
+            ssh ${HWUser}@$box wall &quot;JENKINS WANTS TO DO A TEST on FPGA CARD=$CRD ID=$cards. PLEASE LOGOUT IF YOU CAN ...&quot;
+            sleep 60 # Last box of the list TESBOXES =&gt; Waiting 60s and go to next loop
+          fi
+          continue # next box or next loop (if it was the last box of the list)
+
+        else
+          # It is night =&gt; running on $box even if there are connected users
+          ssh ${HWUser}@${box} who|grep -v root|grep -v ${HWUser}
+      	  echo &quot;  --&gt; hours=$hours (night), nusers=$nusers, now lock &amp; notify &amp; test&quot;
+		  for cardid in $cards;do
+      	    LOCK=&quot;jenkins_lock_card$cardid&quot;
+		    RC=0;ssh ${HWUser}@$box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
+		    if [ $RC == &quot;0&quot; ]; then :
+	  	      echo &quot;  --&gt; box=$box lock=$LOCK lock RC=$RC (`date`)&quot;; 
+	   	      trap finish EXIT  # register finish/unlock function, after lock is set
+              ssh ${HWUser}@$box wall &quot;WARNING: JENKINS OPENCAPI TEST STARTING NOW on FPGA CARD=$CRD ID=$cards&quot;
+		      break 3 # found card and it is the night =&gt; going out of $box for-loop and $loop for-loop
+			else 
+			  echo &quot;  --&gt; box=$box lock=$LOCK already locked, try next card&quot;
+			fi    
+          done
+        fi
+      ;;
+      
+    esac
+    
+  done # for box
+  
+done #for loop
+
+if [ $loop -eq $maxloop ];then
+  echo;echo &quot;***************************************************************************************&quot;
+  echo &quot;J: No card $CRD available with TESTBOXES= ${TESTBOXES[*]}&quot;
+  echo
+  echo &quot;  -&gt; EXITING !&quot;
+  exit 1
+fi
+
+
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot; running test --&gt; $box&quot;  | tr &apos;[:lower:]&apos; &apos;[:upper:]&apos;
+echo &quot;***************************************************************************************&quot;
+
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Preparing $CRD card image(s) test onto $box system&quot;
+echo
+ssh ${HWUser}@${box} &quot;echo ------ START of JOB on $box ----&gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;date                                 &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;echo JOB_NAME  : $JOB_NAME           &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;echo Card      : $CRD[$cardid]       &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;echo Image     : /home/$HWUser/$IMGFileName &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;echo Build No  : ${BUILD_NUMBER}     &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;echo Git Branch: ${GIT_BRANCH}       &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} tail -n7 jenkins.log
+
+
+#------------------------------------------------------------------------------------------------------------------------------
+# Copying Working directory TARGET_DIR into $box:/home/$HWUser
+
+TARGET_DIR=&quot;`basename $PWD`-${ReducedFileName}-${BUILD_NUMBER}&quot;
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Copying snap working directory into $box:/home/$HWUser/$TARGET_DIR&quot;
+echo &quot;  (Local current Dir = $PWD)&quot;
+
+RUN=&quot;./actions/scripts/snap_jenkins.sh&quot;
+echo &quot;  -&gt; Creating $box:/home/$HWUser/$TARGET_DIR, if not existing&quot;
+ssh ${HWUser}@${box} mkdir -p ${TARGET_DIR}
+echo &quot;  -&gt; Copying snap workspace directory to ${box}:/home/${HWUser}/${TARGET_DIR}&quot;
+rsync -az snap/ ${HWUser}@${box}:/home/${HWUser}/${TARGET_DIR}
+
+
+#------------------------------------------------------------------------------------------------------------------------------
+# Copying Image(s) into $box:${ExecutorIMGRootDir}/$CRD
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Copying Image(s) into $box:${ExecutorIMGRootDir}/$CRD&quot;
+
+echo &quot;  -&gt; mkdir ${ExecutorIMGRootDir}/$CRD, if not existing&quot;
+ssh ${HWUser}@${box} mkdir -p ${ExecutorIMGRootDir}/$CRD
+
+if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
+	echo &quot;  -&gt; Copying Image $IMGPrimaryName   to $box:${ExecutorIMGRootDir}/$CRD&quot;
+    rsync -az   $mopIMGDir/$IMGPrimaryName ${HWUser}@${box}:${ExecutorIMGRootDir}/$CRD
+	echo &quot;  -&gt; Copying Image $IMGSecondaryName to $box:${ExecutorIMGRootDir}/$CRD&quot;
+    rsync -az $mopIMGDir/$IMGSecondaryName ${HWUser}@${box}:${ExecutorIMGRootDir}/$CRD
+    RUN+=&quot; -D ${TARGET_DIR}&quot;
+	if [ -z ${mopIMGFile} ]; then RUN+=&quot; -A ALL&quot;;else RUN+=&quot; -F ${ExecutorIMGRootDir}/$CRD/$IMGPrimaryName -f ${ExecutorIMGRootDir}/$CRD/$IMGSecondaryName -A ${CRD} -C $cardid&quot;;fi
+
+else
+	echo &quot;  -&gt; Copying Image $IMGFileName to $box:${ExecutorIMGRootDir}/$CRD&quot;
+    rsync -az $mopIMGDir/$IMGFileName ${HWUser}@${box}:${ExecutorIMGRootDir}/$CRD
+	RUN+=&quot; -D ${TARGET_DIR}&quot;
+	if [ -z ${mopIMGFile} ]; then RUN+=&quot; -A ALL&quot;;else RUN+=&quot; -F ${ExecutorIMGRootDir}/$CRD/$IMGFileName -A ${CRD} -C $cardid&quot;;fi
+fi
+
+
+#------------------------------------------------------------------------------------------------------------------------------
+# Build the SNAP software into $TARGET_DIR on the $box
+
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Building the SNAP software and actions on $box in $TARGET_DIR...&quot;
+ssh ${HWUser}@${box} make -C ${TARGET_DIR} clean software actions
+
+echo  &quot;copy new $FindCardTool to homedir&quot;;  
+ssh ${HWUser}@${box} cp ${TARGET_DIR}/software/tools/$FindCardTool .
+
+
+#------------------------------------------------------------------------------------------------------------------------------
+# Git clone capi-utils tools into $box:/home/$HWUser
+
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Git cloning Capi-Utils tools into $box:/home/$HWUser...&quot;
+echo &quot;  (capi-flash-script.sh used by command `echo $RUN | cut -d&apos; &apos; -f1` )&quot;
+ssh ${HWUser}@${box} rm -rf capi-utils
+ssh ${HWUser}@${box} git clone -b $CAPIUTILS_BRANCH $CapiUtilsURL
+
+# FAB: linking capi-utils/psl-devices to /lib/capi-utils/psl-devices modified by Alexandre
+echo &quot;  -&gt; Linking ~/capi-utils/psl-devices to /lib/capi-utils/psl-devices modified by Alexandre&quot;
+ssh ${HWUser}@${box} &quot;if [ -f /lib/capi-utils/psl-devices ]; then rm capi-utils/psl-devices; ln -s /lib/capi-utils/psl-devices capi-utils/psl-devices; fi&quot;
+
+#------------------------------------------------------------------------------------------------------------------------------
+# Build the capi-utils software into $box:/home/$HWUser/capi-utils on the $box
+
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Building the capi-utils software on $box in /home/$HWUser/capi-utils...&quot;
+echo &quot;   (not installing (not &apos;make install&apos;) to prevent deleting /lib/capi-utils/psl-devices modified by Alexandre)&quot;
+ssh ${HWUser}@${box} make -C /home/$HWUser/capi-utils
+
+
+#------------------------------------------------------------------------------------------------------------------------------
+# Execute the $RUN command on the $box
+
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Executing Test: $RUN&quot;
+echo &quot;   on $box (`date`)&quot;
+
+RC=0
+ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?
+	export TERM=xterm
+	cd ${TARGET_DIR}
+	set -f
+    ulimit -c unlimited               # limit core dumps
+    $SudoOrNotSudo ${RUN}
+EOF
+
+ssh ${HWUser}@${box} &quot;echo Exit: $JOB_NAME RC = $RC at:\      &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;date                                    &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;echo ------ EXIT -----------------------&gt;&gt; jenkins.log&quot;
+
+
+#------------------------------------------------------------------------------------------------------------------------------
+# Do Clean-up work: $TARGET_DIR on the $box, and image files at MOPJENKINS site
+
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Checking RUN return code (`date`)...&quot;
+echo
+
+if [ $RC -eq 0 ]; then
+  mopIMGGoodDir=${mopIMGRootDir}/${CRD}_test_OK
+  if mkdir $mopIMGGoodDir 2&gt;/dev/null; then chmod g+w $mopIMGGoodDir; fi
+  
+  echo &quot;Job return code is good ==&gt;&quot;
+  echo &quot; =&gt; $box: Cleaning working directory&quot;
+  echo &quot; =&gt; Jenkins: Cleaning images from $mopIMGDir&quot;
+  echo &quot; =&gt; $box: Moving Primary/secondary image file to good.* inside $ExecutorIMGRootDir/$CRD&quot;
+  echo &quot;   (needs to be manually done because SNAP github script does not manage Primary/Secondary files for the moment)&quot;
+  echo &quot;   (so it is just renaming primary to primary.good)&quot;
+
+  echo;echo &quot;+ Cleaning up working directory ${TARGET_DIR} from ${box}&quot;
+  ssh ${HWUser}@${box} rm -rf ${TARGET_DIR}
+
+  if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
+    echo;echo &quot;+ Renaming primary/secondary files to good.* on ${box}&quot;
+    echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGPrimaryName&quot;
+    ssh ${HWUser}@${box} &quot;mv \`ls $ExecutorIMGRootDir/$CRD/${IMGPrimaryName}*\` $ExecutorIMGRootDir/$CRD/good.$IMGPrimaryName&quot;
+    echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGSecondaryName&quot;
+    ssh ${HWUser}@${box} &quot;mv \`ls $ExecutorIMGRootDir/$CRD/${IMGSecondaryName}*\` $ExecutorIMGRootDir/$CRD/good.$IMGSecondaryName&quot;
+
+    MoveToDir -c $CRD -b &quot;$mopIMGDir/$IMGPrimaryName $mopIMGDir/$IMGSecondaryName&quot; -B &quot;$mopIMGDir/$IMGBitName&quot; -d $mopIMGGoodDir -s &quot;$IMGServers&quot; -u $HWUser
+
+  else
+    echo;echo &quot;+ Renaming binary file to good.* on ${box}&quot;
+    echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGFileName&quot;
+    ssh ${HWUser}@${box} &quot;mv \`ls $ExecutorIMGRootDir/$CRD/${IMGFileName}*\` $ExecutorIMGRootDir/$CRD/good.$IMGFileName&quot;
+
+    MoveToDir -c $CRD -b &quot;$mopIMGDir/$IMGFileName&quot; -B &quot;$mopIMGDir/$IMGBitName&quot; -d $mopIMGGoodDir -s &quot;$IMGServers&quot; -u $HWUser
+
+  fi
+  echo
+  
+else 
+  die 100 &quot;Job return code indicates FAILURE RC = $RC (`date`) =&gt; exit UNSTABLE&quot;
+fi</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <org.jenkinsci.plugins.github.status.GitHubCommitStatusSetter plugin="github@1.29.5">
+      <commitShaSource class="org.jenkinsci.plugins.github.status.sources.BuildDataRevisionShaSource"/>
+      <reposSource class="org.jenkinsci.plugins.github.status.sources.AnyDefinedRepositorySource"/>
+      <contextSource class="org.jenkinsci.plugins.github.status.sources.ManuallyEnteredCommitContextSource">
+        <context>${PROJECT_NAME} ${GIT_BRANCH}</context>
+      </contextSource>
+      <statusResultSource class="org.jenkinsci.plugins.github.status.sources.ConditionalStatusResultSource">
+        <results>
+          <org.jenkinsci.plugins.github.status.sources.misc.BetterThanOrEqualBuildResult>
+            <state>PENDING</state>
+            <message>SUCCESS</message>
+            <result>SUCCESS</result>
+          </org.jenkinsci.plugins.github.status.sources.misc.BetterThanOrEqualBuildResult>
+          <org.jenkinsci.plugins.github.status.sources.misc.BetterThanOrEqualBuildResult>
+            <state>FAILURE</state>
+            <message>FAILURE</message>
+            <result>FAILURE</result>
+          </org.jenkinsci.plugins.github.status.sources.misc.BetterThanOrEqualBuildResult>
+          <org.jenkinsci.plugins.github.status.sources.misc.AnyBuildResult>
+            <state>PENDING</state>
+            <message>PENDING</message>
+          </org.jenkinsci.plugins.github.status.sources.misc.AnyBuildResult>
+        </results>
+      </statusResultSource>
+      <statusBackrefSource class="org.jenkinsci.plugins.github.status.sources.BuildRefBackrefSource"/>
+      <errorHandlers/>
+    </org.jenkinsci.plugins.github.status.GitHubCommitStatusSetter>
+    <jenkins.plugins.slack.SlackNotifier plugin="slack@2.18">
+      <baseUrl></baseUrl>
+      <teamDomain></teamDomain>
+      <authToken></authToken>
+      <tokenCredentialId></tokenCredentialId>
+      <botUser>false</botUser>
+      <room></room>
+      <startNotification>false</startNotification>
+      <notifySuccess>false</notifySuccess>
+      <notifyAborted>false</notifyAborted>
+      <notifyNotBuilt>false</notifyNotBuilt>
+      <notifyUnstable>false</notifyUnstable>
+      <notifyRegression>false</notifyRegression>
+      <notifyFailure>false</notifyFailure>
+      <notifyBackToNormal>false</notifyBackToNormal>
+      <notifyRepeatedFailure>false</notifyRepeatedFailure>
+      <includeTestSummary>false</includeTestSummary>
+      <includeFailedTests>false</includeFailedTests>
+      <commitInfoChoice>NONE</commitInfoChoice>
+      <includeCustomMessage>false</includeCustomMessage>
+      <customMessage></customMessage>
+      <customMessageSuccess></customMessageSuccess>
+      <customMessageAborted></customMessageAborted>
+      <customMessageNotBuilt></customMessageNotBuilt>
+      <customMessageUnstable></customMessageUnstable>
+      <customMessageFailure></customMessageFailure>
+    </jenkins.plugins.slack.SlackNotifier>
+    <hudson.plugins.ws__cleanup.WsCleanup plugin="ws-cleanup@0.37">
+      <patterns class="empty-list"/>
+      <deleteDirs>false</deleteDirs>
+      <skipWhenFailed>false</skipWhenFailed>
+      <cleanWhenSuccess>true</cleanWhenSuccess>
+      <cleanWhenUnstable>true</cleanWhenUnstable>
+      <cleanWhenFailure>true</cleanWhenFailure>
+      <cleanWhenNotBuilt>true</cleanWhenNotBuilt>
+      <cleanWhenAborted>true</cleanWhenAborted>
+      <notFailBuild>false</notFailBuild>
+      <cleanupMatrixParent>false</cleanupMatrixParent>
+      <externalDelete></externalDelete>
+      <disableDeferredWipeout>false</disableDeferredWipeout>
+    </hudson.plugins.ws__cleanup.WsCleanup>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.19">
+      <strategy class="hudson.plugins.build_timeout.impl.NoActivityTimeOutStrategy">
+        <timeoutSecondsString>180</timeoutSecondsString>
+      </strategy>
+      <operationList/>
+    </hudson.plugins.build__timeout.BuildTimeoutWrapper>
+    <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.3">
+      <template>${PROJECT_NAME} #${BUILD_NUMBER} SNAP=${GIT_BRANCH} CAPI-UTILS=${CAPIUTILS_BRANCH}</template>
+      <descriptionTemplate></descriptionTemplate>
+      <runAtStart>true</runAtStart>
+      <runAtEnd>true</runAtEnd>
+    </org.jenkinsci.plugins.buildnamesetter.BuildNameSetter>
+  </buildWrappers>
+</project>
