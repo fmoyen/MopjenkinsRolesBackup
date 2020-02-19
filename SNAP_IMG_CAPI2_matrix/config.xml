@@ -970,29 +970,34 @@ for  f in $BINFILES; do
 done
 
 
-# In FACTORY MODE : We save hdl_example and hls_helloworld bin for cards files for future .mcs generation
+# In FACTORY MODE : We save hdl_example and hls_helloworld bit for cards files for future .mcs generation
 
 case ${ACT}:$FACTORY in
 
   hdl_example.NORAM:true ) 
-	FACTBINFILES=`ls -t $SNAP_ROOT/hardware/build/Images/fw_*[0-9]_FACTORY*.bin`  # take FACTORY bin files
-    # Copy hdl_ex Factory files if any
-    if [ &quot;$FACTBINFILES&quot; == &quot;&quot; ] ; then echo &quot;  --&gt; cannot find Factory binfile $FACTBINFILES although FACTORY REQUESTED !!&quot;;exit 1
+    FactoryDir=${RootSaveDir}/${CRD}_FACTORY_MCS
+    echo &quot;J: ${ACT} action and FACTORY requested&quot;
+
+    FACTBITFILES=`ls -t $SNAP_ROOT/hardware/build/Images/fw_*[0-9]_FACTORY*.bit`  # take FACTORY bit files
+    
+    if [ &quot;$FACTBITFILES&quot; == &quot;&quot; ] ; then
+      echo &quot;  --&gt; cannot find any Factory bit file from $SNAP_ROOT/hardware/build/Images/fw_\*_FACTORY\*.bit although FACTORY REQUESTED !!&quot;
+      exit 1
     fi
-    DIR=${RootSaveDir}/${CRD}_FACTORY_MCS
-    mkdir -p $DIR
-	echo &quot;  --&gt; FACTORY requested : copying $CRD hdl_example.NORAM Factory binary files to $DIR&quot;
-    cp -rp $FACTBINFILES $DIR
+
+    mkdir -p $FactoryDir
+	echo &quot;  --&gt; Copying $CRD $ACT F bit file to $FactoryDir&quot;
+    cp -rp $FACTBITFILES $FactoryDir
     ;;
 
-# FAB: Image en _FACTORY ou pas ?
-# FAB: Encore un sens helloworld en factory ?
   hls_helloworld:true )
-    DIR=${RootSaveDir}/${CRD}_FACTORY_MCS
-    mkdir -p $DIR
+    FactoryDir=${RootSaveDir}/${CRD}_FACTORY_MCS
+    echo &quot;J: ${ACT} action and FACTORY requested&quot;
+
+    mkdir -p $FactoryDir
      
-	echo &quot;  -&gt; FACTORY requested : copying ${CRD} hls_helloworld Factory binary files to $DIR&quot;
-    cp -rp $BINFILES $DIR
+	echo &quot;  --&gt; Copying ${CRD} $ACT Factory bit file to $FactoryDir&quot;
+    cp -rp $BITFILES $FactoryDir
     ;;
     
 esac
