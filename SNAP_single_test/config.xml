@@ -568,8 +568,9 @@ ssh ${HWUser}@${box} rm -rf capi-utils
 ssh ${HWUser}@${box} git clone -b $CAPIUTILS_BRANCH $CapiUtilsURL
 
 # FAB: linking capi-utils/psl-devices to /lib/capi-utils/psl-devices modified by Alexandre
-echo &quot;  -&gt; Linking ~/capi-utils/psl-devices to /lib/capi-utils/psl-devices modified by Alexandre&quot;
-ssh ${HWUser}@${box} &quot;if [ -f /lib/capi-utils/psl-devices ]; then rm capi-utils/psl-devices; ln -s /lib/capi-utils/psl-devices capi-utils/psl-devices; fi&quot;
+# AC : all should be fine now !
+# echo &quot;  -&gt; Linking ~/capi-utils/psl-devices to /lib/capi-utils/psl-devices modified by Alexandre&quot;
+# ssh ${HWUser}@${box} &quot;if [ -f /lib/capi-utils/psl-devices ]; then rm capi-utils/psl-devices; ln -s /lib/capi-utils/psl-devices capi-utils/psl-devices; fi&quot;
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Build the capi-utils software into $box:/home/$HWUser/capi-utils on the $box
