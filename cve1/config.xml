@@ -44,12 +44,20 @@
       </values>
     </hudson.matrix.TextAxis>
     <hudson.matrix.TextAxis>
-      <name>y</name>
+      <name>Y</name>
       <values>
-        <string>y1</string>
-        <string>y2</string>
+        <string>Y1</string>
+        <string>Y2</string>
       </values>
     </hudson.matrix.TextAxis>
+    <hudson.matrix.LabelAxis>
+      <name>label</name>
+      <values>
+        <string>POWER8</string>
+        <string>POWER9</string>
+        <string>mopjenkins</string>
+      </values>
+    </hudson.matrix.LabelAxis>
   </axes>
   <builders>
     <hudson.tasks.Shell>
@@ -61,7 +69,7 @@ echo &quot;Build Number: $BUILD_NUMBER&quot;
 echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot;
 echo &quot;Working dir is : `pwd`&quot;
 
-echo &quot;X: $X, Y: $Y&quot;
+echo &quot;[X: $X, Y: $Y ]&quot;
 
 echo &quot;BUILD_URL= $BUILD_URL&quot;
 
