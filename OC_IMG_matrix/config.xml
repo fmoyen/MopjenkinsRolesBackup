@@ -1083,7 +1083,9 @@ echo &quot;     Card=$CRD and SPI8=$SPI8&quot;
 # For debugging purpose, if not giving an IMAGE to next $RUN test command, the $RUN command would run the test with
 # the already in-place image inside the FPGA, without trying to reset the FPGA &amp; flash the new image.
 # So you just need to uncomment the following line (unset IMAGE) to do so (deleting any IMAGE reference)
-unset IMAGE
+
+# AC : we now want to load and run the new image =&gt; next line commented
+# unset IMAGE
 
 if [ ${#IMAGE[@]} -eq 0 ]; then
   # no IMAGE to test=&gt; $RUN will just test the image already inside the FPGA (no reset, no flash)
