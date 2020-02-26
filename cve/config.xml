@@ -35,7 +35,9 @@
       <command>ls
 df -h
 
-echo ${BUILD_NUMBER}</command>
+echo ${BUILD_NUMBER}
+
+pwd</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
