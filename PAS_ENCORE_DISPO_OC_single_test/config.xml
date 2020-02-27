@@ -389,12 +389,12 @@ for loop in `seq 1 $maxloop`;do
     fi
     
     echo -e &quot;  --&gt; Using the tool, looking for $CRD inside ${box}: \c&quot;
-    echo &quot;Oc_find_card version is :&quot;;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} &gt; /dev/null 2&gt;&amp;1
+    echo &quot;Oc_find_card version is :&quot;;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -V &gt; /dev/null 2&gt;&amp;1
     found=0;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} &gt; /dev/null 2&gt;&amp;1 ||found=$?
     # ($find_card gives the number of found cards inside $?)
     
     if [ $found -ne 0 ];then
-      cards=`ssh -ttq ${HWUser}@${box} &quot;/home/${HWUser}/$find_card -A OC-${CRD} 2&gt;/dev/null&quot; | head -n1`   
+      cards=`ssh -ttq ${HWUser}@${box} &quot;/home/${HWUser}/$find_card -A ${CRD} 2&gt;/dev/null&quot; | head -n1`   
       echo -e &quot;OK: $found CARD(S) FOUND (card-IDs= $cards)&quot;
       # (head is needed because if more than 1 card, $find_card returns something like &quot;0 0&quot; and second line with &quot;Total 2 cards detected&quot;)
     else
