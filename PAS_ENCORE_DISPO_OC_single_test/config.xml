@@ -131,7 +131,7 @@ IMGServers=&quot;jtagx86&quot; # List of servers where to push generated images.
 
 ExecutorIMGRootDir=&quot;/home/$HWUser/images/single_test&quot;
 
-OcUtilsURL=&quot;https://github.ibm.com/OC-Enablement/oc-utils.git&quot;
+OcUtilsURL=&quot;https://github.com/OpenCAPI/oc-utils&quot;
 
 SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not needed to access /dev/ocxl
 
@@ -565,7 +565,7 @@ ssh ${HWUser}@${box} cp ${TARGET_DIR}/software/tools/$FindCardTool .
 # Git clone capi-utils tools into $box:/home/$HWUser
 
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Git cloning Capi-Utils tools into $box:/home/$HWUser...&quot;
+echo &quot;J: Git cloning oc-Utils tools into $box:/home/$HWUser...&quot;
 echo &quot;  (oc-flash-script.sh used by command `echo $RUN | cut -d&apos; &apos; -f1` )&quot;
 ssh ${HWUser}@${box} rm -rf oc-utils
 ssh ${HWUser}@${box} git clone -b $OCUTILS_BRANCH $OCUtilsURL
