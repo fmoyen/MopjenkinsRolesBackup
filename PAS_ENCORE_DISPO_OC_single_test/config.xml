@@ -42,7 +42,7 @@ for Questions: please contact  A.Castellane or F.Moyen</description>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>OCUTILS_BRANCH</name>
-          <description>Choose the branch for https://github.ibm.com/OC-Enablement/oc-utils/ you want to test. Please do not use wildcards!!</description>
+          <description>Choose the branch for https://github.com/OpenCAPI/oc-utils you want to test. Please do not use wildcards!!</description>
           <defaultValue>master</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
@@ -132,6 +132,7 @@ IMGServers=&quot;jtagx86&quot; # List of servers where to push generated images.
 ExecutorIMGRootDir=&quot;/home/$HWUser/images/single_test&quot;
 
 OcUtilsURL=&quot;https://github.com/OpenCAPI/oc-utils&quot;
+OcUtilsURL=&quot;TOTOTO&quot;
 
 SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not needed to access /dev/ocxl
 
@@ -568,11 +569,13 @@ echo;echo &quot;****************************************************************
 echo &quot;J: Git cloning oc-Utils tools into $box:/home/$HWUser...&quot;
 echo &quot;  (oc-flash-script.sh used by command `echo $RUN | cut -d&apos; &apos; -f1` )&quot;
 ssh ${HWUser}@${box} rm -rf oc-utils
+echo &quot;echo OCUtilsURL = $OCUtilsURL&quot;
+echo &quot;Running : ${HWUser}@${box} git clone -b $OCUTILS_BRANCH $OCUtilsURL&quot;
 ssh ${HWUser}@${box} git clone -b $OCUTILS_BRANCH $OCUtilsURL
 
 # FAB: linking capi-utils/psl-devices to /lib/capi-utils/psl-devices modified by Alexandre
-echo &quot;  -&gt; Linking ~/capi-utils/psl-devices to /lib/capi-utils/psl-devices modified by Alexandre&quot;
-ssh ${HWUser}@${box} &quot;if [ -f /lib/capi-utils/psl-devices ]; then rm capi-utils/psl-devices; ln -s /lib/capi-utils/psl-devices capi-utils/psl-devices; fi&quot;
+#echo &quot;  -&gt; Linking ~/capi-utils/psl-devices to /lib/capi-utils/psl-devices modified by Alexandre&quot;
+#ssh ${HWUser}@${box} &quot;if [ -f /lib/capi-utils/psl-devices ]; then rm capi-utils/psl-devices; ln -s /lib/capi-utils/psl-devices capi-utils/psl-devices; fi&quot;
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Build the capi-utils software into $box:/home/$HWUser/capi-utils on the $box
