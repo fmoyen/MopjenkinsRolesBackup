@@ -132,7 +132,6 @@ IMGServers=&quot;jtagx86&quot; # List of servers where to push generated images.
 ExecutorIMGRootDir=&quot;/home/$HWUser/images/single_test&quot;
 
 OcUtilsURL=&quot;https://github.com/OpenCAPI/oc-utils&quot;
-OcUtilsURL=&quot;TOTOTO&quot;
 
 SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not needed to access /dev/ocxl
 
@@ -168,8 +167,8 @@ function finish {  # define function to unlock in case of error, executed after 
   echo;echo &quot;  -&gt; unlocking ${LOCK}&quot;
   UNLOCK_RC=0;ssh ${HWUser}@${box} rmdir ${LOCK} || UNLOCK_RC=$?
   echo &quot;box=$box lock=$LOCK unlock RC=$UNLOCK_RC (`date`)&quot;
-  echo;echo &quot;  -&gt; cleaning ${box}@$TARGET_DIR&quot;
-  CLEAN_RC=0;ssh -T ${HWUser}@$box rm -rf ${TARGET_DIR} || CLEAN_RC=$?
+  echo;echo &quot;  -&gt; AC: NOT cleaning ${box}@$TARGET_DIR&quot;
+  #CLEAN_RC=0;ssh -T ${HWUser}@$box rm -rf ${TARGET_DIR} || CLEAN_RC=$?
   echo &quot;box=$box clean target_dir=$TARGET_DIR RC=$CLEAN_RC (`date`)&quot;
   echo;echo &quot;  -&gt; EXITING !&quot;  
 
@@ -569,9 +568,9 @@ echo;echo &quot;****************************************************************
 echo &quot;J: Git cloning oc-Utils tools into $box:/home/$HWUser...&quot;
 echo &quot;  (oc-flash-script.sh used by command `echo $RUN | cut -d&apos; &apos; -f1` )&quot;
 ssh ${HWUser}@${box} rm -rf oc-utils
-echo &quot;echo OCUtilsURL = $OCUtilsURL&quot;
-echo &quot;Running : ${HWUser}@${box} git clone -b $OCUTILS_BRANCH $OCUtilsURL&quot;
-ssh ${HWUser}@${box} git clone -b $OCUTILS_BRANCH $OCUtilsURL
+echo &quot;echo OCUtilsURL = $OcUtilsURL&quot;
+echo &quot;Running : ${HWUser}@${box} git clone -b $OCUTILS_BRANCH $OcUtilsURL&quot;
+ssh ${HWUser}@${box} git clone -b $OCUTILS_BRANCH $OcUtilsURL
 
 # FAB: linking capi-utils/psl-devices to /lib/capi-utils/psl-devices modified by Alexandre
 #echo &quot;  -&gt; Linking ~/capi-utils/psl-devices to /lib/capi-utils/psl-devices modified by Alexandre&quot;
