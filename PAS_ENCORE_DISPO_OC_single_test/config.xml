@@ -389,6 +389,7 @@ for loop in `seq 1 $maxloop`;do
     fi
     
     echo -e &quot;  --&gt; Using the tool, looking for $CRD inside ${box}: \c&quot;
+    echo &quot;Oc_find_card version is :&quot;;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} &gt; /dev/null 2&gt;&amp;1
     found=0;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} &gt; /dev/null 2&gt;&amp;1 ||found=$?
     # ($find_card gives the number of found cards inside $?)
     
@@ -565,8 +566,8 @@ ssh ${HWUser}@${box} cp ${TARGET_DIR}/software/tools/$FindCardTool .
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Git cloning Capi-Utils tools into $box:/home/$HWUser...&quot;
-echo &quot;  (capi-flash-script.sh used by command `echo $RUN | cut -d&apos; &apos; -f1` )&quot;
-ssh ${HWUser}@${box} rm -rf capi-utils
+echo &quot;  (oc-flash-script.sh used by command `echo $RUN | cut -d&apos; &apos; -f1` )&quot;
+ssh ${HWUser}@${box} rm -rf oc-utils
 ssh ${HWUser}@${box} git clone -b $OCUTILS_BRANCH $OCUtilsURL
 
 # FAB: linking capi-utils/psl-devices to /lib/capi-utils/psl-devices modified by Alexandre
@@ -577,9 +578,10 @@ ssh ${HWUser}@${box} &quot;if [ -f /lib/capi-utils/psl-devices ]; then rm capi-u
 # Build the capi-utils software into $box:/home/$HWUser/capi-utils on the $box
 
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Building the capi-utils software on $box in /home/$HWUser/capi-utils...&quot;
-echo &quot;   (not installing (not &apos;make install&apos;) to prevent deleting /lib/capi-utils/psl-devices modified by Alexandre)&quot;
-ssh ${HWUser}@${box} make -C /home/$HWUser/capi-utils
+echo &quot;J: Building the oc-utils software on $box in /home/$HWUser/oc-utils...&quot;
+
+#echo &quot; do not &quot;install&quot; to prevent over-writing the server config&quot;
+ssh ${HWUser}@${box} make -C /home/$HWUser/oc-utils
 
 
 #------------------------------------------------------------------------------------------------------------------------------
