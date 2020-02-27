@@ -131,8 +131,9 @@ IMGServers=&quot;jtagx86&quot; # List of servers where to push generated images.
 
 ExecutorIMGRootDir=&quot;/home/$HWUser/images/single_test&quot;
 
-CapiUtilsURL=&quot;https://github.com/ibm-capi/capi-utils.git&quot;
-SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not needed to access /dev/cxl
+OcUtilsURL=&quot;https://github.ibm.com/OC-Enablement/oc-utils.git&quot;
+
+SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not needed to access /dev/ocxl
 
 HWUser=&quot;capimop&quot;
 
@@ -278,6 +279,8 @@ echo &quot;J: Searching for the card name in the image file name ($IMGFileName).
 
 for CRD in &quot;${SortedCARDSList[@]}&quot;;do
   if [[ &quot;$IMGFileName&quot; =~ &quot;$CRD&quot; ]];then echo &quot;  -&gt; Found card=$CRD for image=$IMGFileName size=$size&quot;;break;fi
+  # ici il faut tester si on &quot;oc&quot; en debut de fichier ET à partir de Oc-CARD si on a CARD
+  # if [[ &quot;$IMGFileName&quot; =~ &quot;oc&quot; ]];then echo &quot;  -&gt; Found card=$CRD for image=$IMGFileName size=$size&quot;;break;fi
   if [ $CRD == ${SortedCARDSList[*]: -1} ];then die 100 &quot;  -&gt; Cannot find card for image=$IMGFileName in cards=${CARDSList[*]}&quot;;fi
 done
 
@@ -363,7 +366,7 @@ maxloop=60
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Searching (max $maxloop min) for free card=$CRD into ( ${TESTBOXES[@]} ) (`date`)&quot;
 
-FindCardTool=&quot;snap_find_card&quot;
+FindCardTool=&quot;oc_find_card&quot;
 
 for loop in `seq 1 $maxloop`;do
 
@@ -390,7 +393,7 @@ for loop in `seq 1 $maxloop`;do
     # ($find_card gives the number of found cards inside $?)
     
     if [ $found -ne 0 ];then
-      cards=`ssh -ttq ${HWUser}@${box} &quot;/home/${HWUser}/$find_card -A ${CRD} 2&gt;/dev/null&quot; | head -n1`   
+      cards=`ssh -ttq ${HWUser}@${box} &quot;/home/${HWUser}/$find_card -A OC-${CRD} 2&gt;/dev/null&quot; | head -n1`   
       echo -e &quot;OK: $found CARD(S) FOUND (card-IDs= $cards)&quot;
       # (head is needed because if more than 1 card, $find_card returns something like &quot;0 0&quot; and second line with &quot;Total 2 cards detected&quot;)
     else
