@@ -57,8 +57,8 @@ test</description>
           <description>Choose the Vivado version to use</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
-              <string>2019.1</string>
               <string>2019.2</string>
+              <string>2019.1</string>
               <string>2018.3</string>
             </a>
           </choices>
@@ -214,9 +214,13 @@ H 22-23/1 * * *</spec>
     <hudson.matrix.TextAxis>
       <name>ACT</name>
       <values>
+        <string>hdl_example.BRAM</string>
+        <string>hdl_example.SDRAM</string>
+        <string>hdl_helloworld</string>
         <string>hls_memcopy</string>
         <string>hls_helloworld</string>
-        <string>test</string>
+        <string>hls_decimal_mult</string>
+        <string>hls_latency_eval</string>
       </values>
     </hudson.matrix.TextAxis>
     <hudson.matrix.TextAxis>
