@@ -53,9 +53,8 @@
     <hudson.matrix.LabelAxis>
       <name>label</name>
       <values>
-        <string>POWER8</string>
-        <string>POWER9</string>
-        <string>mopjenkins</string>
+        <string>X86</string>
+        <string>X86_UBUNTU</string>
       </values>
     </hudson.matrix.LabelAxis>
   </axes>
@@ -72,6 +71,7 @@ echo &quot;Working dir is : `pwd`&quot;
 echo &quot;[X: $X, Y: $Y ]&quot;
 
 echo &quot;BUILD_URL= $BUILD_URL&quot;
+hostname -a
 
 sleep 10</command>
     </hudson.tasks.Shell>
