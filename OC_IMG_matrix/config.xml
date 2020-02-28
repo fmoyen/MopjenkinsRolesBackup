@@ -4,6 +4,7 @@
   <description>Builds bitstreams with different configurations and tests images on real HW if possible.&#xd;
 In case of problems: please contact fabrice_moyen@fr.ibm.com or alexandre.castellane@fr.ibm.com&#xd;
 Vivado version used : tests on going for 2019.1 (issue with lsf / RH7)&#xd;
+AC 28 fev 2020 : changed default to 2019.2&#xd;
 &#xd;
 WARNING : P9 oc_find_card is used with OC-$CRD prefix&#xd;
 &#xd;
@@ -40,6 +41,7 @@ Main Issues : &#xd;
           <description>Choose the Vivado version to use</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
+              <string>2019.2</string>
               <string>2019.1</string>
               <string>2018.3</string>
             </a>
