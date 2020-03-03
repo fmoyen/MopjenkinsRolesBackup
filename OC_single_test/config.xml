@@ -36,13 +36,13 @@ for Questions: please contact  A.Castellane or F.Moyen</description>
         </jp.ikedam.jenkins.plugins.extensible__choice__parameter.ExtensibleChoiceParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>BRANCH</name>
-          <description>Choose the branch for github.com:open-power/snap you want to test. Please do not use wildcards!!</description>
+          <description>Choose the branch for https://github.com/OpenCAPI/oc-accel you want to test. Please do not use wildcards!!</description>
           <defaultValue>master</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>CAPIUTILS_BRANCH</name>
-          <description>Choose the branch for https://github.com/ibm-capi/capi-utils you want to test. Please do not use wildcards!!</description>
+          <name>OCUTILS_BRANCH</name>
+          <description>Choose the branch for https://github.com/OpenCAPI/oc-utils you want to test. Please do not use wildcards!!</description>
           <defaultValue>master</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
@@ -131,8 +131,9 @@ IMGServers=&quot;jtagx86&quot; # List of servers where to push generated images.
 
 ExecutorIMGRootDir=&quot;/home/$HWUser/images/single_test&quot;
 
-CapiUtilsURL=&quot;https://github.com/ibm-capi/capi-utils.git&quot;
-SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not needed to access /dev/cxl
+OcUtilsURL=&quot;https://github.com/OpenCAPI/oc-utils&quot;
+
+SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not needed to access /dev/ocxl
 
 HWUser=&quot;capimop&quot;
 
@@ -166,8 +167,8 @@ function finish {  # define function to unlock in case of error, executed after 
   echo;echo &quot;  -&gt; unlocking ${LOCK}&quot;
   UNLOCK_RC=0;ssh ${HWUser}@${box} rmdir ${LOCK} || UNLOCK_RC=$?
   echo &quot;box=$box lock=$LOCK unlock RC=$UNLOCK_RC (`date`)&quot;
-  echo;echo &quot;  -&gt; cleaning ${box}@$TARGET_DIR&quot;
-  CLEAN_RC=0;ssh -T ${HWUser}@$box rm -rf ${TARGET_DIR} || CLEAN_RC=$?
+  echo;echo &quot;  -&gt; AC: NOT cleaning ${box}@$TARGET_DIR&quot;
+  #CLEAN_RC=0;ssh -T ${HWUser}@$box rm -rf ${TARGET_DIR} || CLEAN_RC=$?
   echo &quot;box=$box clean target_dir=$TARGET_DIR RC=$CLEAN_RC (`date`)&quot;
   echo;echo &quot;  -&gt; EXITING !&quot;  
 
@@ -278,6 +279,8 @@ echo &quot;J: Searching for the card name in the image file name ($IMGFileName).
 
 for CRD in &quot;${SortedCARDSList[@]}&quot;;do
   if [[ &quot;$IMGFileName&quot; =~ &quot;$CRD&quot; ]];then echo &quot;  -&gt; Found card=$CRD for image=$IMGFileName size=$size&quot;;break;fi
+  # ici il faut tester si on &quot;oc&quot; en debut de fichier ET à partir de Oc-CARD si on a CARD
+  # if [[ &quot;$IMGFileName&quot; =~ &quot;oc&quot; ]];then echo &quot;  -&gt; Found card=$CRD for image=$IMGFileName size=$size&quot;;break;fi
   if [ $CRD == ${SortedCARDSList[*]: -1} ];then die 100 &quot;  -&gt; Cannot find card for image=$IMGFileName in cards=${CARDSList[*]}&quot;;fi
 done
 
@@ -363,7 +366,7 @@ maxloop=60
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Searching (max $maxloop min) for free card=$CRD into ( ${TESTBOXES[@]} ) (`date`)&quot;
 
-FindCardTool=&quot;snap_find_card&quot;
+FindCardTool=&quot;oc_find_card&quot;
 
 for loop in `seq 1 $maxloop`;do
 
@@ -380,12 +383,13 @@ for loop in `seq 1 $maxloop`;do
     find_card=$FindCardTool.${GIT_COMMIT}.`date +%H%M%S`
 
     echo  &quot;  --&gt; Copying the tool $FindCardTool ($find_card) to $box:/home/${HWUser}&quot;
-    RC=0;scp snap/software/tools/$FindCardTool ${HWUser}@$box:/home/${HWUser}/$find_card ; RC=$?
+    RC=0;scp oc-accel/software/tools/$FindCardTool ${HWUser}@$box:/home/${HWUser}/$find_card ; RC=$?
     if [ $RC -gt 0 ];then
       echo &quot;     -&gt; copy $find_card to $box FAILED, continuing anyway...&quot;;
     fi
     
     echo -e &quot;  --&gt; Using the tool, looking for $CRD inside ${box}: \c&quot;
+    echo &quot;Oc_find_card version is :&quot;;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -V &gt; /dev/null 2&gt;&amp;1
     found=0;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} &gt; /dev/null 2&gt;&amp;1 ||found=$?
     # ($find_card gives the number of found cards inside $?)
     
@@ -512,14 +516,14 @@ ssh ${HWUser}@${box} tail -n7 jenkins.log
 
 TARGET_DIR=&quot;`basename $PWD`-${ReducedFileName}-${BUILD_NUMBER}&quot;
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Copying snap working directory into $box:/home/$HWUser/$TARGET_DIR&quot;
+echo &quot;J: Copying oc-accel working directory into $box:/home/$HWUser/$TARGET_DIR&quot;
 echo &quot;  (Local current Dir = $PWD)&quot;
 
-RUN=&quot;./actions/scripts/snap_jenkins.sh&quot;
+RUN=&quot;./actions/scripts/oc_jenkins.sh&quot;
 echo &quot;  -&gt; Creating $box:/home/$HWUser/$TARGET_DIR, if not existing&quot;
 ssh ${HWUser}@${box} mkdir -p ${TARGET_DIR}
-echo &quot;  -&gt; Copying snap workspace directory to ${box}:/home/${HWUser}/${TARGET_DIR}&quot;
-rsync -az snap/ ${HWUser}@${box}:/home/${HWUser}/${TARGET_DIR}
+echo &quot;  -&gt; Copying oc-accel workspace directory to ${box}:/home/${HWUser}/${TARGET_DIR}&quot;
+rsync -az oc-accel/ ${HWUser}@${box}:/home/${HWUser}/${TARGET_DIR}
 
 
 #------------------------------------------------------------------------------------------------------------------------------
@@ -547,10 +551,10 @@ fi
 
 
 #------------------------------------------------------------------------------------------------------------------------------
-# Build the SNAP software into $TARGET_DIR on the $box
+# Build the OC-ACCEL software into $TARGET_DIR on the $box
 
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Building the SNAP software and actions on $box in $TARGET_DIR...&quot;
+echo &quot;J: Building the OC-ACCEL software and actions on $box in $TARGET_DIR...&quot;
 ssh ${HWUser}@${box} make -C ${TARGET_DIR} clean software actions
 
 echo  &quot;copy new $FindCardTool to homedir&quot;;  
@@ -561,22 +565,25 @@ ssh ${HWUser}@${box} cp ${TARGET_DIR}/software/tools/$FindCardTool .
 # Git clone capi-utils tools into $box:/home/$HWUser
 
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Git cloning Capi-Utils tools into $box:/home/$HWUser...&quot;
-echo &quot;  (capi-flash-script.sh used by command `echo $RUN | cut -d&apos; &apos; -f1` )&quot;
-ssh ${HWUser}@${box} rm -rf capi-utils
-ssh ${HWUser}@${box} git clone -b $CAPIUTILS_BRANCH $CapiUtilsURL
+echo &quot;J: Git cloning oc-Utils tools into $box:/home/$HWUser...&quot;
+echo &quot;  (oc-flash-script.sh used by command `echo $RUN | cut -d&apos; &apos; -f1` )&quot;
+ssh ${HWUser}@${box} rm -rf oc-utils
+echo &quot;echo OCUtilsURL = $OcUtilsURL&quot;
+echo &quot;Running : ${HWUser}@${box} git clone -b $OCUTILS_BRANCH $OcUtilsURL&quot;
+ssh ${HWUser}@${box} git clone -b $OCUTILS_BRANCH $OcUtilsURL
 
 # FAB: linking capi-utils/psl-devices to /lib/capi-utils/psl-devices modified by Alexandre
-echo &quot;  -&gt; Linking ~/capi-utils/psl-devices to /lib/capi-utils/psl-devices modified by Alexandre&quot;
-ssh ${HWUser}@${box} &quot;if [ -f /lib/capi-utils/psl-devices ]; then rm capi-utils/psl-devices; ln -s /lib/capi-utils/psl-devices capi-utils/psl-devices; fi&quot;
+#echo &quot;  -&gt; Linking ~/capi-utils/psl-devices to /lib/capi-utils/psl-devices modified by Alexandre&quot;
+#ssh ${HWUser}@${box} &quot;if [ -f /lib/capi-utils/psl-devices ]; then rm capi-utils/psl-devices; ln -s /lib/capi-utils/psl-devices capi-utils/psl-devices; fi&quot;
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Build the capi-utils software into $box:/home/$HWUser/capi-utils on the $box
 
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Building the capi-utils software on $box in /home/$HWUser/capi-utils...&quot;
-echo &quot;   (not installing (not &apos;make install&apos;) to prevent deleting /lib/capi-utils/psl-devices modified by Alexandre)&quot;
-ssh ${HWUser}@${box} make -C /home/$HWUser/capi-utils
+echo &quot;J: Building the oc-utils software on $box in /home/$HWUser/oc-utils...&quot;
+
+echo &quot; capi-utils is NOT installed to prevent over-writing the server default config (/lib/capi-utils preserved)&quot;
+ssh ${HWUser}@${box} make -C /home/$HWUser/oc-utils
 
 
 #------------------------------------------------------------------------------------------------------------------------------
@@ -615,7 +622,7 @@ if [ $RC -eq 0 ]; then
   echo &quot; =&gt; $box: Cleaning working directory&quot;
   echo &quot; =&gt; Jenkins: Cleaning images from $mopIMGDir&quot;
   echo &quot; =&gt; $box: Moving Primary/secondary image file to good.* inside $ExecutorIMGRootDir/$CRD&quot;
-  echo &quot;   (needs to be manually done because SNAP github script does not manage Primary/Secondary files for the moment)&quot;
+  echo &quot;   (needs to be manually done because OC-ACCEL github script does not manage Primary/Secondary files for the moment)&quot;
   echo &quot;   (so it is just renaming primary to primary.good)&quot;
 
   echo;echo &quot;+ Cleaning up working directory ${TARGET_DIR} from ${box}&quot;
@@ -723,7 +730,7 @@ fi</command>
       <operationList/>
     </hudson.plugins.build__timeout.BuildTimeoutWrapper>
     <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.3">
-      <template>${PROJECT_NAME} #${BUILD_NUMBER} OC-ACCEL=${GIT_BRANCH} CAPI-UTILS=${CAPIUTILS_BRANCH}</template>
+      <template>${PROJECT_NAME} #${BUILD_NUMBER} OC-ACCEL=${GIT_BRANCH} OC-UTILS=${OCUTILS_BRANCH}</template>
       <descriptionTemplate></descriptionTemplate>
       <runAtStart>true</runAtStart>
       <runAtEnd>true</runAtEnd>
