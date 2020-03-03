@@ -1359,7 +1359,7 @@ fi
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Git cloning Capi-Utils tools into $box:/home/$HWUser...&quot;
 echo &quot;  (capi-flash-script.sh used by command `echo $RUN | cut -d&apos; &apos; -f1` )&quot;
-ssh ${HWUser}@${box} git clone -b $CAPIUTILS_BRANCH $CapiUtilsURL
+ssh ${HWUser}@${box} &quot;rm -rf capi-utils &amp;&amp; git clone -b $CAPIUTILS_BRANCH $CapiUtilsURL&quot;
 
 
 echo;echo &quot;***************************************************************************************&quot;

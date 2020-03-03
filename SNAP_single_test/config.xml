@@ -577,7 +577,7 @@ ssh ${HWUser}@${box} git clone -b $CAPIUTILS_BRANCH $CapiUtilsURL
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Building the capi-utils software on $box in /home/$HWUser/capi-utils...&quot;
-echo &quot;   (not installing (not &apos;make install&apos;) to prevent deleting /lib/capi-utils/psl-devices modified by Alexandre)&quot;
+echo &quot; capi-utils is compiled locally to prevent over-writing the server default config (/lib/capi-utils preserved)&quot;
 ssh ${HWUser}@${box} make -C /home/$HWUser/capi-utils
 
 

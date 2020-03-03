@@ -582,7 +582,7 @@ ssh ${HWUser}@${box} git clone -b $OCUTILS_BRANCH $OcUtilsURL
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Building the oc-utils software on $box in /home/$HWUser/oc-utils...&quot;
 
-echo &quot; capi-utils is NOT installed to prevent over-writing the server default config (/lib/capi-utils preserved)&quot;
+echo &quot; oc-utils is compiled locally to prevent over-writing the server default config (/lib/capi-utils preserved)&quot;
 ssh ${HWUser}@${box} make -C /home/$HWUser/oc-utils
 
 
