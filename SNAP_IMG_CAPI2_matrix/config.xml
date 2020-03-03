@@ -1361,6 +1361,14 @@ echo &quot;J: Git cloning Capi-Utils tools into $box:/home/$HWUser...&quot;
 echo &quot;  (capi-flash-script.sh used by command `echo $RUN | cut -d&apos; &apos; -f1` )&quot;
 ssh ${HWUser}@${box} &quot;rm -rf capi-utils &amp;&amp; git clone -b $CAPIUTILS_BRANCH $CapiUtilsURL&quot;
 
+#------------------------------------------------------------------------------------------------------------------------------
+# Build the capi-utils software into $box:/home/$HWUser/capi-utils on the $box
+
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Building the capi-utils software on $box in /home/$HWUser/capi-utils...&quot;
+echo &quot; capi-utils is compiled locally to prevent over-writing the server default config (/lib/capi-utils preserved)&quot;
+ssh ${HWUser}@${box} make -C /home/$HWUser/capi-utils
+
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Executing below SNAP Jenkins test on $box from ${TARGET_DIR} directory (`date`):&quot;
