@@ -105,8 +105,9 @@ Main Issues : &#xd;
           <name>mopBoxes</name>
           <description>List of Montpellier systems available for testing :
   - orpington: AC922 8335-GTH with one OC-AD9V3 (eventually C2 capable)
+  - orpington: IC922 9183-22X with one OC-AD9V3 (eventually C2 capable)
 (it needs to define capimop user with authorized_keys)</description>
-          <defaultValue>orpington</defaultValue>
+          <defaultValue>orpington pavilly</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
