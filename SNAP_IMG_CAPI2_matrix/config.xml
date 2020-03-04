@@ -715,13 +715,6 @@ rm -rf pslse
 echo;echo &quot;Getting (git clone) Power Service Layer Simulation Environment (pslse) branch=$PSLSE_BRANCH for card=$CRD...&quot;
 git clone -b $PSLSE_BRANCH https://github.com/ibm-capi/pslse pslse;echo &quot;git clone PSLSE RC=$?&quot;
 
-
-echo;echo &quot;  -&gt; Cleaning (make clean) $SNAP_ROOT &amp; $SNAP_ROOT/hardware/capi2-bsp directories&quot;
-cd ${SNAP_ROOT}
-make clean                   # to make sure we restart from a blank snap
-cd hardware/capi2-bsp
-make clean                   # to make sure we restart from a blank capi-bsp
-
 cd ${SNAP_ROOT}
 echo;echo &quot;  -&gt; Exporting pslse directory as : ${USERHOME}/pslse into snap_env.sh&quot;
 echo &quot;export PSLSE_ROOT=$USERHOME/pslse&quot; &gt;snap_env.sh
@@ -877,11 +870,21 @@ then
   maxloop=5;
   for loop in `seq 1 $maxloop`
   do  
+  
     echo;echo &quot;****************************************************************************************&quot;
     echo &quot;J: Build Non-Cloud Image (make image) for $CRD, Loop ${loop}/$maxloop (`date`)&quot;
-    echo
+   
+    echo;echo &quot;  -&gt; Cleaning (make clean) $SNAP_ROOT &amp; $SNAP_ROOT/hardware/capi2-bsp directories&quot;
+    cd ${SNAP_ROOT}
+    make clean                   # to make sure we restart from a blank snap
+    cd hardware/capi2-bsp
+    make clean                   # to make sure we restart from a blank capi-bsp    
+    
+    echo;echo &quot;  -&gt; Building the Image (make image)&quot;    
     #RC=0; bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot; &amp;&amp; break || RC=$?
+    cd ${SNAP_ROOT}
     RC=0; make image &amp;&amp; break || RC=$?
+    
   done
   
   if [ $RC -eq 0 ] &amp;&amp; [ $loop -eq 1 ]; then 
