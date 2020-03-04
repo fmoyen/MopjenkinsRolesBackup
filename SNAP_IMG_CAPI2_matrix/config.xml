@@ -904,11 +904,11 @@ then
     mkdir -p $LogsDir/logs # rsync does not do &quot;mkdir -p $LogsDir/logs&quot; but &quot;mkdir $LogsDir/logs&quot; only (which will fail if more than one step dir to create)
     RSYNC_CMD=&quot;rsync -av $SNAP_ROOT/hardware/logs/* $LogsDir/logs&quot;
     echo; echo &quot;$RSYNC_CMD&quot;
-    $RSYNC_CMD
+    $RSYNC_CMD 2&gt;/dev/null
     mkdir -p $LogsDir/build/Reports
     RSYNC_CMD=&quot;rsync -av $SNAP_ROOT/hardware/build/Reports/* $LogsDir/build/Reports&quot;
     echo; echo &quot;$RSYNC_CMD&quot;
-    $RSYNC_CMD
+    $RSYNC_CMD 2&gt;/dev/null
 
 
     exit 1
