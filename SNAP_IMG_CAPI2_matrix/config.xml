@@ -1375,7 +1375,7 @@ ssh ${HWUser}@${box} make -C /home/$HWUser/capi-utils
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Executing below SNAP Jenkins test on $box from ${TARGET_DIR} directory (`date`):&quot;
-echo &quot;  -&gt; $RUN&quot;
+echo &quot;  -&gt; $SudoOrNotSudo ${RUN}&quot;
 echo
 
 RC=0;ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?

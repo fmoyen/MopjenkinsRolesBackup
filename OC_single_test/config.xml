@@ -590,7 +590,7 @@ ssh ${HWUser}@${box} make -C /home/$HWUser/oc-utils
 # Execute the $RUN command on the $box
 
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Executing Test: $RUN&quot;
+echo &quot;J: Executing Test: $SudoOrNotSudo ${RUN}&quot;
 echo &quot;   on $box (`date`)&quot;
 
 RC=0
