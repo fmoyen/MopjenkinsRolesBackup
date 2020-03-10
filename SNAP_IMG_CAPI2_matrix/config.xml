@@ -218,6 +218,7 @@ H 22-23/1 * * *</spec>
     <hudson.matrix.TextAxis>
       <name>ACT</name>
       <values>
+        <string>hdl_example.NORAM</string>
         <string>hdl_example.BRAM</string>
         <string>hdl_example.SDRAM</string>
         <string>hdl_helloworld</string>
@@ -762,12 +763,12 @@ case $CRD in
             ;;
 #  &apos;U200&apos;)   export VIV_VERSION=&quot;2018.3&quot;  removed or 2019.1 test
 #            ;;  
-  &apos;N250SP&apos;) #echo &quot;export PSL9_IP_CORE=/afs/bb/proj/fpga/framework/cards/$CRD/ibm.com_CAPI_PSL9_WRAP_2.00.zip&quot; &gt;&gt;snap_env.sh
+#  &apos;N250SP&apos;) #echo &quot;export PSL9_IP_CORE=/afs/bb/proj/fpga/framework/cards/$CRD/ibm.com_CAPI_PSL9_WRAP_2.00.zip&quot; &gt;&gt;snap_env.sh
             #git submodule update --init --recursive hardware/capi2-bsp
             #cd ${SNAP_ROOT}
-            export VIV_VERSION=&quot;2018.2&quot;
+#            export VIV_VERSION=&quot;2018.2&quot;
             #echo &quot;export TIMING_LABLIMIT=\&quot;-300\&quot;&quot; &gt;&gt; snap_env.sh
-            ;;
+#            ;;
 esac
 
 echo;echo &quot;****************************************************************************************&quot; 
@@ -976,10 +977,12 @@ done
 # if FACTORY requested, copying bit files to FactoryDir=${RootSaveDir}/${CRD}_FACTORY_MCS
 # In FACTORY MODE : We save hdl_example and hls_helloworld bit for cards files for future .mcs generation
 
+FactoryDir=${RootSaveDir}/${CRD}_FACTORY_MCS/Build${BUILD_NUMBER}
+
 case ${ACT}:$FACTORY in
 
   hdl_example.NORAM:true ) 
-    FactoryDir=${RootSaveDir}/${CRD}_FACTORY_MCS
+    
     echo &quot;J: ${ACT} action and FACTORY requested&quot;
 
     FACTBITFILES=`ls -t $SNAP_ROOT/hardware/build/Images/fw_*[0-9]_FACTORY*.bit`  # take FACTORY bit files
@@ -995,8 +998,14 @@ case ${ACT}:$FACTORY in
     ;;
 
   hls_helloworld:true )
-    FactoryDir=${RootSaveDir}/${CRD}_FACTORY_MCS
+  
     echo &quot;J: ${ACT} action and FACTORY requested&quot;
+
+    if [ &quot;$BITFILES&quot; == &quot;&quot; ] ; then
+      echo &quot;  --&gt; cannot find any User bit file from $SNAP_ROOT/hardware/build/Images/fw_\*_FACTORY\*.bit !!&quot;
+      exit 1
+    fi
+
 
     mkdir -p $FactoryDir
      
@@ -1017,8 +1026,6 @@ case ${ACT}:$FACTORY in
   
   echo &quot;J: ${ACT} action and FACTORY requested ==&gt; Checking if everything&apos;s here to build MCS file&quot;
 
-  FactoryDir=${RootSaveDir}/${CRD}_FACTORY_MCS
-
   # Checking Factory and User bitstreams are both here &amp; no lock file is present
   # If everything&apos;s OK, building MCS file
   
@@ -1029,7 +1036,7 @@ case ${ACT}:$FACTORY in
   echo &quot;     USER bitstream file = $user_bitstream&quot;
     
   if [[ &quot;$factory_bitstream&quot; != &quot;&quot; ]] &amp;&amp; [[ &quot;$user_bitstream != &quot;&quot; ]] ; then
-    echo &quot;  -&gt; Both bitstream files are present ==&gt; going further...&quot;
+    echo &quot;  -&gt; Both bitstream files are present in $FactoryDir ==&gt; going further...&quot;
     MCSLock=$FactoryDir/MCSLock
     if [ ! -f $MCSLock ]; then
       touch $MCSLock
