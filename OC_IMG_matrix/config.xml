@@ -1042,6 +1042,25 @@ if [ $RC -ne 0 ];then
 	exit 100
 fi
 
+#------------------------------------------------------------------------------------------------------------------------------
+# Git clone capi-utils tools into $box:/home/$HWUser
+
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;  -&gt; Git cloning oc-Utils tools into $box:/home/$HWUser...&quot;
+echo &quot;  (oc-flash-script.sh used by command `echo $RUN | cut -d&apos; &apos; -f1` )&quot;
+ssh ${HWUser}@${box} rm -rf oc-utils
+echo &quot;echo OCUtils URL = $OCUTILS_URL&quot;
+echo &quot;Running : ${HWUser}@${box} git clone -b $OCUTILS_BRANCH $OCUTILS_URL oc-utils&quot;
+RC=0; ssh ${HWUser}@${box} git clone -b $OCUTILS_BRANCH $OCUTILS_URL oc-utils || RC=$?
+
+if [ $RC -ne 0 ];then 
+	SaveDir=&quot;$RootSaveDir/gitclone_error&quot;
+    echo &quot;  -&gt; git clone -b $OCUTILS_BRANCH $OCUTILS_URL oc-utils failed at ${box} =&gt; copying image to $SaveDir&quot;
+	cp -rp $BINFILES $SaveDir
+	echo &quot;  -&gt; EXITING !&quot;
+	exit 100
+fi
+
 echo &quot;  -&gt; Copying image(s) to ${box}:/home/${HWUser}/images/${CRD}/${ACT}&quot;
 ssh $box mkdir -p /home/${HWUser}/images/${CRD}/${ACT}    # create subdirectory, if not avail yet
 
