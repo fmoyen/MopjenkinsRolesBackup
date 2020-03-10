@@ -30,6 +30,18 @@ Main Issues : &#xd;
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
+          <name>OCUTILS_URL</name>
+          <description>URL for oc-utils github project (you may change this only if you want to test a specific fork repository)</description>
+          <defaultValue>https://github.com/OpenCAPI/oc-utils</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>OCUTILS_BRANCH</name>
+          <description>Choose the branch for $OCUTILS_URL (typically https://github.com/OpenCAPI/oc-utils) you want to test. Please do not use wildcards!!</description>
+          <defaultValue>master</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
           <name>OCSE_BRANCH</name>
           <description>Choose the branch for https://github.com/OpenCAPI/ocse you want to test.
 (OpenCapi Simulation Engine)</description>
