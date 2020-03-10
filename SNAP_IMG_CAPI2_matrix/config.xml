@@ -846,7 +846,7 @@ case $ACT in          # select config &amp; compile action
         cat .snap_config | egrep  -v &quot;ENABLE_FACTORY|FACTORY_IMAGE&quot; &gt; tempofile
         echo &apos;ENABLE_FACTORY=y&apos; &gt;&gt; tempofile
 		mv tempofile .snap_config
-        echo &quot;       -&gt; Running make oldconfig to re-generate a clean .snap_config file with the new ENABLE_FACTORY parameter ...&quot;; echo
+        echo &quot;       -&gt; Running make oldconfig to re-generate clean .snap_config/.snap_config.sh files with ENABLE_FACTORY/FACTORY_IMAGE parameters ...&quot;; echo
         make -s oldconfig
     else
         echo &quot;  -&gt; Factory NOT requested: Nothing else to do (defconfig is the reference) ...&quot;;echo
@@ -988,7 +988,7 @@ case ${ACT}:$FACTORY in
     fi
 
     mkdir -p $FactoryDir
-	echo &quot;  --&gt; Copying $CRD $ACT F bit file to $FactoryDir&quot;
+	echo &quot;  --&gt; Copying $CRD $ACT Factory bit file to $FactoryDir&quot;
     cp -rp $FACTBITFILES $FactoryDir
     ;;
 
