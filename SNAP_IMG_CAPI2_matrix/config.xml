@@ -972,6 +972,8 @@ for  f in $BINFILES; do
 done
 
 
+#==============================================================================================
+# if FACTORY requested, copying bit files to FactoryDir=${RootSaveDir}/${CRD}_FACTORY_MCS
 # In FACTORY MODE : We save hdl_example and hls_helloworld bit for cards files for future .mcs generation
 
 case ${ACT}:$FACTORY in
@@ -1002,6 +1004,48 @@ case ${ACT}:$FACTORY in
     cp -rp $BITFILES $FactoryDir
     ;;
     
+esac
+
+
+#==============================================================================================
+# MCS file generation
+# Compile the MCS file from FACTORY and USER bitstreams
+
+case ${ACT}:$FACTORY in
+
+  hdl_example.NORAM:true|hls_helloworld:true )
+  
+  echo &quot;J: ${ACT} action and FACTORY requested ==&gt; Checking if everything&apos;s here to build MCS file&quot;
+
+  FactoryDir=${RootSaveDir}/${CRD}_FACTORY_MCS
+
+  # Checking Factory and User bitstreams are both here &amp; no lock file is present
+  # If everything&apos;s OK, building MCS file
+  
+  echo &quot;  -&gt; Checking if Factory and User bitstreams are here...&quot;
+  factory_bitstream=`ls -t $FactoryDir/fw_*[0-9]_FACTORY*.bit 2&gt;/dev/null`
+  echo &quot;     FACTORY bitstream file = $factory_bitstream&quot;
+  user_bitstream=`ls -t $FactoryDir/fw_*[0-9].bit 2&gt;/dev/null`  
+  echo &quot;     USER bitstream file = $user_bitstream&quot;
+    
+  if [[ &quot;$factory_bitstream&quot; != &quot;&quot; ]] &amp;&amp; [[ &quot;$user_bitstream != &quot;&quot; ]] ; then
+    echo &quot;  -&gt; Both bitstream files are present ==&gt; going further...&quot;
+    MCSLock=$FactoryDir/MCSLock
+    if [ ! -f $MCSLock ]; then
+      touch $MCSLock
+      echo &quot;  -&gt; MCS build not already running ==&gt; building MCS file...&quot;
+      cd ${SNAP_ROOT}
+      source .snap_config.sh   
+      ./hardware/setup/build_mcs.tcl $factory_bitstream $user_bitstream ${factory_bitstream%.bit}.mcs
+      rm -f $MCSLock
+    else
+      echo &quot;  -&gt; MCS build running ($MCSLock file present) ==&gt; doing nothing&quot;
+  else
+    echo &quot;  -&gt; Both bitstream files couldn&apos;t be found !! ==&gt; doing nothing for the moment&quot;
+  fi  
+
+
+  ;;
 esac
 
 
