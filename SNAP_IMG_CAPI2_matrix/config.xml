@@ -60,10 +60,10 @@ test</description>
           <description>Choose the Vivado version to use</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
+              <string>2018.2</string>
               <string>2019.2</string>
               <string>2019.1</string>
               <string>2018.3</string>
-              <string>2018.2</string>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
@@ -1045,24 +1045,27 @@ case ${ACT}:$FACTORY in
   if [[ &quot;$factory_bitstream&quot; != &quot;&quot; ]] &amp;&amp; [[ &quot;$user_bitstream&quot; != &quot;&quot; ]] ; then
     echo &quot;  -&gt; Both bitstream files are present in $FactoryDir ==&gt; going further...&quot;
     MCSLock=$FactoryDir/MCSLock
+    
     if [ ! -f $MCSLock ]; then
       touch $MCSLock # create a lock to prevent two build_mcs.tcl running in parallel
       echo &quot;  -&gt; MCS build not already running ==&gt; building MCS file...&quot;
+      
       cd ${SNAP_ROOT}
       source .snap_config.sh   
-      ./hardware/setup/build_mcs.tcl $factory_bitstream $user_bitstream $mcs_bitstream
+      RC_MCS=0; ./hardware/setup/build_mcs.tcl $factory_bitstream $user_bitstream $mcs_bitstream | RC_MCS=$?
       rm -f $MCSLock
       
-      # Copying mcs + prm files to $SaveDir (local + $IMGservers) 
-      SaveDir=${RootSaveDir}/${CRD}_FACTORY_MCS
-      prm_bitstream=${mcs_bitstream%.mcs}.prm
-      CopyToDir -c $CRD -b &quot;$mcs_bitstream&quot; -B &quot;$prm_bitstream&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
+      if [ $RC_MCS -eq 0 ]; then
+        # Copying mcs + prm files to $SaveDir (local + $IMGservers) 
+        SaveDir=${RootSaveDir}/${CRD}_FACTORY_MCS
+        prm_bitstream=${mcs_bitstream%.mcs}.prm
+        CopyToDir -c $CRD -b &quot;$mcs_bitstream&quot; -B &quot;$prm_bitstream&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
 
-      echo; echo &quot;  -&gt; ls -la $FactoryDir:&quot;
-      ls -la $FactoryDir
+        rm -rf $FactoryDir 
 
-      echo; echo &quot;  -&gt; ls -latr $SaveDir:&quot;
-      ls -latr $SaveDir
+	    echo; echo &quot;  -&gt; ls -latr $SaveDir:&quot;
+        ls -latr $SaveDir
+      fi
     else
       echo &quot;  -&gt; MCS build running ($MCSLock file present) ==&gt; doing nothing&quot;
     fi
