@@ -1038,7 +1038,10 @@ case ${ACT}:$FACTORY in
   echo &quot;     FACTORY bitstream file = $factory_bitstream&quot;
   user_bitstream=`ls -t $FactoryDir/fw_*[0-9].bit 2&gt;/dev/null`  
   echo &quot;     USER bitstream file = $user_bitstream&quot;
-    
+  
+  user_name=`basename $user_bitstream | sed &apos;s/.bit//g&apos; | cut -d&apos;_&apos; -f5- `
+  mcs_bitstream=${factory_bitstream%.bit}___${user_name}.mcs
+  
   if [[ &quot;$factory_bitstream&quot; != &quot;&quot; ]] &amp;&amp; [[ &quot;$user_bitstream&quot; != &quot;&quot; ]] ; then
     echo &quot;  -&gt; Both bitstream files are present in $FactoryDir ==&gt; going further...&quot;
     MCSLock=$FactoryDir/MCSLock
@@ -1047,7 +1050,7 @@ case ${ACT}:$FACTORY in
       echo &quot;  -&gt; MCS build not already running ==&gt; building MCS file...&quot;
       cd ${SNAP_ROOT}
       source .snap_config.sh   
-      ./hardware/setup/build_mcs.tcl $factory_bitstream $user_bitstream ${factory_bitstream%.bit}.mcs
+      ./hardware/setup/build_mcs.tcl $factory_bitstream $user_bitstream $mcs_bitstream
       rm -f $MCSLock
       echo; echo &quot;  -&gt; ls -la $FactoryDir:&quot;
       ls -la $FactoryDir
