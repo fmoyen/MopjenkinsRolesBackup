@@ -696,7 +696,7 @@ function CopyToDir
         echo;echo &quot;  -&gt; Copying $FPGACard bin-file(s) &amp; bit-file(s) images to $i:$ToDir&quot;
         ssh ${SSHUser}@$i &quot;mkdir -p $ToDir; chmod g+w $ToDir&quot;
         scp -rp $Bin ${SSHUser}@$i:$ToDir
-        if [ &quot;$Bit&quot; != &quot;&quot; ]; then scp -rp $Bit ${SSHUser}@$i:$ToDir; echo $Bit; fi
+        if [ &quot;$Bit&quot; != &quot;&quot; ]; then scp -rp $Bit ${SSHUser}@$i:$ToDir; fi
       done
 }
 
@@ -1046,14 +1046,23 @@ case ${ACT}:$FACTORY in
     echo &quot;  -&gt; Both bitstream files are present in $FactoryDir ==&gt; going further...&quot;
     MCSLock=$FactoryDir/MCSLock
     if [ ! -f $MCSLock ]; then
-      touch $MCSLock
+      touch $MCSLock # create a lock to prevent two build_mcs.tcl running in parallel
       echo &quot;  -&gt; MCS build not already running ==&gt; building MCS file...&quot;
       cd ${SNAP_ROOT}
       source .snap_config.sh   
       ./hardware/setup/build_mcs.tcl $factory_bitstream $user_bitstream $mcs_bitstream
       rm -f $MCSLock
+      
+      # Copying mcs + prm files to $SaveDir (local + $IMGservers) 
+      SaveDir=${RootSaveDir}/${CRD}_FACTORY_MCS
+      prm_bitstream=${mcs_bitstream%.mcs}.prm
+      CopyToDir -c $CRD -b &quot;$mcs_bitstream&quot; -B &quot;$prm_bitstream&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
+
       echo; echo &quot;  -&gt; ls -la $FactoryDir:&quot;
       ls -la $FactoryDir
+
+      echo; echo &quot;  -&gt; ls -latr $SaveDir:&quot;
+      ls -latr $SaveDir
     else
       echo &quot;  -&gt; MCS build running ($MCSLock file present) ==&gt; doing nothing&quot;
     fi
