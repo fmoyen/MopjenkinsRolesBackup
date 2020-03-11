@@ -1048,6 +1048,7 @@ case ${ACT}:$FACTORY in
       rm -f $MCSLock
     else
       echo &quot;  -&gt; MCS build running ($MCSLock file present) ==&gt; doing nothing&quot;
+    fi
   else
     echo &quot;  -&gt; Both bitstream files couldn&apos;t be found !! ==&gt; doing nothing for the moment&quot;
   fi  
