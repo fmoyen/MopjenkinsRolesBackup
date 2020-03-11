@@ -984,6 +984,7 @@ case ${ACT}:$FACTORY in
 
   hdl_example.NORAM:true ) 
     
+    echo;echo &quot;****************************************************************************************&quot;
     echo &quot;J: ${ACT} action and FACTORY requested&quot;
 
     FACTBITFILES=`ls -t $SNAP_ROOT/hardware/build/Images/fw_*[0-9]_FACTORY*.bit`  # take FACTORY bit files
@@ -999,7 +1000,8 @@ case ${ACT}:$FACTORY in
     ;;
 
   hls_helloworld:true )
-  
+    
+    echo;echo &quot;****************************************************************************************&quot;
     echo &quot;J: ${ACT} action and FACTORY requested&quot;
 
     if [ &quot;$BITFILES&quot; == &quot;&quot; ] ; then
@@ -1025,6 +1027,7 @@ case ${ACT}:$FACTORY in
 
   hdl_example.NORAM:true|hls_helloworld:true )
   
+  echo;echo &quot;****************************************************************************************&quot;
   echo &quot;J: ${ACT} action and FACTORY requested ==&gt; Checking if everything&apos;s here to build MCS file&quot;
 
   # Checking Factory and User bitstreams are both here &amp; no lock file is present
@@ -1046,6 +1049,8 @@ case ${ACT}:$FACTORY in
       source .snap_config.sh   
       ./hardware/setup/build_mcs.tcl $factory_bitstream $user_bitstream ${factory_bitstream%.bit}.mcs
       rm -f $MCSLock
+      echo; echo &quot;  -&gt; ls -la $FactoryDir:&quot;
+      ls -la $FactoryDir
     else
       echo &quot;  -&gt; MCS build running ($MCSLock file present) ==&gt; doing nothing&quot;
     fi
