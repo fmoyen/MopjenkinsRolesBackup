@@ -1062,7 +1062,7 @@ case ${ACT}:$FACTORY in
         prm_bitstream=${mcs_bitstream%.mcs}.prm
         CopyToDir -c $CRD -b &quot;$mcs_bitstream&quot; -B &quot;$prm_bitstream&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
 
-        rm -rf $FactoryDir 
+        #rm -rf $FactoryDir 
 
 	    echo; echo &quot;  -&gt; ls -latr $SaveDir:&quot;
         ls -latr $SaveDir
