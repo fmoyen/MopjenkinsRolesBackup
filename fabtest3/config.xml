@@ -65,12 +65,12 @@
 
 echo &quot;X = $X&quot;
 echo &quot;Y = $Y&quot;
-SKIP=0
 
 
-if [[ $X != &quot;test&quot; ]] &amp;&amp; [[ $Y != &quot;y1&quot; ]]; then
-
-  if [[ $X == &quot;x1&quot; ]] &amp;&amp; [[ $Y == &quot;y2&quot; ]]; then
+if [[ $X == &quot;test&quot; ]] &amp;&amp; [[ $Y == &quot;y1&quot; ]]; then
+  SKIP=0
+  
+elif [[ $X == &quot;x1&quot; ]] &amp;&amp; [[ $Y == &quot;y2&quot; ]]; then
 
     echo &quot;FABTEST...&quot;
 
@@ -87,6 +87,7 @@ if [[ $X != &quot;test&quot; ]] &amp;&amp; [[ $Y != &quot;y1&quot; ]]; then
     echo &quot;BUILD_URL= $BUILD_URL&quot;
 
     # sleep 10
+    SKIP=0
   
   else
     echo &quot;SKIP !!!&quot;
@@ -94,7 +95,8 @@ if [[ $X != &quot;test&quot; ]] &amp;&amp; [[ $Y != &quot;y1&quot; ]]; then
   
   fi
 
-fi
+
+
 
 echo &quot;SKIP=$SKIP&quot; &gt; export_props.properties</command>
     </hudson.tasks.Shell>
