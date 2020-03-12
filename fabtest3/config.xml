@@ -68,28 +68,31 @@ echo &quot;Y = $Y&quot;
 SKIP=0
 
 
-if [[ $X == &quot;test&quot; ]] || [[ $X == &quot;x1&quot; ]] &amp;&amp; [[ $Y == &quot;y2&quot; ]];then
+if [[ $X != &quot;test&quot; ]] &amp;&amp; [[ $Y != &quot;y1&quot; ]]; then
 
-  echo &quot;FABTEST...&quot;
+  if [[ $X == &quot;x1&quot; ]] &amp;&amp; [[ $Y == &quot;y2&quot; ]]; then
 
-  echo &quot;Build Number: $BUILD_NUMBER&quot;
-  echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot;
-  echo &quot;Working dir is : `pwd`&quot;
+    echo &quot;FABTEST...&quot;
 
-  echo &quot;Build Number: $BUILD_NUMBER&quot; &gt; output.txt
-  echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot; &gt;&gt; output.txt
-  echo &quot;Working dir is : `pwd`&quot; &gt;&gt; output.txt
+    echo &quot;Build Number: $BUILD_NUMBER&quot;
+    echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot;
+    echo &quot;Working dir is : `pwd`&quot;
 
-  echo &quot;X: $X, Y: $Y&quot;
+    echo &quot;Build Number: $BUILD_NUMBER&quot; &gt; output.txt
+    echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot; &gt;&gt; output.txt
+    echo &quot;Working dir is : `pwd`&quot; &gt;&gt; output.txt
 
-  echo &quot;BUILD_URL= $BUILD_URL&quot;
+    echo &quot;X: $X, Y: $Y&quot;
 
-  # sleep 10
+    echo &quot;BUILD_URL= $BUILD_URL&quot;
+
+    # sleep 10
   
-else
-  echo &quot;SKIP !!!&quot;
-  SKIP=1
-
+  else
+    echo &quot;SKIP !!!&quot;
+    SKIP=1
+  
+  fi
 
 fi
 
