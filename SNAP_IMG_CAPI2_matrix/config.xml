@@ -1059,8 +1059,9 @@ case ${ACT}:$FACTORY in
       if [ $RC_MCS -eq 0 ]; then
         # Copying mcs + prm files to $SaveDir (local + $IMGservers) 
         SaveDir=${RootSaveDir}/${CRD}_FACTORY_MCS
-        prm_bitstream=${mcs_bitstream%.mcs}.prm
-        CopyToDir -c $CRD -b &quot;$mcs_bitstream&quot; -B &quot;$prm_bitstream&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
+        mcs_files=${mcs_bitstream%.mcs}*.mcs # Because for some card (AD9V3, AD9H3), 2 mcs files are generated (*_primary.mcs &amp; *_secondary.mcs)
+        prm_files=${mcs_bitstream%.mcs}*.prm # Because when two MCS files, two RPM files (*_primary.rpm &amp; *_secondary.rpm)
+        CopyToDir -c $CRD -b &quot;$mcs_files&quot; -B &quot;$prm_files&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
 
         #rm -rf $FactoryDir 
 
