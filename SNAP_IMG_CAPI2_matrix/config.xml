@@ -566,6 +566,7 @@ TARGET_DIR=&quot;${JOB_NAME}-${BUILD_NUMBER}-${GIT_BRANCH}&quot;
 export TARGET_DIR=`echo $TARGET_DIR | sed -e &apos;s/[=,\/]/-/g&apos;`
 
 RootSaveDir=/data/Images
+SaveDir=${RootSaveDir}/${CRD}/${CRD}_IMAGES
 RootLogsDir=/data/LogsWhenFailed
 LogsDir=$RootLogsDir/$TARGET_DIR/hardware
 PSLSE_BRANCH=master
@@ -997,10 +998,10 @@ done
 
 
 #==============================================================================================
-# if FACTORY requested, copying bit files to FactoryDir=${RootSaveDir}/${CRD}_FACTORY_MCS
+# if FACTORY requested, copying bit files to $FactoryDir
 # In FACTORY MODE : We save hdl_example and hls_helloworld bit for cards files for future .mcs generation
 
-FactoryDir=${RootSaveDir}/${CRD}_FACTORY_MCS/Build${BUILD_NUMBER}
+FactoryDir=${RootSaveDir}/${CRD}/${CRD}_FACTORY_MCS/Build${BUILD_NUMBER}
 
 case ${ACT}:$FACTORY in
 
@@ -1027,14 +1028,14 @@ case ${ACT}:$FACTORY in
     echo &quot;J: ${ACT} action and FACTORY requested&quot;
 
     if [ &quot;$BITFILES&quot; == &quot;&quot; ] ; then
-      echo &quot;  --&gt; cannot find any User bit file from $SNAP_ROOT/hardware/build/Images/fw_\*_FACTORY\*.bit !!&quot;
+      echo &quot;  --&gt; cannot find any User bit file from $SNAP_ROOT/hardware/build/Images/fw_\*.bit !!&quot;
       exit 1
     fi
 
 
     mkdir -p $FactoryDir
      
-	echo &quot;  --&gt; Copying ${CRD} $ACT Factory bit file to $FactoryDir&quot;
+	echo &quot;  --&gt; Copying ${CRD} $ACT bit file to $FactoryDir&quot;
     cp -rp $BITFILES $FactoryDir
     ;;
     
@@ -1071,7 +1072,7 @@ case ${ACT}:$FACTORY in
     
     if [ ! -f $MCSLock ]; then
       touch $MCSLock # create a lock to prevent two build_mcs.tcl running in parallel
-      echo &quot;  -&gt; MCS build not already running ==&gt; building MCS file...&quot;
+      echo &quot;  -&gt; Building MCS file...&quot;
       
       cd ${SNAP_ROOT}
       source .snap_config.sh   
@@ -1080,11 +1081,11 @@ case ${ACT}:$FACTORY in
       
       if [ $RC_MCS -eq 0 ]; then
         # Copying mcs + prm files to $SaveDir (local + $IMGservers) 
-        SaveDir=${RootSaveDir}/${CRD}/${CRD}_IMAGES
         LinkDir=${RootSaveDir}/${CRD}/${CRD}_FACTORY_MCS
         mcs_files=${mcs_bitstream%.mcs}*.mcs # Because for some card (AD9V3, AD9H3), 2 mcs files are generated (*_primary.mcs &amp; *_secondary.mcs)
         prm_files=${mcs_bitstream%.mcs}*.prm # Because when two MCS files, two RPM files (*_primary.rpm &amp; *_secondary.rpm)
-        CopyToDir -c $CRD -b &quot;$mcs_files&quot; -B &quot;$prm_files&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
+        SRCFILES=&quot;$mcs_files $prmfiles&quot;
+        CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
 
         #rm -rf $FactoryDir 
 
@@ -1120,9 +1121,10 @@ case ${TEST_ON_HW} in
 
     if [ $TestCardAllowed -eq 0 ]
     then
-      SaveDir=$RootSaveDir/${CRD}_test_bypassed
       echo &quot;  -&gt; No test CARD $CRD available...&quot;
-      CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
+      LinkDir=${RootSaveDir}/${CRD}/${CRD}_test_bypassed
+      SRCFILES=&quot;$BINFILES $BITFILES&quot;
+      CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
       echo &quot;  -&gt; EXITING !&quot;
       exit 0
     else
@@ -1134,8 +1136,9 @@ case ${TEST_ON_HW} in
     echo;echo &quot;****************************************************************************************&quot;
     echo &quot;J: No test on POWER Hardware requested (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot; 
     echo
-    SaveDir=$RootSaveDir/${CRD}_no_test_requested
-    CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
+    LinkDir=${RootSaveDir}/${CRD}/${CRD}_no_test_requested
+    SRCFILES=&quot;$BINFILES $BITFILES&quot;
+    CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
     exit 0
   ;;
 
@@ -1341,8 +1344,10 @@ if [ $loop -eq $maxloop ];then
   echo;echo &quot;***************************************************************************************&quot;
   echo &quot;J: No card $CRD available with TESTBOXES= ${TESTBOXES[*]}&quot;
   echo
-  SaveDir=&quot;$RootSaveDir/${CRD}_not_available&quot;
-  CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
+
+  LinkDir=${RootSaveDir}/${CRD}/${CRD}_not_available
+  SRCFILES=&quot;$BINFILES $BITFILES&quot;
+  CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
   echo &quot;  -&gt; EXITING !&quot;
   exit 100
 fi
@@ -1369,9 +1374,11 @@ trap finish EXIT  # register finish/unlock function, after lock is set
 echo &quot;  -&gt; Preparing snap workspace by cloning ${GIT_URL} into ${box}:${TARGET_DIR} using branch= ${GIT_BRANCH}&quot;
 RC=0; ssh ${HWUser}@${box} &quot;git clone ${GIT_URL} ${TARGET_DIR};cd ${TARGET_DIR};git checkout ${GIT_BRANCH}&quot; || RC=$?
 
-if [ $RC -ne 0 ];then 
-	SaveDir=&quot;$RootSaveDir/gitclone_error&quot;
-    CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
+if [ $RC -ne 0 ];then
+
+    LinkDir=${RootSaveDir}/${CRD}/${CRD}_gitclone_error
+    SRCFILES=&quot;$BINFILES $BITFILES&quot;
+    CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
 	echo &quot;  -&gt; EXITING !&quot;
 	exit 1
 fi
@@ -1394,8 +1401,10 @@ do
 done
 
 if [ $RSYNC_RC -ne 0 ]; then
-  SaveDir=&quot;$RootSaveDir/rsync_error&quot;
-  CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
+
+  LinkDir=${RootSaveDir}/${CRD}/${CRD}_rsync_error
+  SRCFILES=&quot;$BINFILES $BITFILES&quot;
+  CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
   echo &quot;EXITING !&quot;
   exit 1
 fi
@@ -1506,17 +1515,19 @@ if [ $RC -eq 0 ]; then
   echo;echo &quot;***************************************************************************************&quot;
   echo &quot;J: Test SUCCEEDED RC= $RC (`date`)&quot;
   
-  SaveDir=$RootSaveDir/${CRD}_test_OK
-  echo &quot;  -&gt;  CARD $CRD Hardware test succeeded...&quot;
-  CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
+  echo &quot;  -&gt;  CARD $CRD Hardware test succeeded...&quot;  
+  LinkDir=${RootSaveDir}/${CRD}/${CRD}_test_OK
+  SRCFILES=&quot;$BINFILES $BITFILES&quot;
+  CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
 
 else
   echo;echo &quot;***************************************************************************************&quot;
   echo &quot;J: Test FAILED RC= $RC (`date`)&quot;
   
-  SaveDir=$RootSaveDir/${CRD}_test_failure
   echo &quot;  -&gt;  CARD $CRD Hardware test failed...&quot;
-  CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
+  LinkDir=${RootSaveDir}/${CRD}/${CRD}_test_failure
+  SRCFILES=&quot;$BINFILES $BITFILES&quot;
+  CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
   echo &quot;  -&gt; EXITING !&quot;
   exit 1
 fi 
