@@ -661,7 +661,7 @@ function SendAnEmail
 
 function CopyToDir
 {
-  local OPTIND opt FPGACard Bin Bit ToDir LkDir SSHDest SSHUser
+  local OPTIND opt FPGACard SrcFiles ToDir LkDir SSHDest SSHUser
 
   while getopts &quot;c:f:d:l:s:u:&quot; opt
   do
@@ -1002,6 +1002,8 @@ done
 # In FACTORY MODE : We save hdl_example and hls_helloworld bit for cards files for future .mcs generation
 
 FactoryDir=${RootSaveDir}/${CRD}/${CRD}_FACTORY_MCS/Build${BUILD_NUMBER}
+FACTBITFILES=&quot;&quot;
+FACTBINFILES=&quot;&quot;
 
 case ${ACT}:$FACTORY in
 
@@ -1011,6 +1013,7 @@ case ${ACT}:$FACTORY in
     echo &quot;J: ${ACT} action and FACTORY requested&quot;
 
     FACTBITFILES=`ls -t $SNAP_ROOT/hardware/build/Images/fw_*[0-9]_FACTORY*.bit`  # take FACTORY bit files
+    FACTBINFILES=`ls -t $SNAP_ROOT/hardware/build/Images/fw_*[0-9]_FACTORY*.bin`  # FACTORY bin files for further use
     
     if [ &quot;$FACTBITFILES&quot; == &quot;&quot; ] ; then
       echo &quot;  --&gt; cannot find any Factory bit file from $SNAP_ROOT/hardware/build/Images/fw_\*_FACTORY\*.bit although FACTORY REQUESTED !!&quot;
@@ -1123,7 +1126,7 @@ case ${TEST_ON_HW} in
     then
       echo &quot;  -&gt; No test CARD $CRD available...&quot;
       LinkDir=${RootSaveDir}/${CRD}/${CRD}_test_bypassed
-      SRCFILES=&quot;$BINFILES $BITFILES&quot;
+      SRCFILES=&quot;$BINFILES $BITFILES $FACTBINFILES $FACTBITFILES&quot;
       CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
       echo &quot;  -&gt; EXITING !&quot;
       exit 0
@@ -1137,7 +1140,7 @@ case ${TEST_ON_HW} in
     echo &quot;J: No test on POWER Hardware requested (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot; 
     echo
     LinkDir=${RootSaveDir}/${CRD}/${CRD}_no_test_requested
-    SRCFILES=&quot;$BINFILES $BITFILES&quot;
+    SRCFILES=&quot;$BINFILES $BITFILES $FACTBINFILES $FACTBITFILES&quot;
     CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
     exit 0
   ;;
@@ -1346,7 +1349,7 @@ if [ $loop -eq $maxloop ];then
   echo
 
   LinkDir=${RootSaveDir}/${CRD}/${CRD}_not_available
-  SRCFILES=&quot;$BINFILES $BITFILES&quot;
+  SRCFILES=&quot;$BINFILES $BITFILES $FACTBINFILES $FACTBITFILES&quot;
   CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
   echo &quot;  -&gt; EXITING !&quot;
   exit 100
@@ -1377,7 +1380,7 @@ RC=0; ssh ${HWUser}@${box} &quot;git clone ${GIT_URL} ${TARGET_DIR};cd ${TARGET_
 if [ $RC -ne 0 ];then
 
     LinkDir=${RootSaveDir}/${CRD}/${CRD}_gitclone_error
-    SRCFILES=&quot;$BINFILES $BITFILES&quot;
+    SRCFILES=&quot;$BINFILES $BITFILES $FACTBINFILES $FACTBITFILES&quot;
     CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
 	echo &quot;  -&gt; EXITING !&quot;
 	exit 1
@@ -1403,7 +1406,7 @@ done
 if [ $RSYNC_RC -ne 0 ]; then
 
   LinkDir=${RootSaveDir}/${CRD}/${CRD}_rsync_error
-  SRCFILES=&quot;$BINFILES $BITFILES&quot;
+  SRCFILES=&quot;$BINFILES $BITFILES $FACTBINFILES $FACTBITFILES&quot;
   CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
   echo &quot;EXITING !&quot;
   exit 1
@@ -1517,7 +1520,7 @@ if [ $RC -eq 0 ]; then
   
   echo &quot;  -&gt;  CARD $CRD Hardware test succeeded...&quot;  
   LinkDir=${RootSaveDir}/${CRD}/${CRD}_test_OK
-  SRCFILES=&quot;$BINFILES $BITFILES&quot;
+  SRCFILES=&quot;$BINFILES $BITFILES $FACTBINFILES $FACTBITFILES&quot;
   CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
 
 else
@@ -1526,7 +1529,7 @@ else
   
   echo &quot;  -&gt;  CARD $CRD Hardware test failed...&quot;
   LinkDir=${RootSaveDir}/${CRD}/${CRD}_test_failure
-  SRCFILES=&quot;$BINFILES $BITFILES&quot;
+  SRCFILES=&quot;$BINFILES $BITFILES $FACTBINFILES $FACTBITFILES&quot;
   CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
   echo &quot;  -&gt; EXITING !&quot;
   exit 1
