@@ -651,29 +651,31 @@ function SendAnEmail
   done
 }
 
-# Function to copy BINFILES and BITFILES to the right directory
-# Example 1: CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s jtagx86 -u $HWUser
-# Example 2: CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;jtagx86 orpington&quot; -u $HWUser
-# Example 3: CopyToDir -c $CRD -b &quot;$BINFILES&quot; -B &quot;$BITFILES&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
-# -b &amp; -B (maybe not -B) should use &quot;&quot; as $BINFILES &amp; $BITFILES are usually lists of files like &quot;primary.bin secondary.bin&quot;
+# Function to copy BIN, BIT, MCS, PRM, etc to the right directory
+# Example 1: CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s jtagx86 -u $HWUser
+# Example 2: CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -s jtagx86 -u $HWUser
+# Example 3: CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;jtagx86 orpington&quot; -u $HWUser
+# Example 4: CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
+# -f should use &quot;&quot; as $SRCFILES are usually lists of files like &quot;primary.bin secondary.bin&quot;
 
 function CopyToDir
 {
-  local OPTIND opt FPGACard Bin Bit ToDir SSHDest SSHUser
-  while getopts &quot;c:b:B:d:s:u:&quot; opt
+  local OPTIND opt FPGACard Bin Bit ToDir LkDir SSHDest SSHUser
+
+  while getopts &quot;c:f:d:l:s:u:&quot; opt
   do
       case $opt in
-      b)
-        Bin=&quot;$OPTARG&quot;
+      c)
+        FPGACard=&quot;$OPTARG&quot;
       ;;
-      B)
-        Bit=&quot;$OPTARG&quot;
+      f)
+        SrcFiles=&quot;$OPTARG&quot;
       ;;
       d)
         ToDir=&quot;$OPTARG&quot;
       ;;
-      c)
-        FPGACard=&quot;$OPTARG&quot;
+      l)
+        LkDir=&quot;$OPTARG&quot;
       ;;
       s)
         SSHDest=&quot;$OPTARG&quot;
@@ -684,20 +686,40 @@ function CopyToDir
     esac
   done
 
-      echo &quot;  -&gt; Copying $FPGACard bin-file(s) &amp; bit-file(s) images to $ToDir&quot;
-      mkdir -p $ToDir
-      chmod g+w $ToDir
-      cp -rp $Bin $ToDir
-      echo $Bin
-      if [ &quot;$Bit&quot; != &quot;&quot; ]; then cp -rp $Bit $ToDir; echo $Bit; fi
+  ToDirFiles=&quot;&quot;
+  for i in $SrcFiles; do ToDirFiles=&quot;$ToDirFiles $ToDir/`basename $i`&quot;; done
+
+
+  # Copying Files to $ToDir
+  echo &quot;  -&gt; Copying $FPGACard images (.bin, .bit, .mcs, .prm) to $ToDir&quot;
+  mkdir -p $ToDir
+  chmod g+w $ToDir
+  cp -rp $SrcFiles $ToDir
       
-      for i in $SSHDest
-      do
-        echo;echo &quot;  -&gt; Copying $FPGACard bin-file(s) &amp; bit-file(s) images to $i:$ToDir&quot;
-        ssh ${SSHUser}@$i &quot;mkdir -p $ToDir; chmod g+w $ToDir&quot;
-        scp -rp $Bin ${SSHUser}@$i:$ToDir
-        if [ &quot;$Bit&quot; != &quot;&quot; ]; then scp -rp $Bit ${SSHUser}@$i:$ToDir; fi
-      done
+  for i in $SSHDest
+  do
+    echo;echo &quot;  -&gt; Copying $FPGACard images to $i:$ToDir&quot;
+    ssh ${SSHUser}@$i &quot;mkdir -p $ToDir; chmod g+w $ToDir&quot;
+    scp -rp $SrcFiles ${SSHUser}@$i:$ToDir
+  done
+
+  # Building symbolic links into $LkDir
+  if [ &quot;$LkDir&quot; != &quot;&quot; ]; then
+    echo &quot;  -&gt; Building $FPGACard images links into $LkDir&quot;
+    mkdir -p $LkDir
+    chmod g+w $LkDir
+    ln -s $ToDirFiles $LkDir
+
+    for i in $ToDirFiles; do echo -e &quot;/\c&quot;;ls -la $LkDir/`basename $i` | cut -d &quot;/&quot; -f2-; done
+
+    for i in $SSHDest
+    do
+      echo;echo &quot;  -&gt; Building $FPGACard images links into $i:$LkDir&quot;
+      ssh ${SSHUser}@$i &quot;mkdir -p $LkDir; chmod g+w $LkDir&quot;
+      ssh ${SSHUser}@$i &quot;ln -s $ToDirFiles $LkDir&quot;
+      for i in $ToDirFiles; do ssh ${SSHUser}@$i &quot;echo -e &apos;/\c&apos;;ls -la $LkDir/`basename $i` | cut -d &apos;/&apos; -f2-&quot;; done
+    done
+  fi
 }
 
 
@@ -1058,10 +1080,11 @@ case ${ACT}:$FACTORY in
       
       if [ $RC_MCS -eq 0 ]; then
         # Copying mcs + prm files to $SaveDir (local + $IMGservers) 
-        SaveDir=${RootSaveDir}/${CRD}_FACTORY_MCS
+        SaveDir=${RootSaveDir}/${CRD}/${CRD}_IMAGES
+        LinkDir=${RootSaveDir}/${CRD}/${CRD}_FACTORY_MCS
         mcs_files=${mcs_bitstream%.mcs}*.mcs # Because for some card (AD9V3, AD9H3), 2 mcs files are generated (*_primary.mcs &amp; *_secondary.mcs)
         prm_files=${mcs_bitstream%.mcs}*.prm # Because when two MCS files, two RPM files (*_primary.rpm &amp; *_secondary.rpm)
-        CopyToDir -c $CRD -b &quot;$mcs_files&quot; -B &quot;$prm_files&quot; -d $SaveDir -s &quot;$IMGServers&quot; -u $HWUser
+        CopyToDir -c $CRD -b &quot;$mcs_files&quot; -B &quot;$prm_files&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
 
         #rm -rf $FactoryDir 
 
