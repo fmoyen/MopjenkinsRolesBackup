@@ -12,6 +12,11 @@
           <description></description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>Y1</name>
+          <description></description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
         <hudson.plugins.matrix__configuration__parameter.MatrixCombinationsParameterDefinition plugin="matrix-combinations-parameter@1.3.1">
           <name>MatrixFilter</name>
           <description></description>
@@ -34,6 +39,11 @@
             <hudson.plugins.matrix__configuration__parameter.shortcut.MatrixCombinationsShortcut_-None/>
           </shortcutList>
         </hudson.plugins.matrix__configuration__parameter.MatrixCombinationsParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>Y2</name>
+          <description></description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
@@ -81,7 +91,7 @@
       </values>
     </hudson.matrix.TextAxis>
   </axes>
-  <combinationFilter>(X==&quot;letest&quot; &amp;&amp; Y==&quot;y1&quot;)||(X!=&quot;letest&quot;)</combinationFilter>
+  <combinationFilter>(X==&quot;letest&quot; &amp;&amp; Y==&quot;y1&quot;) || ( X!=&quot;letest&quot; &amp;&amp; ( (Y==&quot;y1&quot; &amp;&amp; Y1==&quot;true&quot;) || (Y==&quot;y2&quot; &amp;&amp; Y2==&quot;true&quot;) ) )</combinationFilter>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
