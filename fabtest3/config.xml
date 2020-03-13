@@ -76,31 +76,33 @@
       </values>
     </hudson.matrix.LabelAxis>
     <hudson.matrix.TextAxis>
-      <name>X</name>
+      <name>ACT</name>
       <values>
-        <string>letest</string>
-        <string>x1</string>
-        <string>x2</string>
+        <string>test</string>
+        <string>hdl_x1</string>
+        <string>hdl_x2</string>
+        <string>hls_x1</string>
+        <string>hls_x2</string>
       </values>
     </hudson.matrix.TextAxis>
     <hudson.matrix.TextAxis>
-      <name>Y</name>
+      <name>CRD</name>
       <values>
         <string>y1</string>
         <string>y2</string>
       </values>
     </hudson.matrix.TextAxis>
   </axes>
-  <combinationFilter>(X==&quot;letest&quot; &amp;&amp; Y==&quot;y1&quot;) || ( X!=&quot;letest&quot; )</combinationFilter>
+  <combinationFilter>(ACT==&quot;test&quot; &amp;&amp; CRD==&quot;y1&quot;) || ( ACT!=&quot;test&quot; &amp;&amp; ACT=~&quot;hls&quot;)</combinationFilter>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
 
-echo &quot;X = $X&quot;
-echo &quot;Y = $Y&quot;
+echo &quot;ACT = $ACT&quot;
+echo &quot;CRD = $CRD&quot;
 
 
-if [[ $X == &quot;letest&quot; ]]; then
+if [[ $ACT == &quot;test&quot; ]]; then
     echo &quot;TEST !&quot;
 
 else
@@ -117,7 +119,7 @@ else
     echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot; &gt;&gt; output.txt
     echo &quot;Working dir is : `pwd`&quot; &gt;&gt; output.txt
 
-    echo &quot;X: $X, Y: $Y&quot;
+    echo &quot;ACT: $ACT, CRD: $CRD&quot;
 
     echo &quot;BUILD_URL= $BUILD_URL&quot;
 
@@ -158,7 +160,7 @@ echo &quot;SKIP=$SKIP&quot; &gt; export_props.properties</command>
   <buildWrappers/>
   <executionStrategy class="hudson.matrix.DefaultMatrixExecutionStrategyImpl">
     <runSequentially>false</runSequentially>
-    <touchStoneCombinationFilter>X==&quot;letest&quot; &amp;&amp; Y==&quot;y1&quot;</touchStoneCombinationFilter>
+    <touchStoneCombinationFilter>ACT==&quot;test&quot; &amp;&amp; CRD==&quot;y1&quot;</touchStoneCombinationFilter>
     <touchStoneResultCondition>
       <name>SUCCESS</name>
       <ordinal>0</ordinal>
