@@ -42,7 +42,7 @@
         <hudson.model.BooleanParameterDefinition>
           <name>Y2</name>
           <description></description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
@@ -91,7 +91,7 @@
       </values>
     </hudson.matrix.TextAxis>
   </axes>
-  <combinationFilter>(X==&quot;letest&quot; &amp;&amp; Y==&quot;y1&quot;) || ( X!=&quot;letest&quot; &amp;&amp; ( (Y==&quot;y1&quot; &amp;&amp; Y1==&quot;true&quot;) || (Y==&quot;y2&quot; &amp;&amp; Y2==&quot;true&quot;) ) )</combinationFilter>
+  <combinationFilter>(X==&quot;letest&quot; &amp;&amp; Y==&quot;y1&quot;) || ( X!=&quot;letest&quot; )</combinationFilter>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
