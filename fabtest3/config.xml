@@ -68,7 +68,7 @@
     <hudson.matrix.TextAxis>
       <name>X</name>
       <values>
-        <string>test</string>
+        <string>letest</string>
         <string>x1</string>
         <string>x2</string>
       </values>
@@ -81,7 +81,7 @@
       </values>
     </hudson.matrix.TextAxis>
   </axes>
-  <combinationFilter>(X==&quot;test&quot; &amp;&amp; Y==&quot;y1&quot;)||(X!=&quot;test&quot;)</combinationFilter>
+  <combinationFilter>(X==&quot;letest&quot; &amp;&amp; Y==&quot;y1&quot;)||(X!=&quot;letest&quot;)</combinationFilter>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
@@ -90,7 +90,7 @@ echo &quot;X = $X&quot;
 echo &quot;Y = $Y&quot;
 
 
-if [[ $X == &quot;test&quot; ]]; then
+if [[ $X == &quot;letest&quot; ]]; then
     echo &quot;TEST !&quot;
 
 else
@@ -148,7 +148,7 @@ echo &quot;SKIP=$SKIP&quot; &gt; export_props.properties</command>
   <buildWrappers/>
   <executionStrategy class="hudson.matrix.DefaultMatrixExecutionStrategyImpl">
     <runSequentially>false</runSequentially>
-    <touchStoneCombinationFilter>X==&quot;test&quot; &amp;&amp; Y==&quot;y1&quot;</touchStoneCombinationFilter>
+    <touchStoneCombinationFilter>X==&quot;letest&quot; &amp;&amp; Y==&quot;y1&quot;</touchStoneCombinationFilter>
     <touchStoneResultCondition>
       <name>SUCCESS</name>
       <ordinal>0</ordinal>

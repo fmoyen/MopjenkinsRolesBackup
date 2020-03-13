@@ -697,11 +697,11 @@ function CopyToDir
   chmod g+w $ToDir
   cp -rp $SrcFiles $ToDir
       
-  for i in $SSHDest
+  for dest in $SSHDest
   do
-    echo;echo &quot;  -&gt; Copying $FPGACard images to $i:$ToDir&quot;
-    ssh ${SSHUser}@$i &quot;mkdir -p $ToDir; chmod g+w $ToDir&quot;
-    scp -rp $SrcFiles ${SSHUser}@$i:$ToDir
+    echo;echo &quot;  -&gt; Copying $FPGACard images to $dest:$ToDir&quot;
+    ssh ${SSHUser}@$dest &quot;mkdir -p $ToDir; chmod g+w $ToDir&quot;
+    scp -rp $SrcFiles ${SSHUser}@$dest:$ToDir
   done
 
   # Building symbolic links into $LkDir
@@ -713,12 +713,12 @@ function CopyToDir
 
     for i in $ToDirFiles; do echo -e &quot;/\c&quot;;ls -la $LkDir/`basename $i` | cut -d &quot;/&quot; -f2-; done
 
-    for i in $SSHDest
+    for dest in $SSHDest
     do
-      echo;echo &quot;  -&gt; Building $FPGACard images links into $i:$LkDir&quot;
-      ssh ${SSHUser}@$i &quot;mkdir -p $LkDir; chmod g+w $LkDir&quot;
-      ssh ${SSHUser}@$i &quot;ln -s $ToDirFiles $LkDir&quot;
-      for i in $ToDirFiles; do ssh ${SSHUser}@$i &quot;echo -e &apos;/\c&apos;;ls -la $LkDir/`basename $i` | cut -d &apos;/&apos; -f2-&quot;; done
+      echo;echo &quot;  -&gt; Building $FPGACard images links into $dest:$LkDir&quot;
+      ssh ${SSHUser}@$dest &quot;mkdir -p $LkDir; chmod g+w $LkDir&quot;
+      ssh ${SSHUser}@$dest &quot;ln -s $ToDirFiles $LkDir&quot;
+      for i in $ToDirFiles; do ssh ${SSHUser}@$dest &quot;echo -e &apos;/\c&apos;;ls -la $LkDir/`basename $i` | cut -d &apos;/&apos; -f2-&quot;; done
     done
   fi
 }
@@ -1084,7 +1084,7 @@ case ${ACT}:$FACTORY in
         LinkDir=${RootSaveDir}/${CRD}/${CRD}_FACTORY_MCS
         mcs_files=${mcs_bitstream%.mcs}*.mcs # Because for some card (AD9V3, AD9H3), 2 mcs files are generated (*_primary.mcs &amp; *_secondary.mcs)
         prm_files=${mcs_bitstream%.mcs}*.prm # Because when two MCS files, two RPM files (*_primary.rpm &amp; *_secondary.rpm)
-        SRCFILES=&quot;$mcs_files $prmfiles&quot;
+        SRCFILES=&quot;$mcs_files $prm_files&quot;
         CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
 
         #rm -rf $FactoryDir 
