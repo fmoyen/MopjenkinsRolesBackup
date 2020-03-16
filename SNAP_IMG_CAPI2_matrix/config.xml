@@ -55,6 +55,28 @@ test</description>
           <defaultValue>master</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.plugins.matrix__configuration__parameter.MatrixCombinationsParameterDefinition plugin="matrix-combinations-parameter@1.3.1">
+          <name>MatrixFilter</name>
+          <description></description>
+          <shortcutList>
+            <hudson.plugins.matrix__configuration__parameter.shortcut.ResultShortcut>
+              <name>Successful</name>
+              <exact>false</exact>
+              <resultsToCheck>
+                <string>SUCCESS</string>
+              </resultsToCheck>
+            </hudson.plugins.matrix__configuration__parameter.shortcut.ResultShortcut>
+            <hudson.plugins.matrix__configuration__parameter.shortcut.ResultShortcut>
+              <name>Failed</name>
+              <exact>false</exact>
+              <resultsToCheck>
+                <string>FAILURE</string>
+              </resultsToCheck>
+            </hudson.plugins.matrix__configuration__parameter.shortcut.ResultShortcut>
+            <hudson.plugins.matrix__configuration__parameter.shortcut.MatrixCombinationsShortcut_-All/>
+            <hudson.plugins.matrix__configuration__parameter.shortcut.MatrixCombinationsShortcut_-None/>
+          </shortcutList>
+        </hudson.plugins.matrix__configuration__parameter.MatrixCombinationsParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>VIVADO_GLOBAL</name>
           <description>Choose the Vivado version to use
@@ -142,28 +164,6 @@ If -- then VIVADO_XXX parameters below are taken into account</description>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
-        <hudson.plugins.matrix__configuration__parameter.MatrixCombinationsParameterDefinition plugin="matrix-combinations-parameter@1.3.1">
-          <name>MatrixFilter</name>
-          <description></description>
-          <shortcutList>
-            <hudson.plugins.matrix__configuration__parameter.shortcut.ResultShortcut>
-              <name>Successful</name>
-              <exact>false</exact>
-              <resultsToCheck>
-                <string>SUCCESS</string>
-              </resultsToCheck>
-            </hudson.plugins.matrix__configuration__parameter.shortcut.ResultShortcut>
-            <hudson.plugins.matrix__configuration__parameter.shortcut.ResultShortcut>
-              <name>Failed</name>
-              <exact>false</exact>
-              <resultsToCheck>
-                <string>FAILURE</string>
-              </resultsToCheck>
-            </hudson.plugins.matrix__configuration__parameter.shortcut.ResultShortcut>
-            <hudson.plugins.matrix__configuration__parameter.shortcut.MatrixCombinationsShortcut_-All/>
-            <hudson.plugins.matrix__configuration__parameter.shortcut.MatrixCombinationsShortcut_-None/>
-          </shortcutList>
-        </hudson.plugins.matrix__configuration__parameter.MatrixCombinationsParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>TIMING_LABLIMIT_CHOICE</name>
           <description>Choose the TIMING_LABLIMIT parameter for building images. If achieved timing is worst than your choice, the run will failed.
@@ -816,13 +816,21 @@ echo
 
 echo;echo &quot;****************************************************************************************&quot;
 echo &quot;J: Setting up Vivado Version, PSL9_IP_CORE (Zip file) for CAPI2.0 cards and timing value&quot;
-echo
-echo &quot; --&gt; For all CAPI2 cards we run Vivado $VIVADO_CHOICE and extend Timing trials to 5 runs until we optimise placement...&quot;
+
+echo &quot; --&gt; For all CAPI2 cards we extend Timing trials to 5 runs until we optimise placement...&quot;
 echo &quot;     unless expressly indicated&quot;
 
+if [ &quot;$VIVADO_GLOBAL&quot; == &quot;--&quot; ]; then
+  VIVADOVarName=`echo VIVADO_$CRD`
+  export VIV_VERSION=${!VIVADOVarName}
+  echo &quot; --&gt; For $CRD card, VIVADO version initially set to $VIV_VERSION...&quot;
+
+else
+  export VIV_VERSION=$VIVADO_GLOBAL
+  echo &quot; --&gt; For all cards, VIVADO version initially set to $VIV_VERSION...&quot;
+fi
+
 cd ${SNAP_ROOT}
-export VIV_VERSION=&quot;$VIVADO_CHOICE&quot;
-echo &quot;  -&gt; VIVADO version initially set to $VIV_VERSION (please check if we change this later for some specific cards)&quot;
 
 echo &quot;export TIMING_LABLIMIT=\&quot;${TIMING_LABLIMIT_CHOICE}\&quot;&quot; &gt;&gt; snap_env.sh
 echo &quot;  -&gt; TIMING LIMIT set to ${TIMING_LABLIMIT_CHOICE} into snap_env.sh&quot;
@@ -835,25 +843,6 @@ echo &quot;  -&gt; PSL9_IP_CORE set to ${PSL9File} into snap_env.sh&quot;
 #echo &quot;J:git cloning capi2-bsp submodule&quot;
 #git submodule update --init --recursive hardware/capi2-bsp
 
-
-# RCXVUP with Eng sample can run only with 2017.4 !
-# U200 runs only with 2018.3 or later
-case $CRD in 
-  &apos;RCXVUP&apos;) #echo &quot;export PSL9_IP_CORE=/afs/bb/proj/fpga/framework/cards/$CRD/ibm.com_CAPI_PSL9_WRAP_2.00.zip&quot; &gt;&gt;snap_env.sh
-            #git submodule update --init --recursive hardware/capi2-bsp
-            #cd ${SNAP_ROOT}
-            export VIV_VERSION=&quot;2017.4&quot;
-            #echo &quot;export TIMING_LABLIMIT=\&quot;-300\&quot;&quot; &gt;&gt; snap_env.sh
-            ;;
-#  &apos;U200&apos;)   export VIV_VERSION=&quot;2018.3&quot;  removed or 2019.1 test
-#            ;;  
-#  &apos;N250SP&apos;) #echo &quot;export PSL9_IP_CORE=/afs/bb/proj/fpga/framework/cards/$CRD/ibm.com_CAPI_PSL9_WRAP_2.00.zip&quot; &gt;&gt;snap_env.sh
-            #git submodule update --init --recursive hardware/capi2-bsp
-            #cd ${SNAP_ROOT}
-#            export VIV_VERSION=&quot;2018.2&quot;
-            #echo &quot;export TIMING_LABLIMIT=\&quot;-300\&quot;&quot; &gt;&gt; snap_env.sh
-#            ;;
-esac
 
 echo;echo &quot;****************************************************************************************&quot; 
 echo &quot;J: Vivado paths &amp; licences server setup ...&quot;
@@ -1636,7 +1625,7 @@ fi
     </hudson.plugins.build__timeout.BuildTimeoutWrapper>
     <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.10"/>
     <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.3">
-      <template>#${BUILD_NUMBER} ${GIT_BRANCH} Vivado=${ENV,var=&quot;VIVADO_CHOICE&quot;} HWTest=${ENV,var=&quot;TEST_ON_HW&quot;} NOHWCards= ${ENV,var=&quot;NO_TEST_CARDS&quot;}</template>
+      <template>#${BUILD_NUMBER} ${GIT_BRANCH} Vivado=${ENV,var=&quot;VIVADO_GLOBAL&quot;} HWTest=${ENV,var=&quot;TEST_ON_HW&quot;} NOHWCards= ${ENV,var=&quot;NO_TEST_CARDS&quot;}</template>
       <descriptionTemplate></descriptionTemplate>
       <runAtStart>true</runAtStart>
       <runAtEnd>true</runAtEnd>
