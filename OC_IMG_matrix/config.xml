@@ -49,8 +49,55 @@ Main Issues : &#xd;
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
-          <name>VIVADO_CHOICE</name>
-          <description>Choose the Vivado version to use</description>
+          <name>VIVADO_GLOBAL</name>
+          <description>Choose the Vivado version to use
+This parameter overseedes all VIVADO_XXX parameters below
+If -- then VIVADO_XXX parameters below are taken into account</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>2019.2</string>
+              <string>--</string>
+              <string>2019.1</string>
+              <string>2018.3</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>VIVADO_OC_AD9V3</name>
+          <description></description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>2019.2</string>
+              <string>2019.1</string>
+              <string>2018.3</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>VIVADO_OC_AD9H3</name>
+          <description></description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>2019.2</string>
+              <string>2019.1</string>
+              <string>2018.3</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>VIVADO_OC_AD9H7</name>
+          <description></description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>2019.2</string>
+              <string>2019.1</string>
+              <string>2018.3</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>VIVADO_OC_INNOVA2</name>
+          <description></description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
               <string>2019.2</string>
@@ -563,13 +610,22 @@ echo &quot;export XILINX_LOCAL_USER_DATA=no&quot; &gt;&gt; snap_env.sh
 
 echo;echo &quot;****************************************************************************************&quot;
 echo &quot;J: Setting up Vivado Version and timing value&quot;
+
 echo
-echo &quot; --&gt; For all OPENCAPI cards we run Vivado $VIVADO_CHOICE and extend Timing trials to 5 runs until we optimise placement...&quot;
+echo &quot; --&gt; For all CAPI2 cards we extend Timing trials to 5 runs until we optimise placement...&quot;
 echo &quot;     unless expressly indicated&quot;
 
+if [ &quot;$VIVADO_GLOBAL&quot; == &quot;--&quot; ]; then
+  VIVADOVarName=`echo VIVADO_$CRD`
+  export VIV_VERSION=${!VIVADOVarName}
+  echo &quot; --&gt; For $CRD card, VIVADO version initially set to $VIV_VERSION...&quot;
+
+else
+  export VIV_VERSION=$VIVADO_GLOBAL
+  echo &quot; --&gt; For all cards, VIVADO version initially set to $VIV_VERSION...&quot;
+fi
+
 cd ${OCACCEL_ROOT}
-export VIV_VERSION=&quot;$VIVADO_CHOICE&quot;
-echo &quot;VIVADO version initially set to $VIV_VERSION (please check if we change this later for some specific cards)&quot;
 
 echo &quot;export TIMING_LABLIMIT=\&quot;${TIMING_LABLIMIT_CHOICE}\&quot;&quot; &gt;&gt; snap_env.sh
 echo &quot;TIMING LIMIT set to ${TIMING_LABLIMIT_CHOICE}&quot;
@@ -1221,7 +1277,7 @@ fi </command>
     </hudson.plugins.build__timeout.BuildTimeoutWrapper>
     <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.10"/>
     <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.3">
-      <template>#${BUILD_NUMBER} ${GIT_BRANCH} Vivado=${ENV,var=&quot;VIVADO_CHOICE&quot;} HWTest=${ENV,var=&quot;TEST_ON_HW&quot;} HWCards= ${ENV,var=&quot;LIST_TEST_CARDS&quot;}</template>
+      <template>#${BUILD_NUMBER} ${GIT_BRANCH} Vivado=${ENV,var=&quot;VIVADO_GLOBAL&quot;} HWTest=${ENV,var=&quot;TEST_ON_HW&quot;} HWCards= ${ENV,var=&quot;LIST_TEST_CARDS&quot;}</template>
       <descriptionTemplate></descriptionTemplate>
       <runAtStart>true</runAtStart>
       <runAtEnd>true</runAtEnd>
