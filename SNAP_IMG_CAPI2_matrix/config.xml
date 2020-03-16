@@ -56,14 +56,89 @@ test</description>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
-          <name>VIVADO_CHOICE</name>
-          <description>Choose the Vivado version to use</description>
+          <name>VIVADO_GLOBAL</name>
+          <description>Choose the Vivado version to use
+This parameter overseedes all VIVADO_XXX parameters below
+If -- then VIVADO_XXX parameters below are taken into account</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>--</string>
+              <string>2018.2</string>
+              <string>2018.3</string>
+              <string>2019.1</string>
+              <string>2019.2</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>VIVADO_AD9V3</name>
+          <description></description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>2019.2</string>
+              <string>2018.2</string>
+              <string>2018.3</string>
+              <string>2019.1</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>VIVADO_AD9H3</name>
+          <description></description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>2019.2</string>
+              <string>2018.2</string>
+              <string>2018.3</string>
+              <string>2019.1</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>VIVADO_N250SP</name>
+          <description></description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
               <string>2018.2</string>
-              <string>2019.2</string>
-              <string>2019.1</string>
               <string>2018.3</string>
+              <string>2019.1</string>
+              <string>2019.2</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>VIVADO_FX609</name>
+          <description></description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>2019.2</string>
+              <string>2018.2</string>
+              <string>2018.3</string>
+              <string>2019.1</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>VIVADO_S241</name>
+          <description></description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>2019.2</string>
+              <string>2018.2</string>
+              <string>2018.3</string>
+              <string>2019.1</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>VIVADO_U200</name>
+          <description></description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>2019.2</string>
+              <string>2018.2</string>
+              <string>2018.3</string>
+              <string>2019.1</string>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
