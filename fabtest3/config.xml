@@ -92,6 +92,13 @@
         <string>y2</string>
       </values>
     </hudson.matrix.TextAxis>
+    <hudson.matrix.LabelExpAxis>
+      <name>VIVADO</name>
+      <values>
+        <string>2018.1</string>
+        <string>2019.2</string>
+      </values>
+    </hudson.matrix.LabelExpAxis>
   </axes>
   <combinationFilter>(ACT==&quot;test&quot; &amp;&amp; CRD==&quot;y1&quot;) || ( ACT!=&quot;test&quot; &amp;&amp; ACT=~&quot;hls&quot;)</combinationFilter>
   <builders>
