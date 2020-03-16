@@ -128,36 +128,6 @@ If -- then VIVADO_XXX parameters below are taken into account</description>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>HDL</name>
-          <description>enable/disable the HDL examples</description>
-          <defaultValue>true</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>HLS</name>
-          <description>enable/disable the HLS examples</description>
-          <defaultValue>true</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>AD9V3</name>
-          <description>enable/disable the OC-AD9V3 card</description>
-          <defaultValue>true</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>AD9H3</name>
-          <description>enable/disable the OC-AD9H3 card</description>
-          <defaultValue>true</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>AD9H7</name>
-          <description>enable/disable the OC-AD9H7 card</description>
-          <defaultValue>true</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>INNOVA2</name>
-          <description>enable/disable the OC-INNOVA2 card</description>
-          <defaultValue>false</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>TIMING_LABLIMIT_CHOICE</name>
           <description>Choose the TIMING_LABLIMIT parameter. If timing is higher than your choice when doing a make image, the run will failed.</description>
