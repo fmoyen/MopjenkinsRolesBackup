@@ -1148,6 +1148,9 @@ if [ $loop -eq $maxloop ];then
   exit 100
 fi
 
+#------------------------------------------------------------------------------------------------------------------------------
+# Preparing and running HW test
+
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot; running test --&gt; $box&quot;  | tr &apos;[:lower:]&apos; &apos;[:upper:]&apos;
 echo &quot;***************************************************************************************&quot;
@@ -1167,41 +1170,51 @@ ssh ${HWUser}@${box} &quot;echo Git Branch: ${GIT_BRANCH}       &gt;&gt; jenkins
 
 trap finish EXIT  # register finish/unlock function, after lock is set
 
+# Git clone oc-accel tools into $box:$[TARGET_DIR}
+
+echo;echo &quot;---------------------------------------------------------------------------------------&quot;
 echo &quot;  -&gt; Preparing oc-accel workspace by cloning ${GIT_URL} into ${box}:${TARGET_DIR} using branch= ${GIT_BRANCH}&quot;
 RC=0; ssh ${HWUser}@${box} &quot;git clone ${GIT_URL} ${TARGET_DIR};cd ${TARGET_DIR};git checkout ${GIT_BRANCH}&quot; || RC=$?
 
 if [ $RC -ne 0 ];then 
     echo &quot;  -&gt; git clone ${GIT_URL} ${TARGET_DIR} failed at ${box} =&gt; copying image to $SaveDir&quot;
     LinkDir=${RootSaveDir}/${CRD}/${CRD}_gitclone_error
-    SRCFILES=&quot;$BINFILES $BITFILES $FACTBINFILES $FACTBITFILES&quot;
+    SRCFILES=&quot;$BINFILES $BITFILES&quot;
     CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
 	echo &quot;  -&gt; EXITING !&quot;
 	exit 100
 fi
 
-#------------------------------------------------------------------------------------------------------------------------------
-# Git clone capi-utils tools into $box:/home/$HWUser
+# Git clone oc-utils tools into $box:/home/$HWUser
 
-echo;echo &quot;***************************************************************************************&quot;
+echo;echo &quot;---------------------------------------------------------------------------------------&quot;
 echo &quot;  -&gt; Git cloning oc-Utils tools into $box:/home/$HWUser...&quot;
 echo &quot;  (oc-flash-script.sh used by command `echo $RUN | cut -d&apos; &apos; -f1` )&quot;
-ssh ${HWUser}@${box} rm -rf oc-utils
-echo &quot;echo OCUtils URL = $OCUTILS_URL&quot;
-echo &quot;Running : ${HWUser}@${box} git clone -b $OCUTILS_BRANCH $OCUTILS_URL oc-utils&quot;
-RC=0; ssh ${HWUser}@${box} git clone -b $OCUTILS_BRANCH $OCUTILS_URL oc-utils || RC=$?
+RC=0; ssh ${HWUser}@${box} &quot;rm -rf oc-utils &amp;&amp; git clone -b $OCUTILS_BRANCH $OCUTILS_URL oc-utils&quot; || RC=$?
 
 if [ $RC -ne 0 ];then 
-	SaveDir=&quot;$RootSaveDir/gitclone_error&quot;
     echo &quot;  -&gt; git clone -b $OCUTILS_BRANCH $OCUTILS_URL oc-utils failed at ${box} =&gt; copying image to $SaveDir&quot;
-	cp -rp $BINFILES $SaveDir
+    LinkDir=${RootSaveDir}/${CRD}/${CRD}_gitclone_error
+    SRCFILES=&quot;$BINFILES $BITFILES&quot;
+    CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
 	echo &quot;  -&gt; EXITING !&quot;
 	exit 100
 fi
 
+# Build the oc-utils software into $box:/home/$HWUser/capi-utils on the $box
+
+echo;echo &quot;---------------------------------------------------------------------------------------&quot;
+echo &quot;  -&gt; Building the oc-utils software on $box in /home/$HWUser/oc-utils...&quot;
+echo &quot; oc-utils is compiled locally to prevent over-writing the server default config (/lib/oc-utils preserved)&quot;
+ssh ${HWUser}@${box} make -C /home/$HWUser/oc-utils
+
+
+# Copy image(s) to ${box}:/home/${HWUser}/images/${CRD}/${ACT}
+
 echo &quot;  -&gt; Copying image(s) to ${box}:/home/${HWUser}/images/${CRD}/${ACT}&quot;
 ssh $box mkdir -p /home/${HWUser}/images/${CRD}/${ACT}    # create subdirectory, if not avail yet
 
-COUNT_IMAGE=0
+COUNT_IMAGE=0                         # Modification to support SPI dual files cases
 unset IMAGE
 for f in $BINFILES
 do
@@ -1216,14 +1229,14 @@ do
 done
 
 if [ $RSYNC_RC -ne 0 ]; then
-  SaveDir=&quot;$RootSaveDir/rsync_error&quot;
-  echo &quot;  -&gt; copying image(s) to $SaveDir&quot;;
-  mkdir -p $SaveDir
-  cp -rp $BINFILES $SaveDir
+  LinkDir=${RootSaveDir}/${CRD}/${CRD}_rsync_error
+  SRCFILES=&quot;$BINFILES $BITFILES $FACTBINFILES $FACTBITFILES&quot;
+  CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
   echo &quot;EXITING !&quot;
   exit 100
 fi
 
+# Build and Run HW test $RUN Command
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Testing $CRD card image(s) with Power $box system&quot;
@@ -1255,8 +1268,7 @@ echo &quot;     Card=$CRD and SPI8=$SPI8&quot;
 # the already in-place image inside the FPGA, without trying to reset the FPGA &amp; flash the new image.
 # So you just need to uncomment the following line (unset IMAGE) to do so (deleting any IMAGE reference)
 
-# AC : we now want to load and run the new image =&gt; next line commented
-# unset IMAGE
+#unset IMAGE
 
 if [ ${#IMAGE[@]} -eq 0 ]; then
   # no IMAGE to test=&gt; $RUN will just test the image already inside the FPGA (no reset, no flash)
