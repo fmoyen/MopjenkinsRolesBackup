@@ -147,9 +147,9 @@ If -- then VIVADO_XXX parameters below are taken into account</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>LIST_TEST_CARDS</name>
-          <description>The list of available OpenCAPI cards for HW testing (format: &quot;OC-AD9V3 OC-AD9H7&quot;)</description>
-          <defaultValue>OC-AD9V3 OC-AD9H3</defaultValue>
+          <name>NO_TEST_CARDS</name>
+          <description>The list of cards we do NOT want to HW test for different reasons (please see README for default reasons) </description>
+          <defaultValue>OC-AD9H7 OC-INNOVA2</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -506,6 +506,8 @@ RootSaveDir=/data/Images
 SaveDir=${RootSaveDir}/${CRD}/${CRD}_IMAGES
 RootLogsDir=/data/LogsWhenFailed
 LogsDir=$RootLogsDir/$TARGET_DIR/hardware
+
+IMGServers=&quot;jtagx86&quot; # List of servers where to push generated images.
 
 SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not needed to access /dev/cxl
 
@@ -884,15 +886,10 @@ case ${TEST_ON_HW} in
 
     if [ $TestCardAvailable -eq 0 ]
     then
-      SaveDir=$RootSaveDir/${CRD}_missing
       echo &quot;  -&gt; No test CARD $CRD available, copying $CRD bin-file(s) &amp; bit-file(s) images to $SaveDir&quot;
-      mkdir -p $SaveDir
-      cp -rp $BINFILES $SaveDir
-      echo $BINFILES
-      if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; echo $BITFILES; fi
-      echo;echo &quot;  -&gt; Copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
-      ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
-      scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
+      LinkDir=${RootSaveDir}/${CRD}/${CRD}_missing
+      SRCFILES=&quot;$BINFILES $BITFILES&quot;
+      CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
       echo &quot;  -&gt; EXITING !&quot;
       exit 0
     else
@@ -904,17 +901,10 @@ case ${TEST_ON_HW} in
     echo;echo &quot;****************************************************************************************&quot;
     echo &quot;J: No test on POWER Hardware requested (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot; 
     echo
-    SaveDir=$RootSaveDir/oc_no_test_required
-    mkdir -p $SaveDir
-
-    echo &quot;  -&gt; No test required, copying image to $SaveDir&quot;
-    cp -rp $BINFILES $SaveDir
-    echo $BINFILES
-    if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; echo $BITFILES; fi
-    echo;echo &quot;  -&gt; Copying $CRD image to jtagx86:$SaveDir&quot;
-    ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
-    scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
-    exit 0
+      LinkDir=${RootSaveDir}/${CRD}/${CRD}_no_test_requested
+      SRCFILES=&quot;$BINFILES $BITFILES&quot;
+      CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
+      exit 0
   ;;
 
 esac
@@ -1359,7 +1349,7 @@ fi </command>
     </hudson.plugins.build__timeout.BuildTimeoutWrapper>
     <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.10"/>
     <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.3">
-      <template>#${BUILD_NUMBER} ${GIT_BRANCH} Vivado=${ENV,var=&quot;VIVADO_GLOBAL&quot;} HWTest=${ENV,var=&quot;TEST_ON_HW&quot;} HWCards= ${ENV,var=&quot;LIST_TEST_CARDS&quot;}</template>
+      <template>#${BUILD_NUMBER} ${GIT_BRANCH} Vivado=${ENV,var=&quot;VIVADO_GLOBAL&quot;} HWTest=${ENV,var=&quot;TEST_ON_HW&quot;} NOHWCards= ${ENV,var=&quot;NO_TEST_CARDS&quot;}</template>
       <descriptionTemplate></descriptionTemplate>
       <runAtStart>true</runAtStart>
       <runAtEnd>true</runAtEnd>
