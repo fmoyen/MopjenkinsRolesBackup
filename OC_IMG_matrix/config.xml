@@ -501,7 +501,12 @@ export OCACCEL_ROOT=$USERHOME/oc-accel
 
 TESTBOXES=( ${mopBoxes[*]} ${austinBoxes[*]} ) # init array of systems
 echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
+
 RootSaveDir=/data/Images
+SaveDir=${RootSaveDir}/${CRD}/${CRD}_IMAGES
+RootLogsDir=/data/LogsWhenFailed
+LogsDir=$RootLogsDir/$TARGET_DIR/hardware
+
 SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not needed to access /dev/cxl
 
 #echo;echo &quot;********************************************************************************&quot;
@@ -554,6 +559,86 @@ function SendAnEmail
     echo &quot;&quot; | mail -s &quot;$Subject&quot; $i
   done
 }
+
+
+# Function to copy BIN, BIT, MCS, PRM, etc to the right directory
+# Example 1: CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s jtagx86 -u $HWUser
+# Example 2: CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -s jtagx86 -u $HWUser
+# Example 3: CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;jtagx86 orpington&quot; -u $HWUser
+# Example 4: CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
+# -f should use &quot;&quot; as $SRCFILES are usually lists of files like &quot;primary.bin secondary.bin&quot;
+
+function CopyToDir
+{
+  local OPTIND opt FPGACard SrcFiles ToDir LkDir SSHDest SSHUser
+
+  while getopts &quot;c:f:d:l:s:u:&quot; opt
+  do
+      case $opt in
+      c)
+        FPGACard=&quot;$OPTARG&quot;
+      ;;
+      f)
+        SrcFiles=&quot;$OPTARG&quot;
+      ;;
+      d)
+        ToDir=&quot;$OPTARG&quot;
+      ;;
+      l)
+        LkDir=&quot;$OPTARG&quot;
+      ;;
+      s)
+        SSHDest=&quot;$OPTARG&quot;
+      ;;
+      u)
+        SSHUser=&quot;$OPTARG&quot;
+      ;;
+    esac
+  done
+
+  ToDirFiles=&quot;&quot;
+  for i in $SrcFiles; do ToDirFiles=&quot;$ToDirFiles $ToDir/`basename $i`&quot;; done
+
+
+  # Copying Files to $ToDir
+  echo &quot;  -&gt; Copying $FPGACard images (.bin, .bit, .mcs, .prm) to $ToDir&quot;
+  mkdir -p $ToDir
+  chmod g+w $ToDir
+  cp -rp $SrcFiles $ToDir
+      
+  for dest in $SSHDest
+  do
+    echo;echo &quot;  -&gt; Copying $FPGACard images to $dest:$ToDir&quot;
+    ssh ${SSHUser}@$dest &quot;mkdir -p $ToDir; chmod g+w $ToDir&quot;
+    scp -rp $SrcFiles ${SSHUser}@$dest:$ToDir
+  done
+
+  # Building symbolic links into $LkDir
+  if [ &quot;$LkDir&quot; != &quot;&quot; ]; then
+    echo &quot;  -&gt; Building $FPGACard images links into $LkDir&quot;
+    mkdir -p $LkDir
+    chmod g+w $LkDir
+    ln -s $ToDirFiles $LkDir
+
+    for i in $ToDirFiles; do echo -e &quot;/\c&quot;;ls -la $LkDir/`basename $i` | cut -d &quot;/&quot; -f2-; done
+
+    for dest in $SSHDest
+    do
+      echo;echo &quot;  -&gt; Building $FPGACard images links into $dest:$LkDir&quot;
+      ssh ${SSHUser}@$dest &quot;mkdir -p $LkDir; chmod g+w $LkDir&quot;
+      ssh ${SSHUser}@$dest &quot;ln -s $ToDirFiles $LkDir&quot;
+      for i in $ToDirFiles; do ssh ${SSHUser}@$dest &quot;echo -e &apos;/\c&apos;;ls -la $LkDir/`basename $i` | cut -d &apos;/&apos; -f2-&quot;; done
+    done
+  fi
+}
+
+
+
+#==============================================================================================
+#==============================================================================================
+# MAIN starts here !
+#==============================================================================================
+#==============================================================================================
 
 
 #==============================================================================================
