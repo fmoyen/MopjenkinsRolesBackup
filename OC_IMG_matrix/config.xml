@@ -911,33 +911,6 @@ esac
 
 
 #==============================================================================================
-# FAB: POWER hardware test is not yet ready, and below end of script is not yet ready too
-# =&gt; Copying and exiting !
-
-echo;echo &quot;****************************************************************************************&quot;
-echo &quot;J: Temporarily copying generated images to jtagx86 and orpington ($RootSaveDir)&quot;
-echo
-
-SaveDir=$RootSaveDir/${CRD}_for_test
-echo &quot;  -&gt; Hardware test for CARD $CRD not yet working, copying $CRD bin-file(s) &amp; bit-file(s) images to $SaveDir&quot;
-mkdir -p $SaveDir
-cp -rp $BINFILES $SaveDir
-echo $BINFILES
-if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; echo $BITFILES; fi
-
-echo;echo &quot;  -&gt; Temporarily copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
-ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
-scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
-
-echo;echo &quot;  -&gt; Temporarily copying $CRD bin-file(s) to orpington:$SaveDir&quot;
-ssh ${HWUser}@orpington &quot;mkdir -p $SaveDir&quot;
-scp -rp $BINFILES ${HWUser}@orpington:$SaveDir
-
-echo;echo &quot;J: HW TEST NOT YET READY TO WORK ! =&gt; not Exiting but doing all hardware test preparation for debugging purpose !&quot;
-#echo;echo &quot;J: HW TEST NOT YET READY TO WORK ! =&gt; Exiting !&quot;
-#exit 0
-
-#==============================================================================================
 #==============================================================================================
 #==============================================================================================
 
