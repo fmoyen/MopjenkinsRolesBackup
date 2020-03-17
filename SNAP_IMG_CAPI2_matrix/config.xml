@@ -1392,7 +1392,7 @@ echo &quot;  -&gt; Preparing snap workspace by cloning ${GIT_URL} into ${box}:${
 RC=0; ssh ${HWUser}@${box} &quot;git clone ${GIT_URL} ${TARGET_DIR};cd ${TARGET_DIR};git checkout ${GIT_BRANCH}&quot; || RC=$?
 
 if [ $RC -ne 0 ];then
-
+    echo &quot;  -&gt; git clone ${GIT_URL} ${TARGET_DIR} failed at ${box} =&gt; copying image to $SaveDir&quot;
     LinkDir=${RootSaveDir}/${CRD}/${CRD}_gitclone_error
     SRCFILES=&quot;$BINFILES $BITFILES $FACTBINFILES $FACTBITFILES&quot;
     CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
