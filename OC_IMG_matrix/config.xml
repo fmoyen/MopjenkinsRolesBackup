@@ -870,7 +870,7 @@ done
 
 
 #==============================================================================================
-# Checking if we can test the generated binaries on POWER Hardware (checking LIST_TEST_CARDS list)
+# Checking if we can test the generated binaries on POWER Hardware (checking NO_TEST_CARDS list)
 
 case ${TEST_ON_HW} in
 
@@ -878,16 +878,16 @@ case ${TEST_ON_HW} in
     echo;echo &quot;****************************************************************************************&quot;
     echo &quot;J: Checking if we can test the generated binaries on POWER Hardware (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot;
     echo
-    TestCardAvailable=0
-    for i in ${LIST_TEST_CARDS[@]}
+    TestCardAllowed=1
+    for i in ${NO_TEST_CARDS[@]}
     do
-      if [ &quot;$CRD&quot; == &quot;$i&quot; ];then TestCardAvailable=1;fi
+      if [ &quot;$CRD&quot; == &quot;$i&quot; ];then TestCardAllowed=0;fi
     done
 
-    if [ $TestCardAvailable -eq 0 ]
+    if [ $TestCardAllowed -eq 0 ]
     then
-      echo &quot;  -&gt; No test CARD $CRD available, copying $CRD bin-file(s) &amp; bit-file(s) images to $SaveDir&quot;
-      LinkDir=${RootSaveDir}/${CRD}/${CRD}_missing
+      echo &quot;  -&gt; No test CARD $CRD available...&quot;
+      LinkDir=${RootSaveDir}/${CRD}/${CRD}_test_bypassed
       SRCFILES=&quot;$BINFILES $BITFILES&quot;
       CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
       echo &quot;  -&gt; EXITING !&quot;
@@ -901,10 +901,10 @@ case ${TEST_ON_HW} in
     echo;echo &quot;****************************************************************************************&quot;
     echo &quot;J: No test on POWER Hardware requested (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot; 
     echo
-      LinkDir=${RootSaveDir}/${CRD}/${CRD}_no_test_requested
-      SRCFILES=&quot;$BINFILES $BITFILES&quot;
-      CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
-      exit 0
+    LinkDir=${RootSaveDir}/${CRD}/${CRD}_no_test_requested
+    SRCFILES=&quot;$BINFILES $BITFILES&quot;
+    CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
+    exit 0
   ;;
 
 esac
@@ -944,7 +944,7 @@ echo;echo &quot;J: HW TEST NOT YET READY TO WORK ! =&gt; not Exiting but doing a
 
 #==============================================================================================
 # Testing the generated binaries on POWER Hardware
-# (if $TEST_ON_HW==true and $CRD into $LIST_TEST_CARDS[*])
+# (if $TEST_ON_HW==true and $CRD NOT into $NO_TEST_CARDS[*])
 
 # Set unique target directory such that parallel builds do not disturb each other.
 # Well, we might to clean up those from time to time ...
@@ -1019,6 +1019,8 @@ for loop in `seq 1 $maxloop`;do
 
   echo;echo &quot;*************************************************&quot;
   echo &quot;J: LOOP $loop/$maxloop (`date`)&quot;
+  
+  global_found=0
 
   for box in &quot;${TESTBOXES[@]}&quot;;do
 
@@ -1040,16 +1042,17 @@ for loop in `seq 1 $maxloop`;do
     # ($find_card gives the number of found cards inside $?)
     
     if [ $found -ne 0 ];then
-      echo &quot;OK: $found CARD(S) FOUND&quot;
+      echo -e &quot;OK: $found CARD(S) FOUND &quot;
+      global_found=$((global_found+found))
       cards=`ssh -ttq ${HWUser}@${box} &quot;/home/${HWUser}/$find_card -A ${CRD} 2&gt;/dev/null&quot; | head -n1`   
-      echo &quot;      Found card-IDs= $cards&quot;
+      echo &quot;(card-IDs= $cards)&quot;
       # (head is needed because if more than 1 card, $find_card returns something like &quot;0 0&quot; and second line with &quot;Total 2 cards detected&quot;)
     else
       echo &quot;FAILED: NO CARD FOUND&quot;
       unset cards
     fi
 
-    echo &quot;  --&gt; Removing the tool $FindCardTool ($find_card) from $box RC=$SSH_RC&quot;
+    echo &quot;  --&gt; Removing the tool $FindCardTool ($find_card) from $box&quot;
     SSH_RC=0;ssh -ttq ${HWUser}@${box} rm /home/${HWUser}/$find_card || SSH_RC=$?
     if [ $SSH_RC -gt 0 ];then
       echo &quot;    -&gt; Delete $find_card to $box FAILED, continuing anyway...&quot;;
@@ -1065,11 +1068,10 @@ for loop in `seq 1 $maxloop`;do
       #------------------------------------
       # no card available =&gt; try other box
       0:*)
-        if [ $box == ${TESTBOXES[*]:(-1)} ];then
-          echo &quot;  --&gt; $box is the last system to test; Waiting for 60s...&quot;
-          sleep 60 # Last box of the list TESBOXES =&gt; Waiting 60s and go to next loop
-        fi
-        continue # next box or next loop (if it was the last box of the list)
+        for i in &quot;${TESTBOXES[@]}&quot;; do [[ $i != $box ]] &amp;&amp; new+=($i);done   # generate new test array without this bow with no card
+        unset TESTBOXES;TESTBOXES=(&quot;${new[@]}&quot;);unset new                   # reassign to original array name
+        echo &quot;  --&gt; No $CRD card available in $box =&gt; removed from Boxes testing list, remaining list= ${TESTBOXES[@]}&quot;        
+        echo &quot;  --&gt; Trying next box / loop...&quot;        
       ;;
 
       #------------------------------------
@@ -1100,12 +1102,7 @@ for loop in `seq 1 $maxloop`;do
       *)      
       	if (( 9&lt;=hours &amp;&amp; hours&lt;=19 ));then
           # It is day time =&gt; priority to interactive users
-      	  echo &quot;  --&gt; hours=$hours (day), nusers=$nusers, try other box&quot;
-          if [ $box == ${TESTBOXES[*]:(-1)} ];then
-            echo &quot;  --&gt; $box is the last system to test; Waiting for 60s...&quot;
-            sleep 60 # Last box of the list TESBOXES =&gt; Waiting 60s and go to next loop
-          fi
-          continue # next box or next loop (if it was the last box of the list)
+      	  echo &quot;  --&gt; $CRD card found but day time (hours=$hours) and users connected (nusers=$nusers), trying next box / loop...&quot;
 
         else
           # It is night =&gt; running on $box even if there are connected users
@@ -1127,7 +1124,13 @@ for loop in `seq 1 $maxloop`;do
       ;;
       
     esac
-    
+
+  if [[ $box == ${TESTBOXES[*]:(-1)} ]] &amp;&amp; [[ $global_found -gt 0 ]]; then
+    echo &quot;J: $box was the last system to test. We globally found $global_found $CRD card(s) but user(s) were connected&quot;
+    echo &quot;   Waiting for 60s and go to next loop...&quot;
+    sleep 60
+  fi
+
   done # for box
   
 done #for loop
