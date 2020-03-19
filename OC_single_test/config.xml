@@ -29,7 +29,7 @@ for Questions: please contact  A.Castellane or F.Moyen</description>
             <baseDirPath>/data/Images</baseDirPath>
             <includePattern>*/*/oc*bin</includePattern>
             <scanType>File</scanType>
-            <excludePattern></excludePattern>
+            <excludePattern>*/*_IMAGES/oc*bin</excludePattern>
             <reverseOrder>false</reverseOrder>
             <emptyChoiceType>None</emptyChoiceType>
           </choiceListProvider>
@@ -619,7 +619,7 @@ echo &quot;J: Checking RUN return code (`date`)...&quot;
 echo
 
 if [ $RC -eq 0 ]; then
-  mopIMGGoodDir=${mopIMGRootDir}/${CRD}_test_OK
+  mopIMGGoodDir=${mopIMGRootDir}/${CRD}/${CRD}_test_OK
   if mkdir $mopIMGGoodDir 2&gt;/dev/null; then chmod g+w $mopIMGGoodDir; fi
   
   echo &quot;Job return code is good ==&gt;&quot;
