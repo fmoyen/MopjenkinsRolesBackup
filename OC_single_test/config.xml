@@ -259,7 +259,7 @@ function MoveToDir
 
 echo;echo &quot;****************************************************************************************&quot;
 echo &quot;J: Testing if file size is coherent ($mopIMGDir/$IMGFileName)...&quot; 
-size=`ls -al $mopIMGDir/$IMGFileName | awk &apos;{print $5}&apos;`
+size=`wc -c &lt; &quot;$mopIMGDir/$IMGFileName&quot;`
 echo &quot;  -&gt; Size of file is $size&quot;
 (( $size &lt; 100000 ))          &amp;&amp; die 1 &quot;  -&gt; Image $$mopIMGDir/$IMGFileName is too small $size to burn&quot;
 
