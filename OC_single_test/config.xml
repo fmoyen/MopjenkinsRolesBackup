@@ -620,7 +620,7 @@ echo
 
 if [ $RC -eq 0 ]; then
   mopIMGGoodDir=${mopIMGRootDir}/${CRD}/${CRD}_test_OK
-  if mkdir $mopIMGGoodDir 2&gt;/dev/null; then chmod g+w $mopIMGGoodDir; fi
+  #if mkdir $mopIMGGoodDir 2&gt;/dev/null; then chmod g+w $mopIMGGoodDir; fi
   
   echo &quot;Job return code is good ==&gt;&quot;
   echo &quot; =&gt; $box: Cleaning working directory&quot;
