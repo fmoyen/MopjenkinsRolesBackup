@@ -56,7 +56,7 @@ for Questions: please contact  A.Castellane or F.Moyen</description>
           <name>mopBoxes</name>
           <description>List of Montpellier systems available for testing
 Orpington and Lewen05 are P9</description>
-          <defaultValue>orpington lewen05</defaultValue>
+          <defaultValue>orpington pavilly lewen05</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>

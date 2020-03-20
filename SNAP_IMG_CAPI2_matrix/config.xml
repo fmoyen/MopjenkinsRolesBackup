@@ -718,7 +718,8 @@ function CopyToDir
   # Copying Files to $ToDir
   echo &quot;  -&gt; Copying $FPGACard images (.bin, .bit, .mcs, .prm) to $ToDir&quot;
   mkdir -p $ToDir
-  chmod g+w $ToDir
+  chmod g+w `dirname $ToDir` # /data/Images/AD9V3/AD9V3_IMAGES, we need to chmod /data/Images/AD9V3 if we just created /data/Images/AD9V3
+  chmod g+w $ToDir           # and chmod /data/Images/AD9V3/AD9V3_IMAGES
   cp -rp $SrcFiles $ToDir
       
   for dest in $SSHDest
