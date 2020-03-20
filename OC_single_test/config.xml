@@ -540,15 +540,15 @@ ssh ${HWUser}@${box} mkdir -p ${ExecutorIMGRootDir}/$CRD
 
 if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
 	echo &quot;  -&gt; Copying Image $IMGPrimaryName   to $box:${ExecutorIMGRootDir}/$CRD&quot;
-    rsync -az   $mopIMGDir/$IMGPrimaryName ${HWUser}@${box}:${ExecutorIMGRootDir}/$CRD
+    rsync -aLz   $mopIMGDir/$IMGPrimaryName ${HWUser}@${box}:${ExecutorIMGRootDir}/$CRD
 	echo &quot;  -&gt; Copying Image $IMGSecondaryName to $box:${ExecutorIMGRootDir}/$CRD&quot;
-    rsync -az $mopIMGDir/$IMGSecondaryName ${HWUser}@${box}:${ExecutorIMGRootDir}/$CRD
+    rsync -aLz $mopIMGDir/$IMGSecondaryName ${HWUser}@${box}:${ExecutorIMGRootDir}/$CRD
     RUN+=&quot; -D ${TARGET_DIR}&quot;
 	if [ -z ${mopIMGFile} ]; then RUN+=&quot; -A ALL&quot;;else RUN+=&quot; -F ${ExecutorIMGRootDir}/$CRD/$IMGPrimaryName -f ${ExecutorIMGRootDir}/$CRD/$IMGSecondaryName -A ${CRD} -C $cardid&quot;;fi
 
 else
 	echo &quot;  -&gt; Copying Image $IMGFileName to $box:${ExecutorIMGRootDir}/$CRD&quot;
-    rsync -az $mopIMGDir/$IMGFileName ${HWUser}@${box}:${ExecutorIMGRootDir}/$CRD
+    rsync -aLz $mopIMGDir/$IMGFileName ${HWUser}@${box}:${ExecutorIMGRootDir}/$CRD
 	RUN+=&quot; -D ${TARGET_DIR}&quot;
 	if [ -z ${mopIMGFile} ]; then RUN+=&quot; -A ALL&quot;;else RUN+=&quot; -F ${ExecutorIMGRootDir}/$CRD/$IMGFileName -A ${CRD} -C $cardid&quot;;fi
 fi
