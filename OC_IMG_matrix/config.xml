@@ -7,6 +7,7 @@ Vivado version used : tests on going for 2019.1 (issue with lsf / RH7)&#xd;
 AC 28 fev 2020 : changed default to 2019.2&#xd;
 &#xd;
 WARNING : P9 oc_find_card is used with OC-$CRD prefix&#xd;
+WARNING : HDL_EXAMPLE actions HW tests un-activated as not working (hw_tests.sh, 10140000_ddr.sh, etc)&#xd;
 &#xd;
 Main Issues : &#xd;
 - oc-flash not operational&#xd;
@@ -142,7 +143,7 @@ If -- then VIVADO_XXX parameters below are taken into account</description>
         <hudson.model.BooleanParameterDefinition>
           <name>TEST_ON_HW</name>
           <description>Enable/disable testing on HW
-(Disabled by default as oc-flash + oc-reset does&apos;t work yet =&gt; need to reboot to get the code in!)
+(HDL_Example not running)
 </description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
@@ -895,6 +896,15 @@ case ${TEST_ON_HW} in
       exit 0
     else
       echo &quot;  -&gt; OK&quot;
+    fi
+    
+    if [[ &quot;$ACT&quot; =~ &quot;hdl_example&quot; ]]; then
+      echo &quot;  -&gt; OpenCAPI hdl_example HW tests scripts not working...&quot;
+      LinkDir=${RootSaveDir}/${CRD}/${CRD}_test_bypassed
+      SRCFILES=&quot;$BINFILES $BITFILES&quot;
+      CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
+      echo &quot;  -&gt; EXITING !&quot;
+      exit 0
     fi
   ;;
   
