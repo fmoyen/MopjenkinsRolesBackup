@@ -161,6 +161,23 @@ These binaries will be used to create a full MCS image including hld_example.NOR
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
+          <name>LSFCluster</name>
+          <description>NOT YET AVAILABLE !!
+Decide whether or not to use the Boeblingen LSF cluster to build images. </description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>LSFLoginServersList</name>
+          <description>Boeblingen LSF cluster Login Servers</description>
+          <defaultValue>hdcl050.boeblingen.de.ibm.com
+hdcl051.boeblingen.de.ibm.com
+hdcl052.boeblingen.de.ibm.com
+hdcl027.boeblingen.de.ibm.com
+hdcl060.boeblingen.de.ibm.com
+hdclp026.boeblingen.de.ibm.com</defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
           <name>TEST_ON_HW</name>
           <description>enable/disable testing on HW</description>
           <defaultValue>true</defaultValue>
@@ -605,8 +622,40 @@ SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not n
 
 IMGServers=&quot;jtagx86&quot; # List of servers where to push generated images.
 
-#echo;echo &quot;****************************************************************************************&quot;
-#echo &quot;J:LSF SETUP ...&quot;
+if [ &quot;$LSFCluster&quot; == &quot;true&quot; ]; then
+  echo;echo &quot;****************************************************************************************&quot;
+  echo &quot;J:LSF SETUP ...&quot;
+  echo
+
+  LSFLoginServer=&quot;&quot;
+  for i in $LSFLoginServersList; do
+    if ping -c1 $i &gt;/dev/null 2&gt;&amp;1; then 
+      LSFLoginServer=$i
+      break
+    fi
+  done
+
+  if [[ $LSFLoginServer != &quot;&quot; ]]; then
+    echo &quot;LSF Login Server = $LSFLoginServer&quot;
+  else
+    echo &quot;no LSF Login Server available ! Exiting&quot;
+    exit 1
+  fi
+
+  export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+  export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
+  export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+  export LSF_BINDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+  export LSF_SUBMITTER_OSTYPE=Linux
+  export LSF_ENVDIR=/home/lsfbb/prod/conf
+
+  LSF=&quot;-P zsort&quot;
+  LSF+=&quot; -M 6&quot;                      # 12GB memory
+  LSF+=&quot; -C 2000&quot;                   # 2MB core file
+
+  echo &quot;LSF variable set to : $LSF&quot;
+
 
 ## previous settings :
 # export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
@@ -645,8 +694,8 @@ IMGServers=&quot;jtagx86&quot; # List of servers where to push generated images.
 ## AC : older configuration
 #LSF+=&apos; -R type=X86_64 -R span[hosts=1]&apos;
 #LSF+=&quot; -I -n 8&quot;
-#echo &quot;LSF variable set to : $LSF&quot;
 
+fi
 
 #==============================================================================================
 # Functions
@@ -919,11 +968,18 @@ then
     make clean                   # to make sure we restart from a blank snap
     cd hardware/capi2-bsp
     make clean                   # to make sure we restart from a blank capi-bsp    
-    
-    echo;echo &quot;  -&gt; Building the Image (make image)&quot;    
-    #RC=0; bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot; &amp;&amp; break || RC=$?
     cd ${SNAP_ROOT}
-    RC=0; make image &amp;&amp; break || RC=$?
+
+    echo;echo &quot;  -&gt; Building the Image (make image)&quot;
+
+    if [ &quot;$LSFCluster&quot; == &quot;true&quot; ]; then
+      echo &quot;      - done with LSF Cluster&quot;
+      RC=0; bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot; &amp;&amp; break || RC=$?
+      echo &quot;FAB DEV !! EXITING...&quot;; exit 0
+    else
+      echo &quot;      - done locally&quot;
+      RC=0; make image &amp;&amp; break || RC=$?
+    fi
     
   done
   
@@ -1599,6 +1655,15 @@ fi
       <externalDelete></externalDelete>
       <disableDeferredWipeout>false</disableDeferredWipeout>
     </hudson.plugins.ws__cleanup.PreBuildCleanup>
+    <org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper plugin="credentials-binding@1.20">
+      <bindings>
+        <org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
+          <credentialsId>LSFUser</credentialsId>
+          <usernameVariable>AFSUser</usernameVariable>
+          <passwordVariable>AFSPass</passwordVariable>
+        </org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
+      </bindings>
+    </org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper>
     <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.19">
       <strategy class="hudson.plugins.build_timeout.impl.NoActivityTimeOutStrategy">
         <timeoutSecondsString>14400</timeoutSecondsString>
