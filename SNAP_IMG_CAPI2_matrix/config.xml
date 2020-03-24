@@ -161,7 +161,7 @@ These binaries will be used to create a full MCS image including hld_example.NOR
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
-          <name>LSFCluster</name>
+          <name>LSF_CLUSTER</name>
           <description>NOT YET AVAILABLE !!
 Decide whether or not to use the Boeblingen LSF cluster to build images. </description>
           <defaultValue>false</defaultValue>
@@ -611,7 +611,7 @@ SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not n
 
 IMGServers=&quot;jtagx86&quot; # List of servers where to push generated images.
 
-if [ &quot;$LSFCluster&quot; == &quot;true&quot; ]; then
+if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   echo;echo &quot;****************************************************************************************&quot;
   echo &quot;J:LSF SETUP ...&quot;
   echo
@@ -971,7 +971,7 @@ then
 
     echo;echo &quot;  -&gt; Building the Image (make image)&quot;
 
-    if [ &quot;$LSFCluster&quot; == &quot;true&quot; ]; then
+    if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
       echo &quot;      - done with LSF Cluster&quot;
       #RC=0; sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;bsub $LSF -J \&quot;${CRD}_${ACT}_image\&quot; \&quot;make image\&quot; &quot; &amp;&amp; break || RC=$?#
 
