@@ -653,7 +653,8 @@ if [ &quot;$LSFCluster&quot; == &quot;true&quot; ]; then
   LSF=&quot;-P zsort&quot;
   LSF+=&quot; -M 6&quot;                      # 12GB memory
   LSF+=&quot; -C 2000&quot;                   # 2MB core file
-
+  LSF+=&apos; -R type=X86_64 -R span[hosts=1]&apos;
+  LSF+=&quot; -I -n 8&quot;
   echo &quot;LSF variable set to : $LSF&quot;
 
 
@@ -974,8 +975,14 @@ then
 
     if [ &quot;$LSFCluster&quot; == &quot;true&quot; ]; then
       echo &quot;      - done with LSF Cluster&quot;
-      RC=0; bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot; &amp;&amp; break || RC=$?
-      echo &quot;FAB DEV !! EXITING...&quot;; exit 0
+      #RC=0; sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &apos;bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot;&apos; &amp;&amp; break || RC=$?#
+      RC=0; sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &apos;echo $LSF; exit 0&apos; &amp;&amp; break || RC=$?
+      echo &quot;RC= $RC&quot;
+      RC=0; sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &apos;echo $CRD; exit 1&apos; &amp;&amp; break || RC=$?
+      echo &quot;RC= $RC&quot;
+      
+      #RC=0; bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot; &amp;&amp; break || RC=$?
+      echo &quot;FAB DEV !! EXITING...&quot;; exit 1
     else
       echo &quot;      - done locally&quot;
       RC=0; make image &amp;&amp; break || RC=$?
