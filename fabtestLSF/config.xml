@@ -43,8 +43,12 @@ hdclp026.boeblingen.de.ibm.com</defaultValue>
 
 
 echo &quot;Defined Credentials:&quot;
-echo $AFSUser
-echo $AFSPass
+begin=`echo $AFSUser | cut -c1-4`; end=`echo $AFSUser | cut -c5-`
+echo &quot;AFSUser= ${begin}...$end&quot;
+begin=`echo $AFSPass | cut -c1-4`; end=`echo $AFSPass | cut -c5-`
+echo &quot;AFSPass= ${begin}...$end&quot;
+
+exit 0
 
 MyJob=myjob
 JobOutput=joboutput.txt
