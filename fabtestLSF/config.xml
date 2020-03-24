@@ -8,7 +8,7 @@
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.TextParameterDefinition>
-          <name>LoginServersList</name>
+          <name>LSFLoginServersList</name>
           <description>Boeblingen LSF cluster Login Servers</description>
           <defaultValue>hdcl050.boeblingen.de.ibm.com
 hdcl051.boeblingen.de.ibm.com
@@ -57,15 +57,16 @@ echo
 MyJob=myjob
 JobOutput=joboutput.txt
 
-for i in $LoginServersList; do
+LSFLoginServer=&quot;&quot;
+for i in $LSFLoginServersList; do
   if ping -c1 $i &gt;/dev/null 2&gt;&amp;1; then 
-    LoginServer=$i
+    LSFLoginServer=$i
     break
   fi
 done
 
-if [[ $LoginServer != &quot;&quot; ]]; then
-  echo &quot;LSF Login Server = $LoginServer&quot;
+if [[ $LSFLoginServer != &quot;&quot; ]]; then
+  echo &quot;LSF Login Server = $LSFLoginServer&quot;
 else
   echo &quot;no LSF Login Server available ! Exiting&quot;
   exit 1
@@ -80,11 +81,11 @@ uname -a &gt;&gt; $JobOutput
 EOF
 
 # with myjob in local homedir
-ping -c1 $LoginServer &gt; /dev/null &amp;&amp; sshpass -p $AFSPass ssh $AFSUser@$LoginServer &apos;bsub -q desktop -P hdwb -R &quot;select [type==X86_64 &amp;&amp; osver == rh7]&quot;&apos; &lt; $MyJob | tee lastrunjob.txt
+ping -c1 $LSFLoginServer &gt; /dev/null &amp;&amp; sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &apos;bsub -q desktop -P hdwb -R &quot;select [type==X86_64 &amp;&amp; osver == rh7]&quot;&apos; &lt; $MyJob | tee lastrunjob.txt
 JobID=`awk -F&quot;&gt;&quot; &apos;{print $1}&apos; lastrunjob.txt | awk -F&quot;&lt;&quot; &apos;{print $2}&apos;`
 
 # Waiting for job to be marked as DONE
-while ! sshpass -p $AFSPass ssh $AFSUser@$LoginServer bjobs $JobID 2&gt; /dev/null | grep $JobID | grep DONE &gt; /dev/null
+while ! sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer bjobs $JobID 2&gt; /dev/null | grep $JobID | grep DONE &gt; /dev/null
 do
   echo -e &quot;.\c&quot;
   sleep 1
@@ -92,7 +93,7 @@ done
 echo
 
 # Getting back Job file result
-sshpass -p $AFSPass scp $AFSUser@$LoginServer:./$JobOutput . 
+sshpass -p $AFSPass scp $AFSUser@$LSFLoginServer:./$JobOutput . 
 echo
 cat $JobOutput
 </command>
