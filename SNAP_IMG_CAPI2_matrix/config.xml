@@ -324,12 +324,19 @@ EmailOrNotEmail=0 # 0 means do not send emails; 1 means send email
 
 HWUser=&quot;capimop&quot;
 
+RootJobName=`echo $JOB_NAME | awk -F&quot;/&quot; &apos;{print $1}&apos;`
+
+LocalWorkspace=$WORKSPACE
+
+LocalRootWorkspace=&quot;`echo $LocalWorkspace | awk -F&quot;/$RootJobName/&quot; &apos;{print $1}&apos;`/$RootJobName&quot;
+LSFRootWorkspace=&quot;/afs/bb/proj/fpga/framework/CI_ws/$RootJobName&quot;
+
+LSFWorkspace=&quot;$LSFRootWorkspace/`echo $LocalWorkspace | awk -F&quot;$LocalRootWorkspace/&quot; &apos;{print $2}&apos;`&quot;
+
 # LSFLoginServer, RootWorkspace variables... or RootWorkspace pointing to local dir
 if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   echo;echo &quot;****************************************************************************************&quot;
   echo &quot;J:LSF Login Server SETUP ...&quot;
-  
-  RootWorkspace=/afs/bb/proj/fpga/framework/CI_ws/SNAP_IMG_CAPI2_matrix
   
   # Boeblingen LSF cluster Login Servers
   LSFLoginServersList=&quot;\
@@ -350,14 +357,12 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
 
   if [[ &quot;$LSFLoginServer&quot; != &quot;&quot; ]]; then
     echo &quot;  -&gt; LSF Login Server = $LSFLoginServer&quot;
-    echo &quot;  -&gt; Root workspace = $RootWorkspace&quot;
+    echo &quot;  -&gt; LSF Root workspace = $LSFRootWorkspace&quot;
   else
     echo &quot;  -&gt; no LSF Login Server available ! Exiting&quot;
     exit 1
   fi
 
-else # variables (local dir, etc.) if not using LSF cluster
-  RootWorkspace=/var/jenkins/workspace/SNAP_IMG_CAPI2_matrix
 fi
 
 
@@ -474,9 +479,9 @@ then
     echo
 
     if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
-      WorkspaceDirList=`sshpass -p $AFSPass ssh -o &quot;StrictHostKeyChecking no&quot; $AFSUser@$LSFLoginServer &quot;ls -d $RootWorkspace/*/&quot;`
+      WorkspaceDirList=`sshpass -p $AFSPass ssh -o &quot;StrictHostKeyChecking no&quot; $AFSUser@$LSFLoginServer &quot;ls -d $LSFRootWorkspace/*/&quot;`
     else
-      WorkspaceDirList=`ls -d $RootWorkspace/*/`
+      WorkspaceDirList=`ls -d $LocalRootWorkspace/*/`
     fi
     
     for dir in $WorkspaceDirList;do
@@ -543,12 +548,14 @@ then
  echo &quot;J: Checking enough space is available&quot;
 
  if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
-   diskused=`sshpass -p $AFSPass ssh -o &quot;StrictHostKeyChecking no&quot; $AFSUser@$LSFLoginServer &quot;fs lq $RootWorkspace&quot; |grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
+   diskused=`sshpass -p $AFSPass ssh -o &quot;StrictHostKeyChecking no&quot; $AFSUser@$LSFLoginServer &quot;fs lq $LSFRootWorkspace&quot; |grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
+   msg=&quot;$LSFRootWorkspace disk usage =${diskused}%&quot;
  else
-   diskused=`df -h $RootWorkspace |grep -v Used|awk &apos;{print $5}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
+   diskused=`df -h $LocalRootWorkspace |grep -v Used|awk &apos;{print $5}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
+   msg=&quot;$LocalRootWorkspace disk usage =${diskused}%&quot;
  fi
 
- SSKIP=0;msg=&quot;$RootWorkspace disk usage =${diskused}%&quot;
+ SSKIP=0
 
  if   (( diskused &gt; 90 ));then 
    msg=&quot;ERROR: $msg, stopping additional builds&quot;;SSKIP=1
@@ -592,7 +599,11 @@ echo &quot;EmailDestinationList=( ${EmailDestinationList[*]} )&quot; &gt;&gt; ex
 echo &quot;EmailOrNotEmail=$EmailOrNotEmail&quot; &gt;&gt; export_props.properties
 echo &quot;HWUser=${HWUser}&quot; &gt;&gt; export_props.properties
 echo &quot;LSFLoginServer=${LSFLoginServer}&quot; &gt;&gt; export_props.properties
-echo &quot;RootWorkspace=${RootWorkspace}&quot; &gt;&gt; export_props.properties
+echo &quot;LocalRootWorkspace=${LocalRootWorkspace}&quot; &gt;&gt; export_props.properties
+echo &quot;LocalWorkspace=${LocalWorkspace}&quot; &gt;&gt; export_props.properties
+echo &quot;LSFRootWorkspace=${LSFRootWorkspace}&quot; &gt;&gt; export_props.properties
+echo &quot;LSFWorkspace=${LSFWorkspace}&quot; &gt;&gt; export_props.properties
+
 
 echo &quot;properties forwarded to next shell:&quot;
 cat export_props.properties
@@ -670,7 +681,7 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   echo
   
   echo &quot;LSF Login Server = $LSFLoginServer&quot;
-  echo &quot;  -&gt; Root workspace = $RootWorkspace&quot;
+  echo &quot;  -&gt; LSF Root workspace = $LSFRootWorkspace&quot;
 
 # FAB: A revoir car ne sera pas transmis par sshpass au node du cluster LSF...
   export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin

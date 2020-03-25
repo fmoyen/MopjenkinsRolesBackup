@@ -175,8 +175,10 @@ echo &quot;Local Root workspace: $LocalRootWorkspace&quot;
 LSFRootWorkspace=&quot;/afs/bb/proj/fpga/framework/CI_ws/$RootJobName&quot;
 echo &quot;LSF Root workspace: $LSFRootWorkspace&quot;
 
-LocalWorkspacePart2=`echo $LocalWorkspace | awk -F&quot;$LocalRootWorkspace&quot; &apos;{print $2}&apos;`
-echo &quot;LocalWorkspacePart2 = $LocalWorkspacePart2&quot;
+LSFWorkspace=&quot;$LSFRootWorkspace/`echo $LocalWorkspace | awk -F&quot;$LocalRootWorkspace/&quot; &apos;{print $2}&apos;`&quot;
+
+echo &quot;Local Workspace = $LocalWorkspace&quot;
+echo &quot;LSF Workspace = $LSFWorkspace&quot;
 
 echo &quot;SKIP=$SKIP&quot; &gt; export_props.properties</command>
     </hudson.tasks.Shell>
