@@ -292,7 +292,6 @@ H 22-23/1 * * *</spec>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
-set +x
 
 echo
 echo &quot;****************************************************************************************&quot;
@@ -304,11 +303,13 @@ echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot;
 echo &quot;Working dir is : $PWD&quot;
 echo
 
+set -x
 
 #==============================================================================================
 # Variables
 
 &gt; export_props.properties
+
 NAME=$(echo $GIT_BRANCH| cut -d&apos;/&apos; -f 2 |tr &apos;[:upper:]&apos; &apos;[:lower:]&apos;) # remove origin/ from branch and translate to lowercase
 PREFIX=$(echo $NAME| cut -d&apos;_&apos; -f 1)    # chars up to first &apos;_&apos; identify need for test
 ACTION_TYPE=$(echo $ACT| cut -d&apos;_&apos; -f 1| tr &apos;[:lower:]&apos; &apos;[:upper:]&apos;)
@@ -316,12 +317,41 @@ CRD=$(echo $CRD_CL| cut -d&apos;_&apos; -f 1)    # chars up to  first &apos;_&ap
 CL=$(echo $CRD_CL| cut -d&apos;_&apos; -f 2)     # chars behind first &apos;_&apos; identify Cloud build
 
 
-echo &quot;Build with Card=$CRD Action=$ACT Action_type=$ACTION_TYPE CLOUD_build=$CL branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX test_on_hw=$TEST_ON_HW&quot;
+echo &quot;Build with Card=$CRD Action=$ACT Action_type=$ACTION_TYPE CLOUD_build=$CL branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX LSFCluster=$LSF_CLUSTER test_on_hw=$TEST_ON_HW&quot;
 
 EmailDestinationList=( fabrice_moyen@fr.ibm.com )
 EmailOrNotEmail=0 # 0 means do not send emails; 1 means send email
 
 HWUser=&quot;capimop&quot;
+
+if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+  echo;echo &quot;****************************************************************************************&quot;
+  echo &quot;J:LSF Login Server SETUP ...&quot;
+  echo
+  
+  # Boeblingen LSF cluster Login Servers
+  LSFLoginServersList=&quot;\
+  hdcl050.boeblingen.de.ibm.com
+  hdcl051.boeblingen.de.ibm.com
+  hdcl052.boeblingen.de.ibm.com
+  hdcl027.boeblingen.de.ibm.com
+  hdcl060.boeblingen.de.ibm.com
+  hdclp026.boeblingen.de.ibm.com&quot;
+  
+  LSFLoginServer=&quot;&quot;
+  for i in $LSFLoginServersList; do
+    if ping -c1 $i &gt;/dev/null 2&gt;&amp;1; then 
+      LSFLoginServer=$i
+      break
+    fi
+  done
+
+  if [[ &quot;$LSFLoginServer&quot; != &quot;&quot; ]]; then
+    echo &quot;LSF Login Server = $LSFLoginServer&quot;
+  else
+    echo &quot;no LSF Login Server available ! Exiting&quot;
+    exit 1
+  fi
 
 
 #==============================================================================================
@@ -540,6 +570,7 @@ echo &quot;CL=$CL&quot; &gt;&gt; export_props.properties
 echo &quot;EmailDestinationList=( ${EmailDestinationList[*]} )&quot; &gt;&gt; export_props.properties
 echo &quot;EmailOrNotEmail=$EmailOrNotEmail&quot; &gt;&gt; export_props.properties
 echo &quot;HWUser=${HWUser}&quot; &gt;&gt; export_props.properties
+echo &quot;LSFLoginServer=${LSFLoginServer}&quot; &gt;&gt; export_props.properties
 
 echo &quot;properties forwarded to next shell:&quot;
 cat export_props.properties
@@ -616,29 +647,7 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   echo &quot;J:LSF SETUP ...&quot;
   echo
   
-  # Boeblingen LSF cluster Login Servers
-  LSFLoginServersList=&quot;\
-  hdcl050.boeblingen.de.ibm.com
-  hdcl051.boeblingen.de.ibm.com
-  hdcl052.boeblingen.de.ibm.com
-  hdcl027.boeblingen.de.ibm.com
-  hdcl060.boeblingen.de.ibm.com
-  hdclp026.boeblingen.de.ibm.com&quot;
-  
-  LSFLoginServer=&quot;&quot;
-  for i in $LSFLoginServersList; do
-    if ping -c1 $i &gt;/dev/null 2&gt;&amp;1; then 
-      LSFLoginServer=$i
-      break
-    fi
-  done
-
-  if [[ $LSFLoginServer != &quot;&quot; ]]; then
-    echo &quot;LSF Login Server = $LSFLoginServer&quot;
-  else
-    echo &quot;no LSF Login Server available ! Exiting&quot;
-    exit 1
-  fi
+  echo &quot;LSF Login Server = $LSFLoginServer&quot;
 
   export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
   export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
@@ -653,7 +662,7 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   LSF+=&quot; -C 2000&quot;                   # 2MB core file
   LSF+=&apos; -R type=X86_64 -R span[hosts=1]&apos;
   LSF+=&quot; -I -n 8&quot;
-  echo &quot;LSF variable set to : $LSF&quot;
+  echo &quot;LSF variable = $LSF&quot;
 
 
 ## previous settings :

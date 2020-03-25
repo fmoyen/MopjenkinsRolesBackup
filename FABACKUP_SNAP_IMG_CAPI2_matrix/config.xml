@@ -3,37 +3,14 @@
   <actions/>
   <description>Builds bitstreams with many different configurations and tests this images on real HW if possible.&#xd;
 In case of problems: please contact alexandre.castellane@fr.ibm.com or fabrice_moyen@fr.ibm.com&#xd;
+&#xd;
 WARNING !!! &#xd;
 =&gt;&gt; FX609, S241, U200 cards are not available for test =&gt; only binary generation are performed (no hw test)  &#xd;
-=&gt;&gt; Minimum TIMING increased to 300ps for CAPI2&#xd;
-==&gt; Orpington hosts AD9V3 (mainly used in OpenCAPI, the other one is now in Pavilly)&#xd;
+==&gt; Orpington hosts 1 AD9V3 + 1 OC-AD8V3&#xd;
 ==&gt; Lewen05 hosts 1 N250SP and 1 Mellanox INNOVA2 (no CAPI reset nor automated tests possible)&#xd;
-==&gt; Pavilly hosts 1 AD9V3 main mode is C2&#xd;
+==&gt; Pavilly hosts 1 OC-AD9V3 (main mode is C2)&#xd;
 &#xd;
-2019.1 generates timings error =&gt; 2019.2 by default&#xd;
-&#xd;
-hdl_example.NORAM temporarily removed (generates junk on jenkins log)&#xd;
-hls_parallel_memcpy removed (fails)&#xd;
-&#xd;
-2019/12/05: initial actions matrix&#xd;
------------------------------------------------&#xd;
-hdl_example.BRAM&#xd;
-hdl_example.SDRAM&#xd;
-hdl_example.SDRAM.NVME&#xd;
-hdl_helloworld&#xd;
-hdl_nvme_example.SDRAM.NVME&#xd;
-hls_nvme_memcopy&#xd;
-hls_memcopy&#xd;
-hls_bfs&#xd;
-hls_hashjoin&#xd;
-hls_search&#xd;
-hls_sponge&#xd;
-hls_helloworld&#xd;
-hls_decimal_mult&#xd;
-hls_scatter_gather&#xd;
-hls_latency_eval&#xd;
-hls_vector_generator&#xd;
-test</description>
+hls_parallel_memcpy removed (fails)</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <hudson.plugins.jira.JiraProjectProperty plugin="jira@3.0.11"/>
@@ -55,58 +32,115 @@ test</description>
           <defaultValue>master</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.plugins.matrix__configuration__parameter.MatrixCombinationsParameterDefinition plugin="matrix-combinations-parameter@1.3.1">
+          <name>MatrixFilter</name>
+          <description></description>
+          <shortcutList>
+            <hudson.plugins.matrix__configuration__parameter.shortcut.ResultShortcut>
+              <name>Successful</name>
+              <exact>false</exact>
+              <resultsToCheck>
+                <string>SUCCESS</string>
+              </resultsToCheck>
+            </hudson.plugins.matrix__configuration__parameter.shortcut.ResultShortcut>
+            <hudson.plugins.matrix__configuration__parameter.shortcut.ResultShortcut>
+              <name>Failed</name>
+              <exact>false</exact>
+              <resultsToCheck>
+                <string>FAILURE</string>
+              </resultsToCheck>
+            </hudson.plugins.matrix__configuration__parameter.shortcut.ResultShortcut>
+            <hudson.plugins.matrix__configuration__parameter.shortcut.MatrixCombinationsShortcut_-All/>
+            <hudson.plugins.matrix__configuration__parameter.shortcut.MatrixCombinationsShortcut_-None/>
+          </shortcutList>
+        </hudson.plugins.matrix__configuration__parameter.MatrixCombinationsParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
-          <name>VIVADO_CHOICE</name>
-          <description>Choose the Vivado version to use</description>
+          <name>VIVADO_GLOBAL</name>
+          <description>Choose the Vivado version to use
+This parameter overseedes all VIVADO_XXX parameters below
+If -- then VIVADO_XXX parameters below are taken into account</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
+              <string>--</string>
               <string>2018.2</string>
-              <string>2019.2</string>
-              <string>2019.1</string>
               <string>2018.3</string>
+              <string>2019.1</string>
+              <string>2019.2</string>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>HDL</name>
-          <description>enable/disable the HDL examples</description>
-          <defaultValue>false</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>HLS</name>
-          <description>enable/disable the HLS examples</description>
-          <defaultValue>true</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>AD9V3</name>
-          <description>enable/disable the AD9V3 card</description>
-          <defaultValue>true</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>AD9H3</name>
-          <description>enable/disable the AD9H3 card</description>
-          <defaultValue>true</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>N250SP</name>
-          <description>enable/disable the N250SP card</description>
-          <defaultValue>true</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>FX609</name>
-          <description>enable/disable the FX609 card</description>
-          <defaultValue>true</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>S241</name>
-          <description>enable/disable the S241 card</description>
-          <defaultValue>true</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>U200</name>
-          <description>enable/disable the U200 card</description>
-          <defaultValue>true</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>VIVADO_AD9V3</name>
+          <description></description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>2019.2</string>
+              <string>2018.2</string>
+              <string>2018.3</string>
+              <string>2019.1</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>VIVADO_AD9H3</name>
+          <description></description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>2019.2</string>
+              <string>2018.2</string>
+              <string>2018.3</string>
+              <string>2019.1</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>VIVADO_N250SP</name>
+          <description></description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>2018.2</string>
+              <string>2018.3</string>
+              <string>2019.1</string>
+              <string>2019.2</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>VIVADO_FX609</name>
+          <description></description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>2019.2</string>
+              <string>2018.2</string>
+              <string>2018.3</string>
+              <string>2019.1</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>VIVADO_S241</name>
+          <description></description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>2019.2</string>
+              <string>2018.2</string>
+              <string>2018.3</string>
+              <string>2019.1</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>VIVADO_U200</name>
+          <description></description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>2019.2</string>
+              <string>2018.2</string>
+              <string>2018.3</string>
+              <string>2019.1</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>TIMING_LABLIMIT_CHOICE</name>
           <description>Choose the TIMING_LABLIMIT parameter for building images. If achieved timing is worst than your choice, the run will failed.
@@ -124,6 +158,12 @@ Warning: -200ps is not easy to reach and needs several attempts (sometimes 5 att
           <description>To generate a FACTORY image with hdl_example.NORAM cases
      and to finally copy the hdl_example.NORAM factory &amp; hls_helloworld binaries into /data/Images/$card_FACTORY_MCS directory.
 These binaries will be used to create a full MCS image including hld_example.NORAM factory image + hls_helloworld user image.</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>LSF_CLUSTER</name>
+          <description>NOT YET AVAILABLE !!
+Decide whether or not to use the Boeblingen LSF cluster to build images. </description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
@@ -239,7 +279,7 @@ These binaries will be used to create a full MCS image including hld_example.NOR
       </values>
     </hudson.matrix.LabelAxis>
   </axes>
-  <combinationFilter>(     ((ACT=~&quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;)||(ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; ))     &amp;&amp;    ( (CRD_CL=~&quot;N250SP&quot; &amp;&amp; N250SP==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;))     ||      (CRD_CL=~&quot;S241&quot;   &amp;&amp; S241==&quot;true&quot;   &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;))      ||      (CRD_CL=~&quot;FX609&quot;  &amp;&amp; FX609==&quot;true&quot;  &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;))      ||      (CRD_CL=~&quot;AD9V3&quot;  &amp;&amp; AD9V3==&quot;true&quot;  &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;))      ||      (CRD_CL=~&quot;AD9H3&quot;  &amp;&amp; AD9H3==&quot;true&quot;  &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;))      ||      (CRD_CL=~&quot;U200&quot;   &amp;&amp; U200==&quot;true&quot;   &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;))      ||      (CRD_CL=~&quot;RCXVUP&quot; &amp;&amp; RCXVUP==&quot;true&quot; &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;))     )  )  ||  (ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;AD9V3_nCL&quot;)</combinationFilter>
+  <combinationFilter>(ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;AD9V3_nCL&quot;) || ACT!=&quot;test&quot;</combinationFilter>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
@@ -309,17 +349,6 @@ function SendAnEmail
 
 echo;echo &quot;*******************************************************************************&quot;
 echo &quot;J: Do not run (abort) non-desired cases (action types, actions, cards)&quot;
-
-# BSKIP stands for board skip
-
-BSKIP=0
-
-
-if [ &quot;${!ACTION_TYPE}&quot; == &quot;false&quot; ]; then BSKIP=1; fi # if ACTION_TYPE=&quot;HLS&quot;, ${!ACTION_TYPE} is identical to $HLS
-if [ &quot;${!CRD}&quot;         == &quot;false&quot; ]; then BSKIP=1; fi # if CRD=&quot;AD9V3&quot;, ${!CRD} is identical to $AD9V3
-if [ &quot;$ACT&quot;            == &quot;test&quot;  ]; then BSKIP=0; fi # test action always run
-
-echo &quot;  -&gt; action_types (hdl,hls)=$ACTION_TYPE enabled_cards=$CRD BSKIP=$BSKIP&quot;
 
 # ASKIP stands for ACTION skip
 
@@ -487,7 +516,7 @@ fi # end of if ASKIP
 #==============================================================================================
 # Aborting if something went wrong
 
-if [ &quot;$ASKIP&quot; == &quot;1&quot; ] || [ &quot;$DSKIP&quot; == &quot;1&quot; ] || [ &quot;$BSKIP&quot; == &quot;1&quot; ] || [ &quot;$SSKIP&quot; == &quot;1&quot; ];then SKIP=1;else SKIP=0;fi
+if [ &quot;$ASKIP&quot; == &quot;1&quot; ] || [ &quot;$DSKIP&quot; == &quot;1&quot; ] || [ &quot;$SSKIP&quot; == &quot;1&quot; ];then SKIP=1;else SKIP=0;fi
 
 
 #==============================================================================================
@@ -573,8 +602,50 @@ SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not n
 
 IMGServers=&quot;jtagx86&quot; # List of servers where to push generated images.
 
-#echo;echo &quot;****************************************************************************************&quot;
-#echo &quot;J:LSF SETUP ...&quot;
+if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+  echo;echo &quot;****************************************************************************************&quot;
+  echo &quot;J:LSF SETUP ...&quot;
+  echo
+  
+  # Boeblingen LSF cluster Login Servers
+  LSFLoginServersList=&quot;\
+  hdcl050.boeblingen.de.ibm.com
+  hdcl051.boeblingen.de.ibm.com
+  hdcl052.boeblingen.de.ibm.com
+  hdcl027.boeblingen.de.ibm.com
+  hdcl060.boeblingen.de.ibm.com
+  hdclp026.boeblingen.de.ibm.com&quot;
+  
+  LSFLoginServer=&quot;&quot;
+  for i in $LSFLoginServersList; do
+    if ping -c1 $i &gt;/dev/null 2&gt;&amp;1; then 
+      LSFLoginServer=$i
+      break
+    fi
+  done
+
+  if [[ $LSFLoginServer != &quot;&quot; ]]; then
+    echo &quot;LSF Login Server = $LSFLoginServer&quot;
+  else
+    echo &quot;no LSF Login Server available ! Exiting&quot;
+    exit 1
+  fi
+
+  export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+  export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
+  export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+  export LSF_BINDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+  export LSF_SUBMITTER_OSTYPE=Linux
+  export LSF_ENVDIR=/home/lsfbb/prod/conf
+
+  LSF=&quot;-P zsort&quot;
+  LSF+=&quot; -M 6&quot;                      # 12GB memory
+  LSF+=&quot; -C 2000&quot;                   # 2MB core file
+  LSF+=&apos; -R type=X86_64 -R span[hosts=1]&apos;
+  LSF+=&quot; -I -n 8&quot;
+  echo &quot;LSF variable set to : $LSF&quot;
+
 
 ## previous settings :
 # export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
@@ -613,8 +684,8 @@ IMGServers=&quot;jtagx86&quot; # List of servers where to push generated images.
 ## AC : older configuration
 #LSF+=&apos; -R type=X86_64 -R span[hosts=1]&apos;
 #LSF+=&quot; -I -n 8&quot;
-#echo &quot;LSF variable set to : $LSF&quot;
 
+fi
 
 #==============================================================================================
 # Functions
@@ -686,7 +757,8 @@ function CopyToDir
   # Copying Files to $ToDir
   echo &quot;  -&gt; Copying $FPGACard images (.bin, .bit, .mcs, .prm) to $ToDir&quot;
   mkdir -p $ToDir
-  chmod g+w $ToDir
+  chmod g+w `dirname $ToDir` # /data/Images/AD9V3/AD9V3_IMAGES, we need to chmod /data/Images/AD9V3 if we just created /data/Images/AD9V3
+  chmod g+w $ToDir           # and chmod /data/Images/AD9V3/AD9V3_IMAGES
   cp -rp $SrcFiles $ToDir
       
   for dest in $SSHDest
@@ -748,13 +820,22 @@ echo
 
 echo;echo &quot;****************************************************************************************&quot;
 echo &quot;J: Setting up Vivado Version, PSL9_IP_CORE (Zip file) for CAPI2.0 cards and timing value&quot;
+
 echo
-echo &quot; --&gt; For all CAPI2 cards we run Vivado $VIVADO_CHOICE and extend Timing trials to 5 runs until we optimise placement...&quot;
+echo &quot; --&gt; For all CAPI2 cards we extend Timing trials to 5 runs until we optimise placement...&quot;
 echo &quot;     unless expressly indicated&quot;
 
+if [ &quot;$VIVADO_GLOBAL&quot; == &quot;--&quot; ]; then
+  VIVADOVarName=`echo VIVADO_$CRD`
+  export VIV_VERSION=${!VIVADOVarName}
+  echo &quot; --&gt; For $CRD card, VIVADO version initially set to $VIV_VERSION...&quot;
+
+else
+  export VIV_VERSION=$VIVADO_GLOBAL
+  echo &quot; --&gt; For all cards, VIVADO version initially set to $VIV_VERSION...&quot;
+fi
+
 cd ${SNAP_ROOT}
-export VIV_VERSION=&quot;$VIVADO_CHOICE&quot;
-echo &quot;  -&gt; VIVADO version initially set to $VIV_VERSION (please check if we change this later for some specific cards)&quot;
 
 echo &quot;export TIMING_LABLIMIT=\&quot;${TIMING_LABLIMIT_CHOICE}\&quot;&quot; &gt;&gt; snap_env.sh
 echo &quot;  -&gt; TIMING LIMIT set to ${TIMING_LABLIMIT_CHOICE} into snap_env.sh&quot;
@@ -767,25 +848,6 @@ echo &quot;  -&gt; PSL9_IP_CORE set to ${PSL9File} into snap_env.sh&quot;
 #echo &quot;J:git cloning capi2-bsp submodule&quot;
 #git submodule update --init --recursive hardware/capi2-bsp
 
-
-# RCXVUP with Eng sample can run only with 2017.4 !
-# U200 runs only with 2018.3 or later
-case $CRD in 
-  &apos;RCXVUP&apos;) #echo &quot;export PSL9_IP_CORE=/afs/bb/proj/fpga/framework/cards/$CRD/ibm.com_CAPI_PSL9_WRAP_2.00.zip&quot; &gt;&gt;snap_env.sh
-            #git submodule update --init --recursive hardware/capi2-bsp
-            #cd ${SNAP_ROOT}
-            export VIV_VERSION=&quot;2017.4&quot;
-            #echo &quot;export TIMING_LABLIMIT=\&quot;-300\&quot;&quot; &gt;&gt; snap_env.sh
-            ;;
-#  &apos;U200&apos;)   export VIV_VERSION=&quot;2018.3&quot;  removed or 2019.1 test
-#            ;;  
-#  &apos;N250SP&apos;) #echo &quot;export PSL9_IP_CORE=/afs/bb/proj/fpga/framework/cards/$CRD/ibm.com_CAPI_PSL9_WRAP_2.00.zip&quot; &gt;&gt;snap_env.sh
-            #git submodule update --init --recursive hardware/capi2-bsp
-            #cd ${SNAP_ROOT}
-#            export VIV_VERSION=&quot;2018.2&quot;
-            #echo &quot;export TIMING_LABLIMIT=\&quot;-300\&quot;&quot; &gt;&gt; snap_env.sh
-#            ;;
-esac
 
 echo;echo &quot;****************************************************************************************&quot; 
 echo &quot;J: Vivado paths &amp; licences server setup ...&quot;
@@ -896,11 +958,23 @@ then
     make clean                   # to make sure we restart from a blank snap
     cd hardware/capi2-bsp
     make clean                   # to make sure we restart from a blank capi-bsp    
-    
-    echo;echo &quot;  -&gt; Building the Image (make image)&quot;    
-    #RC=0; bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot; &amp;&amp; break || RC=$?
     cd ${SNAP_ROOT}
-    RC=0; make image &amp;&amp; break || RC=$?
+
+    echo;echo &quot;  -&gt; Building the Image (make image)&quot;
+
+    if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+      echo &quot;      - done with LSF Cluster&quot;
+      #RC=0; sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;bsub $LSF -J \&quot;${CRD}_${ACT}_image\&quot; \&quot;make image\&quot; &quot; &amp;&amp; break || RC=$?#
+
+      RC=0; sshpass -p $AFSPass ssh -o &quot;StrictHostKeyChecking no&quot; $AFSUser@$LSFLoginServer &quot;echo $CRD; exit 1&quot; &amp;&amp; break || RC=$?
+      echo &quot;RC= $RC&quot;
+      
+      #RC=0; bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot; &amp;&amp; break || RC=$?
+      echo &quot;FAB DEV !! EXITING...&quot;; exit 1
+    else
+      echo &quot;      - done locally&quot;
+      RC=0; make image &amp;&amp; break || RC=$?
+    fi
     
   done
   
@@ -1267,7 +1341,7 @@ for loop in `seq 1 $maxloop`;do
       #------------------------------------
       # no card available =&gt; try other box
       0:*)
-        for i in &quot;${TESTBOXES[@]}&quot;; do [[ $i != $box ]] &amp;&amp; new+=($i);done   # generate new test array without unreachable box
+        for i in &quot;${TESTBOXES[@]}&quot;; do [[ $i != $box ]] &amp;&amp; new+=($i);done   # generate new test array without this bow with no card
         unset TESTBOXES;TESTBOXES=(&quot;${new[@]}&quot;);unset new                   # reassign to original array name
         echo &quot;  --&gt; No $CRD card available in $box =&gt; removed from Boxes testing list, remaining list= ${TESTBOXES[@]}&quot;        
         echo &quot;  --&gt; Trying next box / loop...&quot;
@@ -1347,6 +1421,9 @@ if [ $loop -eq $maxloop ];then
   exit 100
 fi
 
+#------------------------------------------------------------------------------------------------------------------------------
+# Preparing and running HW test
+
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot; running test --&gt; $box&quot;  | tr &apos;[:lower:]&apos; &apos;[:upper:]&apos;
 echo &quot;***************************************************************************************&quot;
@@ -1366,17 +1443,46 @@ ssh ${HWUser}@${box} &quot;echo Git Branch: ${GIT_BRANCH}       &gt;&gt; jenkins
 
 trap finish EXIT  # register finish/unlock function, after lock is set
 
+# Git clone snap tools into $box:$[TARGET_DIR}
+
+echo;echo &quot;---------------------------------------------------------------------------------------&quot;
 echo &quot;  -&gt; Preparing snap workspace by cloning ${GIT_URL} into ${box}:${TARGET_DIR} using branch= ${GIT_BRANCH}&quot;
 RC=0; ssh ${HWUser}@${box} &quot;git clone ${GIT_URL} ${TARGET_DIR};cd ${TARGET_DIR};git checkout ${GIT_BRANCH}&quot; || RC=$?
 
 if [ $RC -ne 0 ];then
-
+    echo &quot;  -&gt; git clone ${GIT_URL} ${TARGET_DIR} failed at ${box} =&gt; copying image to $SaveDir&quot;
     LinkDir=${RootSaveDir}/${CRD}/${CRD}_gitclone_error
     SRCFILES=&quot;$BINFILES $BITFILES $FACTBINFILES $FACTBITFILES&quot;
     CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
 	echo &quot;  -&gt; EXITING !&quot;
 	exit 1
 fi
+
+# Git clone capi-utils tools into $box:/home/$HWUser
+
+echo;echo &quot;---------------------------------------------------------------------------------------&quot;
+echo &quot;  -&gt; Git cloning Capi-Utils tools into $box:/home/$HWUser...&quot;
+echo &quot;  (capi-flash-script.sh used by command `echo $RUN | cut -d&apos; &apos; -f1` )&quot;
+RC=0; ssh ${HWUser}@${box} &quot;rm -rf capi-utils &amp;&amp; git clone -b $CAPIUTILS_BRANCH $CapiUtilsURL&quot; || RC=$?
+
+if [ $RC -ne 0 ];then 
+    echo &quot;  -&gt; git clone -b $OCUTILS_BRANCH $OCUTILS_URL oc-utils failed at ${box} =&gt; copying image to $SaveDir&quot;
+    LinkDir=${RootSaveDir}/${CRD}/${CRD}_gitclone_error
+    SRCFILES=&quot;$BINFILES $BITFILES $FACTBINFILES $FACTBITFILES&quot;
+    CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
+	echo &quot;  -&gt; EXITING !&quot;
+	exit 100
+fi
+
+# Build the capi-utils software into $box:/home/$HWUser/capi-utils on the $box
+
+echo;echo &quot;---------------------------------------------------------------------------------------&quot;
+echo &quot;  -&gt; Building the capi-utils software on $box in /home/$HWUser/capi-utils...&quot;
+echo &quot; capi-utils is compiled locally to prevent over-writing the server default config (/lib/capi-utils preserved)&quot;
+ssh ${HWUser}@${box} make -C /home/$HWUser/capi-utils
+
+
+# Copy image(s) to ${box}:/home/${HWUser}/images/${CRD}/${ACT}
 
 echo &quot;  -&gt; Copying image(s) to ${box}:/home/${HWUser}/images/${CRD}/${ACT}&quot;
 ssh $box mkdir -p /home/${HWUser}/images/${CRD}/${ACT}    # create subdirectory, if not avail yet
@@ -1396,13 +1502,14 @@ do
 done
 
 if [ $RSYNC_RC -ne 0 ]; then
-
   LinkDir=${RootSaveDir}/${CRD}/${CRD}_rsync_error
   SRCFILES=&quot;$BINFILES $BITFILES $FACTBINFILES $FACTBITFILES&quot;
   CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
   echo &quot;EXITING !&quot;
   exit 1
 fi
+
+# Build and Run HW test $RUN Command
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Testing $CRD card image(s) with Power $box system&quot;
@@ -1433,6 +1540,7 @@ echo &quot;     Card=$CRD and SPI8=$SPI8&quot;
 # For debugging purpose, if not giving an IMAGE to next $RUN test command, the $RUN command would run the test with
 # the already in-place image inside the FPGA, without trying to reset the FPGA &amp; flash the new image.
 # So you just need to uncomment the following line (unset IMAGE) to do so (deleting any IMAGE reference)
+
 #unset IMAGE
 
 if [ ${#IMAGE[@]} -eq 0 ]; then
@@ -1458,22 +1566,6 @@ if [ $RC -ne 0 ]; then
   echo &quot;  -&gt; EXITING !&quot;
   exit 1
 fi
-
-# Git clone capi-utils tools into $box:/home/$HWUser
-
-echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Git cloning Capi-Utils tools into $box:/home/$HWUser...&quot;
-echo &quot;  (capi-flash-script.sh used by command `echo $RUN | cut -d&apos; &apos; -f1` )&quot;
-ssh ${HWUser}@${box} &quot;rm -rf capi-utils &amp;&amp; git clone -b $CAPIUTILS_BRANCH $CapiUtilsURL&quot;
-
-#------------------------------------------------------------------------------------------------------------------------------
-# Build the capi-utils software into $box:/home/$HWUser/capi-utils on the $box
-
-echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Building the capi-utils software on $box in /home/$HWUser/capi-utils...&quot;
-echo &quot; capi-utils is compiled locally to prevent over-writing the server default config (/lib/capi-utils preserved)&quot;
-ssh ${HWUser}@${box} make -C /home/$HWUser/capi-utils
-
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Executing below SNAP Jenkins test on $box from ${TARGET_DIR} directory (`date`):&quot;
@@ -1542,9 +1634,9 @@ fi
       <skipWhenFailed>false</skipWhenFailed>
       <cleanWhenSuccess>true</cleanWhenSuccess>
       <cleanWhenUnstable>true</cleanWhenUnstable>
-      <cleanWhenFailure>true</cleanWhenFailure>
+      <cleanWhenFailure>false</cleanWhenFailure>
       <cleanWhenNotBuilt>true</cleanWhenNotBuilt>
-      <cleanWhenAborted>true</cleanWhenAborted>
+      <cleanWhenAborted>false</cleanWhenAborted>
       <notFailBuild>false</notFailBuild>
       <cleanupMatrixParent>false</cleanupMatrixParent>
       <externalDelete></externalDelete>
@@ -1558,6 +1650,15 @@ fi
       <externalDelete></externalDelete>
       <disableDeferredWipeout>false</disableDeferredWipeout>
     </hudson.plugins.ws__cleanup.PreBuildCleanup>
+    <org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper plugin="credentials-binding@1.20">
+      <bindings>
+        <org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
+          <credentialsId>LSFUser</credentialsId>
+          <usernameVariable>AFSUser</usernameVariable>
+          <passwordVariable>AFSPass</passwordVariable>
+        </org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
+      </bindings>
+    </org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper>
     <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.19">
       <strategy class="hudson.plugins.build_timeout.impl.NoActivityTimeOutStrategy">
         <timeoutSecondsString>14400</timeoutSecondsString>
@@ -1568,7 +1669,7 @@ fi
     </hudson.plugins.build__timeout.BuildTimeoutWrapper>
     <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.10"/>
     <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.3">
-      <template>#${BUILD_NUMBER} ${GIT_BRANCH} Vivado=${ENV,var=&quot;VIVADO_CHOICE&quot;} HWTest=${ENV,var=&quot;TEST_ON_HW&quot;} NOHWCards= ${ENV,var=&quot;NO_TEST_CARDS&quot;}</template>
+      <template>#${BUILD_NUMBER} ${GIT_BRANCH} Vivado=${ENV,var=&quot;VIVADO_GLOBAL&quot;} HWTest=${ENV,var=&quot;TEST_ON_HW&quot;} NOHWCards= ${ENV,var=&quot;NO_TEST_CARDS&quot;}</template>
       <descriptionTemplate></descriptionTemplate>
       <runAtStart>true</runAtStart>
       <runAtEnd>true</runAtEnd>
