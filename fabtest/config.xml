@@ -5,15 +5,6 @@
   <keepDependencies>false</keepDependencies>
   <properties>
     <hudson.plugins.jira.JiraProjectProperty plugin="jira@3.0.11"/>
-    <hudson.model.ParametersDefinitionProperty>
-      <parameterDefinitions>
-        <hudson.model.BooleanParameterDefinition>
-          <name>OC-FABTEST</name>
-          <description></description>
-          <defaultValue>true</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-      </parameterDefinitions>
-    </hudson.model.ParametersDefinitionProperty>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
       <maxConcurrentPerNode>0</maxConcurrentPerNode>
       <maxConcurrentTotal>0</maxConcurrentTotal>
@@ -36,17 +27,13 @@
       <command>#!/bin/bash
 
 
-if [ ${OC-FABTEST} == &quot;true&quot; ]
-then
-  echo oui
-else
-  echo non
-fi
+echo &quot;job name: $JOB_NAME&quot;
+echo &quot;job base name: $JOB_BASE_NAME&quot;
 
-echo &quot;job name:&quot;
-echo $JOB_NAME
+echo &quot;current dir: $PWD&quot;
 
-exit 101</command>
+
+</command>
       <unstableReturn>100</unstableReturn>
     </hudson.tasks.Shell>
   </builders>
