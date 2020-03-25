@@ -471,7 +471,6 @@ then
   test )
     echo &quot;J: ACT=test&quot;
     gitnames=`git ls-remote https://github.com/open-power/snap|grep &quot;refs/heads/&quot;|awk &apos;{print $2}&apos;`
-    echo &quot;gitnames=$gitnames&quot;
     echo
 
     if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
