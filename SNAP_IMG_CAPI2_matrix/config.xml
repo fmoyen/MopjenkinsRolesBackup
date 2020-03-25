@@ -672,6 +672,7 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   echo &quot;LSF Login Server = $LSFLoginServer&quot;
   echo &quot;  -&gt; Root workspace = $RootWorkspace&quot;
 
+# FAB: A revoir car ne sera pas transmis par sshpass au node du cluster LSF...
   export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
   export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
   export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
