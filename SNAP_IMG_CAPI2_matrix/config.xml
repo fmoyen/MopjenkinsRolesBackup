@@ -303,12 +303,12 @@ echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot;
 echo &quot;Working dir is : $PWD&quot;
 echo
 
-set -x
+set +x
 
 #==============================================================================================
 # Variables
 
-&gt; export_props.properties
+&gt; export_props.properties # Create an empty export_props.properties file
 
 NAME=$(echo $GIT_BRANCH| cut -d&apos;/&apos; -f 2 |tr &apos;[:upper:]&apos; &apos;[:lower:]&apos;) # remove origin/ from branch and translate to lowercase
 PREFIX=$(echo $NAME| cut -d&apos;_&apos; -f 1)    # chars up to first &apos;_&apos; identify need for test
@@ -324,10 +324,10 @@ EmailOrNotEmail=0 # 0 means do not send emails; 1 means send email
 
 HWUser=&quot;capimop&quot;
 
+# LSFLoginServer variable...
 if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   echo;echo &quot;****************************************************************************************&quot;
   echo &quot;J:LSF Login Server SETUP ...&quot;
-  echo
   
   # Boeblingen LSF cluster Login Servers
   LSFLoginServersList=&quot;\
@@ -347,11 +347,12 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   done
 
   if [[ &quot;$LSFLoginServer&quot; != &quot;&quot; ]]; then
-    echo &quot;LSF Login Server = $LSFLoginServer&quot;
+    echo &quot;  -&gt; LSF Login Server = $LSFLoginServer&quot;
   else
-    echo &quot;no LSF Login Server available ! Exiting&quot;
+    echo &quot;  -&gt; no LSF Login Server available ! Exiting&quot;
     exit 1
   fi
+fi
 
 
 #==============================================================================================
@@ -501,7 +502,7 @@ then
   * )    
     echo &quot;J: Checking snap/defconfig/$CRD.$ACT.defconfig existence&quot;
     if [ -f snap/defconfig/$CRD.$ACT.defconfig ];then
-      echo &quot; --&gt; OK&quot;
+      echo &quot;  -&gt; OK&quot;
       DSKIP=0
     else 
       echo;echo &quot;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!&quot;
@@ -525,7 +526,7 @@ echo;echo &quot;defconfig DSKIP=$DSKIP&quot;
 
 echo;echo &quot;*******************************************************************************&quot;
 echo &quot;J: Checking enough space is available&quot;
-echo
+
 #AFSused=`fs lq /afs/bb/proj/fpga/framework/CI_ws/SNAP_IMG_TEST_matrix/|grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
 diskused=`df -h /var/jenkins/workspace/SNAP_IMG_CAPI2_matrix|grep -v Used|awk &apos;{print $5}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
 SSKIP=0;msg=&quot;disk usage =${diskused}%&quot;
@@ -545,7 +546,7 @@ elif (( diskused &gt; 70 ));then
    fi
 
 else
-   msg=&quot;OK: $msg&quot;
+   msg=&quot;  -&gt; OK: $msg&quot;
 fi
 echo &quot;$msg&quot;
 
