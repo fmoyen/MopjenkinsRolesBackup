@@ -474,17 +474,26 @@ then
     echo &quot;gitnames=$gitnames&quot;
     echo
 
-    WorkspaceDirList=`ls -d $RootWorkspace/*/`
-    for dir in &quot;/var/jenkins/workspace/SNAP_IMG_CAPI2_matrix&quot;/*;do
-      if [ -d &quot;$dir&quot; ];then
-        branch=&quot;refs/heads/&quot;`basename $dir`
-        if [[ &quot;$gitnames&quot; =~ &quot;$branch&quot; ]];then echo &quot;branch=$branch found in gitnames, keeping dir=$dir&quot;
-        else 
-          echo &quot;branch=$branch not found in gitnames, deleting dir=\&apos;$dir\&apos;&quot;
+    if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+      WorkspaceDirList=`sshpass -p $AFSPass ssh -o &quot;StrictHostKeyChecking no&quot; $AFSUser@$LSFLoginServer &quot;ls -d $RootWorkspace/*/&quot;`
+    else
+      WorkspaceDirList=`ls -d $RootWorkspace/*/`
+    fi
+    
+    for dir in $WorkspaceDirList;do
+      branch=&quot;refs/heads/&quot;`basename $dir`
+      if [[ &quot;$gitnames&quot; =~ &quot;$branch&quot; ]];then
+        echo &quot;branch=$branch found in gitnames, keeping dir=$dir&quot;
+      else 
+        echo &quot;branch=$branch not found in gitnames, deleting dir=\&apos;$dir\&apos;&quot;
+        if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+          #WorkspaceDirList=`sshpass -p $AFSPass ssh -o &quot;StrictHostKeyChecking no&quot; $AFSUser@$LSFLoginServer &quot;ls -d $RootWorkspace/*/&quot;`
+        else
           rm -rf &quot;$dir&quot;     # put in quotes to work for directories with blanks
-        fi        
-      else echo &quot;$dir is not a directory, continuing&quot;
-      fi
+        fi
+
+        rm -rf &quot;$dir&quot;     # put in quotes to work for directories with blanks
+      fi        
     done
     DSKIP=0
     ;;
