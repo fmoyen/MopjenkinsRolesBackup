@@ -329,7 +329,7 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   echo;echo &quot;****************************************************************************************&quot;
   echo &quot;J:LSF Login Server SETUP ...&quot;
   
-  RootWorkspace=/afs/bb/proj/fpga/framework/CI_ws/SNAP_IMG_TEST_matrix
+  RootWorkspace=/afs/bb/proj/fpga/framework/CI_ws/SNAP_IMG_CAPI2_matrix
   
   # Boeblingen LSF cluster Login Servers
   LSFLoginServersList=&quot;\
@@ -472,8 +472,9 @@ then
     echo &quot;J: ACT=test&quot;
     gitnames=`git ls-remote https://github.com/open-power/snap|grep &quot;refs/heads/&quot;|awk &apos;{print $2}&apos;`
     echo &quot;gitnames=$gitnames&quot;
-    
     echo
+
+    WorkspaceDirList=`ls -d $RootWorkspace/*/`
     for dir in &quot;/var/jenkins/workspace/SNAP_IMG_CAPI2_matrix&quot;/*;do
       if [ -d &quot;$dir&quot; ];then
         branch=&quot;refs/heads/&quot;`basename $dir`
