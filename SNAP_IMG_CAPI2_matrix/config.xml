@@ -1023,6 +1023,14 @@ esac
 if [ &quot;$CL&quot; == &quot;nCL&quot; ]
 then
 
+  if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+    echo &quot;echo command: bsub $LSF -J \&quot;${CRD}_${ACT}_image\&quot; \&quot;make image\&quot;; exit 66&quot; &gt;&gt; $LocalWorkspace/$LSFRun
+      
+    sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;rm -rf $LSFWorkspace&quot;
+    sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;mkdir -p `dirname $LSFWorkspace`&quot;
+    sshpass -p $AFSPass rsync -az $LocalWorkspace $AFSUser@$LSFLoginServer:`dirname $LSFWorkspace`
+  fi
+
   maxloop=5;
   for loop in `seq 1 $maxloop`
   do  
@@ -1041,14 +1049,6 @@ then
 
     if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
       echo &quot;      - done with LSF Cluster&quot;
-      #RC=0; bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot; &amp;&amp; break || RC=$?
-      
-      #echo &apos;bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot;&apos; &gt;&gt; $LocalWorkspace/$LSFRun
-      echo &apos;echo command: bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot;&apos; &gt;&gt; $LocalWorkspace/$LSFRun
-      
-      sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;rm -rf $LSFWorkspace&quot;
-      sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;mkdir -p `dirname $LSFWorkspace`&quot;
-      sshpass -p $AFSPass rsync -az $LocalWorkspace $AFSUser@$LSFLoginServer:`dirname $LSFWorkspace`
 
       RC=0; sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;cd $LSFWorkspace; ./$LSFRun&quot; &amp;&amp; break || RC=$?
       
