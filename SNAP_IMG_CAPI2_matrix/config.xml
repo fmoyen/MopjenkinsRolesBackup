@@ -479,6 +479,7 @@ then
     echo
 
     if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+      # First time calling ssh, &quot;StrictHostKeyChecking no&quot; updates .ssh/known_hosts file without asking
       WorkspaceDirList=`sshpass -p $AFSPass ssh -o &quot;StrictHostKeyChecking no&quot; $AFSUser@$LSFLoginServer &quot;ls -d $LSFRootWorkspace/*/&quot;`
     else
       WorkspaceDirList=`ls -d $LocalRootWorkspace/*/`
@@ -492,7 +493,7 @@ then
       else 
         echo &quot;branch=$branch not found in gitnames, deleting dir=&apos;$dir&apos;&quot;
         if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
-          sshpass -p $AFSPass ssh -o &quot;StrictHostKeyChecking no&quot; $AFSUser@$LSFLoginServer rm -rf &quot;$dir&quot;
+          sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer rm -rf &quot;$dir&quot;
         else
           rm -rf &quot;$dir&quot;     # put in quotes to work for directories with blanks
         fi
@@ -548,6 +549,7 @@ then
  echo &quot;J: Checking enough space is available&quot;
 
  if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+   # First time calling ssh, &quot;StrictHostKeyChecking no&quot; updates .ssh/known_hosts file without asking
    diskused=`sshpass -p $AFSPass ssh -o &quot;StrictHostKeyChecking no&quot; $AFSUser@$LSFLoginServer &quot;fs lq $LSFRootWorkspace&quot; |grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
    msg=&quot;$LSFRootWorkspace disk usage =${diskused}%&quot;
  else
@@ -1040,9 +1042,14 @@ then
     if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
       echo &quot;      - done with LSF Cluster&quot;
       #RC=0; bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot; &amp;&amp; break || RC=$?
-      #RC=0; sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;bsub $LSF -J \&quot;${CRD}_${ACT}_image\&quot; \&quot;make image\&quot; &quot; &amp;&amp; break || RC=$?#
+      
+      #echo &apos;bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot;&apos; &gt;&gt; $LocalWorkspace/$LSFRun
+      echo &apos;echo command: bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot;&apos; &gt;&gt; $LocalWorkspace/$LSFRun
+      
+      sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer rm -rf $LFSWorkspace
+      sshpass -p $AFSPass scp -r $LocalWorkspace $AFSUser@$LSFLoginServer:$LSFWorkspace
 
-      RC=0; sshpass -p $AFSPass ssh -o &quot;StrictHostKeyChecking no&quot; $AFSUser@$LSFLoginServer &quot;echo `hostname`-$CRD; exit 1&quot; &amp;&amp; break || RC=$?
+      RC=0; sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;cd $LSFWorkspace; ./$LSFRun&quot; &amp;&amp; break || RC=$?
       echo &quot;RC= $RC&quot;
       echo &quot;FAB DEV !! EXITING...&quot;; exit 1
     else
