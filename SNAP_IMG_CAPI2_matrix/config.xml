@@ -679,26 +679,47 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   echo;echo &quot;****************************************************************************************&quot;
   echo &quot;J:LSF SETUP ...&quot;
   echo
-  
   echo &quot;LSF Login Server = $LSFLoginServer&quot;
   echo &quot;  -&gt; LSF Root workspace = $LSFRootWorkspace&quot;
 
-# FAB: A revoir car ne sera pas transmis par sshpass au node du cluster LSF...
-  export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
-  export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
-  export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
-  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
-  export LSF_BINDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
-  export LSF_SUBMITTER_OSTYPE=Linux
-  export LSF_ENVDIR=/home/lsfbb/prod/conf
+  # Building $LSFRun &amp; $LSFSource scripts locally as $LocalWorkspace will be lately scp to LSF cluster:$LSFWorkspace
 
-  LSF=&quot;-P zsort&quot;
-  LSF+=&quot; -M 6&quot;                      # 12GB memory
-  LSF+=&quot; -C 2000&quot;                   # 2MB core file
-  LSF+=&apos; -R type=X86_64 -R span[hosts=1]&apos;
-  LSF+=&quot; -I -n 8&quot;
-  echo &quot;LSF variable = $LSF&quot;
+  # LSFSource: source file which includes environment variables
+  LSFSource=LSFSource.sh
 
+  cat &lt;&lt; EOF &gt; $LocalWorkspace/$LSFSource
+# LSF cluster environment variables
+export PATH=\$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
+export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+export LSF_BINDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+export LSF_SUBMITTER_OSTYPE=Linux
+export LSF_ENVDIR=/home/lsfbb/prod/conf
+
+# LSF bsub submission settings
+LSF=&quot;-P zsort&quot;
+LSF+=&quot; -M 6&quot;                      # 12GB memory
+LSF+=&quot; -C 2000&quot;                   # 2MB core file
+LSF+=&apos; -R type=X86_64 -R span[hosts=1]&apos;
+LSF+=&quot; -I -n 8&quot;
+
+EOF
+
+  echo &quot;  -&gt; LSF Source script = $LocalWorkspace/$LSFSource&quot;
+
+  # LSFRun: script which will be run at LSF Cluster node to build the image
+  LSFRun=LSFRun.bash
+  
+  cat &lt;&lt; EOF &gt; $LocalWorkspace/$LSFRun
+#!/bin/bash
+
+. $LSFSource
+
+EOF
+
+  chmod +x $LocalWorkspace/$LSFRun
+  echo &quot;  -&gt; LSF Run script = $LocalWorkspace/$LSFRun&quot;
 
 ## previous settings :
 # export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
@@ -739,6 +760,7 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
 #LSF+=&quot; -I -n 8&quot;
 
 fi
+
 
 #==============================================================================================
 # Functions
