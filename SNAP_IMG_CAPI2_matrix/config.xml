@@ -1046,10 +1046,14 @@ then
       #echo &apos;bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot;&apos; &gt;&gt; $LocalWorkspace/$LSFRun
       echo &apos;echo command: bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot;&apos; &gt;&gt; $LocalWorkspace/$LSFRun
       
-      sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer rm -rf $LFSWorkspace
-      sshpass -p $AFSPass scp -r $LocalWorkspace $AFSUser@$LSFLoginServer:$LSFWorkspace
+      sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;rm -rf $LSFWorkspace&quot;
+      sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;mkdir -p `dirname $LSFWorkspace`&quot;
+      sshpass -p $AFSPass rsync -az $LocalWorkspace $AFSUser@$LSFLoginServer:`dirname $LSFWorkspace`
 
       RC=0; sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;cd $LSFWorkspace; ./$LSFRun&quot; &amp;&amp; break || RC=$?
+      
+      echo &quot;LocalWorkspace= $LocalWorkspace&quot;
+      echo &quot;LSFWorkspace= $LSFWorkspace&quot;
       echo &quot;RC= $RC&quot;
       echo &quot;FAB DEV !! EXITING...&quot;; exit 1
     else
