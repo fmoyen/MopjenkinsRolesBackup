@@ -757,13 +757,12 @@ make clean                   # to make sure we restart from a blank snap
 cd hardware/capi2-bsp
 make clean                   # to make sure we restart from a blank capi-bsp    
 
+echo
 cd \$SNAP_ROOT
-
 echo command: bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; &quot;make image&quot;
-env | grep XILINX
-env | grep VIVADO
+bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; &quot;make image&quot;
+echo $?
 exit 66
-
 
 EOF
 
@@ -1100,11 +1099,11 @@ then
 
     if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
       echo;echo &quot;  -&gt; Building the Image (make image) with LSF Cluster&quot;
+      echo;echo &quot;     Executing on $LSFLoginServer:&quot;
+      echo &quot;       cd $LSFWorkspace&quot;
+      echo &quot;       ./$LSFRun&quot;
 
       RC=0; sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;cd $LSFWorkspace; ./$LSFRun&quot; &amp;&amp; break || RC=$?
-      
-      echo &quot;LocalWorkspace= $LocalWorkspace&quot;
-      echo &quot;LSFWorkspace= $LSFWorkspace&quot;
       echo &quot;RC= $RC&quot;
       echo &quot;FAB DEV !! EXITING...&quot;; exit 1
       
