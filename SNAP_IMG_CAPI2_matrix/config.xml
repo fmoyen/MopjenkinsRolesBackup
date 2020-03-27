@@ -706,6 +706,10 @@ LSF+=&quot; -C 2000&quot;                   # 2MB core file
 LSF+=&apos; -R type=X86_64 -R span[hosts=1]&apos;
 LSF+=&quot; -I -n 8&quot;
 
+# Build parameters
+CRD=$CRD
+ACT=$ACT
+
 EOF
 
   echo &quot;  -&gt; LSF Source script = $LocalWorkspace/$LSFSource&quot;
@@ -1024,7 +1028,7 @@ if [ &quot;$CL&quot; == &quot;nCL&quot; ]
 then
 
   if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
-    echo &quot;echo command: bsub \$LSF -J \&quot;${CRD}_${ACT}_image\&quot; \&quot;make image\&quot;; exit 66&quot; &gt;&gt; $LocalWorkspace/$LSFRun
+    echo &apos;echo command: bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot;; exit 66&apos; &gt;&gt; $LocalWorkspace/$LSFRun
       
     sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;rm -rf $LSFWorkspace&quot;
     sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;mkdir -p `dirname $LSFWorkspace`&quot;
