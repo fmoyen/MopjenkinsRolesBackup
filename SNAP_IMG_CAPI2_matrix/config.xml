@@ -680,6 +680,22 @@ SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not n
 
 IMGServers=&quot;jtagx86&quot; # List of servers where to push generated images.
 
+# Setup $VIV_VERSION
+
+echo;echo &quot;****************************************************************************************&quot;
+echo &quot;J: Setting up Vivado Version&quot;
+if [ &quot;$VIVADO_GLOBAL&quot; == &quot;--&quot; ]; then
+  VIVADOVarName=`echo VIVADO_$CRD`
+  export VIV_VERSION=${!VIVADOVarName}
+  echo &quot; --&gt; For $CRD card, VIVADO version initially set to $VIV_VERSION...&quot;
+
+else
+  export VIV_VERSION=$VIVADO_GLOBAL
+  echo &quot; --&gt; For all cards, VIVADO version initially set to $VIV_VERSION...&quot;
+fi
+
+# Initial LSF setup (LSFSource, LSFRun)
+
 if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   echo;echo &quot;****************************************************************************************&quot;
   echo &quot;J:LSF SETUP ...&quot;
@@ -720,7 +736,7 @@ export SNAP_ROOT=$LSFWorkspace/snap
 # VIVADO parameters
 export XILINX_ROOT=$LSFRoot/xilinx
 export XILINXD_LICENSE_FILE=2100@pokwinlic1.pok.ibm.com
-source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
+source \$XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
 
 EOF
 
@@ -910,24 +926,14 @@ echo
 
 
 #==============================================================================================
-# Setting up Vivado, PSL9 and Timing value
+# Setting up PSL9 and Timing value
 
 echo;echo &quot;****************************************************************************************&quot;
-echo &quot;J: Setting up Vivado Version, PSL9_IP_CORE (Zip file) for CAPI2.0 cards and timing value&quot;
+echo &quot;J: Setting up PSL9_IP_CORE (Zip file) for CAPI2.0 cards and timing value&quot;
 
 echo
 echo &quot; --&gt; For all CAPI2 cards we extend Timing trials to 5 runs until we optimise placement...&quot;
 echo &quot;     unless expressly indicated&quot;
-
-if [ &quot;$VIVADO_GLOBAL&quot; == &quot;--&quot; ]; then
-  VIVADOVarName=`echo VIVADO_$CRD`
-  export VIV_VERSION=${!VIVADOVarName}
-  echo &quot; --&gt; For $CRD card, VIVADO version initially set to $VIV_VERSION...&quot;
-
-else
-  export VIV_VERSION=$VIVADO_GLOBAL
-  echo &quot; --&gt; For all cards, VIVADO version initially set to $VIV_VERSION...&quot;
-fi
 
 cd ${SNAP_ROOT}
 
@@ -1057,7 +1063,7 @@ then
     mv $SNAP_ROOT/snap_env.sh $SNAP_ROOT/temp_snap_env.sh
     cat $SNAP_ROOT/temp_snap_env.sh | sed &quot;s%export PSL9_IP_CORE=.*%export PSL9_IP_CORE=$LSFRoot/framework/cards/$CRD/ibm.com_CAPI_PSL9_WRAP_2.00.zip%&quot; &gt; $SNAP_ROOT/snap_env.sh
 
-    echo &quot;New LSF snap_env.sh:&quot;
+    echo;echo &quot;New LSF snap_env.sh:&quot;
     cat $SNAP_ROOT/snap_env.sh
     
     rm $SNAP_ROOT/temp_snap_env.sh
@@ -1065,7 +1071,10 @@ then
     # Copying (rsync) $LocalWorkspace --&gt; $LSFWorkspace
 
     echo;echo &quot;****************************************************************************************&quot;
-    echo &quot;J: Copying (rsync) $LocalWorkspace --&gt; $LSFWorkspace&quot;
+    echo &quot;J: Copying (rsync)...&quot;
+    echo &quot;     $LocalWorkspace&quot;
+    echo &quot;    --&gt;&quot;
+    echo &quot;     $LSFWorkspace&quot;
 
     sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;rm -rf $LSFWorkspace&quot;
     sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;mkdir -p `dirname $LSFWorkspace`&quot;
