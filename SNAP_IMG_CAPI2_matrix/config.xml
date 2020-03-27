@@ -705,10 +705,12 @@ LSF+=&quot; -M 6&quot;                      # 12GB memory
 LSF+=&quot; -C 2000&quot;                   # 2MB core file
 LSF+=&apos; -R type=X86_64 -R span[hosts=1]&apos;
 LSF+=&quot; -I -n 8&quot;
+export LSF
 
 # Build parameters
-CRD=$CRD
-ACT=$ACT
+export CRD=$CRD
+export ACT=$ACT
+export SNAP_ROOT=$LSFWorkspace/snap
 
 EOF
 
