@@ -687,6 +687,7 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   # Building $LSFRun &amp; $LSFSource scripts locally as $LocalWorkspace will be lately scp to LSF cluster:$LSFWorkspace
 
   # LSFSource: source file which includes environment variables
+  
   LSFSource=LSFSource.sh
 
   cat &lt;&lt; EOF &gt; $LocalWorkspace/$LSFSource
@@ -717,6 +718,7 @@ EOF
   echo &quot;  -&gt; LSF Source script = $LocalWorkspace/$LSFSource&quot;
 
   # LSFRun: script which will be run at LSF Cluster node to build the image
+  
   LSFRun=LSFRun.bash
   
   cat &lt;&lt; EOF &gt; $LocalWorkspace/$LSFRun
@@ -1031,6 +1033,9 @@ then
 
   if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
     echo &apos;echo command: bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot;; exit 66&apos; &gt;&gt; $LocalWorkspace/$LSFRun
+    
+    mv $SNAP_ROOT/snap_env.sh $SNAP_ROOT/Mopjenkins_snap_env.sh
+    cat $SNAP_ROOT/Mopjenkins_snap_env.sh | sed &quot;s%export PSLSE_ROOT=.*%export PSLSE_ROOT=$LSFWorkspace/pslse%&quot; &gt; $SNAP_ROOT/snap_env.sh
       
     sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;rm -rf $LSFWorkspace&quot;
     sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;mkdir -p `dirname $LSFWorkspace`&quot;
