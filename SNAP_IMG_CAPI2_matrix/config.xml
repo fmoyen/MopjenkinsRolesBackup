@@ -328,8 +328,10 @@ RootJobName=`echo $JOB_NAME | awk -F&quot;/&quot; &apos;{print $1}&apos;`
 
 LocalWorkspace=$WORKSPACE
 
+LSFRoot=&quot;/afs/bb/proj/fpga&quot;
+
 LocalRootWorkspace=&quot;`echo $LocalWorkspace | awk -F&quot;/$RootJobName/&quot; &apos;{print $1}&apos;`/$RootJobName&quot;
-LSFRootWorkspace=&quot;/afs/bb/proj/fpga/framework/CI_ws/$RootJobName&quot;
+LSFRootWorkspace=&quot;$LSFRoot/framework/CI_ws/$RootJobName&quot;
 
 LSFWorkspace=&quot;$LSFRootWorkspace/`echo $LocalWorkspace | awk -F&quot;$LocalRootWorkspace/&quot; &apos;{print $2}&apos;`&quot;
 
@@ -603,6 +605,7 @@ echo &quot;HWUser=${HWUser}&quot; &gt;&gt; export_props.properties
 echo &quot;LSFLoginServer=${LSFLoginServer}&quot; &gt;&gt; export_props.properties
 echo &quot;LocalRootWorkspace=${LocalRootWorkspace}&quot; &gt;&gt; export_props.properties
 echo &quot;LocalWorkspace=${LocalWorkspace}&quot; &gt;&gt; export_props.properties
+echo &quot;LSFRoot=${LSFRoot}&quot; &gt;&gt; export_props.properties
 echo &quot;LSFRootWorkspace=${LSFRootWorkspace}&quot; &gt;&gt; export_props.properties
 echo &quot;LSFWorkspace=${LSFWorkspace}&quot; &gt;&gt; export_props.properties
 
@@ -711,7 +714,13 @@ export LSF
 # Build parameters
 export CRD=$CRD
 export ACT=$ACT
+export VIV_VERSION=$VIV_VERSION
 export SNAP_ROOT=$LSFWorkspace/snap
+
+# VIVADO parameters
+export XILINX_ROOT=$LSFRoot/xilinx
+export XILINXD_LICENSE_FILE=2100@pokwinlic1.pok.ibm.com
+source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
 
 EOF
 
@@ -925,7 +934,6 @@ cd ${SNAP_ROOT}
 echo &quot;export TIMING_LABLIMIT=\&quot;${TIMING_LABLIMIT_CHOICE}\&quot;&quot; &gt;&gt; snap_env.sh
 echo &quot;  -&gt; TIMING LIMIT set to ${TIMING_LABLIMIT_CHOICE} into snap_env.sh&quot;
 
-#echo &quot;export PSL9_IP_CORE=/afs/bb/proj/fpga/framework/cards/$CRD/ibm.com_CAPI_PSL9_WRAP_2.00.zip&quot; &gt;&gt;snap_env.sh
 echo &quot;export PSL9_IP_CORE=$PSL9File&quot; &gt;&gt;snap_env.sh
 echo &quot;  -&gt; PSL9_IP_CORE set to ${PSL9File} into snap_env.sh&quot;
 
@@ -937,7 +945,6 @@ echo &quot;  -&gt; PSL9_IP_CORE set to ${PSL9File} into snap_env.sh&quot;
 echo;echo &quot;****************************************************************************************&quot; 
 echo &quot;J: Vivado paths &amp; licences server setup ...&quot;
 export XILINX_ROOT=/opt/Xilinx
-#export XILINX_ROOT=/afs/bb/proj/fpga/xilinx
 export XILINXD_LICENSE_FILE=2100@pokwinlic1.pok.ibm.com
 source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
 
@@ -1032,11 +1039,34 @@ if [ &quot;$CL&quot; == &quot;nCL&quot; ]
 then
 
   if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
-    echo &apos;echo command: bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot;; exit 66&apos; &gt;&gt; $LocalWorkspace/$LSFRun
+    echo &apos;echo command: bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot;&apos; &gt;&gt; $LocalWorkspace/$LSFRun
+    echo &apos;env | grep XILINX&apos; &gt;&gt; $LocalWorkspace/$LSFRun
+    echo &apos;env | grep VIVADO&apos; &gt;&gt; $LocalWorkspace/$LSFRun
+    echo &apos;exit 66&apos; &gt;&gt; $LocalWorkspace/$LSFRun
     
-    mv $SNAP_ROOT/snap_env.sh $SNAP_ROOT/Mopjenkins_snap_env.sh
-    cat $SNAP_ROOT/Mopjenkins_snap_env.sh | sed &quot;s%export PSLSE_ROOT=.*%export PSLSE_ROOT=$LSFWorkspace/pslse%&quot; &gt; $SNAP_ROOT/snap_env.sh
-      
+    # Modify snap_env.sh to match the configuration of the LSF Cluster
+
+    echo;echo &quot;****************************************************************************************&quot;
+    echo &quot;J: Modifying snap_env.sh to match the configuration of the LSF Cluster&quot;
+    
+    cp $SNAP_ROOT/snap_env.sh $SNAP_ROOT/Mopjenkins_snap_env.sh
+    
+    mv $SNAP_ROOT/snap_env.sh $SNAP_ROOT/temp_snap_env.sh    
+    cat $SNAP_ROOT/temp_snap_env.sh | sed &quot;s%export PSLSE_ROOT=.*%export PSLSE_ROOT=$LSFWorkspace/pslse%&quot; &gt; $SNAP_ROOT/snap_env.sh
+    
+    mv $SNAP_ROOT/snap_env.sh $SNAP_ROOT/temp_snap_env.sh
+    cat $SNAP_ROOT/temp_snap_env.sh | sed &quot;s%export PSL9_IP_CORE=.*%export PSL9_IP_CORE=$LSFRoot/framework/cards/$CRD/ibm.com_CAPI_PSL9_WRAP_2.00.zip%&quot; &gt; $SNAP_ROOT/snap_env.sh
+
+    echo &quot;New LSF snap_env.sh:&quot;
+    cat $SNAP_ROOT/snap_env.sh
+    
+    rm $SNAP_ROOT/temp_snap_env.sh
+
+    # Copying (rsync) $LocalWorkspace --&gt; $LSFWorkspace
+
+    echo;echo &quot;****************************************************************************************&quot;
+    echo &quot;J: Copying (rsync) $LocalWorkspace --&gt; $LSFWorkspace&quot;
+
     sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;rm -rf $LSFWorkspace&quot;
     sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;mkdir -p `dirname $LSFWorkspace`&quot;
     sshpass -p $AFSPass rsync -az $LocalWorkspace $AFSUser@$LSFLoginServer:`dirname $LSFWorkspace`
