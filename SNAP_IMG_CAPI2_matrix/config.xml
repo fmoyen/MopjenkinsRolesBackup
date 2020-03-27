@@ -751,6 +751,20 @@ EOF
 
 . $LSFSource
 
+echo;echo &quot;  -&gt; Cleaning (make clean) \$SNAP_ROOT &amp; \$SNAP_ROOT/hardware/capi2-bsp directories&quot;
+cd \$SNAP_ROOT
+make clean                   # to make sure we restart from a blank snap
+cd hardware/capi2-bsp
+make clean                   # to make sure we restart from a blank capi-bsp    
+
+cd \$SNAP_ROOT
+
+echo command: bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; &quot;make image&quot;
+env | grep XILINX
+env | grep VIVADO
+exit 66
+
+
 EOF
 
   chmod +x $LocalWorkspace/$LSFRun
@@ -1045,15 +1059,11 @@ if [ &quot;$CL&quot; == &quot;nCL&quot; ]
 then
 
   if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
-    echo &apos;echo command: bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot;&apos; &gt;&gt; $LocalWorkspace/$LSFRun
-    echo &apos;env | grep XILINX&apos; &gt;&gt; $LocalWorkspace/$LSFRun
-    echo &apos;env | grep VIVADO&apos; &gt;&gt; $LocalWorkspace/$LSFRun
-    echo &apos;exit 66&apos; &gt;&gt; $LocalWorkspace/$LSFRun
     
-    # Modify snap_env.sh to match the configuration of the LSF Cluster
+    # Modify snap_env.sh to match configuration of the LSF Cluster
 
     echo;echo &quot;****************************************************************************************&quot;
-    echo &quot;J: Modifying snap_env.sh to match the configuration of the LSF Cluster&quot;
+    echo &quot;J: Modifying snap_env.sh to match configuration of the LSF Cluster&quot;
     
     cp $SNAP_ROOT/snap_env.sh $SNAP_ROOT/Mopjenkins_snap_env.sh
     
@@ -1087,18 +1097,9 @@ then
   
     echo;echo &quot;****************************************************************************************&quot;
     echo &quot;J: Build Non-Cloud Image (make image) for $CRD, Loop ${loop}/$maxloop (`date`)&quot;
-   
-    echo;echo &quot;  -&gt; Cleaning (make clean) $SNAP_ROOT &amp; $SNAP_ROOT/hardware/capi2-bsp directories&quot;
-    cd ${SNAP_ROOT}
-    make clean                   # to make sure we restart from a blank snap
-    cd hardware/capi2-bsp
-    make clean                   # to make sure we restart from a blank capi-bsp    
-    cd ${SNAP_ROOT}
-
-    echo;echo &quot;  -&gt; Building the Image (make image)&quot;
 
     if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
-      echo &quot;      - done with LSF Cluster&quot;
+      echo;echo &quot;  -&gt; Building the Image (make image) with LSF Cluster&quot;
 
       RC=0; sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;cd $LSFWorkspace; ./$LSFRun&quot; &amp;&amp; break || RC=$?
       
@@ -1106,8 +1107,15 @@ then
       echo &quot;LSFWorkspace= $LSFWorkspace&quot;
       echo &quot;RC= $RC&quot;
       echo &quot;FAB DEV !! EXITING...&quot;; exit 1
+      
     else
-      echo &quot;      - done locally&quot;
+      echo;echo &quot;  -&gt; Building the Image (make image) locally&quot;
+      echo;echo &quot;  -&gt; Cleaning (make clean) $SNAP_ROOT &amp; $SNAP_ROOT/hardware/capi2-bsp directories&quot;
+      cd $SNAP_ROOT
+      make clean                   # to make sure we restart from a blank snap
+      cd hardware/capi2-bsp
+      make clean                   # to make sure we restart from a blank capi-bsp    
+      cd $SNAP_ROOT
       RC=0; make image &amp;&amp; break || RC=$?
     fi
     
