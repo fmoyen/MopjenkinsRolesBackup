@@ -142,6 +142,15 @@ If -- then VIVADO_XXX parameters below are taken into account</description>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
+          <name>VIVADO_AD9H7</name>
+          <description>AlphaData AD9H7 in CAPI2 mode</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>2019.2</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
           <name>TIMING_LABLIMIT_CHOICE</name>
           <description>Choose the TIMING_LABLIMIT parameter for building images. If achieved timing is worst than your choice, the run will failed.
 Warning: -200ps is not easy to reach and needs several attempts (sometimes 5 attempts are not enough).</description>
@@ -275,6 +284,7 @@ H 22-23/1 * * *</spec>
       <values>
         <string>AD9V3_nCL</string>
         <string>AD9H3_nCL</string>
+        <string>AD9H7_nCL</string>
         <string>N250SP_nCL</string>
         <string>FX609_nCL</string>
         <string>S241_nCL</string>
@@ -416,6 +426,11 @@ case &quot;$CRD:$ACT&quot; in
     ;; 
         
   AD9H3:hls_bfs | AD9H3:hls_hashjoin | AD9H3:hls_sponge | AD9H3:hls_scatter_gather | AD9H3:hls_vector_generator ) # AD9H3 has no defconfig
+    C=&quot;hndf&quot;
+    ASKIP=1
+    ;; 
+    
+  AD9H7:hls_bfs | AD9H7:hls_hashjoin | AD9H7:hls_sponge | AD9H7:hls_scatter_gather | AD9H7:hls_vector_generator ) # AD9H7 has no defconfig
     C=&quot;hndf&quot;
     ASKIP=1
     ;; 
