@@ -749,13 +749,14 @@ export LSF_SUBMITTER_OSTYPE=Linux
 export LSF_ENVDIR=/home/lsfbb/prod/conf
 
 # LSF bsub submission settings
-LSF=&quot;-P zsort&quot;
-LSF+=&quot; -M 6&quot;              # per-process (soft) memory limit for all processes that belong to this job. LSF_UNIT_FOR_LIMITS=MB ($LSF_ENVDIR/lsf.conf)
+LSF=&quot;-P zsort&quot;            # project name
+LSF+=&quot; -M 12000&quot;          # per-process (soft) memory limit for all processes that belong to this job. LSF_UNIT_FOR_LIMITS=MB ($LSF_ENVDIR/lsf.conf)
 LSF+=&quot; -C 2000&quot;           # per-process (soft) core file size limit for all processes that belong to this job. LSF_UNIT_FOR_LIMITS=MB ($LSF_ENVDIR/lsf.conf)
 LSF+=&apos; -R osver=rh7&apos;      # Asking for RHEL7 which is madatory for Vivado 2019.1 and higher
 LSF+=&apos; -R type==X86_64&apos;   # Vivado make image only runs onto X86 platform
 LSF+=&apos; -R span[hosts=1]&apos;  # Ensure the job runs on only 1 host (not running across the hosts)
 LSF+=&apos; -I&apos;                # interactive job so Jenkins displays job outputs and waits for the job to finish
+LSF+=&apos; -n 8&apos;              # Submitting a parallel job and specifying the number of processors required to run the job 
 export LSF
 
 # Build parameters
