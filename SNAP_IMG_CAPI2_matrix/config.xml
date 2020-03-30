@@ -739,9 +739,12 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
 # LSF cluster environment variables
 export PATH=\$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
 export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
+#export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/etc
 export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+#export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
 export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
 export LSF_BINDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+#export LSF_BINDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
 export LSF_SUBMITTER_OSTYPE=Linux
 export LSF_ENVDIR=/home/lsfbb/prod/conf
 
@@ -749,11 +752,10 @@ export LSF_ENVDIR=/home/lsfbb/prod/conf
 LSF=&quot;-P zsort&quot;
 LSF+=&quot; -M 6&quot;                      # 12GB memory
 LSF+=&quot; -C 2000&quot;                   # 2MB core file
-# Asking for RHEL7 which is madatory for Vivado 2019.1 and higher
-LSF+=&apos; -R osver=rh7&apos;
-LSF+=&apos; -R type==X86_64&apos;
-LSF+=&apos; -R span[hosts=1]&apos;
-LSF+=&apos; -I&apos; # interactive job so Jenkins is displaying job outputs and waiting for the job to finish
+LSF+=&apos; -R osver=rh7&apos;      # Asking for RHEL7 which is madatory for Vivado 2019.1 and higher
+LSF+=&apos; -R type==X86_64&apos;   # Vivado make image only runs onto X86 platform
+LSF+=&apos; -R span[hosts=1]&apos;  # Ensure the job runs on only 1 host (not running across the hosts)
+LSF+=&apos; -I&apos;                # interactive job so Jenkins displays job outputs and waits for the job to finish
 export LSF
 
 # Build parameters
@@ -768,6 +770,11 @@ export XILINXD_LICENSE_FILE=2100@pokwinlic1.pok.ibm.com
 source \$XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
 
 EOF
+
+## AC : older configuration
+#LSF+=&apos; -R type=X86_64 -R span[hosts=1]&apos;
+#LSF+=&quot; -I -n 8&quot;
+
 
   echo &quot;  -&gt; LSF Source script = $LocalWorkspace/$LSFSource&quot;
 
@@ -795,44 +802,6 @@ EOF
 
   chmod +x $LocalWorkspace/$LSFRun
   echo &quot;  -&gt; LSF Run script = $LocalWorkspace/$LSFRun&quot;
-
-## previous settings :
-# export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
-# export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
-# export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
-# export LSF_BINDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
-# export LSF_SUBMITTER_OSTYPE=Linux
-# export LSF_ENVDIR=/home/lsfbb/prod/conf
-
-## Rolf recommendations :
-## LSF_BINDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
-## LSF_ENVDIR=/home/lsfbb/prod/conf
-## LSF_LIBDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
-## LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/etc
-## LSF_SUBMITTER_OSTYPE=Linux
-
-## tested settings :
-## export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
-## export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/etc
-## export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
-## export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
-## export LSF_BINDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
-## export LSF_SUBMITTER_OSTYPE=Linux
-## export LSF_ENVDIR=/home/lsfbb/prod/conf
-
-#LSF=&quot;-P zsort&quot;
-#LSF+=&quot; -M 6&quot;                      # 12GB memory
-#LSF+=&quot; -C 2000&quot;                   # 2MB core file
-
-## AC 2019 10 08 : forcing RH7 for Vivado 2019.1
-## LSF+=&apos; -R osver=rh7&apos;
-## LSF+=&apos; -R type==X86_64&apos;
-## LSF+=&apos; -R span[hosts=1]&apos;
-
-## AC : older configuration
-#LSF+=&apos; -R type=X86_64 -R span[hosts=1]&apos;
-#LSF+=&quot; -I -n 8&quot;
 
 fi
 
