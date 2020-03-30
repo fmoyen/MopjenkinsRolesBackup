@@ -334,16 +334,27 @@ EmailOrNotEmail=0 # 0 means do not send emails; 1 means send email
 
 HWUser=&quot;capimop&quot;
 
+# Example: RootJobName= SNAP_IMG_CAPI2_matrix
 RootJobName=`echo $JOB_NAME | awk -F&quot;/&quot; &apos;{print $1}&apos;`
 
+# Example: LocalWorkspace= /var/jenkins/workspace/SNAP_IMG_CAPI2_matrix@2/master/ACT/hdl_example.NORAM/CRD_CL/AD9H3_nCL/label/X86_UBUNTU
 LocalWorkspace=$WORKSPACE # $WORKSPACE-&gt; Jenkins global variable
+
+# Example: WorkspaceName= SNAP_IMG_CAPI2_matrix@2  (@2 used if one build is running when starting a 2nd build)
+WorkspaceName=`echo $LocalWorkspace | sed &quot;s%^.*$RootJobName%$RootJobName%&quot; | cut -d&quot;/&quot; -f1`
+
+# Example: LocalRootWorkspace= /var/jenkins/workspace/SNAP_IMG_CAPI2_matrix@2
+LocalRootWorkspace=&quot;`echo $LocalWorkspace | awk -F&quot;/$WorkspaceName/&quot; &apos;{print $1}&apos;`/$WorkspaceName&quot;
 
 LSFRoot=&quot;/afs/bb/proj/fpga&quot;
 
-LocalRootWorkspace=&quot;`echo $LocalWorkspace | awk -F&quot;/$RootJobName/&quot; &apos;{print $1}&apos;`/$RootJobName&quot;
+# Example: LSFRootWorkspace= /afs/bb/proj/fpga/framework/CI_ws/SNAP_IMG_CAPI2_matrix (@2 name is not planned in $LSFRoot/framework/CI_ws)
 LSFRootWorkspace=&quot;$LSFRoot/framework/CI_ws/$RootJobName&quot;
 
+# Example: LSFWorkspace= /afs/bb/proj/fpga/framework/CI_ws/SNAP_IMG_CAPI2_matrix/master/ACT/hdl_example.NORAM/CRD_CL/AD9H3_nCL/label/X86_UBUNTU
 LSFWorkspace=&quot;$LSFRootWorkspace/`echo $LocalWorkspace | awk -F&quot;$LocalRootWorkspace/&quot; &apos;{print $2}&apos;`&quot;
+
+
 
 # LSFLoginServer, RootWorkspace variables... or RootWorkspace pointing to local dir
 if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
@@ -742,7 +753,7 @@ LSF+=&quot; -C 2000&quot;                   # 2MB core file
 LSF+=&apos; -R osver=rh7&apos;
 LSF+=&apos; -R type==X86_64&apos;
 LSF+=&apos; -R span[hosts=1]&apos;
-LSF+=&apos; -I&apos; # interactive jobs so Jenkins is waiting for the job to finish
+LSF+=&apos; -I&apos; # interactive jobs so Jenkins is displaying job outputs and waiting for the job to finish
 export LSF
 
 # Build parameters
