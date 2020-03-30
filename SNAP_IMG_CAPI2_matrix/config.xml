@@ -750,7 +750,7 @@ export LSF_ENVDIR=/home/lsfbb/prod/conf
 
 # LSF bsub submission settings
 LSF=&quot;-P zsort&quot;            # project name
-LSF+=&quot; -M 12000&quot;          # per-process (soft) memory limit for all processes that belong to this job. LSF_UNIT_FOR_LIMITS=MB ($LSF_ENVDIR/lsf.conf)
+LSF+=&quot; -M 6&quot;              # per-process (soft) memory limit for all processes that belong to this job. LSF_UNIT_FOR_LIMITS=MB ($LSF_ENVDIR/lsf.conf)
 LSF+=&quot; -C 2000&quot;           # per-process (soft) core file size limit for all processes that belong to this job. LSF_UNIT_FOR_LIMITS=MB ($LSF_ENVDIR/lsf.conf)
 LSF+=&apos; -R osver=rh7&apos;      # Asking for RHEL7 which is madatory for Vivado 2019.1 and higher
 LSF+=&apos; -R type==X86_64&apos;   # Vivado make image only runs onto X86 platform
