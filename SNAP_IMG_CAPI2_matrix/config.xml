@@ -95,7 +95,7 @@ If -- then VIVADO_XXX parameters below are taken into account</description>
         </hudson.model.ChoiceParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>VIVADO_N250SP</name>
-          <description></description>
+          <description>N250SP not working (yet) with Vivado 2019.x release</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
               <string>2018.2</string>
@@ -336,7 +336,7 @@ HWUser=&quot;capimop&quot;
 
 RootJobName=`echo $JOB_NAME | awk -F&quot;/&quot; &apos;{print $1}&apos;`
 
-LocalWorkspace=$WORKSPACE
+LocalWorkspace=$WORKSPACE # $WORKSPACE-&gt; Jenkins global variable
 
 LSFRoot=&quot;/afs/bb/proj/fpga&quot;
 
@@ -779,8 +779,6 @@ echo
 cd \$SNAP_ROOT
 echo command: bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; &quot;make image&quot;
 bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; &quot;make image&quot;
-echo $?
-exit 66
 
 EOF
 
@@ -1138,6 +1136,19 @@ then
     
   done
   
+     # Copying BACK (rsync) $LocalWorkspace --&gt; $LSFWorkspace
+
+    echo;echo &quot;****************************************************************************************&quot;
+    echo &quot;J: Copying BACK (rsync) whether build is good (for images) or not (for logs)...&quot;
+    echo &quot;     $LSFWorkspace&quot;
+    echo &quot;    --&gt;&quot;
+    echo &quot;     $LocalWorkspace&quot;
+
+    sshpass -p $AFSPass rsync -az $AFSUser@$LSFLoginServer:$LSFWorkspace `dirname $LocalWorkspace`
+  
+  
+  echo;echo &quot;****************************************************************************************&quot;
+  echo &quot;J: RESULT for Non-Cloud Image build (make image) for $CRD, Loop ${loop}/$maxloop (`date`)&quot;  
   if [ $RC -eq 0 ] &amp;&amp; [ $loop -eq 1 ]; then 
     echo &quot;OK : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED at the first try (loop=$loop)&quot;
 
@@ -1191,6 +1202,7 @@ else # case of Cloud Build
   make -s oldconfig
   bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_merge&quot; || exit
 fi
+
 
 
 #==============================================================================================
