@@ -749,11 +749,11 @@ export LSF_ENVDIR=/home/lsfbb/prod/conf
 LSF=&quot;-P zsort&quot;
 LSF+=&quot; -M 6&quot;                      # 12GB memory
 LSF+=&quot; -C 2000&quot;                   # 2MB core file
-## AC 2019 10 08 : forcing RH7 for Vivado 2019.1
+# Asking for RHEL7 which is madatory for Vivado 2019.1 and higher
 LSF+=&apos; -R osver=rh7&apos;
 LSF+=&apos; -R type==X86_64&apos;
 LSF+=&apos; -R span[hosts=1]&apos;
-LSF+=&apos; -I&apos; # interactive jobs so Jenkins is displaying job outputs and waiting for the job to finish
+LSF+=&apos; -I&apos; # interactive job so Jenkins is displaying job outputs and waiting for the job to finish
 export LSF
 
 # Build parameters
