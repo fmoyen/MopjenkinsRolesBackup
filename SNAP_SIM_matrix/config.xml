@@ -201,10 +201,10 @@ Removed hls_intersect_s &amp; hls_intersect_h from matrix</description>
       <name>SIM_VIV</name>
       <values>
         <string>xsim_2019.2</string>
-        <string>xsim_2018.1</string>
-        <string>xsim_2018.2</string>
-        <string>xsim_2018.3</string>
         <string>xsim_2019.1</string>
+        <string>xsim_2018.3</string>
+        <string>xsim_2018.2</string>
+        <string>xsim_2018.1</string>
       </values>
     </hudson.matrix.TextAxis>
     <hudson.matrix.LabelAxis>
@@ -782,6 +782,17 @@ case $SIM:$ACT in
     ;;
     
 esac
+
+# if memcopy with HBM requested, replacing HBM by BRAM
+if grep &quot;HLS_HBM_MEMCOPY=y&quot; .snap_config &gt;/dev/null; then
+  echo &quot;J: HLS_HBM_MEMCOPY requested:&quot;
+  echo &quot;       -&gt; Modifying just generated .snap_config file with REPLACE_HBM_BY_BRAM=y (which implies BRAM_USED=\&quot;TRUE\&quot;) ...&quot;
+  cat .snap_config | egrep  -v &quot;REPLACE_HBM_BY_BRAM|BRAM_USED&quot; &gt; tempofile
+  echo &apos;REPLACE_HBM_BY_BRAM=y&apos; &gt;&gt; tempofile
+  mv  tempofile .snap_config
+  echo &quot;       -&gt; Running make oldconfig to re-generate clean .snap_config/.snap_config.sh files with  REPLACE_HBM_BY_BRAM/BRAM_USED parameters ...&quot;; echo
+  make -s oldconfig
+fi
 
 echo
 echo &quot;.snap_config:&quot;
