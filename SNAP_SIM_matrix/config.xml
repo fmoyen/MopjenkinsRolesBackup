@@ -102,6 +102,16 @@ Removed hls_intersect_s &amp; hls_intersect_h from matrix</description>
           <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
+          <name>AD9H3</name>
+          <description></description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>AD9H7</name>
+          <description></description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
           <name>U200</name>
           <description>enable/disable U200 simulation (CAPI2)</description>
           <defaultValue>true</defaultValue>
@@ -182,12 +192,15 @@ Removed hls_intersect_s &amp; hls_intersect_h from matrix</description>
         <string>FX609</string>
         <string>S241</string>
         <string>AD9V3</string>
+        <string>AD9H3</string>
+        <string>AD9H7</string>
         <string>U200</string>
       </values>
     </hudson.matrix.TextAxis>
     <hudson.matrix.TextAxis>
       <name>SIM_VIV</name>
       <values>
+        <string>xsim_2019.2</string>
         <string>xsim_2018.1</string>
         <string>xsim_2018.2</string>
         <string>xsim_2018.3</string>
@@ -224,7 +237,7 @@ ACTION_TYPE=$(echo $ACT| cut -d&apos;_&apos; -f 1 |tr &apos;[:lower:]&apos; &apo
 SIM=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 1 |tr &apos;[:upper:]&apos; &apos;[:lower:]&apos;)    # chars up to  first &apos;_&apos; identify Simulator and translate to lowercase
 VIV=$(echo $SIM_VIV| cut -d&apos;_&apos; -f 2)    # chars behind first &apos;_&apos; identify Vivado version
 
-CAPI2CardsList=( N250SP FX609 S241 RCXVUP AD9V3 U200 )
+CAPI2CardsList=( N250SP FX609 S241 RCXVUP AD9V3 AD9H3 AD9H7 U200 )
 CAPI2=0
 for i in ${CAPI2CardsList[@]}; do
   if [ &quot;$CRD&quot; == &quot;$i&quot; ]; then CAPI2=1; fi
