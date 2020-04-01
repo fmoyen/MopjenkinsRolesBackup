@@ -1082,6 +1082,8 @@ then
     sshpass -p $AFSPass rsync -az $LocalWorkspace $AFSUser@$LSFLoginServer:`dirname $LSFWorkspace`
   fi
 
+  # $maxloop number of tentative to try and make the image
+  
   maxloop=5;
   for loop in `seq 1 $maxloop`
   do  
@@ -1112,8 +1114,9 @@ then
     
   done
   
+    # Copying BACK (rsync) $LocalWorkspace --&gt; $LSFWorkspace if using LSF cluster
+    
     if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
-      # Copying BACK (rsync) $LocalWorkspace --&gt; $LSFWorkspace
       echo;echo &quot;****************************************************************************************&quot;
       echo &quot;J: Copying BACK (rsync) whether build is good (for images) or not (for logs)...&quot;
       echo &quot;     $LSFWorkspace&quot;
@@ -1123,6 +1126,7 @@ then
       sshpass -p $AFSPass rsync -az $AFSUser@$LSFLoginServer:$LSFWorkspace `dirname $LocalWorkspace`
     fi
   
+  # Checking the result of the make image operation
   
   echo;echo &quot;****************************************************************************************&quot;
   echo &quot;J: RESULT for Non-Cloud Image build (make image) for $CRD, Loop ${loop}/$maxloop (`date`)&quot;  
