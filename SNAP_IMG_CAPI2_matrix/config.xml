@@ -1112,15 +1112,16 @@ then
     
   done
   
-     # Copying BACK (rsync) $LocalWorkspace --&gt; $LSFWorkspace
+    if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+      # Copying BACK (rsync) $LocalWorkspace --&gt; $LSFWorkspace
+      echo;echo &quot;****************************************************************************************&quot;
+      echo &quot;J: Copying BACK (rsync) whether build is good (for images) or not (for logs)...&quot;
+      echo &quot;     $LSFWorkspace&quot;
+      echo &quot;    --&gt;&quot;
+      echo &quot;     $LocalWorkspace&quot;
 
-    echo;echo &quot;****************************************************************************************&quot;
-    echo &quot;J: Copying BACK (rsync) whether build is good (for images) or not (for logs)...&quot;
-    echo &quot;     $LSFWorkspace&quot;
-    echo &quot;    --&gt;&quot;
-    echo &quot;     $LocalWorkspace&quot;
-
-    sshpass -p $AFSPass rsync -az $AFSUser@$LSFLoginServer:$LSFWorkspace `dirname $LocalWorkspace`
+      sshpass -p $AFSPass rsync -az $AFSUser@$LSFLoginServer:$LSFWorkspace `dirname $LocalWorkspace`
+    fi
   
   
   echo;echo &quot;****************************************************************************************&quot;
