@@ -1296,27 +1296,33 @@ case ${ACT}:$FACTORY in
       touch $MCSLock # create a lock to prevent two build_mcs.tcl running in parallel
       echo &quot;  -&gt; Building MCS file...&quot;
       
+      # Building MCS &amp; PRM files
       cd ${SNAP_ROOT}
       source .snap_config.sh   
       RC_MCS=0; ./hardware/setup/build_mcs.tcl $factory_bitstream $user_bitstream $mcs_bitstream | RC_MCS=$?
       rm -f $MCSLock
       
+      # Copying MCS &amp; PRM files to $SaveDir (local + $IMGservers) 
       if [ $RC_MCS -eq 0 ]; then
-        # Copying mcs + prm files to $SaveDir (local + $IMGservers) 
         LinkDir=${RootSaveDir}/${CRD}/${CRD}_FACTORY_MCS
         mcs_files=${mcs_bitstream%.mcs}*.mcs # Because for some card (AD9V3, AD9H3), 2 mcs files are generated (*_primary.mcs &amp; *_secondary.mcs)
         prm_files=${mcs_bitstream%.mcs}*.prm # Because when two MCS files, two RPM files (*_primary.rpm &amp; *_secondary.rpm)
         SRCFILES=&quot;$mcs_files $prm_files&quot;
-        CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
-
-        #rm -rf $FactoryDir 
+        
+        if [ `ls -1 $mcs_files 2&gt;/dev/null | wc -l ` -gt 0 ]; then # test *mcs files existence as sometimes RC_MCS=0 when build_mcs has failed
+          CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
+          # Deleting $FactoryDir working directory (generated files are now in $SaveDir)
+          rm -rf $FactoryDir 
+        fi
 
 	    echo; echo &quot;  -&gt; ls -latr $SaveDir:&quot;
         ls -latr $SaveDir
       fi
+      
     else
       echo &quot;  -&gt; MCS build running ($MCSLock file present) ==&gt; doing nothing&quot;
     fi
+    
   else
     echo &quot;  -&gt; Both bitstream files couldn&apos;t be found !! ==&gt; doing nothing for the moment&quot;
   fi  
