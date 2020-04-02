@@ -1292,6 +1292,7 @@ case ${ACT}:$FACTORY in
     mcs_bitstream=${factory_bitstream%.bit}___${user_name}.mcs
     
     if [ ! -f $MCSLock ]; then
+      trap &quot;rm -f $MCSLock&quot; EXIT # Setting trap action to be sure we delete the lock if exiting (CTRL-C, failure, etc)
       touch $MCSLock # create a lock to prevent two build_mcs.tcl running in parallel
       echo &quot;  -&gt; Building MCS file...&quot;
       
@@ -1300,6 +1301,7 @@ case ${ACT}:$FACTORY in
       source .snap_config.sh   
       RC_MCS=0; ./hardware/setup/build_mcs.tcl $factory_bitstream $user_bitstream $mcs_bitstream | RC_MCS=$?
       rm -f $MCSLock
+      trap EXIT # Clearing what to do if trap
       
       # Copying MCS &amp; PRM files to $SaveDir (local + $IMGservers) 
       if [ $RC_MCS -eq 0 ]; then
