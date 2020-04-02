@@ -480,39 +480,48 @@ then
     fi
     ;;
     
-esac
+ esac
 
-echo;echo &quot;defconfig DSKIP=$DSKIP&quot;
+ echo;echo &quot;defconfig DSKIP=$DSKIP&quot;
 
 
 #==============================================================================================
 # Checking enough space is available
 
-echo;echo &quot;*******************************************************************************&quot;
-echo &quot;J: Checking enough space is available&quot;
-echo
-#AFSused=`fs lq /afs/bb/proj/fpga/framework/CI_ws/OC_SNAP_IMG_matrix/|grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
-diskused=`df -h /var/jenkins/workspace/OC_IMG_matrix|grep -v Used|awk &apos;{print $5}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
-SSKIP=0;msg=&quot;disk usage =${diskused}%&quot;
+ echo;echo &quot;*******************************************************************************&quot;
+ echo &quot;J: Checking enough space is available&quot;
 
-if   (( diskused &gt; 90 ));then 
-  msg=&quot;ERROR: $msg, stopping additional builds&quot;;SSKIP=1
-  if [ $EmailOrNotEmail -eq 1 ]; then
-    SendAnEmail -s &quot;ERROR: Disk space is used up to ${diskused}%, stopping additional builds&quot; -d &quot;${EmailDestinationList[*]}&quot;
-    #SendAnEmail -s &quot;ERROR: AFS space is used up to ${AFSused}%, stopping additional builds&quot; -d &quot;${EmailDestinationList[*]}&quot;  
-  fi
+ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+   # First time calling ssh, &quot;StrictHostKeyChecking no&quot; updates .ssh/known_hosts file without asking
+   diskused=`sshpass -p $AFSPass ssh -o &quot;StrictHostKeyChecking no&quot; $AFSUser@$LSFLoginServer &quot;fs lq $LSFRootWorkspace&quot; |grep -v Used|awk &apos;{print $4}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
+   msg=&quot;$LSFRootWorkspace disk usage =${diskused}%&quot;
+ else
+   diskused=`df -h $LocalRootWorkspace |grep -v Used|awk &apos;{print $5}&apos;|sed &apos;s/%//g&apos;|sed &apos;s/&lt;//g&apos;`
+   msg=&quot;$LocalRootWorkspace disk usage =${diskused}%&quot;
+ fi
 
-elif (( diskused &gt; 70 ));then
-  msg=&quot;WARNING: $msg&quot;
-  if [ $EmailOrNotEmail -eq 1 ]; then
-    SendAnEmail -s &quot;WARNING: Disk space is used up to ${diskused}%&quot; -d &quot;${EmailDestinationList[*]}&quot;
-    #SendAnEmail -s &quot;WARNING: AFS space is used up to ${AFSused}%&quot; -d &quot;${EmailDestinationList[*]}&quot;  
-  fi
+ SSKIP=0
 
-else
-   msg=&quot;OK: $msg&quot;
-fi
-echo &quot;$msg&quot;
+ if   (( diskused &gt; 90 ));then 
+   msg=&quot;ERROR: $msg, stopping additional builds&quot;;SSKIP=1
+   if [ $EmailOrNotEmail -eq 1 ]; then
+     SendAnEmail -s &quot;ERROR: Disk space is used up to ${diskused}%, stopping additional builds&quot; -d &quot;${EmailDestinationList[*]}&quot;
+     #SendAnEmail -s &quot;ERROR: AFS space is used up to ${AFSused}%, stopping additional builds&quot; -d &quot;${EmailDestinationList[*]}&quot;  
+   fi 
+
+ elif (( diskused &gt; 70 ));then
+    msg=&quot;WARNING: $msg&quot;
+    if [ $EmailOrNotEmail -eq 1 ]; then
+      SendAnEmail -s &quot;WARNING: Disk space is used up to ${diskused}%&quot; -d &quot;${EmailDestinationList[*]}&quot;
+      #SendAnEmail -s &quot;WARNING: AFS space is used up to ${AFSused}%&quot; -d &quot;${EmailDestinationList[*]}&quot;  
+    fi
+
+ else
+    msg=&quot;  -&gt; OK: $msg&quot;
+ fi
+
+ echo &quot;$msg&quot;
+
 
 fi # end of if ASKIP
 
@@ -535,6 +544,12 @@ echo &quot;CL=$CL&quot; &gt;&gt; export_props.properties
 echo &quot;EmailDestinationList=( ${EmailDestinationList[*]} )&quot; &gt;&gt; export_props.properties
 echo &quot;EmailOrNotEmail=$EmailOrNotEmail&quot; &gt;&gt; export_props.properties
 echo &quot;HWUser=${HWUser}&quot; &gt;&gt; export_props.properties
+echo &quot;LSFLoginServer=${LSFLoginServer}&quot; &gt;&gt; export_props.properties
+echo &quot;LocalRootWorkspace=${LocalRootWorkspace}&quot; &gt;&gt; export_props.properties
+echo &quot;LocalWorkspace=${LocalWorkspace}&quot; &gt;&gt; export_props.properties
+echo &quot;LSFRoot=${LSFRoot}&quot; &gt;&gt; export_props.properties
+echo &quot;LSFRootWorkspace=${LSFRootWorkspace}&quot; &gt;&gt; export_props.properties
+echo &quot;LSFWorkspace=${LSFWorkspace}&quot; &gt;&gt; export_props.properties
 
 echo &quot;properties forwarded to next shell:&quot;
 cat export_props.properties
@@ -1444,6 +1459,15 @@ fi
       <externalDelete></externalDelete>
       <disableDeferredWipeout>false</disableDeferredWipeout>
     </hudson.plugins.ws__cleanup.PreBuildCleanup>
+    <org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper plugin="credentials-binding@1.20">
+      <bindings>
+        <org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
+          <credentialsId>LSFUser</credentialsId>
+          <usernameVariable>AFSUser</usernameVariable>
+          <passwordVariable>AFSPass</passwordVariable>
+        </org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
+      </bindings>
+    </org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper>
     <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.19">
       <strategy class="hudson.plugins.build_timeout.impl.NoActivityTimeOutStrategy">
         <timeoutSecondsString>14400</timeoutSecondsString>
