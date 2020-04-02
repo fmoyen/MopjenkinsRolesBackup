@@ -334,7 +334,7 @@ EmailOrNotEmail=0 # 0 means do not send emails; 1 means send email
 HWUser=&quot;capimop&quot;
 
 # Example: RootJobName= SNAP_IMG_CAPI2_matrix
-RootJobName=`echo $JOB_NAME | awk -F&quot;/&quot; &apos;{print $1}&apos;`
+RootJobName=`echo $JOB_NAME | awk -F&quot;/&quot; &apos;{print $1}&apos;` # $JOB_NAME-&gt; Jenkins global variable
 
 # Example: LocalWorkspace= /var/jenkins/workspace/SNAP_IMG_CAPI2_matrix@2/master/ACT/hdl_example.NORAM/CRD_CL/AD9H3_nCL/label/X86_UBUNTU
 LocalWorkspace=$WORKSPACE # $WORKSPACE-&gt; Jenkins global variable

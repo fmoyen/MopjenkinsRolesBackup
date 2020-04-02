@@ -141,6 +141,12 @@ If -- then VIVADO_XXX parameters below are taken into account</description>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
+          <name>LSF_CLUSTER</name>
+          <description>NOT YET AVAILABLE !!!
+Decide whether or not to use the Boeblingen LSF cluster to build images.</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
           <name>TEST_ON_HW</name>
           <description>Enable/disable testing on HW
 (HDL_Example not running)
@@ -284,10 +290,67 @@ CRD=$(echo $CRD_CL| cut -d&apos;_&apos; -f 1)    # chars up to  first &apos;_&ap
 CRDSuffix=$(echo $CRD | cut -d&apos;-&apos; -f 2)
 CL=$(echo $CRD_CL| cut -d&apos;_&apos; -f 2)     # chars behind first &apos;_&apos; identify Cloud build
 
-echo &quot;Build with Card=$CRD Action=$ACT Action_type=$ACTION_TYPE CLOUD_build=$CL branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX test_on_hw=$TEST_ON_HW&quot;
+echo &quot;Build with Card=$CRD Action=$ACT Action_type=$ACTION_TYPE CLOUD_build=$CL branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX LSFCluster=$LSF_CLUSTER test_on_hw=$TEST_ON_HW&quot;
 
 EmailDestinationList=( fabrice_moyen@fr.ibm.com )
+EmailOrNotEmail=0 # 0 means do not send emails; 1 means send email
+
 HWUser=&quot;capimop&quot;
+
+# Example: RootJobName= SNAP_IMG_CAPI2_matrix
+RootJobName=`echo $JOB_NAME | awk -F&quot;/&quot; &apos;{print $1}&apos;` # $JOB_NAME-&gt; Jenkins global variable
+
+# Example: LocalWorkspace= /var/jenkins/workspace/SNAP_IMG_CAPI2_matrix@2/master/ACT/hdl_example.NORAM/CRD_CL/AD9H3_nCL/label/X86_UBUNTU
+LocalWorkspace=$WORKSPACE # $WORKSPACE-&gt; Jenkins global variable
+
+# Example: WorkspaceName= SNAP_IMG_CAPI2_matrix@2  (@2 used if one build is running when starting a 2nd build)
+WorkspaceName=`echo $LocalWorkspace | sed &quot;s%^.*$RootJobName%$RootJobName%&quot; | cut -d&quot;/&quot; -f1`
+
+# Example: LocalRootWorkspace= /var/jenkins/workspace/SNAP_IMG_CAPI2_matrix@2
+LocalRootWorkspace=&quot;`echo $LocalWorkspace | awk -F&quot;/$WorkspaceName/&quot; &apos;{print $1}&apos;`/$WorkspaceName&quot;
+
+LSFRoot=&quot;/afs/bb/proj/fpga&quot;
+
+# Example: LSFRootWorkspace= /afs/bb/proj/fpga/framework/CI_ws/SNAP_IMG_CAPI2_matrix (@2 name is not planned in $LSFRoot/framework/CI_ws)
+LSFRootWorkspace=&quot;$LSFRoot/framework/CI_ws/$RootJobName&quot;
+
+# Example: LSFWorkspace= /afs/bb/proj/fpga/framework/CI_ws/SNAP_IMG_CAPI2_matrix/master/ACT/hdl_example.NORAM/CRD_CL/AD9H3_nCL/label/X86_UBUNTU
+LSFWorkspace=&quot;$LSFRootWorkspace/`echo $LocalWorkspace | awk -F&quot;$LocalRootWorkspace/&quot; &apos;{print $2}&apos;`&quot;
+
+
+
+# LSFLoginServer, RootWorkspace variables... or RootWorkspace pointing to local dir
+if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+  echo;echo &quot;****************************************************************************************&quot;
+  echo &quot;J:LSF Login Server SETUP ...&quot;
+  
+  # Boeblingen LSF cluster Login Servers
+  LSFLoginServersList=&quot;\
+  hdcl050.boeblingen.de.ibm.com
+  hdcl051.boeblingen.de.ibm.com
+  hdcl052.boeblingen.de.ibm.com
+  hdcl027.boeblingen.de.ibm.com
+  hdcl060.boeblingen.de.ibm.com
+  hdclp026.boeblingen.de.ibm.com&quot;
+  
+  LSFLoginServer=&quot;&quot;
+  for i in $LSFLoginServersList; do
+    if ping -c1 $i &gt;/dev/null 2&gt;&amp;1; then 
+      LSFLoginServer=$i
+      break
+    fi
+  done
+
+  if [[ &quot;$LSFLoginServer&quot; != &quot;&quot; ]]; then
+    echo &quot;  -&gt; LSF Login Server = $LSFLoginServer&quot;
+    echo &quot;  -&gt; LSF Root workspace = $LSFRootWorkspace&quot;
+  else
+    echo &quot;  -&gt; no LSF Login Server available ! Exiting&quot;
+    exit 1
+  fi
+
+fi
+
 
 
 #==============================================================================================
@@ -375,18 +438,29 @@ then
     gitnames=`git ls-remote ${GIT_URL}|grep &quot;refs/heads/&quot;|awk &apos;{print $2}&apos;`;RC=$?
     echo &quot;gitnames= $gitnames&quot;
 
+    if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+      # First time calling ssh, &quot;StrictHostKeyChecking no&quot; updates .ssh/known_hosts file without asking
+      WorkspaceDirList=`sshpass -p $AFSPass ssh -o &quot;StrictHostKeyChecking no&quot; $AFSUser@$LSFLoginServer &quot;ls -d $LSFRootWorkspace/*/&quot;`
+    else
+      WorkspaceDirList=`ls -d $LocalRootWorkspace/*/`
+    fi
+
     echo
-    for dir in &quot;/var/jenkins/workspace/OC_IMG_matrix&quot;/*;do    
-      if [ -d &quot;$dir&quot; ];then
-        branch=&quot;refs/heads/&quot;`basename $dir`
-        if [[ &quot;$gitnames&quot; =~ &quot;$branch&quot; ]];then echo &quot;branch=$branch found in gitnames, keeping dir=$dir&quot;
-        else 
-          echo &quot;branch=$branch not found in gitnames, deleting dir=\&apos;$dir\&apos;&quot;
+    for dir in $WorkspaceDirList&quot;;do    
+      branch=&quot;refs/heads/&quot;`basename $dir`
+
+      if [[ &quot;$gitnames&quot; =~ &quot;$branch&quot; ]];then
+        echo &quot;branch=$branch found in gitnames, keeping dir=$dir&quot;
+      else 
+        echo &quot;branch=$branch not found in gitnames, deleting dir=\&apos;$dir\&apos;&quot;
+        if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+          sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer rm -rf &quot;$dir&quot;
+        else
           rm -rf &quot;$dir&quot;     # put in quotes to work for directories with blanks
-        fi        
-      else echo &quot;$dir is not a directory, continuing&quot;
+        fi
       fi
     done
+    
     DSKIP=0
     ;;
 
@@ -423,13 +497,17 @@ SSKIP=0;msg=&quot;disk usage =${diskused}%&quot;
 
 if   (( diskused &gt; 90 ));then 
   msg=&quot;ERROR: $msg, stopping additional builds&quot;;SSKIP=1
-  #SendAnEmail -s &quot;ERROR: Disk space is used up to ${diskused}%, stopping additional builds&quot; -d &quot;${EmailDestinationList[*]}&quot;
-  #SendAnEmail -s &quot;ERROR: AFS space is used up to ${AFSused}%, stopping additional builds&quot; -d &quot;${EmailDestinationList[*]}&quot;  
+  if [ $EmailOrNotEmail -eq 1 ]; then
+    SendAnEmail -s &quot;ERROR: Disk space is used up to ${diskused}%, stopping additional builds&quot; -d &quot;${EmailDestinationList[*]}&quot;
+    #SendAnEmail -s &quot;ERROR: AFS space is used up to ${AFSused}%, stopping additional builds&quot; -d &quot;${EmailDestinationList[*]}&quot;  
+  fi
 
 elif (( diskused &gt; 70 ));then
-   msg=&quot;WARNING: $msg&quot;
-  #SendAnEmail -s &quot;WARNING: Disk space is used up to ${diskused}%&quot; -d &quot;${EmailDestinationList[*]}&quot;
-  #SendAnEmail -s &quot;WARNING: AFS space is used up to ${AFSused}%&quot; -d &quot;${EmailDestinationList[*]}&quot;  
+  msg=&quot;WARNING: $msg&quot;
+  if [ $EmailOrNotEmail -eq 1 ]; then
+    SendAnEmail -s &quot;WARNING: Disk space is used up to ${diskused}%&quot; -d &quot;${EmailDestinationList[*]}&quot;
+    #SendAnEmail -s &quot;WARNING: AFS space is used up to ${AFSused}%&quot; -d &quot;${EmailDestinationList[*]}&quot;  
+  fi
 
 else
    msg=&quot;OK: $msg&quot;
@@ -455,6 +533,7 @@ echo &quot;SKIP=$SKIP&quot; &gt;&gt; export_props.properties
 echo &quot;CRD=$CRD&quot; &gt;&gt; export_props.properties
 echo &quot;CL=$CL&quot; &gt;&gt; export_props.properties
 echo &quot;EmailDestinationList=( ${EmailDestinationList[*]} )&quot; &gt;&gt; export_props.properties
+echo &quot;EmailOrNotEmail=$EmailOrNotEmail&quot; &gt;&gt; export_props.properties
 echo &quot;HWUser=${HWUser}&quot; &gt;&gt; export_props.properties
 
 echo &quot;properties forwarded to next shell:&quot;
@@ -809,13 +888,18 @@ then
 
   elif [ $RC -eq 0 ] &amp;&amp; [ $loop -gt 1 ]; then
     echo &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot;
-    echo &quot;  -&gt; Sending an email to ${EmailDestinationList[*]}&quot;
-    SendAnEmail -s &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot; -d &quot;${EmailDestinationList[*]}&quot;
+    if [ $EmailOrNotEmail -eq 1 ]; then
+      echo &quot;  -&gt; Sending an email to ${EmailDestinationList[*]}&quot;
+      SendAnEmail -s &quot;WARNING : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED after $loop loop(s)&quot; -d &quot;${EmailDestinationList[*]}&quot;
+    fi
 
   elif [ $RC -ne 0 ]; then
     echo &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot;
-    echo &quot;  -&gt; Sending an email to ${EmailDestinationList[*]}&quot;    
-    SendAnEmail -s &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot; -d &quot;${EmailDestinationList[*]}&quot;
+    if [ $EmailOrNotEmail -eq 1 ]; then
+      echo &quot;  -&gt; Sending an email to ${EmailDestinationList[*]}&quot;    
+      SendAnEmail -s &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot; -d &quot;${EmailDestinationList[*]}&quot;
+    fi
+    
     exit 1
   fi
 
