@@ -736,16 +736,25 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
 
   cat &lt;&lt; EOF &gt; $LocalWorkspace/$LSFSource
 # LSF cluster environment variables
-export PATH=\$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
-export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
-#export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/etc
-export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
-#export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
-export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
-export LSF_BINDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
-#export LSF_BINDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
+
+# -&gt; older setup up to RH6
+#export PATH=\$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+#export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
+#export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+#export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+#export LSF_BINDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+
+# -&gt; new setup for RH7
+export PATH=\$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
+export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/etc
+export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
+export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
+export LSF_BINDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
+
+# -&gt; in all cases
 export LSF_SUBMITTER_OSTYPE=Linux
 export LSF_ENVDIR=/home/lsfbb/prod/conf
+
 
 # LSF bsub submission settings
 LSF=&quot;-P zsort&quot;            # project name
@@ -900,6 +909,14 @@ function CopyToDir
     done
   fi
 }
+
+
+
+#==============================================================================================
+#==============================================================================================
+# MAIN starts here !
+#==============================================================================================
+#==============================================================================================
 
 
 #==============================================================================================

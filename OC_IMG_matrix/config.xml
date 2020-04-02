@@ -606,27 +606,114 @@ IMGServers=&quot;jtagx86&quot; # List of servers where to push generated images.
 
 SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not needed to access /dev/cxl
 
-#echo;echo &quot;********************************************************************************&quot;
-#echo &quot;J: LSF SETUP ...&quot;
-# echo
+# Setup $VIV_VERSION
+
+echo;echo &quot;****************************************************************************************&quot;
+echo &quot;J: Setting up Vivado Version&quot;
+if [ &quot;$VIVADO_GLOBAL&quot; == &quot;--&quot; ]; then
+  VIVADOVarName=`echo VIVADO_$CRD`
+  export VIV_VERSION=${!VIVADOVarName}
+  echo &quot; --&gt; For $CRD card, VIVADO version initially set to $VIV_VERSION...&quot;
+
+else
+  export VIV_VERSION=$VIVADO_GLOBAL
+  echo &quot; --&gt; For all cards, VIVADO version initially set to $VIV_VERSION...&quot;
+fi
+
+# Initial LSF setup (LSFSource, LSFRun)
+
+if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+  echo;echo &quot;****************************************************************************************&quot;
+  echo &quot;J:LSF SETUP ...&quot;
+  echo
+  echo &quot;LSF Login Server = $LSFLoginServer&quot;
+  echo &quot;  -&gt; LSF Root workspace = $LSFRootWorkspace&quot;
+
+  # Building $LSFRun &amp; $LSFSource scripts locally as $LocalWorkspace will be lately scp to LSF cluster:$LSFWorkspace
+
+  # LSFSource: source file which includes environment variables
+  
+  LSFSource=LSFSource.sh
+
+  cat &lt;&lt; EOF &gt; $LocalWorkspace/$LSFSource
+# LSF cluster environment variables
+
+# -&gt; older setup up to RH6
+#export PATH=\$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+#export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
+#export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+#export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+#export LSF_BINDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+
+# -&gt; new setup for RH7
+export PATH=\$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
+export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/etc
+export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
+export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
+export LSF_BINDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
+
+# -&gt; in all cases
+export LSF_SUBMITTER_OSTYPE=Linux
+export LSF_ENVDIR=/home/lsfbb/prod/conf
+
+# LSF bsub submission settings
+LSF=&quot;-P zsort&quot;            # project name
+LSF+=&quot; -M 6&quot;              # per-process (soft) memory limit for all processes that belong to this job. LSF_UNIT_FOR_LIMITS=MB ($LSF_ENVDIR/lsf.conf)
+LSF+=&quot; -C 2000&quot;           # per-process (soft) core file size limit for all processes that belong to this job. LSF_UNIT_FOR_LIMITS=MB ($LSF_ENVDIR/lsf.conf)
+LSF+=&apos; -R osver=rh7&apos;      # Asking for RHEL7 which is madatory for Vivado 2019.1 and higher
+LSF+=&apos; -R type==X86_64&apos;   # Vivado make image only runs onto X86 platform
+LSF+=&apos; -R span[hosts=1]&apos;  # Ensure the job runs on only 1 host (not running across the hosts)
+LSF+=&apos; -I&apos;                # interactive job so Jenkins displays job outputs and waits for the job to finish
+LSF+=&apos; -n 8&apos;              # Submitting a parallel job and specifying the number of processors required to run the job 
+export LSF
+
+# Build parameters
+export CRD=$CRD
+export ACT=$ACT
+export VIV_VERSION=$VIV_VERSION
+export SNAP_ROOT=$LSFWorkspace/snap
+
+# VIVADO parameters
+export XILINX_ROOT=$LSFRoot/xilinx
+export XILINXD_LICENSE_FILE=2100@pokwinlic1.pok.ibm.com
+source \$XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
+
+EOF
+
+  echo &quot;  -&gt; LSF Source script = $LocalWorkspace/$LSFSource&quot;
+
+  # LSFRun: script which will be run at LSF Cluster node to build the image
+  
+  LSFRun=LSFRun.bash
+  
+  cat &lt;&lt; EOF &gt; $LocalWorkspace/$LSFRun
+#!/bin/bash
+
+. $LSFSource
+
+echo;echo &quot;  -&gt; Cleaning (make clean) \$SNAP_ROOT &amp; \$SNAP_ROOT/hardware/capi2-bsp directories&quot;
+cd \$SNAP_ROOT
+make clean                   # to make sure we restart from a blank snap
+cd hardware/capi2-bsp
+make clean                   # to make sure we restart from a blank capi-bsp    
+
+echo
+cd \$SNAP_ROOT
+echo command: bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; &quot;make image&quot;
+bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; &quot;make image&quot;
+
+EOF
+
+  chmod +x $LocalWorkspace/$LSFRun
+  echo &quot;  -&gt; LSF Run script = $LocalWorkspace/$LSFRun&quot;
+
+fi
+
+
 ## older setup up to RH6
-##export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
-##export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
-##export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
-##export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
-##export LSF_BINDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
-##export LSF_SUBMITTER_OSTYPE=Linux
-##export LSF_ENVDIR=/home/lsfbb/prod/conf
 ##LSF=&apos;-P zsort -M 2 -C 2000 -I -n 4 -R type=X86_64 -R span[hosts=1]&apos;  # Project, GB_mem, KB_core, #_processors, type of processor
 
 # new setup for RH7
-#export PATH=$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
-#export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/etc
-#export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
-#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
-#export LSF_BINDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
-#export LSF_SUBMITTER_OSTYPE=Linux
-#export LSF_ENVDIR=/home/lsfbb/prod/conf
 #LSF=&apos;-P zsort -M 2 -C 2000 -I -n 4 -R type=X86_64  -R osver=rh7 -R span[hosts=1]&apos;  # Project, GB_mem, KB_core, #_processors, type of processor
 
 
@@ -786,36 +873,28 @@ echo &quot;export XILINX_LOCAL_USER_DATA=no&quot; &gt;&gt; snap_env.sh
 
 
 #==============================================================================================
-# Setting up Vivado and Timing value
+# Setting up Timing value
 
 echo;echo &quot;****************************************************************************************&quot;
-echo &quot;J: Setting up Vivado Version and timing value&quot;
+echo &quot;J: Setting up timing value&quot;
 
 echo
 echo &quot; --&gt; For all CAPI2 cards we extend Timing trials to 5 runs until we optimise placement...&quot;
 echo &quot;     unless expressly indicated&quot;
 
-if [ &quot;$VIVADO_GLOBAL&quot; == &quot;--&quot; ]; then
-  VIVADOVarName=`echo VIVADO_$CRD`
-  export VIV_VERSION=${!VIVADOVarName}
-  echo &quot; --&gt; For $CRD card, VIVADO version initially set to $VIV_VERSION...&quot;
-
-else
-  export VIV_VERSION=$VIVADO_GLOBAL
-  echo &quot; --&gt; For all cards, VIVADO version initially set to $VIV_VERSION...&quot;
-fi
 
 cd ${OCACCEL_ROOT}
 
 echo &quot;export TIMING_LABLIMIT=\&quot;${TIMING_LABLIMIT_CHOICE}\&quot;&quot; &gt;&gt; snap_env.sh
-echo &quot;TIMING LIMIT set to ${TIMING_LABLIMIT_CHOICE}&quot;
+echo &quot;TIMING LIMIT set to ${TIMING_LABLIMIT_CHOICE} into snap_env.sh&quot;
 
 echo;echo &quot;****************************************************************************************&quot; 
 echo &quot;J: Vivado paths &amp; licences server setup ...&quot;
 export XILINX_ROOT=/opt/Xilinx
-#export XILINX_ROOT=/afs/bb/proj/fpga/xilinx
 export XILINXD_LICENSE_FILE=2100@pokwinlic1.pok.ibm.com
 source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
+
+# FAB ICI
 
 
 #==============================================================================================
