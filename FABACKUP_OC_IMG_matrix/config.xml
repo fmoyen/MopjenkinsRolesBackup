@@ -7,6 +7,7 @@ Vivado version used : tests on going for 2019.1 (issue with lsf / RH7)&#xd;
 AC 28 fev 2020 : changed default to 2019.2&#xd;
 &#xd;
 WARNING : P9 oc_find_card is used with OC-$CRD prefix&#xd;
+WARNING : HW tests for HDL_EXAMPLE actions are un-activated as not working (hw_tests.sh, 10140000_ddr.sh, etc)&#xd;
 &#xd;
 Main Issues : &#xd;
 - oc-flash not operational&#xd;
@@ -48,6 +49,28 @@ Main Issues : &#xd;
           <defaultValue>master</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.plugins.matrix__configuration__parameter.MatrixCombinationsParameterDefinition plugin="matrix-combinations-parameter@1.3.1">
+          <name>MatrixFilter</name>
+          <description>The existence of a Matrix Combinations Parameter (whatever its name is) makes the Matrix Combination Plugin run.</description>
+          <shortcutList>
+            <hudson.plugins.matrix__configuration__parameter.shortcut.ResultShortcut>
+              <name>Successful</name>
+              <exact>false</exact>
+              <resultsToCheck>
+                <string>SUCCESS</string>
+              </resultsToCheck>
+            </hudson.plugins.matrix__configuration__parameter.shortcut.ResultShortcut>
+            <hudson.plugins.matrix__configuration__parameter.shortcut.ResultShortcut>
+              <name>Failed</name>
+              <exact>false</exact>
+              <resultsToCheck>
+                <string>FAILURE</string>
+              </resultsToCheck>
+            </hudson.plugins.matrix__configuration__parameter.shortcut.ResultShortcut>
+            <hudson.plugins.matrix__configuration__parameter.shortcut.MatrixCombinationsShortcut_-All/>
+            <hudson.plugins.matrix__configuration__parameter.shortcut.MatrixCombinationsShortcut_-None/>
+          </shortcutList>
+        </hudson.plugins.matrix__configuration__parameter.MatrixCombinationsParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>VIVADO_GLOBAL</name>
           <description>Choose the Vivado version to use
@@ -106,36 +129,6 @@ If -- then VIVADO_XXX parameters below are taken into account</description>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>HDL</name>
-          <description>enable/disable the HDL examples</description>
-          <defaultValue>true</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>HLS</name>
-          <description>enable/disable the HLS examples</description>
-          <defaultValue>true</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>AD9V3</name>
-          <description>enable/disable the OC-AD9V3 card</description>
-          <defaultValue>true</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>AD9H3</name>
-          <description>enable/disable the OC-AD9H3 card</description>
-          <defaultValue>true</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>AD9H7</name>
-          <description>enable/disable the OC-AD9H7 card</description>
-          <defaultValue>true</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>INNOVA2</name>
-          <description>enable/disable the OC-INNOVA2 card</description>
-          <defaultValue>false</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>TIMING_LABLIMIT_CHOICE</name>
           <description>Choose the TIMING_LABLIMIT parameter. If timing is higher than your choice when doing a make image, the run will failed.</description>
@@ -150,14 +143,14 @@ If -- then VIVADO_XXX parameters below are taken into account</description>
         <hudson.model.BooleanParameterDefinition>
           <name>TEST_ON_HW</name>
           <description>Enable/disable testing on HW
-(Disabled by default as oc-flash + oc-reset does&apos;t work yet =&gt; need to reboot to get the code in!)
+(HDL_Example not running)
 </description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>LIST_TEST_CARDS</name>
-          <description>The list of available OpenCAPI cards for HW testing (format: &quot;OC-AD9V3 OC-AD9H7&quot;)</description>
-          <defaultValue>OC-AD9V3 OC-AD9H3</defaultValue>
+          <name>NO_TEST_CARDS</name>
+          <description>The list of cards we do NOT want to HW test for different reasons (please see README for default reasons) </description>
+          <defaultValue>OC-AD9H7 OC-INNOVA2</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -257,7 +250,7 @@ If -- then VIVADO_XXX parameters below are taken into account</description>
       </values>
     </hudson.matrix.LabelAxis>
   </axes>
-  <combinationFilter>(  ((ACT=~&quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;)||(ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; ))  &amp;&amp; ( (CRD_CL=~&quot;OC-AD9V3&quot;  &amp;&amp; AD9V3==&quot;true&quot;) || (CRD_CL=~&quot;OC-INNOVA2&quot;  &amp;&amp; INNOVA2==&quot;true&quot;) || ( CRD_CL=~&quot;OC-AD9H&quot; &amp;&amp; (AD9H3==&quot;true&quot;|| AD9H7==&quot;true&quot;) &amp;&amp; !(ACT=~&quot;DDR&quot;) ) )  ) || (ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;OC-AD9V3&quot;) </combinationFilter>
+  <combinationFilter>(ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;OC-AD9V3_nCL&quot;) || ( ACT!=&quot;test&quot; &amp;&amp; ( (!(CRD_CL=~&quot;OC-INNOVA2&quot;) &amp;&amp; !(CRD_CL=~&quot;OC-AD9H&quot;)) || (CRD_CL=~&quot;OC-AD9H&quot; &amp;&amp; !(ACT=~&quot;DDR&quot;)) ) )</combinationFilter>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
@@ -326,13 +319,18 @@ function SendAnEmail
 echo;echo &quot;*******************************************************************************&quot;
 echo &quot;J: Do not run (abort) non-desired cases (action types, actions, cards)&quot;
 
+
 BSKIP=0
+ 
+&lt;&lt; //// # FAB: Matrix Combination Filter plugin implementation
 
 if [ &quot;${!ACTION_TYPE}&quot; == &quot;false&quot; ]; then BSKIP=1;fi # if ACTION_TYPE=&quot;HLS&quot;, ${!ACTION_TYPE} is identical to $HLS
 if [ &quot;${!CRDSuffix}&quot;         == &quot;false&quot; ]; then BSKIP=1;fi # if CRDSuffix=&quot;AD9V3&quot;, ${!CRDSuffix} is identical to $AD9V3
 if [ &quot;$ACT&quot;            == &quot;test&quot;  ]; then BSKIP=0;fi
 
 echo &quot;  -&gt; action_types (hdl,hls)=$ACTION_TYPE enabled_cards=$CRD BSKIP=$BSKIP&quot;
+
+////
 
 # Following filtering will stop the current test if not required or not possible
 # This will lead to a brown colored result meaning : aborted
@@ -498,7 +496,14 @@ export OCACCEL_ROOT=$USERHOME/oc-accel
 
 TESTBOXES=( ${mopBoxes[*]} ${austinBoxes[*]} ) # init array of systems
 echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
+
 RootSaveDir=/data/Images
+SaveDir=${RootSaveDir}/${CRD}/${CRD}_IMAGES
+RootLogsDir=/data/LogsWhenFailed
+LogsDir=$RootLogsDir/$TARGET_DIR/hardware
+
+IMGServers=&quot;jtagx86&quot; # List of servers where to push generated images.
+
 SudoOrNotSudo=&quot;sudo&quot; # =&quot;sudo&quot; or &quot;&quot; if sudo not needed to access /dev/cxl
 
 #echo;echo &quot;********************************************************************************&quot;
@@ -551,6 +556,87 @@ function SendAnEmail
     echo &quot;&quot; | mail -s &quot;$Subject&quot; $i
   done
 }
+
+
+# Function to copy BIN, BIT, MCS, PRM, etc to the right directory
+# Example 1: CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s jtagx86 -u $HWUser
+# Example 2: CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -s jtagx86 -u $HWUser
+# Example 3: CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;jtagx86 orpington&quot; -u $HWUser
+# Example 4: CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
+# -f should use &quot;&quot; as $SRCFILES are usually lists of files like &quot;primary.bin secondary.bin&quot;
+
+function CopyToDir
+{
+  local OPTIND opt FPGACard SrcFiles ToDir LkDir SSHDest SSHUser
+
+  while getopts &quot;c:f:d:l:s:u:&quot; opt
+  do
+      case $opt in
+      c)
+        FPGACard=&quot;$OPTARG&quot;
+      ;;
+      f)
+        SrcFiles=&quot;$OPTARG&quot;
+      ;;
+      d)
+        ToDir=&quot;$OPTARG&quot;
+      ;;
+      l)
+        LkDir=&quot;$OPTARG&quot;
+      ;;
+      s)
+        SSHDest=&quot;$OPTARG&quot;
+      ;;
+      u)
+        SSHUser=&quot;$OPTARG&quot;
+      ;;
+    esac
+  done
+
+  ToDirFiles=&quot;&quot;
+  for i in $SrcFiles; do ToDirFiles=&quot;$ToDirFiles $ToDir/`basename $i`&quot;; done
+
+
+  # Copying Files to $ToDir
+  echo &quot;  -&gt; Copying $FPGACard images (.bin, .bit, .mcs, .prm) to $ToDir&quot;
+  mkdir -p $ToDir
+  chmod g+w `dirname $ToDir` # /data/Images/OC-AD9V3/OC-AD9V3_IMAGES, we need to chmod /data/Images/OC-AD9V3 if we just created /data/Images/OC-AD9V3
+  chmod g+w $ToDir           # and chmod /data/Images/OC-AD9V3/OC-AD9V3_IMAGES
+  cp -rp $SrcFiles $ToDir
+      
+  for dest in $SSHDest
+  do
+    echo;echo &quot;  -&gt; Copying $FPGACard images to $dest:$ToDir&quot;
+    ssh ${SSHUser}@$dest &quot;mkdir -p $ToDir; chmod g+w $ToDir&quot;
+    scp -rp $SrcFiles ${SSHUser}@$dest:$ToDir
+  done
+
+  # Building symbolic links into $LkDir
+  if [ &quot;$LkDir&quot; != &quot;&quot; ]; then
+    echo &quot;  -&gt; Building $FPGACard images links into $LkDir&quot;
+    mkdir -p $LkDir
+    chmod g+w $LkDir
+    ln -s $ToDirFiles $LkDir
+
+    for i in $ToDirFiles; do echo -e &quot;/\c&quot;;ls -la $LkDir/`basename $i` | cut -d &quot;/&quot; -f2-; done
+
+    for dest in $SSHDest
+    do
+      echo;echo &quot;  -&gt; Building $FPGACard images links into $dest:$LkDir&quot;
+      ssh ${SSHUser}@$dest &quot;mkdir -p $LkDir; chmod g+w $LkDir&quot;
+      ssh ${SSHUser}@$dest &quot;ln -s $ToDirFiles $LkDir&quot;
+      for i in $ToDirFiles; do ssh ${SSHUser}@$dest &quot;echo -e &apos;/\c&apos;;ls -la $LkDir/`basename $i` | cut -d &apos;/&apos; -f2-&quot;; done
+    done
+  fi
+}
+
+
+
+#==============================================================================================
+#==============================================================================================
+# MAIN starts here !
+#==============================================================================================
+#==============================================================================================
 
 
 #==============================================================================================
@@ -780,7 +866,7 @@ done
 
 
 #==============================================================================================
-# Checking if we can test the generated binaries on POWER Hardware (checking LIST_TEST_CARDS list)
+# Checking if we can test the generated binaries on POWER Hardware (checking NO_TEST_CARDS list)
 
 case ${TEST_ON_HW} in
 
@@ -788,27 +874,31 @@ case ${TEST_ON_HW} in
     echo;echo &quot;****************************************************************************************&quot;
     echo &quot;J: Checking if we can test the generated binaries on POWER Hardware (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot;
     echo
-    TestCardAvailable=0
-    for i in ${LIST_TEST_CARDS[@]}
+    TestCardAllowed=1
+    for i in ${NO_TEST_CARDS[@]}
     do
-      if [ &quot;$CRD&quot; == &quot;$i&quot; ];then TestCardAvailable=1;fi
+      if [ &quot;$CRD&quot; == &quot;$i&quot; ];then TestCardAllowed=0;fi
     done
 
-    if [ $TestCardAvailable -eq 0 ]
+    if [ $TestCardAllowed -eq 0 ]
     then
-      SaveDir=$RootSaveDir/${CRD}_missing
-      echo &quot;  -&gt; No test CARD $CRD available, copying $CRD bin-file(s) &amp; bit-file(s) images to $SaveDir&quot;
-      mkdir -p $SaveDir
-      cp -rp $BINFILES $SaveDir
-      echo $BINFILES
-      if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; echo $BITFILES; fi
-      echo;echo &quot;  -&gt; Copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
-      ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
-      scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
+      echo &quot;  -&gt; No test CARD $CRD available...&quot;
+      LinkDir=${RootSaveDir}/${CRD}/${CRD}_test_bypassed
+      SRCFILES=&quot;$BINFILES $BITFILES&quot;
+      CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
       echo &quot;  -&gt; EXITING !&quot;
       exit 0
     else
       echo &quot;  -&gt; OK&quot;
+    fi
+    
+    if [[ &quot;$ACT&quot; =~ &quot;hdl_example&quot; ]]; then
+      echo &quot;  -&gt; OpenCAPI hdl_example HW tests scripts not working...&quot;
+      LinkDir=${RootSaveDir}/${CRD}/${CRD}_test_bypassed
+      SRCFILES=&quot;$BINFILES $BITFILES&quot;
+      CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
+      echo &quot;  -&gt; EXITING !&quot;
+      exit 0
     fi
   ;;
   
@@ -816,48 +906,14 @@ case ${TEST_ON_HW} in
     echo;echo &quot;****************************************************************************************&quot;
     echo &quot;J: No test on POWER Hardware requested (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot; 
     echo
-    SaveDir=$RootSaveDir/oc_no_test_required
-    mkdir -p $SaveDir
-
-    echo &quot;  -&gt; No test required, copying image to $SaveDir&quot;
-    cp -rp $BINFILES $SaveDir
-    echo $BINFILES
-    if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; echo $BITFILES; fi
-    echo;echo &quot;  -&gt; Copying $CRD image to jtagx86:$SaveDir&quot;
-    ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
-    scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
+    LinkDir=${RootSaveDir}/${CRD}/${CRD}_no_test_requested
+    SRCFILES=&quot;$BINFILES $BITFILES&quot;
+    CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
     exit 0
   ;;
 
 esac
 
-
-#==============================================================================================
-# FAB: POWER hardware test is not yet ready, and below end of script is not yet ready too
-# =&gt; Copying and exiting !
-
-echo;echo &quot;****************************************************************************************&quot;
-echo &quot;J: Temporarily copying generated images to jtagx86 and orpington ($RootSaveDir)&quot;
-echo
-
-SaveDir=$RootSaveDir/${CRD}_for_test
-echo &quot;  -&gt; Hardware test for CARD $CRD not yet working, copying $CRD bin-file(s) &amp; bit-file(s) images to $SaveDir&quot;
-mkdir -p $SaveDir
-cp -rp $BINFILES $SaveDir
-echo $BINFILES
-if [ &quot;BITFILES&quot; != &quot;&quot; ]; then cp -rp $BITFILES $SaveDir; echo $BITFILES; fi
-
-echo;echo &quot;  -&gt; Temporarily copying $CRD bin-file(s) to jtagx86:$SaveDir&quot;
-ssh ${HWUser}@jtagx86 &quot;mkdir -p $SaveDir&quot;
-scp -rp $BINFILES ${HWUser}@jtagx86:$SaveDir
-
-echo;echo &quot;  -&gt; Temporarily copying $CRD bin-file(s) to orpington:$SaveDir&quot;
-ssh ${HWUser}@orpington &quot;mkdir -p $SaveDir&quot;
-scp -rp $BINFILES ${HWUser}@orpington:$SaveDir
-
-echo;echo &quot;J: HW TEST NOT YET READY TO WORK ! =&gt; not Exiting but doing all hardware test preparation for debugging purpose !&quot;
-#echo;echo &quot;J: HW TEST NOT YET READY TO WORK ! =&gt; Exiting !&quot;
-#exit 0
 
 #==============================================================================================
 #==============================================================================================
@@ -866,7 +922,7 @@ echo;echo &quot;J: HW TEST NOT YET READY TO WORK ! =&gt; not Exiting but doing a
 
 #==============================================================================================
 # Testing the generated binaries on POWER Hardware
-# (if $TEST_ON_HW==true and $CRD into $LIST_TEST_CARDS[*])
+# (if $TEST_ON_HW==true and $CRD NOT into $NO_TEST_CARDS[*])
 
 # Set unique target directory such that parallel builds do not disturb each other.
 # Well, we might to clean up those from time to time ...
@@ -941,6 +997,8 @@ for loop in `seq 1 $maxloop`;do
 
   echo;echo &quot;*************************************************&quot;
   echo &quot;J: LOOP $loop/$maxloop (`date`)&quot;
+  
+  global_found=0
 
   for box in &quot;${TESTBOXES[@]}&quot;;do
 
@@ -962,16 +1020,17 @@ for loop in `seq 1 $maxloop`;do
     # ($find_card gives the number of found cards inside $?)
     
     if [ $found -ne 0 ];then
-      echo &quot;OK: $found CARD(S) FOUND&quot;
+      echo -e &quot;OK: $found CARD(S) FOUND &quot;
+      global_found=$((global_found+found))
       cards=`ssh -ttq ${HWUser}@${box} &quot;/home/${HWUser}/$find_card -A ${CRD} 2&gt;/dev/null&quot; | head -n1`   
-      echo &quot;      Found card-IDs= $cards&quot;
+      echo &quot;(card-IDs= $cards)&quot;
       # (head is needed because if more than 1 card, $find_card returns something like &quot;0 0&quot; and second line with &quot;Total 2 cards detected&quot;)
     else
       echo &quot;FAILED: NO CARD FOUND&quot;
       unset cards
     fi
 
-    echo &quot;  --&gt; Removing the tool $FindCardTool ($find_card) from $box RC=$SSH_RC&quot;
+    echo &quot;  --&gt; Removing the tool $FindCardTool ($find_card) from $box&quot;
     SSH_RC=0;ssh -ttq ${HWUser}@${box} rm /home/${HWUser}/$find_card || SSH_RC=$?
     if [ $SSH_RC -gt 0 ];then
       echo &quot;    -&gt; Delete $find_card to $box FAILED, continuing anyway...&quot;;
@@ -987,11 +1046,10 @@ for loop in `seq 1 $maxloop`;do
       #------------------------------------
       # no card available =&gt; try other box
       0:*)
-        if [ $box == ${TESTBOXES[*]:(-1)} ];then
-          echo &quot;  --&gt; $box is the last system to test; Waiting for 60s...&quot;
-          sleep 60 # Last box of the list TESBOXES =&gt; Waiting 60s and go to next loop
-        fi
-        continue # next box or next loop (if it was the last box of the list)
+        for i in &quot;${TESTBOXES[@]}&quot;; do [[ $i != $box ]] &amp;&amp; new+=($i);done   # generate new test array without this bow with no card
+        unset TESTBOXES;TESTBOXES=(&quot;${new[@]}&quot;);unset new                   # reassign to original array name
+        echo &quot;  --&gt; No $CRD card available in $box =&gt; removed from Boxes testing list, remaining list= ${TESTBOXES[@]}&quot;        
+        echo &quot;  --&gt; Trying next box / loop...&quot;        
       ;;
 
       #------------------------------------
@@ -1022,12 +1080,7 @@ for loop in `seq 1 $maxloop`;do
       *)      
       	if (( 9&lt;=hours &amp;&amp; hours&lt;=19 ));then
           # It is day time =&gt; priority to interactive users
-      	  echo &quot;  --&gt; hours=$hours (day), nusers=$nusers, try other box&quot;
-          if [ $box == ${TESTBOXES[*]:(-1)} ];then
-            echo &quot;  --&gt; $box is the last system to test; Waiting for 60s...&quot;
-            sleep 60 # Last box of the list TESBOXES =&gt; Waiting 60s and go to next loop
-          fi
-          continue # next box or next loop (if it was the last box of the list)
+      	  echo &quot;  --&gt; $CRD card found but day time (hours=$hours) and users connected (nusers=$nusers), trying next box / loop...&quot;
 
         else
           # It is night =&gt; running on $box even if there are connected users
@@ -1049,7 +1102,13 @@ for loop in `seq 1 $maxloop`;do
       ;;
       
     esac
-    
+
+  if [[ $box == ${TESTBOXES[*]:(-1)} ]] &amp;&amp; [[ $global_found -gt 0 ]]; then
+    echo &quot;J: $box was the last system to test. We globally found $global_found $CRD card(s) but user(s) were connected&quot;
+    echo &quot;   Waiting for 60s and go to next loop...&quot;
+    sleep 60
+  fi
+
   done # for box
   
 done #for loop
@@ -1059,16 +1118,25 @@ if [ $loop -eq $maxloop ];then
   echo;echo &quot;***************************************************************************************&quot;
   echo &quot;J: No card $CRD available with TESTBOXES= ${TESTBOXES[*]}&quot;
   echo
-  SaveDir=&quot;$RootSaveDir/${CRD}_card_not_avail&quot;
-  mkdir -p $SaveDir
-  echo &quot;  -&gt; Copying image to $SaveDir&quot;
-  cp -rp $BINFILES $SaveDir
+  
+  LinkDir=${RootSaveDir}/${CRD}/${CRD}_not_available
+  SRCFILES=&quot;$BINFILES $BITFILES&quot;
+  CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
   echo &quot;  -&gt; EXITING !&quot;
   exit 100
 fi
 
+#------------------------------------------------------------------------------------------------------------------------------
+# Preparing and running HW test
+
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot; running test --&gt; $box&quot;  | tr &apos;[:lower:]&apos; &apos;[:upper:]&apos;
+echo &quot;***************************************************************************************&quot;
+
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Preparing $CRD card image(s) test onto $box system&quot;
+echo
+echo -e &quot;  -&gt; Power OS release: \c&quot;; ssh ${HWUser}@${box} &quot;grep PRETTY_NAME /etc/os-release | cut -d= -f2&quot;
 echo
 ssh ${HWUser}@${box} &quot;echo ------ START of JOB on $box ----&gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;date                                 &gt;&gt; jenkins.log&quot;
@@ -1080,41 +1148,51 @@ ssh ${HWUser}@${box} &quot;echo Git Branch: ${GIT_BRANCH}       &gt;&gt; jenkins
 
 trap finish EXIT  # register finish/unlock function, after lock is set
 
+# Git clone oc-accel tools into $box:$[TARGET_DIR}
 
+echo;echo &quot;---------------------------------------------------------------------------------------&quot;
 echo &quot;  -&gt; Preparing oc-accel workspace by cloning ${GIT_URL} into ${box}:${TARGET_DIR} using branch= ${GIT_BRANCH}&quot;
 RC=0; ssh ${HWUser}@${box} &quot;git clone ${GIT_URL} ${TARGET_DIR};cd ${TARGET_DIR};git checkout ${GIT_BRANCH}&quot; || RC=$?
 
 if [ $RC -ne 0 ];then 
-	SaveDir=&quot;$RootSaveDir/gitclone_error&quot;
     echo &quot;  -&gt; git clone ${GIT_URL} ${TARGET_DIR} failed at ${box} =&gt; copying image to $SaveDir&quot;
-	cp -rp $BINFILES $SaveDir
+    LinkDir=${RootSaveDir}/${CRD}/${CRD}_gitclone_error
+    SRCFILES=&quot;$BINFILES $BITFILES&quot;
+    CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
 	echo &quot;  -&gt; EXITING !&quot;
 	exit 100
 fi
 
-#------------------------------------------------------------------------------------------------------------------------------
-# Git clone capi-utils tools into $box:/home/$HWUser
+# Git clone oc-utils tools into $box:/home/$HWUser
 
-echo;echo &quot;***************************************************************************************&quot;
+echo;echo &quot;---------------------------------------------------------------------------------------&quot;
 echo &quot;  -&gt; Git cloning oc-Utils tools into $box:/home/$HWUser...&quot;
 echo &quot;  (oc-flash-script.sh used by command `echo $RUN | cut -d&apos; &apos; -f1` )&quot;
-ssh ${HWUser}@${box} rm -rf oc-utils
-echo &quot;echo OCUtils URL = $OCUTILS_URL&quot;
-echo &quot;Running : ${HWUser}@${box} git clone -b $OCUTILS_BRANCH $OCUTILS_URL oc-utils&quot;
-RC=0; ssh ${HWUser}@${box} git clone -b $OCUTILS_BRANCH $OCUTILS_URL oc-utils || RC=$?
+RC=0; ssh ${HWUser}@${box} &quot;rm -rf oc-utils &amp;&amp; git clone -b $OCUTILS_BRANCH $OCUTILS_URL oc-utils&quot; || RC=$?
 
 if [ $RC -ne 0 ];then 
-	SaveDir=&quot;$RootSaveDir/gitclone_error&quot;
     echo &quot;  -&gt; git clone -b $OCUTILS_BRANCH $OCUTILS_URL oc-utils failed at ${box} =&gt; copying image to $SaveDir&quot;
-	cp -rp $BINFILES $SaveDir
+    LinkDir=${RootSaveDir}/${CRD}/${CRD}_gitclone_error
+    SRCFILES=&quot;$BINFILES $BITFILES&quot;
+    CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
 	echo &quot;  -&gt; EXITING !&quot;
 	exit 100
 fi
+
+# Build the oc-utils software into $box:/home/$HWUser/capi-utils on the $box
+
+echo;echo &quot;---------------------------------------------------------------------------------------&quot;
+echo &quot;  -&gt; Building the oc-utils software on $box in /home/$HWUser/oc-utils...&quot;
+echo &quot; oc-utils is compiled locally to prevent over-writing the server default config (/lib/oc-utils preserved)&quot;
+ssh ${HWUser}@${box} make -C /home/$HWUser/oc-utils
+
+
+# Copy image(s) to ${box}:/home/${HWUser}/images/${CRD}/${ACT}
 
 echo &quot;  -&gt; Copying image(s) to ${box}:/home/${HWUser}/images/${CRD}/${ACT}&quot;
 ssh $box mkdir -p /home/${HWUser}/images/${CRD}/${ACT}    # create subdirectory, if not avail yet
 
-COUNT_IMAGE=0
+COUNT_IMAGE=0                         # Modification to support SPI dual files cases
 unset IMAGE
 for f in $BINFILES
 do
@@ -1129,14 +1207,14 @@ do
 done
 
 if [ $RSYNC_RC -ne 0 ]; then
-  SaveDir=&quot;$RootSaveDir/rsync_error&quot;
-  echo &quot;  -&gt; copying image(s) to $SaveDir&quot;;
-  mkdir -p $SaveDir
-  cp -rp $BINFILES $SaveDir
+  LinkDir=${RootSaveDir}/${CRD}/${CRD}_rsync_error
+  SRCFILES=&quot;$BINFILES $BITFILES $FACTBINFILES $FACTBITFILES&quot;
+  CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
   echo &quot;EXITING !&quot;
   exit 100
 fi
 
+# Build and Run HW test $RUN Command
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Testing $CRD card image(s) with Power $box system&quot;
@@ -1168,8 +1246,7 @@ echo &quot;     Card=$CRD and SPI8=$SPI8&quot;
 # the already in-place image inside the FPGA, without trying to reset the FPGA &amp; flash the new image.
 # So you just need to uncomment the following line (unset IMAGE) to do so (deleting any IMAGE reference)
 
-# AC : we now want to load and run the new image =&gt; next line commented
-# unset IMAGE
+#unset IMAGE
 
 if [ ${#IMAGE[@]} -eq 0 ]; then
   # no IMAGE to test=&gt; $RUN will just test the image already inside the FPGA (no reset, no flash)
@@ -1180,6 +1257,7 @@ else
 fi
 
 echo;echo &quot;  -&gt; RUN command= $RUN&quot;
+
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Building the software and actions on $box in $TARGET_DIR ...&quot;
@@ -1225,12 +1303,27 @@ else
   echo &quot;  -&gt; Cleaning operation: FAILED&quot;
 fi
   
-if [ $RC -ne 0 ]; then
+if [ $RC -eq 0 ]; then
+  echo;echo &quot;***************************************************************************************&quot;
+  echo &quot;J: Test SUCCEEDED RC= $RC (`date`)&quot;
+  
+  echo &quot;  -&gt;  CARD $CRD Hardware test succeeded...&quot;  
+  LinkDir=${RootSaveDir}/${CRD}/${CRD}_test_OK
+  SRCFILES=&quot;$BINFILES $BITFILES&quot;
+  CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
+
+else
   echo;echo &quot;***************************************************************************************&quot;
   echo &quot;J: Test FAILED RC= $RC (`date`)&quot;
+  
+  echo &quot;  -&gt;  CARD $CRD Hardware test failed...&quot;
+  LinkDir=${RootSaveDir}/${CRD}/${CRD}_test_failure
+  SRCFILES=&quot;$BINFILES $BITFILES&quot;
+  CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
   echo &quot;  -&gt; EXITING !&quot;
-  exit 100
-fi </command>
+  exit 1
+fi 
+</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
@@ -1245,9 +1338,9 @@ fi </command>
       <skipWhenFailed>false</skipWhenFailed>
       <cleanWhenSuccess>true</cleanWhenSuccess>
       <cleanWhenUnstable>true</cleanWhenUnstable>
-      <cleanWhenFailure>true</cleanWhenFailure>
+      <cleanWhenFailure>false</cleanWhenFailure>
       <cleanWhenNotBuilt>true</cleanWhenNotBuilt>
-      <cleanWhenAborted>true</cleanWhenAborted>
+      <cleanWhenAborted>false</cleanWhenAborted>
       <notFailBuild>false</notFailBuild>
       <cleanupMatrixParent>false</cleanupMatrixParent>
       <externalDelete></externalDelete>
@@ -1271,7 +1364,7 @@ fi </command>
     </hudson.plugins.build__timeout.BuildTimeoutWrapper>
     <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.10"/>
     <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.3">
-      <template>#${BUILD_NUMBER} ${GIT_BRANCH} Vivado=${ENV,var=&quot;VIVADO_GLOBAL&quot;} HWTest=${ENV,var=&quot;TEST_ON_HW&quot;} HWCards= ${ENV,var=&quot;LIST_TEST_CARDS&quot;}</template>
+      <template>#${BUILD_NUMBER} ${GIT_BRANCH} Vivado=${ENV,var=&quot;VIVADO_GLOBAL&quot;} HWTest=${ENV,var=&quot;TEST_ON_HW&quot;} NOHWCards= ${ENV,var=&quot;NO_TEST_CARDS&quot;}</template>
       <descriptionTemplate></descriptionTemplate>
       <runAtStart>true</runAtStart>
       <runAtEnd>true</runAtEnd>
