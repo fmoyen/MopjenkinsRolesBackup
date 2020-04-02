@@ -171,9 +171,8 @@ These binaries will be used to create a full MCS image including hld_example.NOR
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>LSF_CLUSTER</name>
-          <description>NOT YET AVAILABLE !!
-Decide whether or not to use the Boeblingen LSF cluster to build images. </description>
-          <defaultValue>false</defaultValue>
+          <description>Decide whether or not to use the Boeblingen LSF cluster to build images. </description>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>TEST_ON_HW</name>
