@@ -719,7 +719,7 @@ else
   echo &quot; --&gt; For all cards, VIVADO version initially set to $VIV_VERSION...&quot;
 fi
 
-# Initial LSF setup (LSFSource, LSFRun)
+# Initial LSF setup (LSFSource, LSFBsubRun, LSFRun)
 
 if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   echo;echo &quot;****************************************************************************************&quot;
@@ -728,9 +728,11 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   echo &quot;LSF Login Server = $LSFLoginServer&quot;
   echo &quot;  -&gt; LSF Root workspace = $LSFRootWorkspace&quot;
 
-  # Building $LSFRun &amp; $LSFSource scripts locally as $LocalWorkspace will be lately scp to LSF cluster:$LSFWorkspace
 
-  # LSFSource: source file which includes environment variables
+# Building $LSFRun, $LSFBsubRun &amp; $LSFSource scripts locally as $LocalWorkspace will be lately scp to LSF cluster:$LSFWorkspace
+
+#-----------------------------------------------------------------------------------------------------------------------------
+# LSFSource: source file which includes environment variables
   
   LSFSource=LSFSource.sh
 
@@ -783,14 +785,15 @@ EOF
 
   echo &quot;  -&gt; LSF Source script = $LocalWorkspace/$LSFSource&quot;
 
-  # LSFRun: script which will be run at LSF Cluster node to build the image
-  
-  LSFRun=LSFRun.bash
-  
-  cat &lt;&lt; EOF &gt; $LocalWorkspace/$LSFRun
-#!/bin/bash
 
-. $LSFSource
+
+#-----------------------------------------------------------------------------------------------------------------------------
+# LSFBsubRun: script which will be bsub at LSF Cluster node to build the image
+
+  LSFBsubRun=LSFBsubRun.bash
+
+  cat &lt;&lt; EOF &gt; $LocalWorkspace/$LSFBsubRun
+#!/bin/bash
 
 echo; echo &quot;###########################################################################################&quot;
 echo &quot;LSF Cluster Node info:&quot;
@@ -810,12 +813,36 @@ make clean                   # to make sure we restart from a blank snap
 cd hardware/capi2-bsp
 make clean                   # to make sure we restart from a blank capi-bsp    
 
+echo; echo &quot;###########################################################################################&quot;
+echo Command: make image
+cd \$SNAP_ROOT
+make image
+
+EOF
+
+  chmod +x $LocalWorkspace/$LSFBsubRun
+  echo &quot;  -&gt; LSF Bsub script = $LocalWorkspace/$LSFBsubRun&quot;
+
+
+#-----------------------------------------------------------------------------------------------------------------------------
+# LSFRun: script which will be run at LSF Cluster node to build the image
+  
+  LSFRun=LSFRun.bash
+  
+  cat &lt;&lt; EOF &gt; $LocalWorkspace/$LSFRun
+#!/bin/bash
+
+. $LSFSource
 
 echo; echo &quot;###########################################################################################&quot;
-echo Command: bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; &quot;make image&quot;
+echo &quot;LSF Cluster Login Server info:&quot;
+echo &quot;------------------------------&quot;
+hostname
 
-cd \$SNAP_ROOT
-bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; &quot;make image&quot;
+echo; echo &quot;###########################################################################################&quot;
+echo Command: bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; $LSFWorkspace/$LSFBsubRun
+
+bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; $LSFWorkspace/$LSFBsubRun
 
 EOF
 

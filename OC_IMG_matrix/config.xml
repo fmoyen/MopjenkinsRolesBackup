@@ -620,7 +620,7 @@ else
   echo &quot; --&gt; For all cards, VIVADO version initially set to $VIV_VERSION...&quot;
 fi
 
-# Initial LSF setup (LSFSource, LSFRun)
+# Initial LSF setup (LSFSource, LSFBsubRun, LSFRun)
 
 if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   echo;echo &quot;****************************************************************************************&quot;
@@ -630,7 +630,7 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   echo &quot;  -&gt; LSF Root workspace = $LSFRootWorkspace&quot;
 
 
-# Building $LSFRun =BSUBRun &amp; $LSFSource scripts locally as $LocalWorkspace will be lately scp to LSF cluster:$LSFWorkspace
+# Building $LSFRun, $LSFBsubRun &amp; $LSFSource scripts locally as $LocalWorkspace will be lately scp to LSF cluster:$LSFWorkspace
 
 #-----------------------------------------------------------------------------------------------------------------------------
 # LSFSource: source file which includes environment variables
@@ -687,11 +687,11 @@ EOF
 
 
 #-----------------------------------------------------------------------------------------------------------------------------
-# BSUBRun: script which will be bsub at LSF Cluster node to build the image
+# LSFBsubRun: script which will be bsub at LSF Cluster node to build the image
 
-  BSUBRun=BSUBRun.bash
+  LSFBsubRun=LSFBsubRun.bash
 
-  cat &lt;&lt; EOF &gt; $LocalWorkspace/$BSUBRun
+  cat &lt;&lt; EOF &gt; $LocalWorkspace/$LSFBsubRun
 #!/bin/bash
 
 echo; echo &quot;###########################################################################################&quot;
@@ -706,20 +706,19 @@ echo; echo &quot;free -h:&quot;
 free -h
 
 echo; echo &quot;###########################################################################################&quot;
-echo &quot;  -&gt; Cleaning (make clean) \$OCACCEL_ROOT &amp; \$OCACCEL_ROOT/hardware/capi2-bsp directories&quot;
+echo &quot;  -&gt; Cleaning (make clean) \$OCACCEL_ROOT directory&quot;
 cd \$OCACCEL_ROOT
 make clean                   # to make sure we restart from a blank snap
 
 echo; echo &quot;###########################################################################################&quot;
 echo Command: make image
 
-cd \$OCACCEL_ROOT
 make image
 
 EOF
 
-  chmod +x $LocalWorkspace/$BSUBRun
-  echo &quot;  -&gt; LSF Bsub script = $LocalWorkspace/$BSUBRun&quot;
+  chmod +x $LocalWorkspace/$LSFBsubRun
+  echo &quot;  -&gt; LSF Bsub script = $LocalWorkspace/$LSFBsubRun&quot;
 
 
 
@@ -739,10 +738,10 @@ echo &quot;------------------------------&quot;
 hostname
 
 echo; echo &quot;###########################################################################################&quot;
-echo Command: bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; $LSFWorkspace/$BSUBRun
+echo Command: bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; $LSFWorkspace/$LSFBsubRun
 
 cd \$OCACCEL_ROOT
-bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; $LSFWorkspace/$BSUBRun
+bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; $LSFWorkspace/$LSFBsubRun
 
 EOF
 
@@ -1018,11 +1017,8 @@ then
     cp $OCACCEL_ROOT/snap_env.sh $OCACCEL_ROOT/Mopjenkins_snap_env.sh
     
     mv $OCACCEL_ROOT/snap_env.sh $OCACCEL_ROOT/temp_snap_env.sh    
-    cat $OCACCEL_ROOT/temp_snap_env.sh | sed &quot;s%export PSLSE_ROOT=.*%export PSLSE_ROOT=$LSFWorkspace/pslse%&quot; &gt; $OCACCEL_ROOT/snap_env.sh
+    cat $OCACCEL_ROOT/temp_snap_env.sh | sed &quot;s%export OCSE_ROOT=.*%export OCSE_ROOT=$LSFWorkspace/ocse%&quot; &gt; $OCACCEL_ROOT/snap_env.sh
     
-    mv $OCACCEL_ROOT/snap_env.sh $OCACCEL_ROOT/temp_snap_env.sh
-    cat $OCACCEL_ROOT/temp_snap_env.sh | sed &quot;s%export PSL9_IP_CORE=.*%export PSL9_IP_CORE=$LSFRoot/framework/cards/$CRD/ibm.com_CAPI_PSL9_WRAP_2.00.zip%&quot; &gt; $OCACCEL_ROOT/snap_env.sh
-
     echo;echo &quot;New LSF snap_env.sh:&quot;
     cat $OCACCEL_ROOT/snap_env.sh
     
