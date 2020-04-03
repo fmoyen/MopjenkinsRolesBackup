@@ -629,9 +629,11 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   echo &quot;LSF Login Server = $LSFLoginServer&quot;
   echo &quot;  -&gt; LSF Root workspace = $LSFRootWorkspace&quot;
 
-  # Building $LSFRun &amp; $LSFSource scripts locally as $LocalWorkspace will be lately scp to LSF cluster:$LSFWorkspace
 
-  # LSFSource: source file which includes environment variables
+# Building $LSFRun =BSUBRun &amp; $LSFSource scripts locally as $LocalWorkspace will be lately scp to LSF cluster:$LSFWorkspace
+
+#-----------------------------------------------------------------------------------------------------------------------------
+# LSFSource: source file which includes environment variables
   
   LSFSource=LSFSource.sh
 
@@ -682,14 +684,15 @@ EOF
 
   echo &quot;  -&gt; LSF Source script = $LocalWorkspace/$LSFSource&quot;
 
-  # LSFRun: script which will be run at LSF Cluster node to build the image
-  
-  LSFRun=LSFRun.bash
-  
-  cat &lt;&lt; EOF &gt; $LocalWorkspace/$LSFRun
-#!/bin/bash
 
-. $LSFSource
+
+#-----------------------------------------------------------------------------------------------------------------------------
+# BSUBRun: script which will be bsub at LSF Cluster node to build the image
+
+  BSUBRun=BSUBRun.bash
+
+  cat &lt;&lt; EOF &gt; $LocalWorkspace/$BSUBRun
+#!/bin/bash
 
 echo; echo &quot;###########################################################################################&quot;
 echo &quot;LSF Cluster Node info:&quot;
@@ -711,14 +714,43 @@ echo; echo &quot;###############################################################
 echo Command: bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; &quot;make image&quot;
 
 cd \$SNAP_ROOT
-bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; &quot;make image&quot;
+make image
+
+EOF
+
+  chmod +x $LocalWorkspace/$BSUBRun
+  echo &quot;  -&gt; LSF Bsub script = $LocalWorkspace/$BSUBRun&quot;
+
+
+
+#-----------------------------------------------------------------------------------------------------------------------------
+# LSFRun: script which will be run at LSF Cluster Login server to push the bsub
+  
+  LSFRun=LSFRun.bash
+  
+  cat &lt;&lt; EOF &gt; $LocalWorkspace/$LSFRun
+#!/bin/bash
+
+. $LSFSource
+
+echo; echo &quot;###########################################################################################&quot;
+echo &quot;LSF Cluster Login Server info:&quot;
+echo &quot;------------------------------&quot;
+hostname
+
+echo; echo &quot;###########################################################################################&quot;
+echo Command: bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; $LSFWorkspace/$BSUBRun
+
+cd \$SNAP_ROOT
+bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; $BSUBRun
 
 EOF
 
   chmod +x $LocalWorkspace/$LSFRun
   echo &quot;  -&gt; LSF Run script = $LocalWorkspace/$LSFRun&quot;
+  
 
-fi
+fi 
 
 
 ## older setup up to RH6
