@@ -745,7 +745,7 @@ export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux2.6-glibc2.3
 export LSF_BINDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
 
 # -&gt; new setup for RH7
-# 2020/04/03 it does not work: /home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/etc/mesub: /lib64/libc.so.6: version `GLIBC_2.14&apos; not found (required by /home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/etc/mesub)
+# 2020/04/03 it does not work: GLIBC_2.14 not found (required by /home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/etc/mesub)
 #export PATH=\$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
 #export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/etc
 #export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
