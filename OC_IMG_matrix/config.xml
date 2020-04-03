@@ -641,18 +641,18 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
 # LSF cluster environment variables
 
 # -&gt; older setup up to RH6
-#export PATH=\$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
-#export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
-#export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
-#export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
-#export LSF_BINDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+export PATH=\$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
+export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/etc
+export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/lib
+export LSF_BINDIR=/home/lsfbb/prod/10.1/linux2.6-glibc2.3-x86_64/bin
 
 # -&gt; new setup for RH7
-export PATH=\$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
-export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/etc
-export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
-export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
-export LSF_BINDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
+#export PATH=\$PATH:/usr/local/bin:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
+#export LSF_SERVERDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/etc
+#export LSF_LIBDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
+#export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/lib
+#export LSF_BINDIR=/home/lsfbb/prod/10.1/linux3.10-glibc2.17-x86_64/bin
 
 # -&gt; in all cases
 export LSF_SUBMITTER_OSTYPE=Linux
@@ -673,7 +673,7 @@ export LSF
 export CRD=$CRD
 export ACT=$ACT
 export VIV_VERSION=$VIV_VERSION
-export SNAP_ROOT=$LSFWorkspace/snap
+export OCACCEL_ROOT=$LSFWorkspace/oc-accel
 
 # VIVADO parameters
 export XILINX_ROOT=$LSFRoot/xilinx
@@ -706,14 +706,14 @@ echo; echo &quot;free -h:&quot;
 free -h
 
 echo; echo &quot;###########################################################################################&quot;
-echo &quot;  -&gt; Cleaning (make clean) \$SNAP_ROOT &amp; \$SNAP_ROOT/hardware/capi2-bsp directories&quot;
-cd \$SNAP_ROOT
+echo &quot;  -&gt; Cleaning (make clean) \$OCACCEL_ROOT &amp; \$OCACCEL_ROOT/hardware/capi2-bsp directories&quot;
+cd \$OCACCEL_ROOT
 make clean                   # to make sure we restart from a blank snap
 
 echo; echo &quot;###########################################################################################&quot;
-echo Command: bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; &quot;make image&quot;
+echo Command: make image
 
-cd \$SNAP_ROOT
+cd \$OCACCEL_ROOT
 make image
 
 EOF
@@ -741,8 +741,8 @@ hostname
 echo; echo &quot;###########################################################################################&quot;
 echo Command: bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; $LSFWorkspace/$BSUBRun
 
-cd \$SNAP_ROOT
-bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; $BSUBRun
+cd \$OCACCEL_ROOT
+bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; $LSFWorkspace/$BSUBRun
 
 EOF
 
@@ -1015,18 +1015,18 @@ then
     echo;echo &quot;****************************************************************************************&quot;
     echo &quot;J: Modifying snap_env.sh to match configuration of the LSF Cluster&quot;
     
-    cp $SNAP_ROOT/snap_env.sh $SNAP_ROOT/Mopjenkins_snap_env.sh
+    cp $OCACCEL_ROOT/snap_env.sh $OCACCEL_ROOT/Mopjenkins_snap_env.sh
     
-    mv $SNAP_ROOT/snap_env.sh $SNAP_ROOT/temp_snap_env.sh    
-    cat $SNAP_ROOT/temp_snap_env.sh | sed &quot;s%export PSLSE_ROOT=.*%export PSLSE_ROOT=$LSFWorkspace/pslse%&quot; &gt; $SNAP_ROOT/snap_env.sh
+    mv $OCACCEL_ROOT/snap_env.sh $OCACCEL_ROOT/temp_snap_env.sh    
+    cat $OCACCEL_ROOT/temp_snap_env.sh | sed &quot;s%export PSLSE_ROOT=.*%export PSLSE_ROOT=$LSFWorkspace/pslse%&quot; &gt; $OCACCEL_ROOT/snap_env.sh
     
-    mv $SNAP_ROOT/snap_env.sh $SNAP_ROOT/temp_snap_env.sh
-    cat $SNAP_ROOT/temp_snap_env.sh | sed &quot;s%export PSL9_IP_CORE=.*%export PSL9_IP_CORE=$LSFRoot/framework/cards/$CRD/ibm.com_CAPI_PSL9_WRAP_2.00.zip%&quot; &gt; $SNAP_ROOT/snap_env.sh
+    mv $OCACCEL_ROOT/snap_env.sh $OCACCEL_ROOT/temp_snap_env.sh
+    cat $OCACCEL_ROOT/temp_snap_env.sh | sed &quot;s%export PSL9_IP_CORE=.*%export PSL9_IP_CORE=$LSFRoot/framework/cards/$CRD/ibm.com_CAPI_PSL9_WRAP_2.00.zip%&quot; &gt; $OCACCEL_ROOT/snap_env.sh
 
     echo;echo &quot;New LSF snap_env.sh:&quot;
-    cat $SNAP_ROOT/snap_env.sh
+    cat $OCACCEL_ROOT/snap_env.sh
     
-    rm $SNAP_ROOT/temp_snap_env.sh
+    rm $OCACCEL_ROOT/temp_snap_env.sh
 
     # Copying (rsync) $LocalWorkspace --&gt; $LSFWorkspace
 
@@ -1059,8 +1059,8 @@ then
       
     else
       echo;echo &quot;  -&gt; Building the Image (make image) locally&quot;
-      echo;echo &quot;  -&gt; Cleaning (make clean) $SNAP_ROOT &amp; $SNAP_ROOT/hardware/capi2-bsp directories&quot;
-      cd $SNAP_ROOT
+      echo;echo &quot;  -&gt; Cleaning (make clean) $OCACCEL_ROOT &amp; $OCACCEL_ROOT/hardware/capi2-bsp directories&quot;
+      cd $OCACCEL_ROOT
       make clean                   # to make sure we restart from a blank snap
       RC=0; make image &amp;&amp; break || RC=$?
     fi
