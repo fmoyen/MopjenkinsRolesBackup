@@ -502,7 +502,7 @@ then
  
   test )
     echo &quot;J: ACT=test&quot;
-    gitnames=`git ls-remote https://github.com/open-power/snap|grep &quot;refs/heads/&quot;|awk &apos;{print $2}&apos;`
+    gitnames=`git ls-remote ${GIT_URL}|grep &quot;refs/heads/&quot;|awk &apos;{print $2}&apos;`
     echo
 
     if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then

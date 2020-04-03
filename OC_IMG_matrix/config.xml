@@ -435,7 +435,7 @@ then
   test )
     echo &quot;J: ACT=test&quot;
     echo
-    gitnames=`git ls-remote ${GIT_URL}|grep &quot;refs/heads/&quot;|awk &apos;{print $2}&apos;`;RC=$?
+    gitnames=`git ls-remote ${GIT_URL}|grep &quot;refs/heads/&quot;|awk &apos;{print $2}&apos;`
     echo &quot;gitnames= $gitnames&quot;
 
     if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
@@ -446,7 +446,7 @@ then
     fi
 
     echo
-    for dir in $WorkspaceDirList&quot;;do    
+    for dir in $WorkspaceDirList;do    
       branch=&quot;refs/heads/&quot;`basename $dir`
 
       if [[ &quot;$gitnames&quot; =~ &quot;$branch&quot; ]];then
