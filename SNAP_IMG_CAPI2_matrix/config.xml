@@ -792,15 +792,29 @@ EOF
 
 . $LSFSource
 
-echo;echo &quot;  -&gt; Cleaning (make clean) \$SNAP_ROOT &amp; \$SNAP_ROOT/hardware/capi2-bsp directories&quot;
+echo; echo &quot;###########################################################################################&quot;
+echo &quot;LSF Cluster Node info:&quot;
+echo &quot;----------------------&quot;
+hostname
+grep PRETTY_NAME /etc/os-release | cut -d= -f2
+uname -a
+echo; echo &quot;lscpu:&quot; 
+lscpu
+echo; echo &quot;lsmem:&quot;
+lsmem
+
+echo; echo &quot;###########################################################################################&quot;
+echo &quot;  -&gt; Cleaning (make clean) \$SNAP_ROOT &amp; \$SNAP_ROOT/hardware/capi2-bsp directories&quot;
 cd \$SNAP_ROOT
 make clean                   # to make sure we restart from a blank snap
 cd hardware/capi2-bsp
 make clean                   # to make sure we restart from a blank capi-bsp    
 
-echo
+
+echo; echo &quot;###########################################################################################&quot;
+echo Command: bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; &quot;make image&quot;
+
 cd \$SNAP_ROOT
-echo command: bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; &quot;make image&quot;
 bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; &quot;make image&quot;
 
 EOF
@@ -1115,8 +1129,6 @@ then
       echo &quot;       ./$LSFRun&quot;
 
       RC=0; sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;cd $LSFWorkspace; ./$LSFRun&quot; &amp;&amp; break || RC=$?
-      echo &quot;RC= $RC&quot;
-      echo &quot;FAB DEV !! EXITING...&quot;; exit 1
       
     else
       echo;echo &quot;  -&gt; Building the Image (make image) locally&quot;
@@ -1131,17 +1143,17 @@ then
     
   done
   
-    # Copying BACK (rsync) $LocalWorkspace --&gt; $LSFWorkspace if using LSF cluster
+  # Copying BACK (rsync) $LocalWorkspace --&gt; $LSFWorkspace if using LSF cluster
     
-    if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
-      echo;echo &quot;****************************************************************************************&quot;
-      echo &quot;J: Copying BACK (rsync) whether build is good (for images) or not (for logs)...&quot;
-      echo &quot;     $LSFWorkspace&quot;
-      echo &quot;    --&gt;&quot;
-      echo &quot;     $LocalWorkspace&quot;
+  if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+    echo;echo &quot;****************************************************************************************&quot;
+    echo &quot;J: Copying BACK (rsync) whether build is good (for images) or not (for logs)...&quot;
+    echo &quot;     $LSFWorkspace&quot;
+    echo &quot;    --&gt;&quot;
+    echo &quot;     $LocalWorkspace&quot;
 
-      sshpass -p $AFSPass rsync -az $AFSUser@$LSFLoginServer:$LSFWorkspace `dirname $LocalWorkspace`
-    fi
+    sshpass -p $AFSPass rsync -az $AFSUser@$LSFLoginServer:$LSFWorkspace `dirname $LocalWorkspace`
+  fi
   
   # Checking the result of the make image operation
   

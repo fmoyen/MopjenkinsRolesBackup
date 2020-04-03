@@ -691,15 +691,26 @@ EOF
 
 . $LSFSource
 
-echo;echo &quot;  -&gt; Cleaning (make clean) \$SNAP_ROOT &amp; \$SNAP_ROOT/hardware/capi2-bsp directories&quot;
+echo; echo &quot;###########################################################################################&quot;
+echo &quot;LSF Cluster Node info:&quot;
+echo &quot;----------------------&quot;
+hostname
+grep PRETTY_NAME /etc/os-release | cut -d= -f2
+uname -a
+echo; echo &quot;lscpu:&quot; 
+lscpu
+echo; echo &quot;lsmem:&quot;
+lsmem
+
+echo; echo &quot;###########################################################################################&quot;
+echo &quot;  -&gt; Cleaning (make clean) \$SNAP_ROOT &amp; \$SNAP_ROOT/hardware/capi2-bsp directories&quot;
 cd \$SNAP_ROOT
 make clean                   # to make sure we restart from a blank snap
-cd hardware/capi2-bsp
-make clean                   # to make sure we restart from a blank capi-bsp    
 
-echo
+echo; echo &quot;###########################################################################################&quot;
+echo Command: bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; &quot;make image&quot;
+
 cd \$SNAP_ROOT
-echo command: bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; &quot;make image&quot;
 bsub \$LSF -J &quot;\${CRD}_\${ACT}_image&quot; &quot;make image&quot;
 
 EOF
@@ -894,8 +905,6 @@ export XILINX_ROOT=/opt/Xilinx
 export XILINXD_LICENSE_FILE=2100@pokwinlic1.pok.ibm.com
 source $XILINX_ROOT/Vivado/${VIV_VERSION}/settings64.sh
 
-# FAB ICI
-
 
 #==============================================================================================
 # Cadence setup
@@ -967,15 +976,81 @@ esac
 if [ &quot;$CL&quot; == &quot;nCL&quot; ]
 then
 
+  if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+    
+    # Modify snap_env.sh to match configuration of the LSF Cluster
+
+    echo;echo &quot;****************************************************************************************&quot;
+    echo &quot;J: Modifying snap_env.sh to match configuration of the LSF Cluster&quot;
+    
+    cp $SNAP_ROOT/snap_env.sh $SNAP_ROOT/Mopjenkins_snap_env.sh
+    
+    mv $SNAP_ROOT/snap_env.sh $SNAP_ROOT/temp_snap_env.sh    
+    cat $SNAP_ROOT/temp_snap_env.sh | sed &quot;s%export PSLSE_ROOT=.*%export PSLSE_ROOT=$LSFWorkspace/pslse%&quot; &gt; $SNAP_ROOT/snap_env.sh
+    
+    mv $SNAP_ROOT/snap_env.sh $SNAP_ROOT/temp_snap_env.sh
+    cat $SNAP_ROOT/temp_snap_env.sh | sed &quot;s%export PSL9_IP_CORE=.*%export PSL9_IP_CORE=$LSFRoot/framework/cards/$CRD/ibm.com_CAPI_PSL9_WRAP_2.00.zip%&quot; &gt; $SNAP_ROOT/snap_env.sh
+
+    echo;echo &quot;New LSF snap_env.sh:&quot;
+    cat $SNAP_ROOT/snap_env.sh
+    
+    rm $SNAP_ROOT/temp_snap_env.sh
+
+    # Copying (rsync) $LocalWorkspace --&gt; $LSFWorkspace
+
+    echo;echo &quot;****************************************************************************************&quot;
+    echo &quot;J: Copying (rsync)...&quot;
+    echo &quot;     $LocalWorkspace&quot;
+    echo &quot;    --&gt;&quot;
+    echo &quot;     $LSFWorkspace&quot;
+
+    sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;rm -rf $LSFWorkspace&quot;
+    sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;mkdir -p `dirname $LSFWorkspace`&quot;
+    sshpass -p $AFSPass rsync -az $LocalWorkspace $AFSUser@$LSFLoginServer:`dirname $LSFWorkspace`
+  fi
+
+  # $maxloop number of tentative to try and make the image
+  
   maxloop=5;
   for loop in `seq 1 $maxloop`
   do  
     echo;echo &quot;****************************************************************************************&quot;
     echo &quot;J: Build Non-Cloud Image (make image) for $CRD, Loop ${loop}/$maxloop (`date`)&quot;
-    echo
-    #RC=0; bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make image&quot; &amp;&amp; break || RC=$?
-	RC=0; make image &amp;&amp; break || RC=$?
+
+    if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+      echo;echo &quot;  -&gt; Building the Image (make image) with LSF Cluster&quot;
+      echo;echo &quot;     Executing on $LSFLoginServer:&quot;
+      echo &quot;       cd $LSFWorkspace&quot;
+      echo &quot;       ./$LSFRun&quot;
+
+      RC=0; sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;cd $LSFWorkspace; ./$LSFRun&quot; &amp;&amp; break || RC=$?
+      
+    else
+      echo;echo &quot;  -&gt; Building the Image (make image) locally&quot;
+      echo;echo &quot;  -&gt; Cleaning (make clean) $SNAP_ROOT &amp; $SNAP_ROOT/hardware/capi2-bsp directories&quot;
+      cd $SNAP_ROOT
+      make clean                   # to make sure we restart from a blank snap
+      RC=0; make image &amp;&amp; break || RC=$?
+    fi
+    
   done
+  
+  # Copying BACK (rsync) $LocalWorkspace --&gt; $LSFWorkspace if using LSF cluster
+  
+  if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+    echo;echo &quot;****************************************************************************************&quot;
+    echo &quot;J: Copying BACK (rsync) whether build is good (for images) or not (for logs)...&quot;
+    echo &quot;     $LSFWorkspace&quot;
+    echo &quot;    --&gt;&quot;
+    echo &quot;     $LocalWorkspace&quot;
+
+    sshpass -p $AFSPass rsync -az $AFSUser@$LSFLoginServer:$LSFWorkspace `dirname $LocalWorkspace`
+  fi
+  
+  # Checking the result of the make image operation
+  
+  echo;echo &quot;****************************************************************************************&quot;
+  echo &quot;J: RESULT for Non-Cloud Image build (make image) for $CRD, Loop ${loop}/$maxloop (`date`)&quot;  
 
   if [ $RC -eq 0 ] &amp;&amp; [ $loop -eq 1 ]; then 
     echo &quot;OK : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED at the first try (loop=$loop)&quot;
