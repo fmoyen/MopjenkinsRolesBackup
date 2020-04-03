@@ -796,12 +796,12 @@ echo; echo &quot;###############################################################
 echo &quot;LSF Cluster Node info:&quot;
 echo &quot;----------------------&quot;
 hostname
-grep PRETTY_NAME /etc/os-release | cut -d= -f2
+{ [ -f /etc/os-release ] &amp;&amp; grep PRETTY_NAME /etc/os-release | cut -d= -f2 ; } || { [ -f /etc/system-release ] &amp;&amp; cat /etc/system-release ; }
 uname -a
 echo; echo &quot;lscpu:&quot; 
 lscpu
-echo; echo &quot;lsmem:&quot;
-lsmem
+echo; echo &quot;free -h:&quot;
+free -h
 
 echo; echo &quot;###########################################################################################&quot;
 echo &quot;  -&gt; Cleaning (make clean) \$SNAP_ROOT &amp; \$SNAP_ROOT/hardware/capi2-bsp directories&quot;
