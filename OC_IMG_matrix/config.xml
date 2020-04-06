@@ -832,12 +832,14 @@ function CopyToDir
   chmod g+w `dirname $ToDir` # /data/Images/OC-AD9V3/OC-AD9V3_IMAGES, we need to chmod /data/Images/OC-AD9V3 if we just created /data/Images/OC-AD9V3
   chmod g+w $ToDir           # and chmod /data/Images/OC-AD9V3/OC-AD9V3_IMAGES
   cp -rp $SrcFiles $ToDir
+  chmod 664 $ToDirFiles      # giving rw- attributs for user &amp; group and r-- for other
       
   for dest in $SSHDest
   do
     echo;echo &quot;  -&gt; Copying $FPGACard images to $dest:$ToDir&quot;
     ssh ${SSHUser}@$dest &quot;mkdir -p $ToDir; chmod g+w $ToDir&quot;
     scp -rp $SrcFiles ${SSHUser}@$dest:$ToDir
+    ssh ${SSHUser}@$dest &quot;chmod 664 $ToDirFiles&quot;      # giving rw- attributs for user &amp; group and r-- for other
   done
 
   # Building symbolic links into $LkDir
