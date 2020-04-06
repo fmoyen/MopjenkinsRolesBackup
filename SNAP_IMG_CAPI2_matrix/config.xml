@@ -692,7 +692,7 @@ export TARGET_DIR=`echo $TARGET_DIR | sed -e &apos;s/[=,\/]/-/g&apos;`
 RootSaveDir=/data/Images
 SaveDir=${RootSaveDir}/${CRD}/${CRD}_IMAGES
 RootLogsDir=/data/LogsWhenFailed
-LogsDir=$RootLogsDir/$TARGET_DIR/hardware
+LogsDir=$RootLogsDir/${BUILD_NUMBER}-${JOB_NAME}-${GIT_BRANCH}/hardware
 PSLSE_BRANCH=master
 #PSL9File=/opt/IBM/PSL9/v2.00/ibm.com_CAPI_PSL9_WRAP_2.00.zip # v2.00: original ibm zip file
 PSL9File=/opt/IBM/PSL9/v2.01/ibm.com_CAPI_PSL9_WRAP_2.01.zip # v2.01: Added virtexuplushbm supportedFamilies

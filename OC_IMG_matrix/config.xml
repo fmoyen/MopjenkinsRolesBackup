@@ -600,7 +600,7 @@ echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
 RootSaveDir=/data/Images
 SaveDir=${RootSaveDir}/${CRD}/${CRD}_IMAGES
 RootLogsDir=/data/LogsWhenFailed
-LogsDir=$RootLogsDir/$TARGET_DIR/hardware
+LogsDir=$RootLogsDir/${BUILD_NUMBER}-${JOB_NAME}-${GIT_BRANCH}/hardware
 
 IMGServers=&quot;jtagx86&quot; # List of servers where to push generated images.
 
