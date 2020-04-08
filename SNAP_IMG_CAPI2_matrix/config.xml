@@ -5,7 +5,7 @@
 In case of problems: please contact alexandre.castellane@fr.ibm.com or fabrice_moyen@fr.ibm.com&#xd;
 &#xd;
 WARNING !!! &#xd;
-=&gt;&gt; FX609, S241, U200 cards are not available for test =&gt; only binary generation are performed (no hw test)  &#xd;
+=&gt;&gt; FX609, S241, U200, U50 cards are not available for test =&gt; only binary generation are performed (no hw test)  &#xd;
 ==&gt; Orpington hosts 1 AD9V3 + 1 OC-AD8V3&#xd;
 ==&gt; Lewen05 hosts 1 N250SP and 1 Mellanox INNOVA2 (no CAPI reset nor automated tests possible)&#xd;
 ==&gt; Pavilly hosts 1 OC-AD9V3 (main mode is C2)&#xd;
@@ -130,6 +130,16 @@ If -- then VIVADO_XXX parameters below are taken into account</description>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
+          <name>VIVADO_U50</name>
+          <description>Enables U50 test</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>2019.2</string>
+              <string>2019.1</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
           <name>VIVADO_U200</name>
           <description></description>
           <choices class="java.util.Arrays$ArrayList">
@@ -182,7 +192,7 @@ These binaries will be used to create a full MCS image including hld_example.NOR
         <hudson.model.StringParameterDefinition>
           <name>NO_TEST_CARDS</name>
           <description>The list of CAPI2.0 cards we do NOT want to HW test for different reasons (please see README for default reasons) </description>
-          <defaultValue>FX609 S241 U200 AD9H7</defaultValue>
+          <defaultValue>FX609 S241 U200 U50 AD9H7</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -288,6 +298,7 @@ H 22-23/1 * * *</spec>
         <string>FX609_nCL</string>
         <string>S241_nCL</string>
         <string>U200_nCL</string>
+        <string>U50_nCL</string>
       </values>
     </hudson.matrix.TextAxis>
     <hudson.matrix.LabelAxis>
