@@ -59,14 +59,14 @@ Orpington and Lewen05 are P9 (CAPI2.0 cards)</description>
           <description>List of Austin systems available for testing :
 (Assuming no VPN or jump server is needed to access Austin servers, 9.X.X.X addresses)
 (it needs to define capimop user with authorized_keys)</description>
-          <defaultValue>hawklp08.aus.stglabs.ibm.com</defaultValue>
+          <defaultValue>hawklp07.aus.stglabs.ibm.com hawklp08.aus.stglabs.ibm.com</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>CARDS</name>
           <description>List of available cards for Hardware test
 CARDS=(ADKU3 AD8K5 S121B N250S N250SP AD9V3)</description>
-          <defaultValue>ADKU3 AD8K5 N250S AD9V3 AD9H3 N250SP</defaultValue>
+          <defaultValue>ADKU3 AD8K5 N250S AD9V3 AD9H3 AD9H7 N250SP</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
