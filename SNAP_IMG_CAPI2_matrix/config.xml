@@ -1061,14 +1061,15 @@ case $ACT in          # select config &amp; compile action
 
       for box in &quot;${TESTBOXES[@]}&quot;;do
       
+        # First time calling ssh, &quot;StrictHostKeyChecking no&quot; updates .ssh/known_hosts file without asking
         if [[ ${mopBoxes[*]} =~ $box ]]
         then
           # $box is a Montpellier server
           echo -e &quot;MOP   : $box -&gt; \c&quot;
-          RC=0;ssh ${HWUser}@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
+          RC=0;ssh -o &quot;StrictHostKeyChecking no&quot; ${HWUser}@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
         else
           echo -e &quot;AUSTIN: $box -&gt; \c&quot;
-          RC=0;ssh ${HWUser}@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
+          RC=0;ssh -o &quot;StrictHostKeyChecking no&quot; ${HWUser}@$box ping localhost -c1 &gt;/dev/null 2&gt;&amp;1 || RC=$?
         fi
 
         if [ $RC == &quot;0&quot; ]; then echo &quot;OK&quot;; else echo &quot;FAILED&quot;;continue;fi
