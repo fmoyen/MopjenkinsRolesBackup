@@ -477,6 +477,13 @@ case &quot;$CRD:$ACT&quot; in
     ASKIP=1
     ;;
     
+  *:hls_hbm_memcopy ) # HBM is only available on 9Hx cards
+    if [[ $CRD != &quot;AD9H3&quot; &amp;&amp; $CRD != &quot;AD9H7&quot; ]]; then
+      C=&quot;hbmc&quot;
+      ASKIP=1
+    fi
+    ;;
+        
   *:hls_parallel_memcpy)
     if [[ $CRD != &quot;AD9V3&quot; &amp;&amp; $CRD != &quot;N250SP&quot; ]]; then
       C=&quot;pmcp&quot;
