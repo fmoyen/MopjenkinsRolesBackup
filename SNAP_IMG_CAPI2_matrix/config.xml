@@ -1091,8 +1091,8 @@ case $ACT in          # select config &amp; compile action
     exit 0                     
     ;;
     
-  *&quot;nvme&quot;*|*&quot;NVME&quot;*)
-    echo &quot;J: ACT=*NVME* ==&gt; SIMULATOR=nosim &amp; Configuring image thanks to $CRD.$ACT.defconfig file ...&quot;;echo
+  *&quot;nvme&quot;*|*&quot;NVME&quot;*|&quot;hbm&quot;*)
+    echo &quot;J: ACT=*NVME* or &quot;HBM&quot; ==&gt; SIMULATOR=nosim &amp; Configuring image thanks to $CRD.$ACT.defconfig file ...&quot;;echo
     echo &quot;export SIMULATOR=nosim&quot; &gt;&gt; snap_env.sh
     make -s $CRD.$ACT.defconfig
     ;;
