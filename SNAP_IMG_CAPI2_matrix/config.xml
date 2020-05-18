@@ -309,7 +309,7 @@ H 22-23/1 * * *</spec>
       </values>
     </hudson.matrix.LabelAxis>
   </axes>
-  <combinationFilter>(ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;AD9V3_nCL&quot;) || ACT!=&quot;test&quot;</combinationFilter>
+  <combinationFilter>( (CRD_CL=~&quot;N250SP_nCL&quot; &amp;&amp; !(ACT=~&quot;hbm&quot;)         &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;)) || (CRD_CL=~&quot;S241_nCL&quot;   &amp;&amp; !(ACT=~&quot;hbm&quot;)         &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;)) || (CRD_CL=~&quot;FX609_nCL&quot;  &amp;&amp; !(ACT=~&quot;hbm&quot;)         &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;)) || (CRD_CL=~&quot;AD9V3_nCL&quot;  &amp;&amp; !(ACT=~&quot;hbm&quot;)         &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;)) || (CRD_CL=~&quot;AD9H&quot;       &amp;&amp; !(ACT=~&quot;hls_memcopy&quot;) &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;)) || (CRD_CL=~&quot;U200_nCL&quot;   &amp;&amp; !(ACT=~&quot;hbm&quot;)         &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;)) || (CRD_CL=~&quot;U50_nCL&quot;    &amp;&amp; !(ACT=~&quot;hbm&quot;)         &amp;&amp; !(ACT=~&quot;NVME&quot; || ACT=~&quot;nvme&quot;)) ) || (ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;AD9V3_nCL&quot;)</combinationFilter>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
