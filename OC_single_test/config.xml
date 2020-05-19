@@ -64,7 +64,7 @@ Orpington and Lewen05 are P9</description>
           <description>List of Austin systems available for testing :
 (Assuming no VPN or jump server is needed to access Austin servers, 9.X.X.X addresses)
 (it needs to define capimop user with authorized_keys)</description>
-          <defaultValue>hawklp08.aus.stglabs.ibm.com</defaultValue>
+          <defaultValue>hawklp07.aus.stglabs.ibm.com hawklp08.aus.stglabs.ibm.com</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
