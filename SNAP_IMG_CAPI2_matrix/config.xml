@@ -166,6 +166,7 @@ If -- then VIVADO_XXX parameters below are taken into account</description>
 Warning: -200ps is not easy to reach and needs several attempts (sometimes 5 attempts are not enough).</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
+              <string>0</string>
               <string>-300</string>
               <string>-200</string>
               <string>-1000</string>
