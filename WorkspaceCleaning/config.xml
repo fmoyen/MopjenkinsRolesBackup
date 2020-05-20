@@ -122,9 +122,9 @@ echo &quot;LSFRootWorkspace= $LSFRootWorkspace&quot;
 
 if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   # First time calling ssh, &quot;StrictHostKeyChecking no&quot; updates .ssh/known_hosts file without asking
-  WorkspaceDirList=`sshpass -p $AFSPass ssh -o &quot;StrictHostKeyChecking no&quot; $AFSUser@$LSFLoginServer &quot;ls -d $LSFRootWorkspace/*/ACT/*/CRD_CL/*/label&quot;`
+  WorkspaceDirList=`sshpass -p $AFSPass ssh -o &quot;StrictHostKeyChecking no&quot; $AFSUser@$LSFLoginServer &quot;ls -dtr $LSFRootWorkspace/*/ACT/*/CRD_CL/*/label&quot;`
 else
-  WorkspaceDirList=`ls -d $LocalRootWorkspace/*/ACT/*/CRD_CL/*/label`
+  WorkspaceDirList=`ls -dtr $LocalRootWorkspace/*/ACT/*/CRD_CL/*/label`
 fi
 
 echo 
@@ -136,9 +136,11 @@ echo $WorkspaceDirList
 
 if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   sshpass -p $AFSPass ssh -T $AFSUser@$LSFLoginServer &lt;&lt; EOF
-  
+
+dirlist=&quot;$WorkspaceDirList&quot;
+
 dir2del=&quot;&quot;
-for dir in $WorkspaceDirList
+for dir in \$dirlist
 do
   now_epoch=\`date +%s\`
   dir_mtime_epoch=\`stat -c &quot;%Y&quot; \$dir\`
@@ -153,12 +155,11 @@ echo
 echo &quot;Deleting directories to free disk space:&quot;
 for dir in \$dir2del; do
   ls -lad \$dir
-  echo &quot;rm -rf \$dir&quot;
-#  rm -rf \$dir
-#  root_dir=\`dirname \$dir\`
-#  while rmdir \$root_dir 2&gt;/dev/null; do
-#    root_dir=\`dirname \$root_dir\`
-#  done
+  rm -rf \$dir
+  root_dir=\`dirname \$dir\`
+  while rmdir \$root_dir 2&gt;/dev/null; do
+    root_dir=\`dirname \$root_dir\`
+  done
 done
 EOF
 

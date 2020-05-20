@@ -6,12 +6,10 @@ In case of problems: please contact fabrice_moyen@fr.ibm.com or alexandre.castel
 Vivado version used : tests on going for 2019.1 (issue with lsf / RH7)&#xd;
 AC 28 fev 2020 : changed default to 2019.2&#xd;
 &#xd;
-WARNING : P9 oc_find_card is used with OC-$CRD prefix&#xd;
 WARNING : HW tests for HDL_EXAMPLE actions are un-activated as not working (hw_tests.sh, 10140000_ddr.sh, etc)&#xd;
 &#xd;
 Main Issues : &#xd;
-- oc-flash not operational&#xd;
-- after flashing the oc-reset doesn&apos;t cut the power supply, and FPGA is not refreshed !! Need &quot;Power9 reload routine&quot;&#xd;
+- oc-flash not operational for AD9H7 only&#xd;
 &#xd;
 =&gt; hdl_example.NORAM had an issue at config level (same as for CAPI2) to be confirmed&#xd;
 =&gt; ID are not coherent with SNAP IDs  =&gt; repaired</description>
