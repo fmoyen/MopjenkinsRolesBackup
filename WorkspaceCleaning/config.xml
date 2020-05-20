@@ -1,0 +1,152 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Job for cleaning Workspace (on LSF cluster or locally)</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.plugins.jira.JiraProjectProperty plugin="jira@3.0.11"/>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.BooleanParameterDefinition>
+          <name>LSF_CLUSTER</name>
+          <description>Decide whether or not to clean the Boeblingen LSF cluster workspaces.</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>Workspace</name>
+          <description>The name of the workspace to clean.</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>SNAP_IMG_CAPI2_matrix</string>
+              <string>ALL</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
+      <maxConcurrentPerNode>0</maxConcurrentPerNode>
+      <maxConcurrentTotal>0</maxConcurrentTotal>
+      <categories class="java.util.concurrent.CopyOnWriteArrayList"/>
+      <throttleEnabled>false</throttleEnabled>
+      <throttleOption>project</throttleOption>
+      <limitOneJobWithMatchingParams>false</limitOneJobWithMatchingParams>
+      <paramsToUseForLimit></paramsToUseForLimit>
+    </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>#!/bin/bash
+
+
+echo
+echo &quot;****************************************************************************************&quot;
+echo &quot;BUILD START (`date`)&quot;
+echo &quot;****************************************************************************************&quot;
+echo &quot;EXECUTING WORKSPACE CLEANING SHELL FROM MOPJENKINS ...&quot;
+echo &quot;****************************************************************************************&quot;
+echo &quot;Hostname: `hostname`&quot;; echo &quot;ID: `id`&quot;
+echo &quot;Working dir is : $PWD&quot;
+echo
+
+set +x
+
+#==============================================================================================
+# Variables
+
+
+EmailDestinationList=( fabrice_moyen@fr.ibm.com )
+EmailOrNotEmail=0 # 0 means do not send emails; 1 means send email
+
+HWUser=&quot;capimop&quot;
+
+# Example: RootJobName= SNAP_IMG_CAPI2_matrix
+RootJobName=`echo $JOB_NAME | awk -F&quot;/&quot; &apos;{print $1}&apos;` # $JOB_NAME-&gt; Jenkins global variable
+
+# Example: LocalWorkspace= /var/jenkins/workspace/SNAP_IMG_CAPI2_matrix@2/master/ACT/hdl_example.NORAM/CRD_CL/AD9H3_nCL/label/X86_UBUNTU
+LocalWorkspace=$WORKSPACE # $WORKSPACE-&gt; Jenkins global variable
+
+# Example: WorkspaceName= SNAP_IMG_CAPI2_matrix@2  (@2 used if one build is running when starting a 2nd build)
+WorkspaceName=`echo $LocalWorkspace | sed &quot;s%^.*$RootJobName%$RootJobName%&quot; | cut -d&quot;/&quot; -f1`
+
+# Example: LocalRootWorkspace= /var/jenkins/workspace/SNAP_IMG_CAPI2_matrix@2
+LocalRootWorkspace=&quot;`echo $LocalWorkspace | awk -F&quot;/$WorkspaceName/&quot; &apos;{print $1}&apos;`/$WorkspaceName&quot;
+
+LSFRoot=&quot;/afs/bb/proj/fpga&quot;
+
+# Example: LSFRootWorkspace= /afs/bb/proj/fpga/framework/CI_ws/SNAP_IMG_CAPI2_matrix (@2 name is not planned in $LSFRoot/framework/CI_ws)
+LSFRootWorkspace=&quot;$LSFRoot/framework/CI_ws/$RootJobName&quot;
+
+# Example: LSFWorkspace= /afs/bb/proj/fpga/framework/CI_ws/SNAP_IMG_CAPI2_matrix/master/ACT/hdl_example.NORAM/CRD_CL/AD9H3_nCL/label/X86_UBUNTU
+LSFWorkspace=&quot;$LSFRootWorkspace/`echo $LocalWorkspace | awk -F&quot;$LocalRootWorkspace/&quot; &apos;{print $2}&apos;`&quot;
+
+
+
+# LSFLoginServer, RootWorkspace variables... or RootWorkspace pointing to local dir
+if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+  echo;echo &quot;****************************************************************************************&quot;
+  echo &quot;J:LSF Login Server SETUP ...&quot;
+  
+  # Boeblingen LSF cluster Login Servers
+  LSFLoginServersList=&quot;\
+  hdcl050.boeblingen.de.ibm.com
+  hdcl051.boeblingen.de.ibm.com
+  hdcl052.boeblingen.de.ibm.com
+  hdcl027.boeblingen.de.ibm.com
+  hdcl060.boeblingen.de.ibm.com
+  hdclp026.boeblingen.de.ibm.com&quot;
+  
+  LSFLoginServer=&quot;&quot;
+  for i in $LSFLoginServersList; do
+    if ping -c1 $i &gt;/dev/null 2&gt;&amp;1; then 
+      LSFLoginServer=$i
+      break
+    fi
+  done
+
+  if [[ &quot;$LSFLoginServer&quot; != &quot;&quot; ]]; then
+    echo &quot;  -&gt; LSF Login Server = $LSFLoginServer&quot;
+    echo &quot;  -&gt; LSF Root workspace = $LSFRootWorkspace&quot;
+  else
+    echo &quot;  -&gt; no LSF Login Server available ! Exiting&quot;
+    exit 1
+  fi
+
+fi
+
+echo &quot;LocalWorkspace= $LocalWorkspace&quot;
+echo &quot;LSFWorkspace= $LSFWorkspace&quot;
+echo &quot;LSFLoginServer= $LSFLoginServer&quot;
+
+exit 0
+
+if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+  # First time calling ssh, &quot;StrictHostKeyChecking no&quot; updates .ssh/known_hosts file without asking
+  WorkspaceDirList=`sshpass -p $AFSPass ssh -o &quot;StrictHostKeyChecking no&quot; $AFSUser@$LSFLoginServer &quot;ls -d $LSFRootWorkspace/*/&quot;`
+else
+  WorkspaceDirList=`ls -d $LocalRootWorkspace/*/`
+fi
+
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper plugin="credentials-binding@1.20">
+      <bindings>
+        <org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
+          <credentialsId>LSFUser</credentialsId>
+          <usernameVariable>AFSUser</usernameVariable>
+          <passwordVariable>AFSPass</passwordVariable>
+        </org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
+      </bindings>
+    </org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper>
+  </buildWrappers>
+</project>
