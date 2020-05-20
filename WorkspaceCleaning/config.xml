@@ -14,10 +14,12 @@
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>WorkspaceName</name>
-          <description>The name of the workspace to clean.</description>
+          <description>The name of the workspace to clean.
+(ALL not yet working !)</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
               <string>SNAP_IMG_CAPI2_matrix</string>
+              <string>OC_IMG_matrix</string>
               <string>ALL</string>
             </a>
           </choices>
@@ -26,7 +28,7 @@
           <name>Days2Keep</name>
           <description>How many days you want to keep (not to delete)
 -&gt; Keeping the last $Days2Keep days</description>
-          <defaultValue>10</defaultValue>
+          <defaultValue>14</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
@@ -115,10 +117,6 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
 
 fi
 
-echo
-echo &quot;LocalRootWorkspace= $LocalRootWorkspace&quot;
-echo &quot;LSFRootWorkspace= $LSFRootWorkspace&quot;
-
 
 if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   # First time calling ssh, &quot;StrictHostKeyChecking no&quot; updates .ssh/known_hosts file without asking
@@ -127,14 +125,21 @@ else
   WorkspaceDirList=`ls -dtr $LocalRootWorkspace/*/ACT/*/CRD_CL/*/label`
 fi
 
-echo 
+echo; echo &quot;########################################################################################&quot;
+echo &quot;LIST OF DIRECTORIES ANALYZED&quot;
+echo
 echo &quot;WorkspaceDirList=&quot;
 echo $WorkspaceDirList
 
 #==============================================================================================
 # Doing the rm job !
 
+echo; echo &quot;########################################################################################&quot;
+echo &quot;DOING THE CLEANING STUFF&quot;
+
 if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+  sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;fs listquota $LSFRootWorkspace&quot;
+
   sshpass -p $AFSPass ssh -T $AFSUser@$LSFLoginServer &lt;&lt; EOF
 
 dirlist=&quot;$WorkspaceDirList&quot;
@@ -152,12 +157,14 @@ do
 done
 
 echo
-echo &quot;Deleting directories to free disk space:&quot;
+echo &quot;Deleting below named directories to free disk space:&quot;
+echo &quot;----------------------------------------------------&quot;
 for dir in \$dir2del; do
   ls -lad \$dir
   rm -rf \$dir
   root_dir=\`dirname \$dir\`
   while rmdir \$root_dir 2&gt;/dev/null; do
+    echo &quot;  +  \$root_dir&quot;
     root_dir=\`dirname \$root_dir\`
   done
 done

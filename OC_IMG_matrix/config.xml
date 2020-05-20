@@ -9,7 +9,7 @@ AC 28 fev 2020 : changed default to 2019.2&#xd;
 WARNING : HW tests for HDL_EXAMPLE actions are un-activated as not working (hw_tests.sh, 10140000_ddr.sh, etc)&#xd;
 &#xd;
 Main Issues : &#xd;
-- oc-flash not operational for AD9H7 only&#xd;
+- oc-flash not operational for AD9H7 only =&gt; NO HARDWARE TEST ON AD9H7&#xd;
 &#xd;
 =&gt; hdl_example.NORAM had an issue at config level (same as for CAPI2) to be confirmed&#xd;
 =&gt; ID are not coherent with SNAP IDs  =&gt; repaired</description>
@@ -154,7 +154,7 @@ Decide whether or not to use the Boeblingen LSF cluster to build images.</descri
         <hudson.model.StringParameterDefinition>
           <name>NO_TEST_CARDS</name>
           <description>The list of cards we do NOT want to HW test for different reasons (please see README for default reasons) </description>
-          <defaultValue>OC-INNOVA2</defaultValue>
+          <defaultValue>OC-INNOVA2 OC-AD9H7</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
