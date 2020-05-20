@@ -13,14 +13,14 @@
           <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
-          <name>WorkspaceName</name>
+          <name>WorkspaceNameList</name>
           <description>The name of the workspace to clean.
-(ALL not yet working !)</description>
+(ALL means all the workspaces available for selection !)</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
+              <string>ALL</string>
               <string>SNAP_IMG_CAPI2_matrix</string>
               <string>OC_IMG_matrix</string>
-              <string>ALL</string>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
@@ -67,26 +67,13 @@ echo
 
 set +x
 
+
 #==============================================================================================
 # Variables
 
 
 EmailDestinationList=( fabrice_moyen@fr.ibm.com )
 EmailOrNotEmail=0 # 0 means do not send emails; 1 means send email
-
-HWUser=&quot;capimop&quot;
-
-LocalRoot=/var/jenkins/workspace
-
-# Example: LocalWorkspace= /var/jenkins/workspace/SNAP_IMG_CAPI2_matrix@2/master/ACT/hdl_example.NORAM/CRD_CL/AD9H3_nCL/label/X86_UBUNTU
-# Example: LocalWorkspace= /var/jenkins/workspace/SNAP_IMG_CAPI2_matrix
-LocalRootWorkspace=$LocalRoot/$WorkspaceName
-
-LSFRoot=&quot;/afs/bb/proj/fpga&quot;
-
-# Example: LSFRootWorkspace= /afs/bb/proj/fpga/framework/CI_ws/SNAP_IMG_CAPI2_matrix (@2 name is not planned in $LSFRoot/framework/CI_ws)
-LSFRootWorkspace=&quot;$LSFRoot/framework/CI_ws/$WorkspaceName&quot;
-
 
 
 # LSFLoginServer, RootWorkspace variables... or RootWorkspace pointing to local dir
@@ -109,7 +96,6 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
 
   if [[ &quot;$LSFLoginServer&quot; != &quot;&quot; ]]; then
     echo &quot;  -&gt; LSF Login Server = $LSFLoginServer&quot;
-    echo &quot;  -&gt; LSF Root workspace = $LSFRootWorkspace&quot;
   else
     echo &quot;  -&gt; no LSF Login Server available ! Exiting&quot;
     exit 1
@@ -118,29 +104,57 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
 fi
 
 
-if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
-  # First time calling ssh, &quot;StrictHostKeyChecking no&quot; updates .ssh/known_hosts file without asking
-  WorkspaceDirList=`sshpass -p $AFSPass ssh -o &quot;StrictHostKeyChecking no&quot; $AFSUser@$LSFLoginServer &quot;ls -dtr $LSFRootWorkspace/*/ACT/*/CRD_CL/*/label&quot;`
-else
-  WorkspaceDirList=`ls -dtr $LocalRootWorkspace/*/ACT/*/CRD_CL/*/label`
+if [[ &quot;$WorkspaceNameList&quot; == &quot;ALL&quot; ]]; then
+  WorkspaceNameList=&quot;SNAP_IMG_CAPI2_matrix OC_IMG_matrix&quot;
 fi
 
-echo; echo &quot;########################################################################################&quot;
-echo &quot;LIST OF DIRECTORIES ANALYZED&quot;
-echo
-echo &quot;WorkspaceDirList=&quot;
-echo $WorkspaceDirList
+
+
+for WorkspaceName in $WorkspaceNameList; do
+
+  echo
+  echo &quot;########################################################################################&quot;
+  echo &quot;########################################################################################&quot;
+  echo
+
+  LocalRoot=/var/jenkins/workspace
+
+  # Example: LocalWorkspace= /var/jenkins/workspace/SNAP_IMG_CAPI2_matrix
+  # FAB Warning to work ON: LocalWorkspace= /var/jenkins/workspace/SNAP_IMG_CAPI2_matrix@2
+  LocalRootWorkspace=$LocalRoot/$WorkspaceName
+
+  LSFRoot=&quot;/afs/bb/proj/fpga&quot;
+
+  # Example: LSFRootWorkspace= /afs/bb/proj/fpga/framework/CI_ws/SNAP_IMG_CAPI2_matrix (@2 name is not planned in $LSFRoot/framework/CI_ws)
+  LSFRootWorkspace=&quot;$LSFRoot/framework/CI_ws/$WorkspaceName&quot;
+
+
+  if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+    # First time calling ssh, &quot;StrictHostKeyChecking no&quot; updates .ssh/known_hosts file without asking
+    WorkspaceDirList=`sshpass -p $AFSPass ssh -o &quot;StrictHostKeyChecking no&quot; $AFSUser@$LSFLoginServer &quot;ls -dtr $LSFRootWorkspace/*/ACT/*/CRD_CL/*/label&quot;`
+  else
+    WorkspaceDirList=`ls -dtr $LocalRootWorkspace/*/ACT/*/CRD_CL/*/label`
+  fi
+
+  echo;echo &quot;****************************************************************************************&quot;
+  echo &quot;LIST OF DIRECTORIES ANALYZED --&gt; $WorkspaceName&quot;
+  echo
+  echo &quot;WorkspaceDirList=&quot;
+  echo $WorkspaceDirList
 
 #==============================================================================================
 # Doing the rm job !
 
-echo; echo &quot;########################################################################################&quot;
-echo &quot;DOING THE CLEANING STUFF&quot;
+  echo;echo &quot;****************************************************************************************&quot;
+  echo &quot;DOING THE CLEANING STUFF --&gt; $WorkspaceName&quot;
 
-if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
-  sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;fs listquota $LSFRootWorkspace&quot;
+  if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+    echo
+    echo &quot;FS quota before cleaning:&quot;
+    echo &quot;-------------------------&quot;
+    sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;fs listquota $LSFRootWorkspace&quot;
 
-  sshpass -p $AFSPass ssh -T $AFSUser@$LSFLoginServer &lt;&lt; EOF
+    sshpass -p $AFSPass ssh -T $AFSUser@$LSFLoginServer &lt;&lt; EOF
 
 dirlist=&quot;$WorkspaceDirList&quot;
 
@@ -170,8 +184,19 @@ for dir in \$dir2del; do
 done
 EOF
 
-fi
-</command>
+    echo
+    echo &quot;FS quota after cleaning:&quot;
+    echo &quot;-------------------------&quot;
+    sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;fs listquota $LSFRootWorkspace&quot;
+
+  fi
+
+done # for WorkspaceName in $WorkspaceNameList
+
+echo
+echo &quot;########################################################################################&quot;
+echo &quot;########################################################################################&quot;
+echo</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
