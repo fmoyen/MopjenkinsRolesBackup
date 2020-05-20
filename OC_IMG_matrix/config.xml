@@ -235,9 +235,7 @@ H 22-23/1 * * *</spec>
     <hudson.matrix.TextAxis>
       <name>ACT</name>
       <values>
-        <string>hdl_example.NORAM</string>
-        <string>hdl_example.BRAM</string>
-        <string>hdl_example.DDR</string>
+        <string>hdl_example</string>
         <string>hdl_single_engine</string>
         <string>hls_helloworld</string>
         <string>hls_memcopy_1024</string>
@@ -1178,15 +1176,16 @@ case ${TEST_ON_HW} in
     else
       echo &quot;  -&gt; OK&quot;
     fi
-    
-    if [[ &quot;$ACT&quot; =~ &quot;hdl_example&quot; ]]; then
-      echo &quot;  -&gt; OpenCAPI hdl_example HW tests scripts not working...&quot;
-      LinkDir=${RootSaveDir}/${CRD}/${CRD}_test_bypassed
-      SRCFILES=&quot;$BINFILES $BITFILES&quot;
-      CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
-      echo &quot;  -&gt; EXITING !&quot;
-      exit 0
-    fi
+
+#  AC 2020 May 20, hdl_example should work now
+#    if [[ &quot;$ACT&quot; =~ &quot;hdl_example&quot; ]]; then
+#      echo &quot;  -&gt; OpenCAPI hdl_example HW tests scripts not working...&quot;
+#      LinkDir=${RootSaveDir}/${CRD}/${CRD}_test_bypassed
+#      SRCFILES=&quot;$BINFILES $BITFILES&quot;
+#      CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
+#      echo &quot;  -&gt; EXITING !&quot;
+#      exit 0
+#    fi
   ;;
   
   false )
