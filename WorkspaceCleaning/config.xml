@@ -13,7 +13,7 @@
           <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
-          <name>Workspace</name>
+          <name>WorkspaceName</name>
           <description>The name of the workspace to clean.</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
@@ -22,6 +22,13 @@
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>Days2Keep</name>
+          <description>How many days you want to keep (not to delete)
+-&gt; Keeping the last $Days2Keep days</description>
+          <defaultValue>10</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
@@ -67,25 +74,16 @@ EmailOrNotEmail=0 # 0 means do not send emails; 1 means send email
 
 HWUser=&quot;capimop&quot;
 
-# Example: RootJobName= SNAP_IMG_CAPI2_matrix
-RootJobName=`echo $JOB_NAME | awk -F&quot;/&quot; &apos;{print $1}&apos;` # $JOB_NAME-&gt; Jenkins global variable
+LocalRoot=/var/jenkins/workspace
 
 # Example: LocalWorkspace= /var/jenkins/workspace/SNAP_IMG_CAPI2_matrix@2/master/ACT/hdl_example.NORAM/CRD_CL/AD9H3_nCL/label/X86_UBUNTU
-LocalWorkspace=$WORKSPACE # $WORKSPACE-&gt; Jenkins global variable
-
-# Example: WorkspaceName= SNAP_IMG_CAPI2_matrix@2  (@2 used if one build is running when starting a 2nd build)
-WorkspaceName=`echo $LocalWorkspace | sed &quot;s%^.*$RootJobName%$RootJobName%&quot; | cut -d&quot;/&quot; -f1`
-
-# Example: LocalRootWorkspace= /var/jenkins/workspace/SNAP_IMG_CAPI2_matrix@2
-LocalRootWorkspace=&quot;`echo $LocalWorkspace | awk -F&quot;/$WorkspaceName/&quot; &apos;{print $1}&apos;`/$WorkspaceName&quot;
+# Example: LocalWorkspace= /var/jenkins/workspace/SNAP_IMG_CAPI2_matrix
+LocalRootWorkspace=$LocalRoot/$WorkspaceName
 
 LSFRoot=&quot;/afs/bb/proj/fpga&quot;
 
 # Example: LSFRootWorkspace= /afs/bb/proj/fpga/framework/CI_ws/SNAP_IMG_CAPI2_matrix (@2 name is not planned in $LSFRoot/framework/CI_ws)
-LSFRootWorkspace=&quot;$LSFRoot/framework/CI_ws/$RootJobName&quot;
-
-# Example: LSFWorkspace= /afs/bb/proj/fpga/framework/CI_ws/SNAP_IMG_CAPI2_matrix/master/ACT/hdl_example.NORAM/CRD_CL/AD9H3_nCL/label/X86_UBUNTU
-LSFWorkspace=&quot;$LSFRootWorkspace/`echo $LocalWorkspace | awk -F&quot;$LocalRootWorkspace/&quot; &apos;{print $2}&apos;`&quot;
+LSFRootWorkspace=&quot;$LSFRoot/framework/CI_ws/$WorkspaceName&quot;
 
 
 
@@ -121,19 +119,48 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
 
 fi
 
-echo &quot;LocalWorkspace= $LocalWorkspace&quot;
-echo &quot;LSFWorkspace= $LSFWorkspace&quot;
-echo &quot;LSFLoginServer= $LSFLoginServer&quot;
+echo
+echo &quot;LocalRootWorkspace= $LocalRootWorkspace&quot;
+echo &quot;LSFRootWorkspace= $LSFRootWorkspace&quot;
 
-exit 0
 
 if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   # First time calling ssh, &quot;StrictHostKeyChecking no&quot; updates .ssh/known_hosts file without asking
-  WorkspaceDirList=`sshpass -p $AFSPass ssh -o &quot;StrictHostKeyChecking no&quot; $AFSUser@$LSFLoginServer &quot;ls -d $LSFRootWorkspace/*/&quot;`
+  WorkspaceDirList=`sshpass -p $AFSPass ssh -o &quot;StrictHostKeyChecking no&quot; $AFSUser@$LSFLoginServer &quot;ls -d $LSFRootWorkspace/*/ACT/*/CRD_CL/*/label&quot;`
 else
-  WorkspaceDirList=`ls -d $LocalRootWorkspace/*/`
+  WorkspaceDirList=`ls -d $LocalRootWorkspace/*/ACT/*/CRD_CL/*/label`
 fi
 
+echo 
+echo &quot;WorkspaceDirList=&quot;
+echo $WorkspaceDirList
+
+#==============================================================================================
+# Doing the rm job !
+
+dir2del=&quot;&quot;
+for dir in $dir_list
+do
+  now_epoch=`date +%s`
+  dir_mtime_epoch=`stat -c &quot;%Y&quot; $dir`
+  diff_epoch=$(($now_epoch-$dir_mtime_epoch))
+  diff_days=$(($diff_epoch/3600/24))
+  if [[ $diff_days -ge $Days2Keep ]]; then
+    dir2del=&quot;$dir2del $dir&quot;
+  fi
+done
+
+echo
+echo &quot;Deleting directories to free disk space:&quot;
+for dir in $dir2del; do
+  ls -lad $dir
+  echo &quot;rm -rf $dir&quot;
+#  rm -rf $dir
+#  root_dir=`dirname $dir`
+#  while rmdir $root_dir 2&gt;/dev/null; do
+#    root_dir=`dirname $root_dir`
+#  done
+done
 </command>
     </hudson.tasks.Shell>
   </builders>
