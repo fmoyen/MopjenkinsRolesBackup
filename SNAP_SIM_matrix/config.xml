@@ -180,6 +180,9 @@ Removed hls_intersect_s &amp; hls_intersect_h from matrix</description>
     <hudson.matrix.TextAxis>
       <name>ACT</name>
       <values>
+        <string>hdl_helloworld</string>
+        <string>hls_helloworld</string>
+        <string>hls_memcopy</string>
         <string>hls_udp</string>
         <string>hls_image_filter</string>
         <string>test</string>
