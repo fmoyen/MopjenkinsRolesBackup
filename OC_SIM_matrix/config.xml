@@ -8,6 +8,8 @@ in case of problems: please contact fmoyen@fr.ibm.com or alexandre.castellane@fr
 KNOWN FAILURES : &#xd;
 - hdl do not have a hw_test available&#xd;
 - HBM cannot be simulated with xsim yet&#xd;
+&#xd;
+Removed hdl_example.NORAM and hdl_example.DDR test considered as useless&#xd;
 </description>
   <keepDependencies>false</keepDependencies>
   <properties>
@@ -135,9 +137,7 @@ H 18-23/4 * * *</spec>
     <hudson.matrix.TextAxis>
       <name>ACT</name>
       <values>
-        <string>hdl_example.NORAM</string>
-        <string>hdl_example.BRAM</string>
-        <string>hdl_example.DDR</string>
+        <string>hdl_example</string>
         <string>hdl_single_engine</string>
         <string>hls_helloworld</string>
         <string>hls_memcopy_1024</string>
