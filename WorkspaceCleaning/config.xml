@@ -134,29 +134,35 @@ echo $WorkspaceDirList
 #==============================================================================================
 # Doing the rm job !
 
+if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+  sshpass -p $AFSPass ssh -T $AFSUser@$LSFLoginServer &lt;&lt; EOF
+  
 dir2del=&quot;&quot;
 for dir in $WorkspaceDirList
 do
-  now_epoch=`sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;date +%s&quot;`
-  dir_mtime_epoch=`sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;stat -c &apos;%Y&apos; $dir&quot;`
-  diff_epoch=$(($now_epoch-$dir_mtime_epoch))
-  diff_days=$(($diff_epoch/3600/24))
-  if [[ $diff_days -ge $Days2Keep ]]; then
-    dir2del=&quot;$dir2del $dir&quot;
+  now_epoch=\`date +%s\`
+  dir_mtime_epoch=\`stat -c &quot;%Y&quot; \$dir\`
+  diff_epoch=\$((\$now_epoch-\$dir_mtime_epoch))
+  diff_days=\$((\$diff_epoch/3600/24))
+  if [[ \$diff_days -ge $Days2Keep ]]; then
+    dir2del=&quot;\$dir2del \$dir&quot;
   fi
 done
 
 echo
 echo &quot;Deleting directories to free disk space:&quot;
-for dir in $dir2del; do
-  ls -lad $dir
-  echo &quot;rm -rf $dir&quot;
-#  rm -rf $dir
-#  root_dir=`dirname $dir`
-#  while rmdir $root_dir 2&gt;/dev/null; do
-#    root_dir=`dirname $root_dir`
+for dir in \$dir2del; do
+  ls -lad \$dir
+  echo &quot;rm -rf \$dir&quot;
+#  rm -rf \$dir
+#  root_dir=\`dirname \$dir\`
+#  while rmdir \$root_dir 2&gt;/dev/null; do
+#    root_dir=\`dirname \$root_dir\`
 #  done
 done
+EOF
+
+fi
 </command>
     </hudson.tasks.Shell>
   </builders>
