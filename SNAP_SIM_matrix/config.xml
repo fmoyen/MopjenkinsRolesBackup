@@ -29,6 +29,11 @@ hls_parallel_memcpy&#xd;
 hls_vector_generator&#xd;
 test&#xd;
 &#xd;
+temp removal :&#xd;
+hdl_helloworld&#xd;
+hls_helloworld&#xd;
+hls_memcopy&#xd;
+&#xd;
 2019 Dec 3rd : Removed irun_201x.y type entries&#xd;
 &#xd;
 April 26th 2019 : filter : CAPI1 2018.1 CAPI2 2018.2or 3, U200 2018.3 RCXVUP 2017.4&#xd;
@@ -175,9 +180,6 @@ Removed hls_intersect_s &amp; hls_intersect_h from matrix</description>
     <hudson.matrix.TextAxis>
       <name>ACT</name>
       <values>
-        <string>hdl_helloworld</string>
-        <string>hls_helloworld</string>
-        <string>hls_memcopy</string>
         <string>hls_udp</string>
         <string>hls_image_filter</string>
         <string>test</string>
@@ -318,6 +320,14 @@ case &quot;$CRD:$ACT:$SIM:$CAPI2&quot; in
       C=&quot;vgen&quot;; ASKIP=1
     elif [[ $CRD != &quot;AD9V3&quot; &amp;&amp; $CRD != &quot;N250SP&quot; ]]; then
       C=&quot;vgen&quot;; ASKIP=1
+    fi;;
+    *:hls_udp:*:*)
+    if [[ $CRD != &quot;AD9H3&quot; ]]; then
+      C=&quot;udp&quot;; ASKIP=1
+    fi;;
+    *:hls_image_filter:*:*)             # This is to limit the number or tests
+    if [[ $CRD != &quot;AD9H3&quot; &amp;&amp; $CRD != &quot;AD9V3&quot; &amp;&amp; $CRD != &quot;N250SP&quot; ]]; then
+      C=&quot;imfi&quot;; ASKIP=1
     fi;;
   * )                           C=&quot;def&quot; ;ASKIP=0;;
 esac        
