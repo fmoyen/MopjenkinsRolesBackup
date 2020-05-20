@@ -94,10 +94,6 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   
   # Boeblingen LSF cluster Login Servers
   LSFLoginServersList=&quot;\
-  hdcl050.boeblingen.de.ibm.com
-  hdcl051.boeblingen.de.ibm.com
-  hdcl052.boeblingen.de.ibm.com
-  hdcl027.boeblingen.de.ibm.com
   hdcl060.boeblingen.de.ibm.com
   hdclp026.boeblingen.de.ibm.com&quot;
   
@@ -139,10 +135,10 @@ echo $WorkspaceDirList
 # Doing the rm job !
 
 dir2del=&quot;&quot;
-for dir in $dir_list
+for dir in $WorkspaceDirList
 do
-  now_epoch=`date +%s`
-  dir_mtime_epoch=`stat -c &quot;%Y&quot; $dir`
+  now_epoch=`sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;date +%s&quot;`
+  dir_mtime_epoch=`sshpass -p $AFSPass ssh $AFSUser@$LSFLoginServer &quot;stat -c &apos;%Y&apos; $dir&quot;`
   diff_epoch=$(($now_epoch-$dir_mtime_epoch))
   diff_days=$(($diff_epoch/3600/24))
   if [[ $diff_days -ge $Days2Keep ]]; then
