@@ -165,7 +165,7 @@ H 18-23/4 * * *</spec>
       </values>
     </hudson.matrix.LabelAxis>
   </axes>
-  <combinationFilter>(  ((ACT=~&quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;)||(ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; ))  &amp;&amp; ( (CRD=~&quot;AD9V3&quot;  &amp;&amp; AD9V3==&quot;true&quot;) || ( CRD=~&quot;AD9H&quot; &amp;&amp; (AD9H3==&quot;true&quot;|| AD9H7==&quot;true&quot;) &amp;&amp; !(ACT=~&quot;DDR&quot;) ) )  ) || (ACT==&quot;test&quot; &amp;&amp; CRD==&quot;AD9V3&quot;)</combinationFilter>
+  <combinationFilter>( ( (ACT=~&quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;)||(ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; ) )   &amp;&amp; ( (CRD=~&quot;AD9V3&quot;  &amp;&amp; AD9V3==&quot;true&quot; &amp;&amp; !(ACT=~&quot;hls_hbm_memcopy_1024&quot;)) || ( CRD=~&quot;AD9H&quot; &amp;&amp; (AD9H3==&quot;true&quot;|| AD9H7==&quot;true&quot;) &amp;&amp; !(ACT=~&quot;hls_memcopy_1024&quot;) ) )   )  || (ACT==&quot;test&quot; &amp;&amp; CRD==&quot;AD9V3&quot;)</combinationFilter>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
@@ -213,8 +213,8 @@ echo
 # defconfig contains predefined representative configurations ready for test
 # We generate them by manually coping the .snap_config files obtained after a &quot;make snap_config&quot;
 
-case &quot;$ACT&quot; in
-  test )
+case &quot;$CRD:$ACT:$SIM&quot; in
+  *:test:* )
     # What for ??? (test is used to check remotes machines and tokens are available)
     # gitnames=list of all remote branches
     gitnames=`git ls-remote git@github.ibm.com:OC-Enablement/oc-snap.git|grep &quot;refs/heads/&quot;|awk &apos;{print $2}&apos;`;RC=$?
@@ -240,13 +240,24 @@ case &quot;$ACT&quot; in
     date
     DSKIP=0;;
     
-  * )          
+  *:*:* )          
     if [ -f snap/defconfig/$CRD.$ACT.defconfig ];then DSKIP=0
     else 
       echo &quot;$CRD.$ACT.defconfig does not exist&quot;
       ls snap/defconfig/
       DSKIP=1
-    fi;;  
+    fi;; 
+    
+  *:hls_memcopy_1024:*)
+    if [[ $CRD != &quot;AD9V3&quot; ]]; then
+      C=&quot;mcp&quot;; ASKIP=1
+    fi;;
+     
+  *:hls_hbm_memcopy_1024:*)
+    if [[ $CRD != &quot;AD9H3&quot; &amp;&amp; $CRD != &quot;AD9H7&quot; ]]; then
+      C=&quot;nhbm&quot;; ASKIP=1
+    fi;;   
+    
 esac
 echo &quot;defconfig SKIP=$DSKIP&quot;
 
