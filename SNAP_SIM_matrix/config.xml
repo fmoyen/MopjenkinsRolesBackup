@@ -29,10 +29,11 @@ hls_parallel_memcpy&#xd;
 hls_vector_generator&#xd;
 test&#xd;
 &#xd;
-temp removal :&#xd;
+AC 2020 may 25 : temp removal pour ne simuler que image_filter&#xd;
 hdl_helloworld&#xd;
 hls_helloworld&#xd;
 hls_memcopy&#xd;
+hls_udp&#xd;
 &#xd;
 2019 Dec 3rd : Removed irun_201x.y type entries&#xd;
 &#xd;
@@ -180,10 +181,6 @@ Removed hls_intersect_s &amp; hls_intersect_h from matrix</description>
     <hudson.matrix.TextAxis>
       <name>ACT</name>
       <values>
-        <string>hdl_helloworld</string>
-        <string>hls_helloworld</string>
-        <string>hls_memcopy</string>
-        <string>hls_udp</string>
         <string>hls_image_filter</string>
         <string>test</string>
       </values>
