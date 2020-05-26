@@ -10,6 +10,13 @@ KNOWN FAILURES : &#xd;
 - HBM cannot be simulated with xsim yet&#xd;
 &#xd;
 Removed hdl_example.NORAM and hdl_example.DDR test considered as useless&#xd;
+&#xd;
+Temp remove :&#xd;
+hdl_example&#xd;
+hdl_single_engine&#xd;
+hls_helloworld_512&#xd;
+hls_helloworld_1024&#xd;
+hls_memcopy_1024&#xd;
 </description>
   <keepDependencies>false</keepDependencies>
   <properties>
@@ -137,10 +144,8 @@ H 18-23/4 * * *</spec>
     <hudson.matrix.TextAxis>
       <name>ACT</name>
       <values>
-        <string>hdl_example</string>
-        <string>hdl_single_engine</string>
-        <string>hls_helloworld</string>
-        <string>hls_memcopy_1024</string>
+        <string>hls_helloworld_512</string>
+        <string>hls_helloworld_1024</string>
         <string>test</string>
       </values>
     </hudson.matrix.TextAxis>
