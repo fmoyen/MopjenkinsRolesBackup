@@ -62,12 +62,12 @@ Removed hdl_example.NORAM and hdl_example.DDR test considered as useless&#xd;
         <hudson.model.BooleanParameterDefinition>
           <name>AD9H3</name>
           <description>enable/disable AD9H3 simulation</description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>AD9H7</name>
           <description>enable/disable AD9H7 simulation</description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>XSIM</name>
