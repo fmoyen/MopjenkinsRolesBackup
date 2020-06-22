@@ -113,7 +113,7 @@ If -- then VIVADO_XXX parameters below are taken into account</description>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
-          <name>VIVADO_OC_INNOVA2</name>
+          <name>VIVADO_OC_BW250SOC</name>
           <description></description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
@@ -150,7 +150,7 @@ Decide whether or not to use the Boeblingen LSF cluster to build images.</descri
         <hudson.model.StringParameterDefinition>
           <name>NO_TEST_CARDS</name>
           <description>The list of cards we do NOT want to HW test for different reasons (please see README for default reasons) </description>
-          <defaultValue>OC-INNOVA2 OC-AD9H7</defaultValue>
+          <defaultValue>OC-BW250SOC OC-AD9H7</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -245,7 +245,7 @@ H 22-23/1 * * *</spec>
         <string>OC-AD9V3_nCL</string>
         <string>OC-AD9H3_nCL</string>
         <string>OC-AD9H7_nCL</string>
-        <string>OC-INNOVA2_nCL</string>
+        <string>OC-BW250SOC_nCL</string>
       </values>
     </hudson.matrix.TextAxis>
     <hudson.matrix.LabelAxis>
@@ -255,7 +255,7 @@ H 22-23/1 * * *</spec>
       </values>
     </hudson.matrix.LabelAxis>
   </axes>
-  <combinationFilter> (ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;OC-AD9V3_nCL&quot;)  ||  (  ACT!=&quot;test&quot; &amp;&amp;   (   (!(CRD_CL=~&quot;OC-INNOVA2&quot;) &amp;&amp; !(CRD_CL=~&quot;OC-AD9H&quot;))   ||   (CRD_CL=~&quot;OC-AD9H&quot; &amp;&amp; !(ACT=~&quot;hls_memcopy_1024&quot;))   ||   (CRD_CL=~&quot;OC-AD9V3&quot; &amp;&amp; !(ACT=~&quot;hls_hbm_memcopy_1024&quot;))  ) )</combinationFilter>
+  <combinationFilter> (ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;OC-AD9V3_nCL&quot;)  ||  (  ACT!=&quot;test&quot; &amp;&amp;   (   (!(CRD_CL=~&quot;OC-BW250SOC&quot;) &amp;&amp; !(CRD_CL=~&quot;OC-AD9H&quot;))   ||   (CRD_CL=~&quot;OC-AD9H&quot; &amp;&amp; !(ACT=~&quot;hls_memcopy_1024&quot;))   ||   (CRD_CL=~&quot;OC-AD9V3&quot; &amp;&amp; !(ACT=~&quot;hls_hbm_memcopy_1024&quot;))  ) )</combinationFilter>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
