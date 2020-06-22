@@ -3,7 +3,7 @@
   <actions/>
   <description>builds and simulates many different configurations, automatic nightruns on master&#xd;
 in case of problems: please contact fmoyen@fr.ibm.com or alexandre.castellane@fr.ibm.com&#xd;
-=&gt; 2019.1 is default&#xd;
+=&gt; 2019.1 was default moved to 2019.2 AC june 26th 2020&#xd;
 &#xd;
 KNOWN FAILURES : &#xd;
 - hdl did not have a hw_test available, now they seems ok in IMG test but not in simulation&#xd;
@@ -39,6 +39,7 @@ Removed hdl_example.NORAM and hdl_example.DDR test considered as useless&#xd;
           <description>Choose the Vivado version to use</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
+              <string>2019.2</string>
               <string>2019.1</string>
               <string>2018.3</string>
             </a>
@@ -401,6 +402,9 @@ echo;echo &quot;****************************************************************
 case $VIV in    # test multiple Vivado versions in one build
 
   2019.1)
+    echo &quot;J: Vivado Version is OK: $VIV&quot;
+    ;; 
+  2019.2)
     echo &quot;J: Vivado Version is OK: $VIV&quot;
     ;; 
     
