@@ -7,6 +7,7 @@ Vivado version used : tests on going for 2019.1 (issue with lsf / RH7)&#xd;
 AC 28 fev 2020 : changed default to 2019.2&#xd;
 &#xd;
 Main Issues : &#xd;
+OC-AD9H7:hls_memcopy_1024 ) # oc-accel/hardware/oc-bip/board_support_packages/ad9h7/xdc/snap_hbm_timing.xdc does not exist&#xd;
 - oc-flash not operational for AD9H7 only =&gt; NO HARDWARE TEST ON AD9H7</description>
   <keepDependencies>false</keepDependencies>
   <properties>
@@ -399,7 +400,7 @@ echo &quot;  -&gt; action_types (hdl,hls)=$ACTION_TYPE enabled_cards=$CRD BSKIP=
 
 case &quot;$CRD:$ACT&quot; in
   
-  OC-AD9H7:hls_memcopy_1024 ) # c-accel/hardware/oc-bip/board_support_packages/ad9h7/xdc/snap_hbm_timing.xdc does not exist
+  OC-AD9H7:hls_memcopy_1024 ) # oc-accel/hardware/oc-bip/board_support_packages/ad9h7/xdc/snap_hbm_timing.xdc does not exist
     C=&quot;unsupported &quot;
     ASKIP=1
     ;;

@@ -70,6 +70,11 @@ Removed hdl_example.NORAM and hdl_example.DDR test considered as useless&#xd;
           <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
+          <name>BW250SOC</name>
+          <description>enable/disable BW250SOC simulation</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
           <name>XSIM</name>
           <description>enable/disable model build with XSIM</description>
           <defaultValue>true</defaultValue>
@@ -152,6 +157,7 @@ H 18-23/4 * * *</spec>
         <string>OC-AD9V3</string>
         <string>OC-AD9H3</string>
         <string>OC-AD9H7</string>
+        <string>OC-BW250SOC</string>
       </values>
     </hudson.matrix.TextAxis>
     <hudson.matrix.TextAxis>
@@ -167,7 +173,7 @@ H 18-23/4 * * *</spec>
       </values>
     </hudson.matrix.LabelAxis>
   </axes>
-  <combinationFilter>( ( (ACT=~&quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;)||(ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; ) )   &amp;&amp; ( (CRD=~&quot;AD9V3&quot;  &amp;&amp; AD9V3==&quot;true&quot; &amp;&amp; !(ACT=~&quot;hls_hbm_memcopy_1024&quot;)) || ( CRD=~&quot;AD9H&quot; &amp;&amp; (AD9H3==&quot;true&quot;|| AD9H7==&quot;true&quot;) &amp;&amp; !(ACT=~&quot;hls_memcopy_1024&quot;) ) )   )  || (ACT==&quot;test&quot; &amp;&amp; CRD==&quot;AD9V3&quot;)</combinationFilter>
+  <combinationFilter>( ( (ACT=~&quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;)||(ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; ) )   &amp;&amp; (         (CRD=~&quot;AD9V3&quot;  &amp;&amp; AD9V3==&quot;true&quot; &amp;&amp; !(ACT=~&quot;hls_hbm_memcopy_1024&quot;)) || (CRD=~&quot;BW250SOC&quot;  &amp;&amp; BW250SOC==&quot;true&quot; &amp;&amp; !(ACT=~&quot;hls_hbm_memcopy_1024&quot;)) || ( CRD=~&quot;AD9H&quot; &amp;&amp; (AD9H3==&quot;true&quot;|| AD9H7==&quot;true&quot;) &amp;&amp; !(ACT=~&quot;hls_memcopy_1024&quot;) )         )  )  ||  (ACT==&quot;test&quot; &amp;&amp; CRD==&quot;AD9V3&quot;)</combinationFilter>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
@@ -199,13 +205,14 @@ echo &quot;Build with Card=$CRD Action=$ACT Action_type=$ACTION_TYPE branch_sele
 # Do not run non-desired cases (action types, actions, cards)
 
 BSKIP=0
-if [ &quot;$ACTION_TYPE&quot; == &quot;hdl&quot;    ] &amp;&amp; [ &quot;$HDL&quot;    == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$ACTION_TYPE&quot; == &quot;hls&quot;    ] &amp;&amp; [ &quot;$HLS&quot;    == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$CRD&quot;         == &quot;AD9V3&quot;  ] &amp;&amp; [ &quot;$AD9V3&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$CRD&quot;         == &quot;AD9H3&quot;  ] &amp;&amp; [ &quot;$AD9H3&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$CRD&quot;         == &quot;AD9H7&quot;  ] &amp;&amp; [ &quot;$AD9H7&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
-if [ &quot;$ACT&quot;         == &quot;test&quot;   ]; then BSKIP=0;fi
-echo &quot;action_types (hdl,hls)=$HDL,$HLS enabled_cards(AD9v3,AD9H3,AD9H7)=$AD9V3,$AD9H3,$AD9H7 BSKIP=$BSKIP&quot;
+if [ &quot;$ACTION_TYPE&quot; == &quot;hdl&quot;       ] &amp;&amp; [ &quot;$HDL&quot;       == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$ACTION_TYPE&quot; == &quot;hls&quot;       ] &amp;&amp; [ &quot;$HLS&quot;       == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$CRD&quot;         == &quot;AD9V3&quot;     ] &amp;&amp; [ &quot;$AD9V3&quot;     == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$CRD&quot;         == &quot;AD9H3&quot;     ] &amp;&amp; [ &quot;$AD9H3&quot;     == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$CRD&quot;         == &quot;AD9H7&quot;     ] &amp;&amp; [ &quot;$AD9H7&quot;     == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$CRD&quot;         == &quot;BW250SOC&quot;  ] &amp;&amp; [ &quot;$BW250SOC&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$ACT&quot;         == &quot;test&quot;      ]; then BSKIP=0;fi
+echo &quot;action_types (hdl,hls)=$HDL,$HLS enabled_cards(AD9v3,AD9H3,AD9H7)=$AD9V3,$AD9H3,$AD9H7 $BW250SOC BSKIP=$BSKIP&quot;
 echo
 
 #==============================================================================================
@@ -251,7 +258,7 @@ case &quot;$CRD:$ACT:$SIM&quot; in
     fi;; 
     
   *:hls_memcopy_1024:*)
-    if [[ $CRD != &quot;AD9V3&quot; ]]; then
+    if [[ $CRD != &quot;AD9V3&quot; &amp;&amp; $CRD != &quot;BW250SOC&quot; ]]; then
       C=&quot;mcp&quot;; ASKIP=1
     fi;;
      
