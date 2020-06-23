@@ -1069,7 +1069,7 @@ echo;echo &quot;****************************************************************
 case $ACT in          # select config &amp; compile action
 
   &quot;test&quot;)
-    echo &quot;J: ACT=$ACT ==&gt; skiping image building&quot;;echo
+    echo &quot;J: ACT=$ACT ==&gt; skipping image building&quot;;echo
     
   	if [ &quot;$TEST_ON_HW&quot; == &quot;true&quot; ]; then 
     
