@@ -486,6 +486,13 @@ case $ACT in                    # select config &amp; compile action
     ;;
 esac
 
+# when simulating an HBM Chip, we replace the HBM by a DDR to allow simulation to occur
+# by hand we set the following parameter which will change the HBM configuration
+  echo &quot;ENABLE_BRAM=y&quot;                             &gt;&gt; .snap_config
+  echo &quot;BRAM_USED=\&quot;TRUE\&quot;&quot;                        &gt;&gt; .snap_config
+  echo &quot;ENABLE_DDRI=y&quot;                             &gt;&gt; .snap_config
+  echo &quot;DDRI_USED=\&quot;TRUE\&quot;&quot;                        &gt;&gt; .snap_config
+
 #==============================================================================================
 # Build Simulation Model (make model)
 
