@@ -548,7 +548,8 @@ make model|| exit 1
 
 echo;echo &quot;********************************************************************************&quot;
 echo &quot;J: Run $SIM Simulation (formerly using LSF, but now on local executors) ...&quot;
-cd ${SNAP_ROOT}/hardware/sim
+echo &quot;J: cd ${SNAP_ROOT}/hardware/sim&quot;
+    cd ${SNAP_ROOT}/hardware/sim
 
 ##### enable SW trace
 # export SNAP_TRACE=0xf
@@ -561,7 +562,7 @@ case $SIM in
   &apos;xsim&apos;|&apos;XSIM&apos; )
     #bsub $LSF -J &quot;${CRD}_${ACT}_${SIM}&quot; &quot;${SNAP_ROOT}/hardware/sim/run_sim -list ../../actions/${ACT}/tests/hw_test.sh -noaet&quot;||exit 100
     echo &quot;J: launching : ./run_sim -list testlist_simple.sh -noaet||exit 100&quot;
-    ./run_sim -list testlist_simple.sh -noaet||exit 100
+        ./run_sim -list testlist_simple.sh -noaet||exit 100
       ;;
 
 # older way to run with capi snap
