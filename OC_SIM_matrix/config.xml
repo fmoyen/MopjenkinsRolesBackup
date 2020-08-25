@@ -486,7 +486,8 @@ case $ACT in                    # select config &amp; compile action
     ;;
 esac
 
-case $ACT in                    # select config &amp; compile action
+case $ACT in                    # manually forcing BRAM usage to emulate the HBM in simulation
+								# We will see HBM but modeling will be BRAM
 
   *hbm*)
 # when simulating an HBM Chip, we replace the HBM by a DDR to allow simulation to occur
