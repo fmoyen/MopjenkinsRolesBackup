@@ -7,8 +7,9 @@ Vivado version used : tests on going for 2019.1 (issue with lsf / RH7)&#xd;
 AC 28 fev 2020 : changed default to 2019.2&#xd;
 &#xd;
 Main Issues : &#xd;
-OC-AD9H7:hls_memcopy_1024 ) # oc-accel/hardware/oc-bip/board_support_packages/ad9h7/xdc/snap_hbm_timing.xdc does not exist&#xd;
-- oc-flash not operational for AD9H7 only =&gt; NO HARDWARE TEST ON AD9H7&#xd;
+OC-AD9H7:&#xd;
+   - hls_hbm_memcopy_1024 ) Currently timing are failing for HBM (even with default 12)&#xd;
+   - oc-flash not operational (for OC-AD9H7 only) =&gt; NO HARDWARE TEST ON OC-AD9H7&#xd;
 &#xd;
 </description>
   <keepDependencies>false</keepDependencies>
