@@ -21,6 +21,7 @@
               <string>ALL</string>
               <string>SNAP_IMG_CAPI2_matrix</string>
               <string>OC_IMG_matrix</string>
+              <string>OC_SIM_matrix</string>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
@@ -109,7 +110,7 @@ fi
 
 
 if [[ &quot;$WorkspaceNameList&quot; == &quot;ALL&quot; ]]; then
-  WorkspaceNameList=&quot;SNAP_IMG_CAPI2_matrix OC_IMG_matrix&quot;
+  WorkspaceNameList=&quot;SNAP_IMG_CAPI2_matrix OC_IMG_matrix OC_SIM_matrix&quot;
 fi
 
 
