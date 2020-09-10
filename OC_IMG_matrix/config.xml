@@ -153,7 +153,7 @@ Decide whether or not to use the Boeblingen LSF cluster to build images.</descri
         <hudson.model.StringParameterDefinition>
           <name>NO_TEST_CARDS</name>
           <description>The list of cards we do NOT want to HW test for different reasons (please see README for default reasons) </description>
-          <defaultValue>OC-BW250SOC OC-AD9H7</defaultValue>
+          <defaultValue>OC-BW250SOC OC-AD9H7 OC-AD9H3</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -170,7 +170,7 @@ Decide whether or not to use the Boeblingen LSF cluster to build images.</descri
           <description>List of Austin systems available for testing :
 (Assuming no VPN or jump server is needed to access Austin servers, 9.X.X.X addresses)
 (it needs to define capimop user with authorized_keys)</description>
-          <defaultValue>hawklp08.aus.stglabs.ibm.com</defaultValue>
+          <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
