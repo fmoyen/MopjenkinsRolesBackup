@@ -239,6 +239,7 @@ H 22-23/1 * * *</spec>
         <string>hls_helloworld_512</string>
         <string>hls_helloworld_1024</string>
         <string>hls_memcopy_1024</string>
+        <string>hls_memcopy_512</string>
         <string>hls_hbm_memcopy_1024</string>
         <string>hls_image_filter</string>
         <string>test</string>
@@ -260,7 +261,7 @@ H 22-23/1 * * *</spec>
       </values>
     </hudson.matrix.LabelAxis>
   </axes>
-  <combinationFilter> (ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;OC-AD9V3_nCL&quot;)   ||   (       ACT!=&quot;test&quot; &amp;&amp;          (                    (CRD_CL=~&quot;OC-AD9H&quot; &amp;&amp; !(ACT=~&quot;hls_memcopy_1024&quot;))          ||          ( (CRD_CL=~&quot;OC-AD9V3&quot; || CRD_CL=~&quot;OC-BW250SOC&quot; ) &amp;&amp; !(ACT=~&quot;hls_hbm_memcopy_1024&quot;))        )   )</combinationFilter>
+  <combinationFilter> (ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;OC-AD9V3_nCL&quot;)   ||   (       ACT!=&quot;test&quot; &amp;&amp;          (                    (CRD_CL=~&quot;OC-AD9H&quot; &amp;&amp; !(ACT=~&quot;hls_memcopy_&quot;))          ||          ( (CRD_CL=~&quot;OC-AD9V3&quot; || CRD_CL=~&quot;OC-BW250SOC&quot; ) &amp;&amp; !(ACT=~&quot;hls_hbm_memcopy_&quot;))        )   )</combinationFilter>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
