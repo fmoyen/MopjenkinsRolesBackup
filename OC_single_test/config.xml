@@ -64,7 +64,7 @@ Orpington and Lewen05 are P9</description>
           <description>List of Austin systems available for testing :
 (Assuming no VPN or jump server is needed to access Austin servers, 9.X.X.X addresses)
 (it needs to define capimop user with authorized_keys)</description>
-          <defaultValue>hawklp07.aus.stglabs.ibm.com hawklp08.aus.stglabs.ibm.com</defaultValue>
+          <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -177,14 +177,14 @@ function finish {  # define function to unlock in case of error, executed after 
   UNLOCK_RC=0;ssh ${HWUser}@${box} rmdir ${LOCK} || UNLOCK_RC=$?
   echo &quot;box=$box lock=$LOCK unlock RC=$UNLOCK_RC (`date`)&quot;
   
-  if [ $noclean -ne 1 ]; then
-  	echo;echo &quot;  -&gt; cleaning ${box}@$TARGET_DIR&quot;;
+  if [ &quot;$NOCLEAN&quot; == &quot;true&quot; ]; then
+  	echo;echo &quot;  -&gt; NO CLEANING REQUESTED !&quot;; 
+  	echo;echo &quot;  -&gt; EXITING !&quot;;
+  else 
+    echo;echo &quot;  -&gt; cleaning ${box}@$TARGET_DIR&quot;;
   	CLEAN_RC=0;ssh -T ${HWUser}@$box rm -rf ${TARGET_DIR} || CLEAN_RC=$?;
   	echo &quot;box=$box clean target_dir=$TARGET_DIR RC=$CLEAN_RC (`date`)&quot;;
   	echo;echo &quot;  -&gt; EXITING !&quot;;
-  else 
-  	echo;echo &quot;  -&gt; NO CLEANING REQUESTED !&quot;; 
-  	echo;echo &quot;  -&gt; EXITING !&quot;; 
   fi
 
 }
@@ -640,7 +640,7 @@ if [ $RC -eq 0 ]; then
   echo &quot;   (needs to be manually done because OC-ACCEL github script does not manage Primary/Secondary files for the moment)&quot;
   echo &quot;   (so it is just renaming primary to primary.good)&quot;
 
-    if [ $noclean -ne 1 ]; then
+    if [ &quot;$NOCLEAN&quot; == &quot;true&quot; ]; then
     	echo;echo &quot;NO CLEAN REQUEST : NOT Cleaning up working directory ${TARGET_DIR} from ${box}&quot;;
     else
     	echo;echo &quot;Cleaning up working directory ${TARGET_DIR} from ${box}&quot;;
