@@ -74,6 +74,11 @@ CARDS=(OC-AD9V3 OC-AD9H3 OC-AD9H7)</description>
           <defaultValue>OC-AD9V3 OC-AD9H3 OC-AD9H7</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>NOCLEAN</name>
+          <description>To avoid cleaning the directory at the end</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
@@ -171,10 +176,16 @@ function finish {  # define function to unlock in case of error, executed after 
   echo;echo &quot;  -&gt; unlocking ${LOCK}&quot;
   UNLOCK_RC=0;ssh ${HWUser}@${box} rmdir ${LOCK} || UNLOCK_RC=$?
   echo &quot;box=$box lock=$LOCK unlock RC=$UNLOCK_RC (`date`)&quot;
-  echo;echo &quot;  -&gt; AC: NOT cleaning ${box}@$TARGET_DIR&quot;
-  #CLEAN_RC=0;ssh -T ${HWUser}@$box rm -rf ${TARGET_DIR} || CLEAN_RC=$?
-  echo &quot;box=$box clean target_dir=$TARGET_DIR RC=$CLEAN_RC (`date`)&quot;
-  echo;echo &quot;  -&gt; EXITING !&quot;  
+  
+  if [ $noclean -ne 1 ]; then
+  	echo;echo &quot;  -&gt; cleaning ${box}@$TARGET_DIR&quot;;
+  	CLEAN_RC=0;ssh -T ${HWUser}@$box rm -rf ${TARGET_DIR} || CLEAN_RC=$?;
+  	echo &quot;box=$box clean target_dir=$TARGET_DIR RC=$CLEAN_RC (`date`)&quot;;
+  	echo;echo &quot;  -&gt; EXITING !&quot;;
+  else 
+  	echo;echo &quot;  -&gt; NO CLEANING REQUESTED !&quot;; 
+  	echo;echo &quot;  -&gt; EXITING !&quot;; 
+  fi
 
 }
 
@@ -629,8 +640,12 @@ if [ $RC -eq 0 ]; then
   echo &quot;   (needs to be manually done because OC-ACCEL github script does not manage Primary/Secondary files for the moment)&quot;
   echo &quot;   (so it is just renaming primary to primary.good)&quot;
 
-  echo;echo &quot;+ Cleaning up working directory ${TARGET_DIR} from ${box}&quot;
-  ssh ${HWUser}@${box} rm -rf ${TARGET_DIR}
+    if [ $noclean -ne 1 ]; then
+    	echo;echo &quot;NO CLEAN REQUEST : NOT Cleaning up working directory ${TARGET_DIR} from ${box}&quot;;
+    else
+    	echo;echo &quot;Cleaning up working directory ${TARGET_DIR} from ${box}&quot;;
+  		ssh ${HWUser}@${box} rm -rf ${TARGET_DIR};
+    fi
 
   if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
     echo;echo &quot;+ Renaming primary/secondary files to good.* on ${box}&quot;
