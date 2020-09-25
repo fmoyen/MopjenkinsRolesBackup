@@ -10,16 +10,6 @@ Main Issues : &#xd;
 OC-AD9H7:&#xd;
    - hls_hbm_memcopy_1024 ) SOLVED !!!  timing were failing for HBM (even with default 12)&#xd;
    - oc-flash not operational (for OC-AD9H7 only) =&gt; NO HARDWARE TEST ON OC-AD9H7&#xd;
-&#xd;
-temp removed :&#xd;
-hdl_example&#xd;
-hdl_single_engine&#xd;
-hls_helloworld_512&#xd;
-hls_helloworld_1024&#xd;
-hls_memcopy_1024&#xd;
-hls_memcopy_512&#xd;
-hls_hbm_memcopy_1024&#xd;
-hls_image_filter&#xd;
 </description>
   <keepDependencies>false</keepDependencies>
   <properties>
@@ -243,6 +233,14 @@ H 22-23/1 * * *</spec>
     <hudson.matrix.TextAxis>
       <name>ACT</name>
       <values>
+        <string>hdl_example</string>
+        <string>hdl_single_engine</string>
+        <string>hls_helloworld_512</string>
+        <string>hls_helloworld_1024</string>
+        <string>hls_memcopy_1024</string>
+        <string>hls_memcopy_512</string>
+        <string>hls_hbm_memcopy_1024</string>
+        <string>hls_image_filter</string>
         <string>hls_decimal_mult</string>
         <string>test</string>
       </values>
