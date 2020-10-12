@@ -78,6 +78,7 @@ If -- then VIVADO_XXX parameters below are taken into account</description>
               <string>--</string>
               <string>2019.1</string>
               <string>2018.3</string>
+              <string>2020.1</string>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
