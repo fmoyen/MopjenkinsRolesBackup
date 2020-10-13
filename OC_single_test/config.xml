@@ -71,7 +71,7 @@ Orpington and Lewen05 are P9</description>
           <name>CARDS</name>
           <description>List of available cards for Hardware test
 CARDS=(OC-AD9V3 OC-AD9H3 OC-AD9H7)</description>
-          <defaultValue>OC-AD9V3 OC-AD9H3 OC-AD9H7</defaultValue>
+          <defaultValue>OC-AD9V3 OC-AD9H3 OC-AD9H7 OC-BW250SOC</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
