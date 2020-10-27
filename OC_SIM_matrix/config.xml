@@ -12,6 +12,15 @@ KNOWN FAILURES : &#xd;
 &#xd;
 Removed hdl_example.NORAM and hdl_example.DDR test considered as useless&#xd;
 &#xd;
+temp removed&#xd;
+hdl_example&#xd;
+hdl_single_engine&#xd;
+hls_helloworld_512&#xd;
+hls_helloworld_1024&#xd;
+hls_memcopy_1024&#xd;
+hls_hbm_memcopy_1024&#xd;
+hls_image_filter&#xd;
+hls_decimal_mult&#xd;
 </description>
   <keepDependencies>false</keepDependencies>
   <properties>
@@ -145,14 +154,7 @@ H 18-23/4 * * *</spec>
     <hudson.matrix.TextAxis>
       <name>ACT</name>
       <values>
-        <string>hdl_example</string>
-        <string>hdl_single_engine</string>
-        <string>hls_helloworld_512</string>
-        <string>hls_helloworld_1024</string>
-        <string>hls_memcopy_1024</string>
         <string>hls_hbm_memcopy_1024</string>
-        <string>hls_image_filter</string>
-        <string>hls_decimal_mult</string>
         <string>test</string>
       </values>
     </hudson.matrix.TextAxis>
@@ -492,12 +494,21 @@ case $ACT in                    # manually forcing BRAM usage to emulate the HBM
 
   *hbm*)
 # when simulating an HBM Chip, we replace the HBM by a DDR to allow simulation to occur
-# by hand we set the following parameter which will change the HBM configuration
+# We manually set the following parameters which will change the HBM configuration at SOFTWARE level
   echo &quot;ENABLE_BRAM=y&quot;                             &gt;&gt; .snap_config
   echo &quot;BRAM_USED=\&quot;TRUE\&quot;&quot;                        &gt;&gt; .snap_config
   echo &quot;ENABLE_DDRI=y&quot;                             &gt;&gt; .snap_config
   echo &quot;DDRI_USED=\&quot;TRUE\&quot;&quot;                        &gt;&gt; .snap_config
   make -s oldconfig
+  
+  # We manually set the following parameters which will change the HBM configuration at HDL level
+  # We assume that end lines are overwriting previous defaults ones
+  echo &quot;SNAP_CFLAGS += \&quot;-DCONFIG_ENABLE_BRAM=y\&quot;&quot;    &gt;&gt; .snap_config.cflags
+  echo &quot;SNAP_CFLAGS += \&quot;-DCONFIG_BRAM_USED=TRUE\&quot;&quot;   &gt;&gt; .snap_config.cflags
+  echo &quot;SNAP_CFLAGS += \&quot;-DCONFIG_DDR4_USED=FALSE\&quot;&quot;  &gt;&gt; .snap_config.cflags
+  echo &quot;SNAP_CFLAGS += \&quot;-DCONFIG_ENABLE_DDRI=y\&quot;&quot;    &gt;&gt; .snap_config.cflags
+  echo &quot;SNAP_CFLAGS += \&quot;-DCONFIG_DDRI_USED=TRUE\&quot;&quot;   &gt;&gt; .snap_config.cflags
+  
   ;;
 esac
 
