@@ -505,7 +505,6 @@ case $ACT in                    # manually forcing BRAM usage to emulate the HBM
   # We assume that end lines are overwriting previous defaults ones
   echo &quot;SNAP_CFLAGS += \&quot;-DCONFIG_ENABLE_BRAM=y\&quot;&quot;    &gt;&gt; .snap_config.cflags
   echo &quot;SNAP_CFLAGS += \&quot;-DCONFIG_BRAM_USED=TRUE\&quot;&quot;   &gt;&gt; .snap_config.cflags
-  echo &quot;SNAP_CFLAGS += \&quot;-DCONFIG_DDR4_USED=FALSE\&quot;&quot;  &gt;&gt; .snap_config.cflags
   echo &quot;SNAP_CFLAGS += \&quot;-DCONFIG_ENABLE_DDRI=y\&quot;&quot;    &gt;&gt; .snap_config.cflags
   echo &quot;SNAP_CFLAGS += \&quot;-DCONFIG_DDRI_USED=TRUE\&quot;&quot;   &gt;&gt; .snap_config.cflags
   
