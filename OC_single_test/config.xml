@@ -441,7 +441,8 @@ for loop in `seq 1 $maxloop`;do
 
       #------------------------------------
       # card available &amp; no user =&gt; now lock &amp; test
-      [1234]:0)
+      # [1234]:0) we extend the position to the PCI equivalent position
+      [123456789]:0)
 		for cardid in $cards;do
       	  LOCK=&quot;jenkins_lock_card$cardid&quot;
 		  RC=0;ssh ${HWUser}@$box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
