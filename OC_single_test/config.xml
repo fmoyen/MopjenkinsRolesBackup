@@ -79,6 +79,11 @@ CARDS=(OC-AD9V3 OC-AD9H3 OC-AD9H7)</description>
           <description>To avoid cleaning the directory at the end</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>CHECKUSER</name>
+          <description>Check if users are connected at working hours</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
@@ -393,7 +398,15 @@ for loop in `seq 1 $maxloop`;do
     echo;echo &quot;-------------------------------------------------&quot;
     echo &quot;$box&quot;
 	
-    nusers=`ssh ${HWUser}@${box} who|grep -v root|grep -v ${HWUser}|wc -l`
+  # AC: Dirty invalidating user check
+  
+      if [ &quot;$CHECKUSER&quot; == &quot;true&quot; ]; then
+           nusers=`ssh ${HWUser}@${box} who|grep -v root|grep -v ${HWUser}|wc -l`
+      else 
+           nusers=0
+      fi
+    
+   # nusers=`ssh ${HWUser}@${box} who|grep -v root|grep -v ${HWUser}|wc -l`
 
     find_card=$FindCardTool.${GIT_COMMIT}.`date +%H%M%S`
 
