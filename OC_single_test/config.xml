@@ -418,8 +418,10 @@ for loop in `seq 1 $maxloop`;do
     
     echo -e &quot;  --&gt; Using specific $FindCardTool, looking for $CRD inside ${box}: \c&quot;
     echo &quot;&quot;
-    echo &quot;Oc_find_card version is :&quot;;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -V
-    echo &quot;&quot;
+    #echo &quot;Oc_find_card version is :&quot;;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -V &gt; /dev/null 2&gt;&amp;1
+    echo &quot;Oc_find_card version is :&quot;;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -V 2&gt;$1
+echo &quot;&quot;
+    #found=0;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} &gt; /dev/null 2&gt;&amp;1 ||found=$?
     found=0;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} &gt; /dev/null 2&gt;&amp;1 ||found=$?
     # ($find_card gives the number of found cards inside $?)
     # we use $find_card without the -v option. Be careful that any modification of oc_find_card report affects this step
