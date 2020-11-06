@@ -1324,6 +1324,8 @@ for loop in `seq 1 $maxloop`;do
     echo -e &quot;  --&gt; Using the tool, looking for $CRD inside ${box}: \c&quot;
     found=0;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} &gt; /dev/null 2&gt;&amp;1 ||found=$?
     # ($find_card gives the number of found cards inside $?)
+    # we use $find_card without the -v option. Be careful that any modification of oc_find_card report affects this step
+    # make sure oc_find_card only report the cards numbers.
     
     if [ $found -ne 0 ];then
       echo -e &quot;OK: $found CARD(S) FOUND &quot;
