@@ -11,7 +11,8 @@ OC-BW250SOC : does not programm from jenkins images, and doesn&apos;t reset/relo
 &#xd;
 OC-AD9H7:&#xd;
    - hls_hbm_memcopy_1024 ) SOLVED !!!  timing were failing for HBM (even with default 12)&#xd;
-   - oc-flash not operational (for OC-AD9H7 only) =&gt; NO HARDWARE TEST ON OC-AD9H7</description>
+   - oc-flash not operational (for OC-AD9H7 only) =&gt; NO HARDWARE TEST ON OC-AD9H7&#xd;
+   - hdl_ex fails on 9V3 ???</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <hudson.plugins.jira.JiraProjectProperty plugin="jira@3.0.11"/>
