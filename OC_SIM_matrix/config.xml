@@ -14,6 +14,17 @@ Removed hdl_example.NORAM and hdl_example.DDR test considered as useless&#xd;
 &#xd;
 !!! hbm tests are failing (collection of param for sim to update defconfig are not ok)&#xd;
 &#xd;
+tymp removed :&#xd;
+hdl_example&#xd;
+hdl_single_engine&#xd;
+hls_helloworld_512&#xd;
+hls_helloworld_1024&#xd;
+hls_memcopy_1024&#xd;
+hls_hbm_memcopy_1024&#xd;
+hls_image_filter&#xd;
+hls_decimal_mult&#xd;
+hls_hbm_memcopy_1024&#xd;
+&#xd;
 </description>
   <keepDependencies>false</keepDependencies>
   <properties>
@@ -147,15 +158,7 @@ H 18-23/4 * * *</spec>
     <hudson.matrix.TextAxis>
       <name>ACT</name>
       <values>
-        <string>hdl_example</string>
-        <string>hdl_single_engine</string>
-        <string>hls_helloworld_512</string>
-        <string>hls_helloworld_1024</string>
-        <string>hls_memcopy_1024</string>
-        <string>hls_hbm_memcopy_1024</string>
-        <string>hls_image_filter</string>
-        <string>hls_decimal_mult</string>
-        <string>hls_hbm_memcopy_1024</string>
+        <string>hls_udp</string>
         <string>test</string>
       </values>
     </hudson.matrix.TextAxis>
