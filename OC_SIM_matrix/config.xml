@@ -158,7 +158,7 @@ H 18-23/4 * * *</spec>
     <hudson.matrix.TextAxis>
       <name>ACT</name>
       <values>
-        <string>hls_udp</string>
+        <string>hls_udp_512</string>
         <string>test</string>
       </values>
     </hudson.matrix.TextAxis>
@@ -493,12 +493,12 @@ case $ACT in                    # select config &amp; compile action
     ;;
 esac
 
-case $ACT in                    # manually forcing BRAM usage to emulate the HBM in simulation
-								# We will see HBM but modeling will be BRAM
-
+case $ACT in                    
+ # manually forcing BRAM usage to emulate the HBM in simulation
+ # We will see HBM but modeling will be BRAM
   *hbm*)
-# when simulating an HBM Chip, we replace the HBM by a DDR to allow simulation to occur
-# We manually set the following parameters which will change the HBM configuration at SOFTWARE level
+  # when simulating an HBM Chip, we replace the HBM by a DDR to allow simulation to occur
+  # We manually set the following parameters which will change the HBM configuration at SOFTWARE level
   echo &quot;ENABLE_BRAM=y&quot;                             &gt;&gt; .snap_config
   echo &quot;BRAM_USED=\&quot;TRUE\&quot;&quot;                        &gt;&gt; .snap_config
   echo &quot;ENABLE_DDRI=y&quot;                             &gt;&gt; .snap_config
@@ -511,8 +511,20 @@ case $ACT in                    # manually forcing BRAM usage to emulate the HBM
   echo &quot;SNAP_CFLAGS += \&quot;-DCONFIG_BRAM_USED=TRUE\&quot;&quot;   &gt;&gt; .snap_config.cflags
   echo &quot;SNAP_CFLAGS += \&quot;-DCONFIG_ENABLE_DDRI=y\&quot;&quot;    &gt;&gt; .snap_config.cflags
   echo &quot;SNAP_CFLAGS += \&quot;-DCONFIG_DDRI_USED=TRUE\&quot;&quot;   &gt;&gt; .snap_config.cflags
-  
   ;;
+  
+ # AC 2020/11/24
+ # manually forcing Ethernet loopback usage when simulating
+  *udp*)
+  # We manually set the following parameters which will change the ETH configuration at SOFTWARE level
+  echo &quot;ENABLE_ETH_LOOP_BACK=y&quot;                       &gt;&gt; .snap_config
+  make -s oldconfig
+  
+  # We manually set the following parameters which will change the HBM configuration at HDL level
+  # We assume that end lines are overwriting previous defaults ones
+  echo &quot;SNAP_CFLAGS += \&quot;-DCONFIG_ENABLE_ETH_LOOP_BACK=y\&quot;&quot;  &gt;&gt; .snap_config.cflags
+  ;;
+  
 esac
 
 #==============================================================================================
