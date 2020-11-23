@@ -517,12 +517,15 @@ case $ACT in
  # manually forcing Ethernet loopback usage when simulating
   *udp*)
   # We manually set the following parameters which will change the ETH configuration at SOFTWARE level
+  echo &quot;J: Enabling Eth loopback for simulation&quot;
   echo &quot;ENABLE_ETH_LOOP_BACK=y&quot;                       &gt;&gt; .snap_config
+  echo &quot;ETH_LOOP_BACK=\&quot;TRUE\&quot;&quot;                       &gt;&gt; .snap_config
   make -s oldconfig
   
   # We manually set the following parameters which will change the HBM configuration at HDL level
   # We assume that end lines are overwriting previous defaults ones
   echo &quot;SNAP_CFLAGS += \&quot;-DCONFIG_ENABLE_ETH_LOOP_BACK=y\&quot;&quot;  &gt;&gt; .snap_config.cflags
+  echo &quot;SNAP_CFLAGS += \&quot;-DCONFIG_ETH_LOOP_BACK=TRUE\&quot;&quot;      &gt;&gt; .snap_config.cflags
   ;;
   
 esac
