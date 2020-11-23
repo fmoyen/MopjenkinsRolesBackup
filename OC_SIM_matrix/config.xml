@@ -520,7 +520,15 @@ case $ACT in
   echo &quot;J: Enabling Eth loopback for simulation&quot;
   echo &quot;ENABLE_ETH_LOOP_BACK=y&quot;                       &gt;&gt; .snap_config
   echo &quot;ETH_LOOP_BACK=\&quot;TRUE\&quot;&quot;                       &gt;&gt; .snap_config
+
+  
   make -s oldconfig
+  
+    
+  echo &quot;.snap_config.sh apres  make -s oldconfig de l&apos;eth&quot;
+  echo &quot;--------------- --------------- ---------------&quot;
+  cat .snap_config.sh
+  echo
   
   # We manually set the following parameters which will change the HBM configuration at HDL level
   # We assume that end lines are overwriting previous defaults ones
