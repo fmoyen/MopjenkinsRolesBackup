@@ -19,11 +19,13 @@ hdl_example&#xd;
 hdl_single_engine&#xd;
 hls_helloworld_512&#xd;
 hls_helloworld_1024&#xd;
+hls_memcopy_512&#xd;
 hls_memcopy_1024&#xd;
+hls_hbm_memcopy_512&#xd;
 hls_hbm_memcopy_1024&#xd;
 hls_image_filter&#xd;
 hls_decimal_mult&#xd;
-hls_hbm_memcopy_1024&#xd;
+&#xd;
 &#xd;
 </description>
   <keepDependencies>false</keepDependencies>
@@ -158,6 +160,7 @@ H 18-23/4 * * *</spec>
     <hudson.matrix.TextAxis>
       <name>ACT</name>
       <values>
+        <string>hls_hbm_memcopy_1024</string>
         <string>hls_udp_512</string>
         <string>test</string>
       </values>
