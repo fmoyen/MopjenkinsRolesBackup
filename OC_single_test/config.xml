@@ -84,6 +84,17 @@ CARDS=(OC-AD9V3 OC-AD9H3 OC-AD9H7)</description>
           <description>Check if users are connected at working hours</description>
           <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>USE_OC_UTILS_CHECKOUT</name>
+          <description>To allow usage of a previous level of oc-utils</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>OC_UTILS_COMMIT</name>
+          <description>for example provide 96d05c6 or 96d05c6517a211404a131953fd72f120f515ad0c</description>
+          <defaultValue>96d05c6</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
@@ -607,6 +618,11 @@ ssh ${HWUser}@${box} rm -rf oc-utils
 echo &quot;echo OCUtils URL = $OCUTILS_URL&quot;
 echo &quot;Running : ${HWUser}@${box} git clone -b $OCUTILS_BRANCH $OCUTILS_URL oc-utils&quot;
 ssh ${HWUser}@${box} git clone -b $OCUTILS_BRANCH $OCUTILS_URL oc-utils
+
+#AC: use of a previous branch
+		if [ &quot;$USE_OC_UTILS_CHECKOUT&quot; == &quot;true&quot; ]; then
+           ssh ${HWUser}@${box} git checkout $OC_UTILS_COMMIT
+		fi
 
 # FAB: linking capi-utils/psl-devices to /lib/capi-utils/psl-devices modified by Alexandre
 #echo &quot;  -&gt; Linking ~/capi-utils/psl-devices to /lib/capi-utils/psl-devices modified by Alexandre&quot;
