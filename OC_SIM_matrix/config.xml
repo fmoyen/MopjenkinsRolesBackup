@@ -154,7 +154,6 @@ H 18-23/4 * * *</spec>
         <string>hls_helloworld_1024</string>
         <string>hls_memcopy_512</string>
         <string>hls_memcopy_1024</string>
-        <string>hls_hbm_memcopy_512</string>
         <string>hls_hbm_memcopy_1024</string>
         <string>hls_image_filter</string>
         <string>hls_decimal_mult</string>
