@@ -42,8 +42,8 @@ Removed hdl_example.NORAM and hdl_example.DDR test considered as useless&#xd;
           <description>Choose the Vivado version to use</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
-              <string>2020.1</string>
               <string>2019.2</string>
+              <string>2020.1</string>
               <string>2019.1</string>
               <string>2018.3</string>
             </a>
