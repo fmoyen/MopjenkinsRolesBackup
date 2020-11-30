@@ -95,6 +95,13 @@ CARDS=(OC-AD9V3 OC-AD9H3 OC-AD9H7)</description>
           <defaultValue>96d05c6</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>NO_FLASH</name>
+          <description>Just running the test on existing action already programmed in the requested card
+The card is selected basedon the provided file name.
+Eg: OC-AD9H3xxxxx.bin provided =&gt; an OC-AD9H3 card will be tested</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
@@ -581,19 +588,26 @@ echo &quot;J: Copying Image(s) into $box:${ExecutorIMGRootDir}/$CRD&quot;
 echo &quot;  -&gt; mkdir ${ExecutorIMGRootDir}/$CRD, if not existing&quot;
 ssh ${HWUser}@${box} mkdir -p ${ExecutorIMGRootDir}/$CRD
 
-if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
-	echo &quot;  -&gt; Copying Image $IMGPrimaryName   to $box:${ExecutorIMGRootDir}/$CRD&quot;
-    rsync -aLz   $mopIMGDir/$IMGPrimaryName ${HWUser}@${box}:${ExecutorIMGRootDir}/$CRD
-	echo &quot;  -&gt; Copying Image $IMGSecondaryName to $box:${ExecutorIMGRootDir}/$CRD&quot;
-    rsync -aLz $mopIMGDir/$IMGSecondaryName ${HWUser}@${box}:${ExecutorIMGRootDir}/$CRD
-    RUN+=&quot; -D ${TARGET_DIR}&quot;
-	if [ -z ${mopIMGFile} ]; then RUN+=&quot; -A ALL&quot;;else RUN+=&quot; -F ${ExecutorIMGRootDir}/$CRD/$IMGPrimaryName -f ${ExecutorIMGRootDir}/$CRD/$IMGSecondaryName -A ${CRD} -C $cardid&quot;;fi
+if [ &quot;NO_FLASH&quot; == &quot;false&quot; ]; then
+	if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
+		echo &quot;  -&gt; Copying Image $IMGPrimaryName   to $box:${ExecutorIMGRootDir}/$CRD&quot;
+	    rsync -aLz   $mopIMGDir/$IMGPrimaryName ${HWUser}@${box}:${ExecutorIMGRootDir}/$CRD
+		echo &quot;  -&gt; Copying Image $IMGSecondaryName to $box:${ExecutorIMGRootDir}/$CRD&quot;
+	    rsync -aLz $mopIMGDir/$IMGSecondaryName ${HWUser}@${box}:${ExecutorIMGRootDir}/$CRD
+	    RUN+=&quot; -D ${TARGET_DIR}&quot;
+		if [ -z ${mopIMGFile} ]; then RUN+=&quot; -A ALL&quot;;else RUN+=&quot; -F ${ExecutorIMGRootDir}/$CRD/$IMGPrimaryName -f ${ExecutorIMGRootDir}/$CRD/$IMGSecondaryName -A ${CRD} -C $cardid&quot;;fi
 
-else
-	echo &quot;  -&gt; Copying Image $IMGFileName to $box:${ExecutorIMGRootDir}/$CRD&quot;
-    rsync -aLz $mopIMGDir/$IMGFileName ${HWUser}@${box}:${ExecutorIMGRootDir}/$CRD
-	RUN+=&quot; -D ${TARGET_DIR}&quot;
-	if [ -z ${mopIMGFile} ]; then RUN+=&quot; -A ALL&quot;;else RUN+=&quot; -F ${ExecutorIMGRootDir}/$CRD/$IMGFileName -A ${CRD} -C $cardid&quot;;fi
+	else
+		echo &quot;  -&gt; Copying Image $IMGFileName to $box:${ExecutorIMGRootDir}/$CRD&quot;
+	    rsync -aLz $mopIMGDir/$IMGFileName ${HWUser}@${box}:${ExecutorIMGRootDir}/$CRD
+		RUN+=&quot; -D ${TARGET_DIR}&quot;
+		if [ -z ${mopIMGFile} ]; then RUN+=&quot; -A ALL&quot;;else RUN+=&quot; -F ${ExecutorIMGRootDir}/$CRD/$IMGFileName -A ${CRD} -C $cardid&quot;;fi
+	fi
+    
+    else
+    		RUN+=&quot; -D ${TARGET_DIR}&quot;;
+#            if [ -z ${mopIMGFile} ]; then RUN+=&quot; -A ALL&quot;;else RUN+=&quot; -A ${CRD} -C $cardid&quot;;fi
+			RUN+=&quot; -A ALL&quot;
 fi
 
 
