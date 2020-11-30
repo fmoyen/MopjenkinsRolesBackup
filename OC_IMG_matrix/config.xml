@@ -1608,6 +1608,8 @@ echo;echo &quot;****************************************************************
 echo &quot;J: Executing below OC-ACCEL Jenkins test on $box from ${TARGET_DIR} directory (`date`):&quot;
 echo &quot;  -&gt; $SudoOrNotSudo ${RUN}&quot;
 echo
+echo &quot;Expected test is:         $ACT&quot;
+  
 
 RC=0;ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?
 	export TERM=xterm
@@ -1615,7 +1617,10 @@ RC=0;ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?
     pwd
 	set -f  # the set -f command disables file name generation (&quot;path name expansion&quot;), meaning &quot;*.zip&quot; stays &quot;*.zip&quot;
     $SudoOrNotSudo ${RUN}
+#    cd actions/ACT;grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print $NF}&apos;
 EOF
+
+echo &quot;Actual Action on card is:
 
 
 # Write short log only, Clean workspace

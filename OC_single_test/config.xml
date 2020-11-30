@@ -588,7 +588,8 @@ echo &quot;J: Copying Image(s) into $box:${ExecutorIMGRootDir}/$CRD&quot;
 echo &quot;  -&gt; mkdir ${ExecutorIMGRootDir}/$CRD, if not existing&quot;
 ssh ${HWUser}@${box} mkdir -p ${ExecutorIMGRootDir}/$CRD
 
-if [ &quot;NO_FLASH&quot; == &quot;false&quot; ]; then
+if [ &quot;NO_FLASH&quot; == &quot;false&quot; ]; then # no need to manage file as we used it just to pick up the card name $CRD
+
 	if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
 		echo &quot;  -&gt; Copying Image $IMGPrimaryName   to $box:${ExecutorIMGRootDir}/$CRD&quot;
 	    rsync -aLz   $mopIMGDir/$IMGPrimaryName ${HWUser}@${box}:${ExecutorIMGRootDir}/$CRD
@@ -608,7 +609,7 @@ if [ &quot;NO_FLASH&quot; == &quot;false&quot; ]; then
     		RUN+=&quot; -D ${TARGET_DIR}&quot;;
 			RUN+=&quot; -A ${CRD} -C $cardid&quot;
 
-fi
+fi  #end of if NO_FLASH=false
 
 
 #------------------------------------------------------------------------------------------------------------------------------
@@ -658,6 +659,7 @@ ssh ${HWUser}@${box} make -C /home/$HWUser/oc-utils
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Executing Test: $SudoOrNotSudo ${RUN}&quot;
 echo &quot;   on $box (`date`)&quot;
+echo &quot;J: Expected test is:         $ACT&quot;
 
 RC=0
 ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?
@@ -680,6 +682,9 @@ echo;echo &quot;****************************************************************
 echo &quot;J: Checking RUN return code (`date`)...&quot;
 echo
 
+ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?    cd ${TARGET_DIR}/actions/$ACT;grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print $NF}&apos;
+
+
 if [ $RC -eq 0 ]; then
   mopIMGGoodDir=${mopIMGRootDir}/${CRD}/${CRD}_test_OK
   #if mkdir $mopIMGGoodDir 2&gt;/dev/null; then chmod g+w $mopIMGGoodDir; fi
@@ -698,6 +703,8 @@ if [ $RC -eq 0 ]; then
   		ssh ${HWUser}@${box} rm -rf ${TARGET_DIR};
     fi
 
+if [ &quot;NO_FLASH&quot; == &quot;false&quot; ]; then  # we don&apos;t want to manage files as we used it just to pick up the card name $CRD
+
   if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
     echo;echo &quot;+ Renaming primary/secondary files to good.* on ${box}&quot;
     echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGPrimaryName&quot;
@@ -714,7 +721,9 @@ if [ $RC -eq 0 ]; then
 
     MoveToDir -c $CRD -b &quot;$mopIMGDir/$IMGFileName&quot; -B &quot;$mopIMGDir/$IMGBitName&quot; -d $mopIMGGoodDir -s &quot;$IMGServers&quot; -u $HWUser
 
-  fi
+  fi #end of if $SPI8&quot; -eq &quot;1&quot;
+  
+fi   #end of if NO_FLASH=false
   echo
   
 else 
