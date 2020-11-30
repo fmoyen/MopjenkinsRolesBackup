@@ -607,7 +607,8 @@ if [ &quot;NO_FLASH&quot; == &quot;false&quot; ]; then
     else
     		RUN+=&quot; -D ${TARGET_DIR}&quot;;
 #            if [ -z ${mopIMGFile} ]; then RUN+=&quot; -A ALL&quot;;else RUN+=&quot; -A ${CRD} -C $cardid&quot;;fi
-			RUN+=&quot; -A ${CRD} -C $cardid&quot;
+#			RUN+=&quot; -A ${CRD} -C $cardid&quot;
+            RUN+=&quot; -A ALL -C $cardid&quot;
 fi
 
 
