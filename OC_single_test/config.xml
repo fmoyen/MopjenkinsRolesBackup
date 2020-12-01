@@ -681,21 +681,38 @@ ssh ${HWUser}@${box} &quot;echo ------ EXIT -----------------------&gt;&gt; jenk
 
 #------------------------------------------------------------------------------------------------------------------------------
 # To Simulate IMG_TEST case, we defined a fake ACT
-ACT=hls_helloworld_1024
+ACT=hls_memcopy_1024
 # we then create the env for this fake action
 
 #Knowing what the ACT should be, we check if the hardware contains this action
 # be careful in NO_FLASH mode it will depend on existing action
 echo &quot;J: Expected action is:         $ACT&quot;
 echo &quot;J: searching for existing action&quot;
-#ACTUAL_ACT&lt;&lt;
-ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?
+
+RC_ACT_CHECK=0
+ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
 	cd ${TARGET_DIR}/;
-    ls -al;
+#    ls -al;
+	make software;
     source ./snap_path.sh;  # to allow find snap_peek
 	cd actions/$ACT/;
-    grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print $NF}&apos;;
-    snap_peek -w32 0x0010| awk &apos;{print $NF}&apos;;
+    pwd;
+    requested_action=`grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print $NF}&apos;;`
+    actual_action=0x`snap_peek -w32 0x0010| awk &apos;{print $NF}&apos;;`
+    r_action_int=$(printf &apos;%x&apos; &quot;${requested_action}&quot;);
+    a_action_int=$(printf &apos;%x&apos; &quot;${actual_action}&quot;);
+#    echo &quot;requested_action=$requested_action&quot;;
+#    echo &quot;actual_action=   $actual_action&quot;;
+#    echo &quot;r_action_int=    $r_action_int&quot;;
+#    echo &quot;a_action_int=    $a_action_int&quot;;
+    
+    if [ &quot;${a_action_int}&quot; == &quot;${r_action_int}&quot; ]; then
+#    	echo &quot;actions match&quot;;
+        exit 0;
+    else
+#    	echo &quot;actions do NOT match =&gt; KO!&quot;;
+        exit 1;
+    fi
 EOF
 
 
