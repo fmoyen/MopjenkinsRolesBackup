@@ -1611,13 +1611,12 @@ echo
 echo &quot;Expected test is:         $ACT&quot;
   
 
-RC=0;ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?
+RC_RUN=0;ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_RUN=$?
 	export TERM=xterm
 	cd ${TARGET_DIR}
     pwd
 	set -f  # the set -f command disables file name generation (&quot;path name expansion&quot;), meaning &quot;*.zip&quot; stays &quot;*.zip&quot;
     $SudoOrNotSudo ${RUN}
-#    cd actions/ACT;grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print $NF}&apos;
 EOF
 
 echo &quot;Actual Action on card is:
@@ -1625,7 +1624,7 @@ echo &quot;Actual Action on card is:
 
 # Write short log only, Clean workspace
 # Note: this lines in the log file and the lines above can be 
-ssh ${HWUser}@${box} &quot;echo Exit: $JOB_NAME RC = $RC at:\       &gt;&gt; jenkins.log&quot;
+ssh ${HWUser}@${box} &quot;echo Exit: $JOB_NAME RC_RUN = $RC_RUN at:\       &gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;date                                     &gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;echo ----------- EXIT -------------------&gt;&gt; jenkins.log&quot;
 
@@ -1640,9 +1639,9 @@ else
   echo &quot;  -&gt; Cleaning operation: FAILED&quot;
 fi
   
-if [ $RC -eq 0 ]; then
+if [ $RC_RUN -eq 0 ]; then
   echo;echo &quot;***************************************************************************************&quot;
-  echo &quot;J: Test SUCCEEDED RC= $RC (`date`)&quot;
+  echo &quot;J: Test SUCCEEDED RC_RUN= $RC_RUN (`date`)&quot;
   
   echo &quot;  -&gt;  CARD $CRD Hardware test succeeded...&quot;  
   LinkDir=${RootSaveDir}/${CRD}/${CRD}_test_OK
@@ -1651,7 +1650,7 @@ if [ $RC -eq 0 ]; then
 
 else
   echo;echo &quot;***************************************************************************************&quot;
-  echo &quot;J: Test FAILED RC= $RC (`date`)&quot;
+  echo &quot;J: Test FAILED RC_RUN= $RC_RUN (`date`)&quot;
   
   echo &quot;  -&gt;  CARD $CRD Hardware test failed...&quot;
   LinkDir=${RootSaveDir}/${CRD}/${CRD}_test_failure
