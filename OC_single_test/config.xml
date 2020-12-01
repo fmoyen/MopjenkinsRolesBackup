@@ -659,10 +659,9 @@ ssh ${HWUser}@${box} make -C /home/$HWUser/oc-utils
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Executing Test: $SudoOrNotSudo ${RUN}&quot;
 echo &quot;   on $box (`date`)&quot;
-echo &quot;J: Expected test is:         $ACT&quot;
 
-RC=0
-ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?
+RC_RUN=0
+ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_RUN=$?
 	export TERM=xterm
 	cd ${TARGET_DIR}
 	set -f
@@ -670,9 +669,26 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?
     $SudoOrNotSudo ${RUN}
 EOF
 
-ssh ${HWUser}@${box} &quot;echo Exit: $JOB_NAME RC = $RC at:\      &gt;&gt; jenkins.log&quot;
+#------------------------------------------------------------------------------------------------------------------------------
+# Updating remote Power server local logs
+ssh ${HWUser}@${box} &quot;echo Exit: $JOB_NAME RC = $RC_RUN at:\  &gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;date                                    &gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;echo ------ EXIT -----------------------&gt;&gt; jenkins.log&quot;
+
+
+#------------------------------------------------------------------------------------------------------------------------------
+# To Simulate IMG_TEST case, we defined a fake ACT
+ACT=hls_helloworld_1024
+# we then create the env for this fake action
+
+#Knowing what the ACT should be, we check if the hardware contains this action
+# be careful in NO_FLASH mode it will depend on existing action
+echo &quot;J: Expected action is:         $ACT&quot;
+echo &quot;J: searching for existing action&quot;
+#ACTUAL_ACT&lt;&lt;
+ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?    cd ${TARGET_DIR}/actions/$ACT;grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print $NF}&apos;
+
+
 
 
 #------------------------------------------------------------------------------------------------------------------------------
@@ -682,28 +698,29 @@ echo;echo &quot;****************************************************************
 echo &quot;J: Checking RUN return code (`date`)...&quot;
 echo
 
-ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?    cd ${TARGET_DIR}/actions/$ACT;grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print $NF}&apos;
-
-
-if [ $RC -eq 0 ]; then
+if [ $RC_RUN -eq 0 ]; then
   mopIMGGoodDir=${mopIMGRootDir}/${CRD}/${CRD}_test_OK
   #if mkdir $mopIMGGoodDir 2&gt;/dev/null; then chmod g+w $mopIMGGoodDir; fi
   
   echo &quot;Job return code is good ==&gt;&quot;
-  echo &quot; =&gt; $box: Cleaning working directory&quot;
-  echo &quot; =&gt; Jenkins: Cleaning images from $mopIMGDir&quot;
-  echo &quot; =&gt; $box: Moving Primary/secondary image file to good.* inside $ExecutorIMGRootDir/$CRD&quot;
-  echo &quot;   (needs to be manually done because OC-ACCEL github script does not manage Primary/Secondary files for the moment)&quot;
-  echo &quot;   (so it is just renaming primary to primary.good)&quot;
+
 
     if [ &quot;$NOCLEAN&quot; == &quot;true&quot; ]; then
-    	echo;echo &quot;NO CLEAN REQUEST : NOT Cleaning up working directory ${TARGET_DIR} from ${box}&quot;;
-    else
-    	echo;echo &quot;Cleaning up working directory ${TARGET_DIR} from ${box}&quot;;
+    	echo;echo &quot;NO CLEAN REQUEST by USER : NOT Cleaning up working directory ${TARGET_DIR} from ${box}&quot;;
+        
+        else
+        
+        echo &quot; =&gt; $box: Cleaning working directory&quot;
+        echo &quot; =&gt; Jenkins: Cleaning images from $mopIMGDir&quot;
+        echo &quot; =&gt; $box: Moving Primary/secondary image file to good.* inside $ExecutorIMGRootDir/$CRD&quot;
+        echo &quot;   (needs to be manually done because OC-ACCEL github script does not manage Primary/Secondary files for the moment)&quot;
+        echo &quot;   (so it is just renaming primary to primary.good)&quot;
+        echo;echo &quot;Cleaning up working directory ${TARGET_DIR} from ${box}&quot;;
   		ssh ${HWUser}@${box} rm -rf ${TARGET_DIR};
     fi
 
-if [ &quot;NO_FLASH&quot; == &quot;false&quot; ]; then  # we don&apos;t want to manage files as we used it just to pick up the card name $CRD
+# we don&apos;t want to manage files as we used it just to pick up the card name $CRD
+if [ &quot;NO_FLASH&quot; == &quot;false&quot; ]; then  
 
   if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
     echo;echo &quot;+ Renaming primary/secondary files to good.* on ${box}&quot;
