@@ -75,9 +75,9 @@ CARDS=(OC-AD9V3 OC-AD9H3 OC-AD9H7)</description>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
-          <name>NOCLEAN</name>
-          <description>To avoid cleaning the directory at the end</description>
-          <defaultValue>false</defaultValue>
+          <name>CLEAN</name>
+          <description>Allows default cleaning the directory at the end</description>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>CHECKUSER</name>
@@ -96,11 +96,13 @@ CARDS=(OC-AD9V3 OC-AD9H3 OC-AD9H7)</description>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
-          <name>NO_FLASH</name>
-          <description>Just running the test on existing action already programmed in the requested card
-The card is selected basedon the provided file name.
+          <name>FLASH</name>
+          <description>Flashing the card is the default
+
+If unselected we just run the test on existing action already programmed in the requested card
+The card is selected based on the provided file name.
 Eg: OC-AD9H3xxxxx.bin provided =&gt; an OC-AD9H3 card will be tested</description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
@@ -200,7 +202,7 @@ function finish {  # define function to unlock in case of error, executed after 
   UNLOCK_RC=0;ssh ${HWUser}@${box} rmdir ${LOCK} || UNLOCK_RC=$?
   echo &quot;box=$box lock=$LOCK unlock RC=$UNLOCK_RC (`date`)&quot;
   
-  if [ &quot;$NOCLEAN&quot; == &quot;true&quot; ]; then
+  if [ &quot;$CLEAN&quot; == &quot;false&quot; ]; then
   	echo;echo &quot;  -&gt; NO CLEANING REQUESTED !&quot;; 
   	echo;echo &quot;  -&gt; EXITING !&quot;;
   else 
@@ -588,7 +590,7 @@ echo &quot;J: Copying Image(s) into $box:${ExecutorIMGRootDir}/$CRD&quot;
 echo &quot;  -&gt; mkdir ${ExecutorIMGRootDir}/$CRD, if not existing&quot;
 ssh ${HWUser}@${box} mkdir -p ${ExecutorIMGRootDir}/$CRD
 
-if [ &quot;NO_FLASH&quot; == &quot;false&quot; ]; then # no need to manage file as we used it just to pick up the card name $CRD
+if [ &quot;FLASH&quot; == &quot;true&quot; ]; then 
 
 	if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
 		echo &quot;  -&gt; Copying Image $IMGPrimaryName   to $box:${ExecutorIMGRootDir}/$CRD&quot;
@@ -605,11 +607,12 @@ if [ &quot;NO_FLASH&quot; == &quot;false&quot; ]; then # no need to manage file 
 		if [ -z ${mopIMGFile} ]; then RUN+=&quot; -A ALL&quot;;else RUN+=&quot; -F ${ExecutorIMGRootDir}/$CRD/$IMGFileName -A ${CRD} -C $cardid&quot;;fi
 	fi
     
-    else   # User has requested not flashing, $CRD is previously built with provided IMG name
+    else   # User has requested no flashing, $CRD is previously built with provided IMG name
+           # no need to manage files
     		RUN+=&quot; -D ${TARGET_DIR}&quot;;
 			RUN+=&quot; -A ${CRD} -C $cardid&quot;
 
-fi  #end of if NO_FLASH=false
+fi  #end of if FLASH=true
 
 
 #------------------------------------------------------------------------------------------------------------------------------
@@ -686,9 +689,14 @@ ACT=hls_helloworld_1024
 echo &quot;J: Expected action is:         $ACT&quot;
 echo &quot;J: searching for existing action&quot;
 #ACTUAL_ACT&lt;&lt;
-ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?    cd ${TARGET_DIR}/actions/$ACT;grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print $NF}&apos;
-
-
+ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC=$?
+	cd ${TARGET_DIR}/;
+    ls -al;
+    source ./snap_path.sh;  # to allow find snap_peek
+	cd actions/$ACT/;
+    grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print $NF}&apos;;
+    snap_peek -w32 0x0010| awk &apos;{print $NF}&apos;;
+EOF
 
 
 #------------------------------------------------------------------------------------------------------------------------------
@@ -705,7 +713,7 @@ if [ $RC_RUN -eq 0 ]; then
   echo &quot;Job return code is good ==&gt;&quot;
 
 
-    if [ &quot;$NOCLEAN&quot; == &quot;true&quot; ]; then
+    if [ &quot;$CLEAN&quot; == &quot;false&quot; ]; then
     	echo;echo &quot;NO CLEAN REQUEST by USER : NOT Cleaning up working directory ${TARGET_DIR} from ${box}&quot;;
         
         else
@@ -720,7 +728,7 @@ if [ $RC_RUN -eq 0 ]; then
     fi
 
 # we don&apos;t want to manage files as we used it just to pick up the card name $CRD
-if [ &quot;NO_FLASH&quot; == &quot;false&quot; ]; then  
+if [ &quot;FLASH&quot; == &quot;true&quot; ]; then  
 
   if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
     echo;echo &quot;+ Renaming primary/secondary files to good.* on ${box}&quot;
@@ -740,7 +748,7 @@ if [ &quot;NO_FLASH&quot; == &quot;false&quot; ]; then
 
   fi #end of if $SPI8&quot; -eq &quot;1&quot;
   
-fi   #end of if NO_FLASH=false
+fi   #end of if FLASH=true
   echo
   
 else 
