@@ -82,7 +82,7 @@ CARDS=(OC-AD9V3 OC-AD9H3 OC-AD9H7)</description>
         <hudson.model.BooleanParameterDefinition>
           <name>CHECKUSER</name>
           <description>Check if users are connected at working hours</description>
-          <defaultValue>true</defaultValue>
+          <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>USE_OC_UTILS_CHECKOUT</name>
@@ -102,8 +102,14 @@ CARDS=(OC-AD9V3 OC-AD9H3 OC-AD9H7)</description>
 If unselected we just run the test on existing action already programmed in the requested card
 The card is selected based on the provided file name.
 Eg: OC-AD9H3xxxxx.bin provided =&gt; an OC-AD9H3 card will be tested</description>
-          <defaultValue>true</defaultValue>
+          <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>ACT</name>
+          <description>to test action checking routine</description>
+          <defaultValue>hls_memcopy_1024</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
@@ -667,6 +673,8 @@ RC_RUN=0
 ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_RUN=$?
 	export TERM=xterm
 	cd ${TARGET_DIR}
+    #AC
+    make software
 	set -f
     ulimit -c unlimited               # limit core dumps
     $SudoOrNotSudo ${RUN}
@@ -681,8 +689,8 @@ ssh ${HWUser}@${box} &quot;echo ------ EXIT -----------------------&gt;&gt; jenk
 
 #------------------------------------------------------------------------------------------------------------------------------
 # To Simulate IMG_TEST case, we defined a fake ACT
-ACT=hls_memcopy_1024
-# we then create the env for this fake action
+# ACT=hls_memcopy_1024
+
 
 #Knowing what the ACT should be, we check if the hardware contains this action
 # be careful in NO_FLASH mode it will depend on existing action
@@ -691,26 +699,26 @@ echo &quot;J: searching for existing action&quot;
 
 RC_ACT_CHECK=0
 ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
-	cd ${TARGET_DIR}/;
-#    ls -al;
-	make software;
-    source ./snap_path.sh;  # to allow find snap_peek
-	cd actions/$ACT/;
-    pwd;
-    requested_action=`grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print $NF}&apos;;`
-    actual_action=0x`snap_peek -w32 0x0010| awk &apos;{print $NF}&apos;;`
-    r_action_int=$(printf &apos;%x&apos; &quot;${requested_action}&quot;);
-    a_action_int=$(printf &apos;%x&apos; &quot;${actual_action}&quot;);
-#    echo &quot;requested_action=$requested_action&quot;;
-#    echo &quot;actual_action=   $actual_action&quot;;
-#    echo &quot;r_action_int=    $r_action_int&quot;;
-#    echo &quot;a_action_int=    $a_action_int&quot;;
+	pwd
+    cd ${TARGET_DIR}/
+    source ./snap_path.sh
+    pwd
+	cd actions/$ACT/
+    pwd
+    requested_action=`grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print $NF}&apos;`
+    #actual_action=0x`../../software/tools/snap_peek -w32 0x0010| awk &apos;{print $NF}&apos;`
+    r_action_int=$(printf &apos;%x&apos; &quot;${requested_action}&quot;)
+    a_action_int=$(printf &apos;%x&apos; &quot;${actual_action}&quot;)
+    echo &quot;requested_action=$requested_action&quot;
+    echo &quot;actual_action=   $actual_action&quot;
+    echo &quot;r_action_int=    $r_action_int&quot;
+    echo &quot;a_action_int=    $a_action_int&quot;
     
     if [ &quot;${a_action_int}&quot; == &quot;${r_action_int}&quot; ]; then
-#    	echo &quot;actions match&quot;;
+    	echo &quot;actions match&quot;;
         exit 0;
     else
-#    	echo &quot;actions do NOT match =&gt; KO!&quot;;
+    	echo &quot;actions do NOT match =&gt; KO!&quot;;
         exit 1;
     fi
 EOF
