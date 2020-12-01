@@ -110,7 +110,6 @@ Removed hdl_example.NORAM and hdl_example.DDR test considered as useless&#xd;
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
         <url>https://github.com/OpenCAPI/oc-accel.git</url>
-        <credentialsId>executor-user</credentialsId>
       </hudson.plugins.git.UserRemoteConfig>
     </userRemoteConfigs>
     <branches>
