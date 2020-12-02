@@ -705,15 +705,22 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
     pwd
 	cd actions/$ACT/
     pwd
-    requested_action=`grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print $NF}&apos;`
-    actual_action=0x12345678
+    requested_action=$(grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print $NF}&apos;)
+    actual_action=0x$(snap_peek -w32 0x0010| awk &apos;{print $NF}&apos;;)
     r_action_int=$(printf &apos;%x&apos; &quot;${requested_action}&quot;)
     a_action_int=$(printf &apos;%x&apos; &quot;${actual_action}&quot;)
     echo &quot;requested_action=$requested_action&quot;
     echo &quot;actual_action=   $actual_action&quot;
     echo &quot;r_action_int=    $r_action_int&quot;
     echo &quot;a_action_int=    $a_action_int&quot;
-    
+            if [ -z $r_action_int ]; then
+            	echo &quot;Can&apos;t find requested action!&quot;
+            	exit 1
+            	if [ -z $a_action_int ]; then
+            	echo &quot;Can&apos;t find actual action!&quot;
+            	exit 1
+            	fi
+        	fi
     if [ &quot;${a_action_int}&quot; == &quot;${r_action_int}&quot; ]; then
     	echo &quot;actions match&quot;;
         exit 0;
