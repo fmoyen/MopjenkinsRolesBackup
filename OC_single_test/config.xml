@@ -695,8 +695,7 @@ ssh ${HWUser}@${box} &quot;echo ------ EXIT -----------------------&gt;&gt; jenk
 #Knowing what the ACT should be, we check if the hardware contains this action
 # be careful in NO_FLASH mode it will depend on existing action
 echo &quot;J: Expected action is:         $ACT&quot;
-echo &quot;J: searching for existing action&quot;
-
+echo &quot;J: searching for existing action on $box (`date`) for card ${CRD} on position (-C) $cardid&quot;
 RC_ACT_CHECK=0
 ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
 	pwd
@@ -705,11 +704,11 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
     pwd
 	cd actions/$ACT/
     pwd
-    grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print $NF};
-    snap_peek -w32 0x0010| awk &apos;{print $NF};
+    grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print $NF}&apos;;
+    snap_peek -w32 0x0010| awk &apos;{print $NF}&apos;;
     echo &quot;&quot;
     requested_action=$(grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print $NF}&apos;)
-    actual_action=0x$(snap_peek -w32 0x0010| awk &apos;{print $NF})
+    actual_action=0x$(snap_peek -w32 0x0010| awk &apos;{print $NF}&apos;)
     r_action_int=$(printf &apos;%x&apos; &quot;${requested_action}&quot;)
     a_action_int=$(printf &apos;%x&apos; &quot;${actual_action}&quot;)
     echo &quot;requested_action=$requested_action&quot;
