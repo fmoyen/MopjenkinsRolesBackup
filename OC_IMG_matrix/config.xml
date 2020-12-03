@@ -1619,7 +1619,70 @@ RC_RUN=0;ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_RUN=$?
     $SudoOrNotSudo ${RUN}
 EOF
 
-echo &quot;Actual Action on card is:
+
+
+#------------------------------------------------------------------------------------------------------------------------------
+# After the run (TO DO: check if run fails)
+# Knowing what the ACT should be, we check if the hardware contains this action
+
+echo &quot;J: Expected action is:            $ACT&quot;
+cd actions/$ACT/
+loc_requested_action=$(grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print \$NF}&apos;)
+echo &quot;J: Expected action ID is:         $loc_requested_action&quot;
+cd -
+
+echo &quot;J: searching for existing action on $box (`date`) for card ${CRD} on position (-C) $cardid&quot;
+
+RC_ACT_CHECK=0
+ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
+	pwd
+    cd ${TARGET_DIR}/
+    source ./snap_path.sh
+    pwd
+	cd actions/$ACT/
+    pwd
+    echo &quot;Collecting actions:&quot;
+
+	requested_action=\$(grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print \$NF}&apos;)
+	actual_action=0x\$(snap_peek -w32 0x0010 | awk &apos;{print \$NF}&apos;)
+    
+    r_action_int=\$(printf &apos;%x&apos; &quot;\${requested_action}&quot;)
+    a_action_int=\$(printf &apos;%x&apos; &quot;\${actual_action}&quot;)
+
+	echo &quot;requested_action=\$requested_action&quot;
+    echo &quot;actual_action=   \$actual_action&quot;
+    echo &quot;r_action_int=    \$r_action_int&quot;
+    echo &quot;a_action_int=    \$a_action_int&quot;
+            if [ \$r_action_int == 0 ]; then
+            	echo &quot;Can&apos;t find requested action!&quot;
+            	exit 1
+            	if [ \$a_action_int == 0 ]; then
+            	echo &quot;Can&apos;t find actual action!&quot;
+            	exit 1
+            	fi
+        	fi
+    if [ &quot;\${a_action_int}&quot; == &quot;\${r_action_int}&quot; ]; then
+    	echo &quot;actions match&quot;;
+        exit 0;
+    else
+    	echo &quot;actions do NOT match =&gt; KO!&quot;;
+        exit 1;
+    fi
+EOF
+
+#------------------------------------------------------------------------------------------------------------------------------
+# CHECKING Return codes, to check tested action is the proper one
+
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Checking Action Match return code (`date`)...&quot;
+echo
+
+  if [ $RC_ACT_CHECK -eq 0 ]; then
+  	echo &quot;ACTION MATCH return code is good ==&gt;&quot;
+  else
+  	echo &quot;ACTION DO NOT MATCH ==&gt;&gt;&gt; we let the next cleaning step to occur&quot;
+  fi
+
 
 
 # Write short log only, Clean workspace
@@ -1639,7 +1702,7 @@ else
   echo &quot;  -&gt; Cleaning operation: FAILED&quot;
 fi
   
-if [ $RC_RUN -eq 0 ]; then
+if [ $RC_RUN -eq 0 ] &amp;&amp; [ $RC_ACT_CHECK -eq 0 ]; then
   echo;echo &quot;***************************************************************************************&quot;
   echo &quot;J: Test SUCCEEDED RC_RUN= $RC_RUN (`date`)&quot;
   
@@ -1647,6 +1710,8 @@ if [ $RC_RUN -eq 0 ]; then
   LinkDir=${RootSaveDir}/${CRD}/${CRD}_test_OK
   SRCFILES=&quot;$BINFILES $BITFILES&quot;
   CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
+  
+  
 
 else
   echo;echo &quot;***************************************************************************************&quot;
