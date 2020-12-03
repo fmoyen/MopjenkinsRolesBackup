@@ -694,8 +694,13 @@ ssh ${HWUser}@${box} &quot;echo ------ EXIT -----------------------&gt;&gt; jenk
 
 #Knowing what the ACT should be, we check if the hardware contains this action
 # be careful in NO_FLASH mode it will depend on existing action
-echo &quot;J: Expected action is:         $ACT&quot;
+echo &quot;J: Expected action is:            $ACT&quot;
+cd actions/$ACT/
+loc_requested_action=\$(grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print \$NF}&apos;)
+echo &quot;J: Expected action ID is:         $loc_requested_action&quot;
+
 echo &quot;J: searching for existing action on $box (`date`) for card ${CRD} on position (-C) $cardid&quot;
+
 RC_ACT_CHECK=0
 ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
 	pwd
@@ -704,20 +709,21 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
     pwd
 	cd actions/$ACT/
     echo &quot;Collecting actions:&quot;
-	actual_action=0x\$(snap_peek -w32 0x0010 | awk &apos;{print $NF}&apos;)
-	r_action_int=\$(printf &apos;%x&apos; &quot;\${requested_action}&quot;)
-	a_action_int=\$(printf &apos;%x&apos; &quot;\${actual_action}&quot;)
+
+	requested_action=\$(grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print \$NF}&apos;)
+	actual_action=0x\$(snap_peek -w32 0x0010 | awk &apos;{print \$NF}&apos;)
     
-    r_action_int=$(printf &apos;%x&apos; &quot;\${requested_action}&quot;)
-    a_action_int=$(printf &apos;%x&apos; &quot;\${actual_action}&quot;)
-    echo &quot;requested_action=\$requested_action&quot;
+    r_action_int=\$(printf &apos;%x&apos; &quot;\${requested_action}&quot;)
+    a_action_int=\$(printf &apos;%x&apos; &quot;\${actual_action}&quot;)
+
+	echo &quot;requested_action=\$requested_action&quot;
     echo &quot;actual_action=   \$actual_action&quot;
     echo &quot;r_action_int=    \$r_action_int&quot;
     echo &quot;a_action_int=    \$a_action_int&quot;
-            if [ -z \$r_action_int ]; then
+            if [ \$r_action_int == 0 ]; then
             	echo &quot;Can&apos;t find requested action!&quot;
             	exit 1
-            	if [ -z \$a_action_int ]; then
+            	if [ \$a_action_int == 0 ]; then
             	echo &quot;Can&apos;t find actual action!&quot;
             	exit 1
             	fi
@@ -732,10 +738,10 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
 EOF
 
 #------------------------------------------------------------------------------------------------------------------------------
-# Do Clean-up work: $TARGET_DIR on the $box, and image files at MOPJENKINS site
+# CHECKING Return codes, to check tested action is the proper one
 
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Checking RUN return code (`date`)...&quot;
+echo &quot;J: Checking Action match and job RUN return codes (`date`)...&quot;
 echo
 
 if [ $RC_RUN -eq 0 ]; then
@@ -743,6 +749,18 @@ if [ $RC_RUN -eq 0 ]; then
   #if mkdir $mopIMGGoodDir 2&gt;/dev/null; then chmod g+w $mopIMGGoodDir; fi
   
   echo &quot;Job return code is good ==&gt;&quot;
+  
+  if [ $RC_ACT_CHECK -eq 0 ]; then
+  echo &quot;ACTION MATCH return code is good ==&gt;&quot;
+  else echo &quot;ACTION DO NOT MATCH ==&gt;&gt;&gt; to do : deal with the cleaning to come&quot;
+  fi
+
+#------------------------------------------------------------------------------------------------------------------------------
+# Do Clean-up work: $TARGET_DIR on the $box, and image files at MOPJENKINS site
+
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Cleaning step if required (`date`)...&quot;
+echo
 
 
     if [ &quot;$CLEAN&quot; == &quot;false&quot; ]; then
