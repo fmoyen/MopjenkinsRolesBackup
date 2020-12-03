@@ -696,8 +696,9 @@ ssh ${HWUser}@${box} &quot;echo ------ EXIT -----------------------&gt;&gt; jenk
 # be careful in NO_FLASH mode it will depend on existing action
 echo &quot;J: Expected action is:            $ACT&quot;
 cd actions/$ACT/
-loc_requested_action=\$(grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print \$NF}&apos;)
+loc_requested_action=$(grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print \$NF}&apos;)
 echo &quot;J: Expected action ID is:         $loc_requested_action&quot;
+cd -
 
 echo &quot;J: searching for existing action on $box (`date`) for card ${CRD} on position (-C) $cardid&quot;
 
@@ -708,6 +709,7 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
     source ./snap_path.sh
     pwd
 	cd actions/$ACT/
+    pwd
     echo &quot;Collecting actions:&quot;
 
 	requested_action=\$(grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print \$NF}&apos;)
