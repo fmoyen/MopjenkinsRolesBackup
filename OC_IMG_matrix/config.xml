@@ -3,8 +3,10 @@
   <actions/>
   <description>Builds bitstreams with different configurations and tests images on real HW if possible.&#xd;
 In case of problems: please contact fabrice_moyen@fr.ibm.com or alexandre.castellane@fr.ibm.com&#xd;
+&#xd;
 Vivado version used : tests on going for 2019.1 (issue with lsf / RH7)&#xd;
 AC 28 fev 2020 : changed default to 2019.2&#xd;
+AC late Nov 2020 : changed default to 2020.1 (simulations still in 2019.2)&#xd;
 &#xd;
 Main Issues : &#xd;
 OC-BW250SOC : does not program from jenkins images, and doesn&apos;t reset/reload properly on pavilly &#xd;
@@ -13,16 +15,7 @@ OC-AD9H7:&#xd;
    - hls_hbm_memcopy_1024 ) SOLVED !!!  timing were failing for HBM (even with default 12)&#xd;
    - oc-flash not operational (for OC-AD9H7 only) =&gt; NO HARDWARE TEST ON OC-AD9H7&#xd;
    - hdl_ex fails on 9V3 ???&#xd;
-&#xd;
-hdl_example&#xd;
-hdl_single_engine&#xd;
-hls_helloworld_512&#xd;
-hls_helloworld_1024&#xd;
-hls_memcopy_1024&#xd;
-hls_memcopy_512&#xd;
-hls_hbm_memcopy_1024&#xd;
-hls_image_filter&#xd;
-hls_decimal_mult</description>
+</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <hudson.plugins.jira.JiraProjectProperty plugin="jira@3.0.11"/>
@@ -1678,7 +1671,7 @@ echo &quot;J: Checking Action Match return code (`date`)...&quot;
 echo
 
   if [ $RC_ACT_CHECK -eq 0 ]; then
-  	echo &quot;ACTION MATCH return code is good ==&gt;&quot;
+  	echo &quot;ACTION MATCH return code is good&quot;
   else
   	echo &quot;ACTION DO NOT MATCH ==&gt;&gt;&gt; we let the next cleaning step to occur&quot;
   fi
@@ -1704,7 +1697,7 @@ fi
   
 if [ $RC_RUN -eq 0 ] &amp;&amp; [ $RC_ACT_CHECK -eq 0 ]; then
   echo;echo &quot;***************************************************************************************&quot;
-  echo &quot;J: Test SUCCEEDED RC_RUN= $RC_RUN (`date`)&quot;
+  echo &quot;J: Test SUCCEEDED: RC_RUN = $RC_RUN AND HARDWARE ACTION MATCH TEST CASE (`date`)&quot;
   
   echo &quot;  -&gt;  CARD $CRD Hardware test succeeded...&quot;  
   LinkDir=${RootSaveDir}/${CRD}/${CRD}_test_OK
@@ -1715,8 +1708,11 @@ if [ $RC_RUN -eq 0 ] &amp;&amp; [ $RC_ACT_CHECK -eq 0 ]; then
 
 else
   echo;echo &quot;***************************************************************************************&quot;
-  echo &quot;J: Test FAILED RC_RUN= $RC_RUN (`date`)&quot;
-  
+  echo &quot;J: Test FAILED&quot;
+  echo &quot;J: JOB RC_RUN = $RC_RUN&quot;
+  if [ $RC_ACT_CHECK -eq 1 ]; then
+  	echo &quot;J: HARDWARE ACTION DOES NOT MATCH ACTION FROM TEST CASE !!(`date`)&quot;
+  fi
   echo &quot;  -&gt;  CARD $CRD Hardware test failed...&quot;
   LinkDir=${RootSaveDir}/${CRD}/${CRD}_test_failure
   SRCFILES=&quot;$BINFILES $BITFILES&quot;
