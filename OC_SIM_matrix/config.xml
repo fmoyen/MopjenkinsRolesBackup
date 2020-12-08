@@ -188,7 +188,7 @@ H 18-23/4 * * *</spec>
       </values>
     </hudson.matrix.LabelAxis>
   </axes>
-  <combinationFilter>( ( (ACT=~&quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;)||(ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; ) )   &amp;&amp; (         (CRD=~&quot;AD9V3&quot;  &amp;&amp; AD9V3==&quot;true&quot; &amp;&amp; !(ACT=~&quot;hls_hbm_memcopy_1024&quot;) &amp;&amp; !(ACT=~&quot;hls_udp&quot;) ) || (CRD=~&quot;BW250SOC&quot;  &amp;&amp; BW250SOC==&quot;true&quot; &amp;&amp; !(ACT=~&quot;hls_hbm_memcopy_1024&quot;) &amp;&amp; !(ACT=~&quot;hls_udp&quot;)) || ( CRD=~&quot;AD9H&quot; &amp;&amp; (AD9H3==&quot;true&quot;|| AD9H335==&quot;true&quot; ||AD9H7==&quot;true&quot;) &amp;&amp; !(ACT=~&quot;hls_memcopy_1024&quot;) &amp;&amp; !(ACT=~&quot;hls_udp&quot;) )   ||  ( CRD=~&quot;AD9H3&quot; &amp;&amp; (AD9H3==&quot;true&quot;) &amp;&amp; (ACT=~&quot;hls_udp&quot;) )      )  )  ||  (ACT==&quot;test&quot; &amp;&amp; CRD==&quot;AD9V3&quot;)</combinationFilter>
+  <combinationFilter>( ( (ACT=~&quot;hls&quot; &amp;&amp; HLS==&quot;true&quot;)||(ACT=~&quot;hdl&quot; &amp;&amp; HDL==&quot;true&quot; ) )   &amp;&amp; (         (CRD=~&quot;AD9V3&quot;  &amp;&amp; AD9V3==&quot;true&quot; &amp;&amp; !(ACT=~&quot;hls_hbm_memcopy_1024&quot;) &amp;&amp; !(ACT=~&quot;hls_udp&quot;) ) || (CRD=~&quot;BW250SOC&quot;  &amp;&amp; BW250SOC==&quot;true&quot; &amp;&amp; !(ACT=~&quot;hls_hbm_memcopy_1024&quot;) &amp;&amp; !(ACT=~&quot;hls_udp&quot;)) || ( CRD=~&quot;AD9H&quot; &amp;&amp; (AD9H3==&quot;true&quot;|| AD9H335==&quot;true&quot; || AD9H7==&quot;true&quot;) &amp;&amp; !(ACT=~&quot;hls_memcopy_1024&quot;) &amp;&amp; !(ACT=~&quot;hls_udp&quot;) )   ||  ( CRD=~&quot;AD9H3&quot; &amp;&amp; (AD9H3==&quot;true&quot;) &amp;&amp; (ACT=~&quot;hls_udp&quot;) )      )  )  ||  (ACT==&quot;test&quot; &amp;&amp; CRD==&quot;AD9V3&quot;)</combinationFilter>
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
@@ -228,7 +228,7 @@ if [ &quot;$CRD&quot;         == &quot;AD9H335&quot;   ] &amp;&amp; [ &quot;$AD9
 if [ &quot;$CRD&quot;         == &quot;AD9H7&quot;     ] &amp;&amp; [ &quot;$AD9H7&quot;     == &quot;false&quot; ]; then BSKIP=1;fi
 if [ &quot;$CRD&quot;         == &quot;BW250SOC&quot;  ] &amp;&amp; [ &quot;$BW250SOC&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
 if [ &quot;$ACT&quot;         == &quot;test&quot;      ]; then BSKIP=0;fi
-echo &quot;action_types (hdl,hls)=$HDL,$HLS enabled_cards(AD9v3,AD9H3,AD9H335,AD9H7,BW250SOC)=$AD9V3,$AD9H3,$AD9H7 $BW250SOC BSKIP=$BSKIP&quot;
+echo &quot;action_types (hdl,hls)=$HDL,$HLS enabled_cards(AD9v3,AD9H3,AD9H335,AD9H7,BW250SOC)=$AD9V3,$AD9H3,$AD9H335,$AD9H7,$BW250SOC BSKIP=$BSKIP&quot;
 echo
 
 #==============================================================================================
@@ -281,7 +281,12 @@ case &quot;$CRD:$ACT:$SIM&quot; in
   *:hls_hbm_memcopy_1024:*)
     if [[ $CRD != &quot;AD9H3&quot; &amp;&amp; $CRD != &quot;AD9H335&quot; &amp;&amp; $CRD != &quot;AD9H7&quot; ]]; then
       C=&quot;nhbm&quot;; ASKIP=1
-    fi;;   
+    fi;;
+    
+  *:hls_udp:*)
+    if [[ $CRD != &quot;AD9H3&quot; ]]; then
+      C=&quot;nudp&quot;; ASKIP=1
+    fi;;    
     
 esac
 echo &quot;defconfig SKIP=$DSKIP&quot;
