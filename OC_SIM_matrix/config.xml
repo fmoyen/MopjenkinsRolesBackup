@@ -70,6 +70,11 @@ Removed hdl_example.NORAM and hdl_example.DDR test considered as useless&#xd;
           <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
+          <name>AD9H335</name>
+          <description>enable/disable AD9H335 simulation</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
           <name>AD9H7</name>
           <description>enable/disable AD9H7 simulation</description>
           <defaultValue>true</defaultValue>
@@ -218,10 +223,11 @@ if [ &quot;$ACTION_TYPE&quot; == &quot;hdl&quot;       ] &amp;&amp; [ &quot;$HDL
 if [ &quot;$ACTION_TYPE&quot; == &quot;hls&quot;       ] &amp;&amp; [ &quot;$HLS&quot;       == &quot;false&quot; ]; then BSKIP=1;fi
 if [ &quot;$CRD&quot;         == &quot;AD9V3&quot;     ] &amp;&amp; [ &quot;$AD9V3&quot;     == &quot;false&quot; ]; then BSKIP=1;fi
 if [ &quot;$CRD&quot;         == &quot;AD9H3&quot;     ] &amp;&amp; [ &quot;$AD9H3&quot;     == &quot;false&quot; ]; then BSKIP=1;fi
+if [ &quot;$CRD&quot;         == &quot;AD9H335&quot;   ] &amp;&amp; [ &quot;$AD9H335&quot;   == &quot;false&quot; ]; then BSKIP=1;fi
 if [ &quot;$CRD&quot;         == &quot;AD9H7&quot;     ] &amp;&amp; [ &quot;$AD9H7&quot;     == &quot;false&quot; ]; then BSKIP=1;fi
 if [ &quot;$CRD&quot;         == &quot;BW250SOC&quot;  ] &amp;&amp; [ &quot;$BW250SOC&quot;  == &quot;false&quot; ]; then BSKIP=1;fi
 if [ &quot;$ACT&quot;         == &quot;test&quot;      ]; then BSKIP=0;fi
-echo &quot;action_types (hdl,hls)=$HDL,$HLS enabled_cards(AD9v3,AD9H3,AD9H7)=$AD9V3,$AD9H3,$AD9H7 $BW250SOC BSKIP=$BSKIP&quot;
+echo &quot;action_types (hdl,hls)=$HDL,$HLS enabled_cards(AD9v3,AD9H3,AD9H335,AD9H7,BW250SOC)=$AD9V3,$AD9H3,$AD9H7 $BW250SOC BSKIP=$BSKIP&quot;
 echo
 
 #==============================================================================================
@@ -272,7 +278,7 @@ case &quot;$CRD:$ACT:$SIM&quot; in
     fi;;
      
   *:hls_hbm_memcopy_1024:*)
-    if [[ $CRD != &quot;AD9H3&quot; &amp;&amp; $CRD != &quot;AD9H7&quot; ]]; then
+    if [[ $CRD != &quot;AD9H3&quot; &amp;&amp; $CRD != &quot;AD9H335&quot; &amp;&amp; $CRD != &quot;AD9H7&quot; ]]; then
       C=&quot;nhbm&quot;; ASKIP=1
     fi;;   
     
