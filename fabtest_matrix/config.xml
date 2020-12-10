@@ -70,10 +70,10 @@ If -- then VIVADO_XXX parameters below are taken into account</description>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
-      <maxConcurrentPerNode>0</maxConcurrentPerNode>
-      <maxConcurrentTotal>0</maxConcurrentTotal>
+      <maxConcurrentPerNode>1</maxConcurrentPerNode>
+      <maxConcurrentTotal>4</maxConcurrentTotal>
       <categories class="java.util.concurrent.CopyOnWriteArrayList"/>
-      <throttleEnabled>false</throttleEnabled>
+      <throttleEnabled>true</throttleEnabled>
       <throttleOption>project</throttleOption>
       <limitOneJobWithMatchingParams>false</limitOneJobWithMatchingParams>
       <matrixOptions>
@@ -159,7 +159,7 @@ else
 
     echo &quot;BUILD_URL= $BUILD_URL&quot;
 
-    # sleep 10
+    sleep 10
     SKIP=0
     
 fi
