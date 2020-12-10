@@ -219,7 +219,7 @@ Decide whether or not to use the Boeblingen LSF cluster to build images.</descri
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
-        <url>git@github.com:fleon-psi/oc-accel.git</url>
+        <url>git@github.com:/OpenCAPIoc-accel.git</url>
       </hudson.plugins.git.UserRemoteConfig>
     </userRemoteConfigs>
     <branches>
