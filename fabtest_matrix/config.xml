@@ -106,6 +106,12 @@ If -- then VIVADO_XXX parameters below are taken into account</description>
         <string>hdl_x2</string>
         <string>hls_x1</string>
         <string>hls_x2</string>
+        <string>hls_x3</string>
+        <string>hls_x4</string>
+        <string>hls_x5</string>
+        <string>hls_x6</string>
+        <string>hls_x7</string>
+        <string>hls_x8</string>
       </values>
     </hudson.matrix.TextAxis>
     <hudson.matrix.TextAxis>
