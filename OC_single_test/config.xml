@@ -86,12 +86,12 @@ CARDS=(OC-AD9V3 OC-AD9H3 OC-AD9H7)</description>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>USE_OC_UTILS_CHECKOUT</name>
-          <description>To allow usage of a previous level of oc-utils</description>
+          <description>To allow usage of a different git level of oc-utils</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>OC_UTILS_COMMIT</name>
-          <description>for example provide 96d05c6 or 96d05c6517a211404a131953fd72f120f515ad0c</description>
+          <description>Used only if USE_OC_UTILS_CHECKOUT is selected : for example provide 96d05c6    or   96d05c6517a211404a131953fd72f120f515ad0c</description>
           <defaultValue>96d05c6</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
@@ -106,7 +106,7 @@ Eg: OC-AD9H3xxxxx.bin provided =&gt; an OC-AD9H3 card will be tested</descriptio
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>ACT</name>
-          <description>to test action checking routine</description>
+          <description>Only If previous FLASH variable is not selected, please provide the test action name to check</description>
           <defaultValue>hls_memcopy_1024</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
