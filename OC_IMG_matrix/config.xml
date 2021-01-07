@@ -29,7 +29,7 @@ OC-AD9H7:&#xd;
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
-          <name>extra_io</name>
+          <name>BRANCH</name>
           <description>Choose the branch for https://github.com/OpenCAPI/oc-accel you want to test.</description>
           <defaultValue>master</defaultValue>
           <trim>false</trim>

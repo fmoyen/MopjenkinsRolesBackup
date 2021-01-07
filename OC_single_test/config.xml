@@ -37,7 +37,7 @@ for Questions: please contact  A.Castellane or F.Moyen</description>
         <hudson.model.StringParameterDefinition>
           <name>BRANCH</name>
           <description>Choose the branch for https://github.com/OpenCAPI/oc-accel you want to test. Please do not use wildcards!!</description>
-          <defaultValue>Master</defaultValue>
+          <defaultValue>master</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
