@@ -8,8 +8,8 @@ Vivado version used : tests on going for 2019.1 (issue with lsf / RH7)&#xd;
 AC 28 fev 2020 : changed default to 2019.2&#xd;
 AC late Nov 2020 : changed default to 2020.1 (simulations still in 2019.2)&#xd;
 &#xd;
-TEMPORALILY CHANGING TO fleon&apos;s git&#xd;
-git@github.com:/OpenCAPI/oc-accel.git &#xd;
+TEMPORARILY CHANGING TO fleon&apos;s git  https://github.com/fleon-psi/oc-accel.git&#xd;
+not git@github.com:/OpenCAPI/oc-accel.git &#xd;
 &#xd;
 Main Issues : &#xd;
 OC-BW250SOC : does not program from jenkins images, and doesn&apos;t reset/reload properly on pavilly &#xd;
@@ -222,7 +222,7 @@ Decide whether or not to use the Boeblingen LSF cluster to build images.</descri
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
-        <url>git@github.com:/OpenCAPI/oc-accel.git</url>
+        <url>https://github.com/fleon-psi/oc-accel.git</url>
       </hudson.plugins.git.UserRemoteConfig>
     </userRemoteConfigs>
     <branches>
