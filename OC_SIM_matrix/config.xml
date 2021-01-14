@@ -14,7 +14,8 @@ Removed hdl_example.NORAM and hdl_example.DDR test considered as useless&#xd;
 &#xd;
 !!! hbm tests are failing (collection of param for sim to update defconfig are not ok)&#xd;
 &#xd;
-temporarily using fleon (not git@github.com:/OpenCAPI/oc-accel.git)&#xd;
+check git has not been changed REPOSITORY temporarily using fleon&apos;s git https://github.com/fleon-psi/oc-accel.git&#xd;
+(not git@github.com:/OpenCAPI/oc-accel.git)&#xd;
 &#xd;
 </description>
   <keepDependencies>false</keepDependencies>
@@ -116,7 +117,7 @@ temporarily using fleon (not git@github.com:/OpenCAPI/oc-accel.git)&#xd;
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
-        <url>https://github.com/fleon-psi/oc-accel.git</url>
+        <url>git@github.com:/OpenCAPI/oc-accel.git</url>
       </hudson.plugins.git.UserRemoteConfig>
     </userRemoteConfigs>
     <branches>
