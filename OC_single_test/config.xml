@@ -608,9 +608,12 @@ echo &quot;J: Copying Image(s) into $box:${ExecutorIMGRootDir}/$CRD&quot;
 echo &quot;  -&gt; mkdir ${ExecutorIMGRootDir}/$CRD, if not existing&quot;
 ssh ${HWUser}@${box} mkdir -p ${ExecutorIMGRootDir}/$CRD
 
+echo &quot;J: FLASH is $FLASH&quot;
 if [ &quot;FLASH&quot; == &quot;true&quot; ]; then 
 
-    echo &quot;J: flashing has been requested ....&quot;
+    echo &quot;J: Test command is currently : $RUN&quot;
+    echo &quot;J: flashing has been requested .... adding files to test command&quot;
+
     
 	if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
 		echo &quot;	J:   -&gt; Copying Image $IMGPrimaryName   to $box:${ExecutorIMGRootDir}/$CRD&quot;
@@ -626,6 +629,8 @@ if [ &quot;FLASH&quot; == &quot;true&quot; ]; then
 		RUN+=&quot; -D ${TARGET_DIR}&quot;
 		if [ -z ${mopIMGFile} ]; then RUN+=&quot; -A ALL&quot;;else RUN+=&quot; -F ${ExecutorIMGRootDir}/$CRD/$IMGFileName -A ${CRD} -C $cardid&quot;;fi
 	fi
+    
+    echo &quot;J: Test command is now       : $RUN&quot;
     
     else   # User has requested no flashing, $CRD is previously built with provided IMG name
            # no need to manage files
