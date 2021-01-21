@@ -609,7 +609,7 @@ echo &quot;  -&gt; mkdir ${ExecutorIMGRootDir}/$CRD, if not existing&quot;
 ssh ${HWUser}@${box} mkdir -p ${ExecutorIMGRootDir}/$CRD
 
 echo &quot;J: FLASH is $FLASH&quot;
-if [ &quot;FLASH&quot; == &quot;true&quot; ]; then 
+if [ &quot;$FLASH&quot; == &quot;true&quot; ]; then 
 
     echo &quot;J: Test command is currently : $RUN&quot;
     echo &quot;J: flashing has been requested .... adding files to test command&quot;
@@ -799,7 +799,7 @@ echo
     fi
 
 # we don&apos;t want to manage files as we used it just to pick up the card name $CRD
-if [ &quot;FLASH&quot; == &quot;true&quot; ]; then  
+if [ &quot;$FLASH&quot; == &quot;true&quot; ]; then  
 
   if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
     echo;echo &quot;+ Renaming primary/secondary files to good.* on ${box}&quot;
