@@ -171,7 +171,7 @@ Decide whether or not to use the Boeblingen LSF cluster to build images.</descri
           <description>Enable/disable testing on HW
 (HDL_Example not running)
 </description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>NO_TEST_CARDS</name>
@@ -199,7 +199,7 @@ Decide whether or not to use the Boeblingen LSF cluster to build images.</descri
         <hudson.model.BooleanParameterDefinition>
           <name>CHECKUSER</name>
           <description>Check if users are connected at working hours</description>
-          <defaultValue>true</defaultValue>
+          <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
