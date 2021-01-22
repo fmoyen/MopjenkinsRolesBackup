@@ -185,7 +185,7 @@ Decide whether or not to use the Boeblingen LSF cluster to build images.</descri
   - orpington: AC922 8335-GTH with one OC-AD9V3 (eventually C2 capable)
   - pavilly     : IC922 9183-22X with one OC-AD9V3 (eventually C2 capable), OC-AD9V2, OC-AD9H7 (not flash), OC-BW250SOC
 (it needs to define capimop user with authorized_keys)</description>
-          <defaultValue>orpington pavilly</defaultValue>
+          <defaultValue>pavilly</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
