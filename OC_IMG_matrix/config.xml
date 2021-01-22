@@ -176,14 +176,14 @@ Decide whether or not to use the Boeblingen LSF cluster to build images.</descri
         <hudson.model.StringParameterDefinition>
           <name>NO_TEST_CARDS</name>
           <description>The list of cards we do NOT want to HW test for different reasons (please see README for default reasons) </description>
-          <defaultValue>OC-BW250SOC OC-AD9H7 OC-AD9H3 OC-AD9H335</defaultValue>
+          <defaultValue>OC-AD9H7 OC-AD9H335</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>mopBoxes</name>
           <description>List of Montpellier systems available for testing :
   - orpington: AC922 8335-GTH with one OC-AD9V3 (eventually C2 capable)
-  - orpington: IC922 9183-22X with one OC-AD9V3 (eventually C2 capable)
+  - pavilly     : IC922 9183-22X with one OC-AD9V3 (eventually C2 capable), OC-AD9V2, OC-AD9H7 (not flash), OC-BW250SOC
 (it needs to define capimop user with authorized_keys)</description>
           <defaultValue>orpington pavilly</defaultValue>
           <trim>false</trim>
@@ -1635,7 +1635,7 @@ EOF
 
 echo &quot;J: Expected action is:            $ACT&quot;
 cd actions/$ACT/
-loc_requested_action=$(grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print \$NF}&apos;)
+loc_requested_action=$(grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print $NF}&apos;)
 echo &quot;J: Expected action ID is:         $loc_requested_action&quot;
 cd -
 
