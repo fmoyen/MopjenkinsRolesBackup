@@ -509,7 +509,7 @@ for loop in `seq 1 $maxloop`;do
 		    trap finish EXIT  # register finish/unlock function, after lock is set
 		    break 3 # found card and no user =&gt; going out of $box for-loop and $loop for-loop
 	      else 
-		    echo &quot;  --&gt; box=$box lock=$LOCK already locked, trying next card&quot;
+		    echo &quot;  --&gt; In box=$box a lock dir $LOCK is already here, trying next card&quot;
 		  fi    
 		done
       ;;

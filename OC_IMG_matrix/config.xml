@@ -1403,7 +1403,7 @@ for loop in `seq 1 $maxloop`;do
 		    trap finish EXIT  # register finish/unlock function, after lock is set
 		    break 3 # found card and no user =&gt; going out of $box for-loop and $loop for-loop
 	      else 
-		    echo &quot;  --&gt; box=$box lock=$LOCK already locked, try next card&quot;
+		    echo &quot;  --&gt; In box=$box a lock dir $LOCK is already here, trying next card&quot;
 		  fi    
 		done
       ;;
@@ -1430,7 +1430,7 @@ for loop in `seq 1 $maxloop`;do
       	    LOCK=&quot;jenkins_lock_card$cardid&quot;
 		    RC=0;ssh ${HWUser}@$box &quot;mkdir ${LOCK} 2&gt;/dev/null&quot;||RC=$?
 		    if [ $RC == &quot;0&quot; ]; then :
-	  	      echo &quot;  --&gt; box=$box lock=$LOCK lock RC=$RC (`date`)&quot;; 
+	  	      echo &quot;  --&gt; In box=$box a lock dir $LOCK is already here. Lock RC=$RC (`date`)&quot;; 
 	   	      trap finish EXIT  # register finish/unlock function, after lock is set
               ssh ${HWUser}@$box wall &quot;WARNING: JENKINS OPENCAPI TEST STARTING NOW on FPGA CARD=$CRD ID=$cards&quot;
 		      break 3 # found card and it is the night =&gt; going out of $box for-loop and $loop for-loop
