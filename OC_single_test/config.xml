@@ -713,6 +713,7 @@ ssh ${HWUser}@${box} &quot;echo ------ EXIT -----------------------&gt;&gt; jenk
 
 #Knowing what the ACT should be, we check if the hardware contains this action
 # be careful in NO_FLASH mode it will depend on existing action
+pwd
 echo &quot;J: Expected action is:            $ACT&quot;
 cd actions/$ACT/
 loc_requested_action=$(grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print $NF}&apos;)
