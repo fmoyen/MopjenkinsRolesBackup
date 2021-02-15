@@ -439,8 +439,12 @@ case &quot;$CRD:$ACT&quot; in
   OC-AD9H7:hls_memcopy_1024 ) # oc-accel/hardware/oc-bip/board_support_packages/ad9h7/xdc/snap_hbm_timing.xdc does not exist
     C=&quot;unsupported &quot;
     ASKIP=1
-    ;;
-    
+    ;;  
+  OC-AD9H7:*hdl* ) # temporarily removing HDL cases
+    C=&quot;failing&quot;
+    ASKIP=1
+    ;;  
+  
   * )
     C=&quot;def &quot;  # def=default
     ASKIP=0
