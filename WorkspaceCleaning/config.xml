@@ -12,6 +12,13 @@
           <description>Decide whether or not to clean the Boeblingen LSF cluster workspaces.</description>
           <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>LSFLoginServersList</name>
+          <description>Boeblingen LSF cluster Login Servers</description>
+          <defaultValue>hdcl060.boeblingen.de.ibm.com
+hdclp026.boeblingen.de.ibm.com</defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>WorkspaceNameList</name>
           <description>The name of the workspace to clean.
@@ -87,10 +94,6 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   echo &quot;J:LSF Login Server SETUP ...&quot;
   
   # Boeblingen LSF cluster Login Servers
-  LSFLoginServersList=&quot;\
-  hdcl060.boeblingen.de.ibm.com
-  hdclp026.boeblingen.de.ibm.com&quot;
-  
   LSFLoginServer=&quot;&quot;
   for i in $LSFLoginServersList; do
     if ping -c1 $i &gt;/dev/null 2&gt;&amp;1; then 
