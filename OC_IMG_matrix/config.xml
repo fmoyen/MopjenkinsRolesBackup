@@ -165,6 +165,13 @@ If -- then VIVADO_XXX parameters below are taken into account</description>
 Decide whether or not to use the Boeblingen LSF cluster to build images.</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>LSFLoginServersList</name>
+          <description>Boeblingen LSF cluster Login Servers</description>
+          <defaultValue>hdcl060.boeblingen.de.ibm.com
+hdclp026.boeblingen.de.ibm.com</defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>TEST_ON_HW</name>
           <description>Enable/disable testing on HW
@@ -354,14 +361,6 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   echo &quot;J:LSF Login Server SETUP ...&quot;
   
   # Boeblingen LSF cluster Login Servers
-  LSFLoginServersList=&quot;\
-  hdcl050.boeblingen.de.ibm.com
-  hdcl051.boeblingen.de.ibm.com
-  hdcl052.boeblingen.de.ibm.com
-  hdcl027.boeblingen.de.ibm.com
-  hdcl060.boeblingen.de.ibm.com
-  hdclp026.boeblingen.de.ibm.com&quot;
-  
   LSFLoginServer=&quot;&quot;
   for i in $LSFLoginServersList; do
     if ping -c1 $i &gt;/dev/null 2&gt;&amp;1; then 
