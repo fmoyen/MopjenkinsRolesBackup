@@ -10,11 +10,7 @@
         <hudson.model.TextParameterDefinition>
           <name>LSFLoginServersList</name>
           <description>Boeblingen LSF cluster Login Servers</description>
-          <defaultValue>hdcl050.boeblingen.de.ibm.com
-hdcl051.boeblingen.de.ibm.com
-hdcl052.boeblingen.de.ibm.com
-hdcl027.boeblingen.de.ibm.com
-hdcl060.boeblingen.de.ibm.com
+          <defaultValue>hdcl060.boeblingen.de.ibm.com
 hdclp026.boeblingen.de.ibm.com</defaultValue>
           <trim>false</trim>
         </hudson.model.TextParameterDefinition>

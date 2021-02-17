@@ -185,6 +185,13 @@ These binaries will be used to create a full MCS image including hld_example.NOR
           <description>Decide whether or not to use the Boeblingen LSF cluster to build images. </description>
           <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>LSFLoginServersList</name>
+          <description>Boeblingen LSF cluster Login Servers</description>
+          <defaultValue>hdcl060.boeblingen.de.ibm.com
+hdclp026.boeblingen.de.ibm.com</defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>TEST_ON_HW</name>
           <description>enable/disable testing on HW</description>
@@ -375,15 +382,7 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
   echo;echo &quot;****************************************************************************************&quot;
   echo &quot;J:LSF Login Server SETUP ...&quot;
   
-  # Boeblingen LSF cluster Login Servers
-  LSFLoginServersList=&quot;\
-  hdcl050.boeblingen.de.ibm.com
-  hdcl051.boeblingen.de.ibm.com
-  hdcl052.boeblingen.de.ibm.com
-  hdcl027.boeblingen.de.ibm.com
-  hdcl060.boeblingen.de.ibm.com
-  hdclp026.boeblingen.de.ibm.com&quot;
-  
+  # Choosing Boeblingen LSF cluster Login Server
   LSFLoginServer=&quot;&quot;
   for i in $LSFLoginServersList; do
     if ping -c1 $i &gt;/dev/null 2&gt;&amp;1; then 
