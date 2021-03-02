@@ -47,6 +47,7 @@ check git has not been changed REPOSITORY temporarily using fleon&apos;s git htt
             <a class="string-array">
               <string>2019.2</string>
               <string>2020.1</string>
+              <string>2020.2</string>
               <string>2019.1</string>
               <string>2018.3</string>
             </a>
@@ -424,10 +425,16 @@ cat snap_env.sh
 echo;echo &quot;****************************************************************************************&quot;
 case $VIV in    # test multiple Vivado versions in one build
 
+  2018.3)
+    echo &quot;J: Vivado Version is OK: $VIV&quot;
+    ;; 
   2019.1)
     echo &quot;J: Vivado Version is OK: $VIV&quot;
     ;; 
   2019.2)
+    echo &quot;J: Vivado Version is OK: $VIV&quot;
+    ;; 
+  2020.2)
     echo &quot;J: Vivado Version is OK: $VIV&quot;
     ;; 
     
