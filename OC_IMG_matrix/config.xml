@@ -445,10 +445,10 @@ case &quot;$CRD:$ACT&quot; in
     C=&quot;unsupported &quot;
     ASKIP=1
     ;;  
-  OC-AD9H7:*hdl* ) # temporarily removing HDL cases
-    C=&quot;failing&quot;
-    ASKIP=1
-    ;;  
+#  OC-AD9H7:*hdl* ) # temporarily removing HDL cases
+#    C=&quot;failing&quot;
+#    ASKIP=1
+#    ;;  
   
   * )
     C=&quot;def &quot;  # def=default
