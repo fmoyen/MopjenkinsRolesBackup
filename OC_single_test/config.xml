@@ -707,12 +707,9 @@ ssh ${HWUser}@${box} &quot;echo ------ EXIT -----------------------&gt;&gt; jenk
 
 
 #------------------------------------------------------------------------------------------------------------------------------
-# To Simulate IMG_TEST case, we defined a fake ACT
-# ACT=hls_memcopy_1024
-
-
 #Knowing what the ACT should be, we check if the hardware contains this action
 # be careful in NO_FLASH mode it will depend on existing action
+echo &quot;J: Current local directory is :&quot;
 pwd
 echo &quot;J: Expected action is:            $ACT&quot;
 cd actions/$ACT/
@@ -729,8 +726,9 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
     source ./snap_path.sh
     pwd
 	cd actions/$ACT/
+    echo &quot;J: Current ${box} directory is :&quot;
     pwd
-    echo &quot;Collecting actions:&quot;
+    echo &quot;J: Collecting remote ${box} actions:&quot;
 
 	requested_action=\$(grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print \$NF}&apos;)
 	actual_action=0x\$(snap_peek -C$cardid -w32 0x0010 | awk &apos;{print \$NF}&apos;)
