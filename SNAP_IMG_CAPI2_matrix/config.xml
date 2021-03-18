@@ -9,6 +9,7 @@ WARNING !!! &#xd;
 ==&gt; Orpington hosts 1 AD9V3 + 1 OC-AD8V3&#xd;
 ==&gt; Lewen05 hosts 1 N250SP and 1 Mellanox INNOVA2 (no CAPI reset nor automated tests possible)&#xd;
 ==&gt; Pavilly hosts 1 OC-AD9V3 (main mode is C2)&#xd;
+==&gt; N250SP is only running in 2018.2 (IP has changed and Gen4 is not supported with the new one, issue with NVME)&#xd;
 &#xd;
 hls_parallel_memcpy removed (fails)</description>
   <keepDependencies>false</keepDependencies>
@@ -166,9 +167,9 @@ If -- then VIVADO_XXX parameters below are taken into account</description>
 Warning: -200ps is not easy to reach and needs several attempts (sometimes 5 attempts are not enough).</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
+              <string>-200</string>
               <string>0</string>
               <string>-300</string>
-              <string>-200</string>
               <string>-1000</string>
             </a>
           </choices>
