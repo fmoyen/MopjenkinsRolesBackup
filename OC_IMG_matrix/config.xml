@@ -1138,6 +1138,7 @@ then
     if [ $EmailOrNotEmail -eq 1 ]; then
       echo &quot;  -&gt; Sending an email to ${EmailDestinationList[*]}&quot;    
       SendAnEmail -s &quot;ERROR : ${CRD}_${ACT}_image :-make image- : TIMING FAILED after $maxloop loop(s)&quot; -d &quot;${EmailDestinationList[*]}&quot;
+      cat /var/jenkins/workspace/OC_IMG_matrix/vitis_hls/ACT/hls_udp_512/CRD_CL/OC-AD9H3_nCL/label/X86_UBUNTU/oc-accel/hardware/logs/action_make.log
       cat /var/jenkins/workspace/OC_IMG_matrix/vitis_hls/ACT/${ACT}/CRD_CL/OC-${CRD}_$CL/label/X86_UBUNTU/oc-accel/hardware/logs/action_make.log
     fi
     
