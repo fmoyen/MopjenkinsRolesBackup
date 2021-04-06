@@ -16,6 +16,7 @@ Removed hdl_example.NORAM and hdl_example.DDR test considered as useless&#xd;
 !!! 2019.2 : hbm tests are failing (collection of param for sim to update defconfig are not ok)&#xd;
 2020.2 : master HBM at test level&#xd;
               vitis_hls : HBM locked at HBM build&#xd;
+              memcopy 9V3 KO simu&#xd;
 </description>
   <keepDependencies>false</keepDependencies>
   <properties>
