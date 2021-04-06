@@ -4,6 +4,7 @@
   <description>builds and simulates many different configurations, automatic nightruns on master&#xd;
 in case of problems: please contact fmoyen@fr.ibm.com or alexandre.castellane@fr.ibm.com&#xd;
 =&gt; 2019.1 was default moved to 2019.2 AC june 26th 2020&#xd;
+=&gt; March 2021 Test on 2020.2 vs 2019.2 with vitis_hls branches implies modify scripts for vitis_hls&#xd;
 &#xd;
 KNOWN FAILURES : &#xd;
 - hdl did not have a hw_test available, now they seems ok in IMG test but not in simulation&#xd;
@@ -12,11 +13,9 @@ KNOWN FAILURES : &#xd;
 &#xd;
 Removed hdl_example.NORAM and hdl_example.DDR test considered as useless&#xd;
 &#xd;
-!!! hbm tests are failing (collection of param for sim to update defconfig are not ok)&#xd;
-&#xd;
-check git has not been changed REPOSITORY temporarily using fleon&apos;s git https://github.com/fleon-psi/oc-accel.git&#xd;
-(not git@github.com:/OpenCAPI/oc-accel.git)&#xd;
-&#xd;
+!!! 2019.2 : hbm tests are failing (collection of param for sim to update defconfig are not ok)&#xd;
+2020.2 : master HBM at test level&#xd;
+              vitis_hls : HBM locked at HBM build&#xd;
 </description>
   <keepDependencies>false</keepDependencies>
   <properties>
