@@ -15,6 +15,9 @@ OC-AD9H7:&#xd;
    - hls_hbm_memcopy_1024 ) SOLVED !!!  timing were failing for HBM (even with default 12)&#xd;
    - hdl_ex fails on 9V3 ???&#xd;
 &#xd;
+OC-AD9H3 : &#xd;
+   - one card is failing on HBM P1 (the one that remaining, the other being repairing)&#xd;
+&#xd;
 If required TEMPORARILY CHANGE TO fleon&apos;s : git  https://github.com/fleon-psi/oc-accel.git&#xd;
 instead of : git@github.com:/OpenCAPI/oc-accel.git </description>
   <keepDependencies>false</keepDependencies>
