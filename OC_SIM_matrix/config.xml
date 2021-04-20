@@ -139,9 +139,6 @@ Removed hdl_example.NORAM and hdl_example.DDR test considered as useless&#xd;
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
-    <com.cloudbees.jenkins.GitHubPushTrigger plugin="github@1.29.5">
-      <spec></spec>
-    </com.cloudbees.jenkins.GitHubPushTrigger>
     <hudson.triggers.SCMTrigger>
       <spec>H 0-8/4 * * *
 H 18-23/4 * * *</spec>
@@ -677,7 +674,7 @@ esac
     </hudson.plugins.build__timeout.BuildTimeoutWrapper>
     <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.10"/>
     <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.3">
-      <template>#${BUILD_NUMBER}-${GIT_BRANCH}</template>
+      <template>#${BUILD_NUMBER}-${GIT_BRANCH}  Vivado=${ENV,var=&quot;VIVADO_CHOICE&quot;}</template>
       <descriptionTemplate></descriptionTemplate>
       <runAtStart>true</runAtStart>
       <runAtEnd>true</runAtEnd>

@@ -1212,7 +1212,11 @@ case ${TEST_ON_HW} in
     TestCardAllowed=1
     for i in ${NO_TEST_CARDS[@]}
     do
-      if [ &quot;$CRD&quot; == &quot;$i&quot; ];then TestCardAllowed=0;echo &quot;$CRD has been put in the NO_TEST_CARD list&quot;;fi
+      if [ &quot;$CRD&quot; == &quot;$i&quot; ]
+      then
+        TestCardAllowed=0;
+        echo &quot;$CRD has been put in the NO_TEST_CARD list&quot;
+      fi
       
     done
 
