@@ -191,7 +191,7 @@ hdclp026.boeblingen.de.ibm.com</defaultValue>
         <hudson.model.StringParameterDefinition>
           <name>NO_TEST_CARDS</name>
           <description>The list of cards we do NOT want to HW test for different reasons (please see README for default reasons) </description>
-          <defaultValue>OC-AD9H335 OC_BW250SOC</defaultValue>
+          <defaultValue>OC_BW250SOC OC-AD9H335</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -1207,17 +1207,18 @@ case ${TEST_ON_HW} in
 
   true )
     echo;echo &quot;****************************************************************************************&quot;
-    echo &quot;J: Checking if we can test the generated binaries on POWER Hardware (test_on_hw=${TEST_ON_HW} for card=${CRD})&quot;
+    echo &quot;J: Checking if we can test the generated binaries on POWER Hardware (test_on_hw=${TEST_ON_HW} and current card is ${CRD})&quot;
     echo
     TestCardAllowed=1
     for i in ${NO_TEST_CARDS[@]}
     do
-      if [ &quot;$CRD&quot; == &quot;$i&quot; ];then TestCardAllowed=0;fi
+      if [ &quot;$CRD&quot; == &quot;$i&quot; ];then TestCardAllowed=0;echo &quot;$CRD has been put in the NO_TEST_CARD list&quot;;fi
+      
     done
 
     if [ $TestCardAllowed -eq 0 ]
     then
-      echo &quot;  -&gt; No test CARD $CRD available...&quot;
+      echo &quot;  -&gt; No test requested on CARD $CRD ...&quot;
       LinkDir=${RootSaveDir}/${CRD}/${CRD}_test_bypassed
       SRCFILES=&quot;$BINFILES $BITFILES&quot;
       CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
