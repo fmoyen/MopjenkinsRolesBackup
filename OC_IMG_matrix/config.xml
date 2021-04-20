@@ -200,7 +200,7 @@ hdclp026.boeblingen.de.ibm.com</defaultValue>
   - orpington: AC922 8335-GTH with one OC-AD9V3 (eventually C2 capable)
   - pavilly     : IC922 9183-22X with one OC-AD9V3 (eventually C2 capable), OC-AD9V2, OC-AD9H7 (not flash), OC-BW250SOC
 (it needs to define capimop user with authorized_keys)</description>
-          <defaultValue>pavilly</defaultValue>
+          <defaultValue>orpington pavilly</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
