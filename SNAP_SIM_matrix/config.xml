@@ -4,9 +4,6 @@
   <description>CAPI1&amp;2 : Builds and simulates many different configurations, automatic nightruns on master&#xd;
 Contacts : alexandre.castellane@fr.ibm.com or fabrice_moyen@fr.ibm.com&#xd;
 &#xd;
-23 avril 2021  temp removed :&#xd;
-&#xd;
-&#xd;
 November 2019: Job imported from hdcl070Boeblingen jenkins server&#xd;
 Original ACT matrix:&#xd;
 hdl_example.SDRAM&#xd;
