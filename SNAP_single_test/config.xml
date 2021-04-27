@@ -51,7 +51,7 @@ for Questions: please contact  A.Castellane or F.Moyen</description>
           <description>List of Montpellier systems available for testing
 Antipode and Marennes are P8 (CAPI1 cards)
 Orpington and Lewen05 are P9 (CAPI2.0 cards)</description>
-          <defaultValue>antipode marennes orpington pavilly lewen05</defaultValue>
+          <defaultValue>antipode orpington pavilly lewen05</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>

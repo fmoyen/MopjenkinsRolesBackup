@@ -98,7 +98,7 @@ Warning: -200ps is not easy to reach and needs several attempts (sometimes 5 att
   - antipode: S822LC with 1 ADKU3 and 1 N250S
   - marennes: S822LC with 1 N250S and 1 AD8K5
 (it needs to define capimop user with authorized_keys)</description>
-          <defaultValue>antipode marennes</defaultValue>
+          <defaultValue>antipode</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
