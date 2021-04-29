@@ -139,6 +139,9 @@ Removed hdl_example.NORAM and hdl_example.DDR test considered as useless&#xd;
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
+    <com.cloudbees.jenkins.GitHubPushTrigger plugin="github@1.29.5">
+      <spec></spec>
+    </com.cloudbees.jenkins.GitHubPushTrigger>
     <hudson.triggers.SCMTrigger>
       <spec>H 0-8/4 * * *
 H 18-23/4 * * *</spec>
@@ -152,6 +155,7 @@ H 18-23/4 * * *</spec>
       <values>
         <string>hdl_example</string>
         <string>hdl_single_engine</string>
+        <string>hdl_helloworld</string>
         <string>hls_helloworld_512</string>
         <string>hls_helloworld_1024</string>
         <string>hls_memcopy_512</string>
