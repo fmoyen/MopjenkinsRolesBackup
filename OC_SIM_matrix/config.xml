@@ -155,7 +155,6 @@ H 18-23/4 * * *</spec>
       <values>
         <string>hdl_example</string>
         <string>hdl_single_engine</string>
-        <string>hdl_helloworld</string>
         <string>hls_helloworld_512</string>
         <string>hls_helloworld_1024</string>
         <string>hls_memcopy_512</string>
