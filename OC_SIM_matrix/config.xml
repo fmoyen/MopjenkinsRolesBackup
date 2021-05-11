@@ -22,6 +22,7 @@ Removed hdl_example.NORAM and hdl_example.DDR test considered as useless&#xd;
       <projectUrl>https://github.com/OpenCAPI/oc-accel/</projectUrl>
       <displayName></displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
+    <org.jenkins.plugins.lockableresources.RequiredResourcesProperty plugin="lockable-resources@2.7"/>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
