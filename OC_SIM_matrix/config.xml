@@ -517,6 +517,7 @@ case $ACT in
   *hbm*)
   # when simulating an HBM Chip, we replace the HBM by a DDR to allow simulation to occur
   # We manually set the following parameters which will change the HBM configuration at SOFTWARE level
+  echo;echo &quot;J: Forcing use of BRAM to simulate HBM (we should condition this to Xsim, but for the moment only xsim is available&quot;
   echo &quot;ENABLE_BRAM=y&quot;                             &gt;&gt; .snap_config
   echo &quot;BRAM_USED=\&quot;TRUE\&quot;&quot;                        &gt;&gt; .snap_config
   echo &quot;ENABLE_DDRI=y&quot;                             &gt;&gt; .snap_config
