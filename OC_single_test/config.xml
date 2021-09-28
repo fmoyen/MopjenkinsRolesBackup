@@ -742,10 +742,10 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
     echo &quot;a_action_int=    \$a_action_int&quot;
             if [ \$r_action_int == 0 ]; then
             	echo &quot;Can&apos;t find requested action!&quot;
-            	exit 1
+            	exit 10
             	if [ \$a_action_int == 0 ]; then
             	echo &quot;Can&apos;t find actual action!&quot;
-            	exit 1
+            	exit 11
             	fi
         	fi
     if [ &quot;\${a_action_int}&quot; == &quot;\${r_action_int}&quot; ]; then
@@ -753,7 +753,7 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
         exit 0;
     else
     	echo &quot;actions do NOT match =&gt; KO!&quot;;
-        exit 1;
+        exit 20;
     fi
 EOF
 

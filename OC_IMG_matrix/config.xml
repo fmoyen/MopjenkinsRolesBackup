@@ -1684,7 +1684,7 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
             	RC_ACT_CHECK=1
             	if [ \$a_action_int == 0 ]; then
             	echo &quot;Can&apos;t find actual action!&quot;
-            	RC_ACT_CHECK=1
+            	RC_ACT_CHECK=3
             	fi
         	fi
     if [ &quot;\${a_action_int}&quot; == &quot;\${r_action_int}&quot; ]; then
