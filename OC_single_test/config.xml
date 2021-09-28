@@ -712,7 +712,9 @@ ssh ${HWUser}@${box} &quot;echo ------ EXIT -----------------------&gt;&gt; jenk
 echo &quot;J: Current local directory is :&quot;
 pwd
 echo &quot;J: Expected action is:            $ACT&quot;
-cd actions/$ACT/
+cd oc-accel/actions/$ACT/
+ls -al
+echo &quot;J: looking for requested action&quot;
 loc_requested_action=$(grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print $NF}&apos;)
 echo &quot;J: Expected action ID is:         $loc_requested_action&quot;
 cd -
@@ -756,7 +758,7 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
         exit 0;
     else
     	echo &quot;actions do NOT match =&gt; KO!&quot;;
-        ${RMT_ACT_CHECK}=200
+        ${RMT_RC_ACT_CHECK}=200
         exit 20;
     fi
 EOF
