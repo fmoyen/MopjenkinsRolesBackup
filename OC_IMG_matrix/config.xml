@@ -1694,10 +1694,10 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
     	echo &quot;actions match&quot;;
         ${RMT_RC_ACT_CHECK}=200;
         exit 0
-// le test est souvent KO, alors que c&apos;est le bon code !! a réparer
-//    else
-//    	echo &quot;actions do NOT match =&gt; KO!&quot;;
-//        exit 1;
+    else
+    	echo &quot;actions do NOT match =&gt; KO!&quot;;
+        ${RMT_RC_ACT_CHECK}=101;
+        exit 101;
     fi
 EOF
 
