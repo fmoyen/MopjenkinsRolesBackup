@@ -755,11 +755,12 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
         	fi
     if [ &quot;\${a_action_int}&quot; == &quot;\${r_action_int}&quot; ]; then
     	echo &quot;actions match&quot;;
+        ${RMT_RC_ACT_CHECK}=500
         exit 0;
     else
     	echo &quot;actions do NOT match =&gt; KO!&quot;;
         ${RMT_RC_ACT_CHECK}=200
-        exit 20;
+        exit 0;
     fi
 EOF
 
@@ -777,10 +778,10 @@ if [ $RC_ACT_CHECK -eq 0 ]; then
   mopIMGGoodDir=${mopIMGRootDir}/${CRD}/${CRD}_test_OK
   #if mkdir $mopIMGGoodDir 2&gt;/dev/null; then chmod g+w $mopIMGGoodDir; fi
   
-  echo &quot;Job return code is good ==&gt;&quot;
+  echo &quot;Job return code is good&quot;
   
   if [ $RC_ACT_CHECK -eq 0 ]; then
-  echo &quot;ACTION MATCH return code is good ==&gt;&quot;
+  echo &quot;ACTION MATCH return code is good&quot;
   else echo &quot;ACTION DO NOT MATCH ==&gt;&gt;&gt; to do : deal with the cleaning to come&quot;
   fi
 

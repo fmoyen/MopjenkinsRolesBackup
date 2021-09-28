@@ -1682,17 +1682,18 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
     echo &quot;a_action_int=    \$a_action_int&quot;
             if [ \$r_action_int == 0 ]; then
             	echo &quot;Can&apos;t find requested action!&quot;
-            	${RMT_RC_ACT_CHECK}=1
-                exit 1
+            	${RMT_RC_ACT_CHECK}=100
+                exit 10
             	if [ \$a_action_int == 0 ]; then
             	echo &quot;Can&apos;t find actual action!&quot;
-            	${RMT_RC_ACT_CHECK}=3
-                exit 3
+            	${RMT_RC_ACT_CHECK}=110
+                exit 11
             	fi
         	fi
     if [ &quot;\${a_action_int}&quot; == &quot;\${r_action_int}&quot; ]; then
     	echo &quot;actions match&quot;;
-        ${RMT_RC_ACT_CHECK}=0;
+        ${RMT_RC_ACT_CHECK}=200;
+        exit 0
 // le test est souvent KO, alors que c&apos;est le bon code !! a réparer
 //    else
 //    	echo &quot;actions do NOT match =&gt; KO!&quot;;
