@@ -1660,7 +1660,7 @@ cd -
 echo &quot;J: searching for existing action on $box (`date`) for card ${CRD} on position (-C) $cardid&quot;
 
 RC_ACT_CHECK=0
-RMT_RC_ACT_CHECK=0
+#RMT_RC_ACT_CHECK=0
 ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
 	pwd
     cd ${TARGET_DIR}/
@@ -1682,21 +1682,17 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
     echo &quot;a_action_int=    \$a_action_int&quot;
             if [ \$r_action_int == 0 ]; then
             	echo &quot;Can&apos;t find requested action!&quot;
-            	${RMT_RC_ACT_CHECK}=100
                 exit 10
             	if [ \$a_action_int == 0 ]; then
             	echo &quot;Can&apos;t find actual action!&quot;
-            	${RMT_RC_ACT_CHECK}=110
                 exit 11
             	fi
         	fi
     if [ &quot;\${a_action_int}&quot; == &quot;\${r_action_int}&quot; ]; then
     	echo &quot;actions match&quot;;
-        ${RMT_RC_ACT_CHECK}=200;
         exit 0
     else
     	echo &quot;actions do NOT match =&gt; KO!&quot;;
-        ${RMT_RC_ACT_CHECK}=101;
         exit 101;
     fi
 EOF
@@ -1709,7 +1705,7 @@ echo &quot;J: Checking Action Match return code (`date`)...&quot;
 echo
 
 echo &quot;RC_ACT_CHECK=$RC_ACT_CHECK&quot;
-echo &quot;RMT_RC_ACT_CHECK=$RMT_RC_ACT_CHECK&quot;
+#echo &quot;RMT_RC_ACT_CHECK=$RMT_RC_ACT_CHECK&quot;
 
   if [ $RC_ACT_CHECK -eq 0 ]; then
   	echo &quot;ACTION MATCH return code is good&quot;
