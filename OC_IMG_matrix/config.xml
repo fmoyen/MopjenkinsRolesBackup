@@ -759,7 +759,8 @@ make clean                   # to make sure we restart from a blank snap
 echo; echo &quot;###########################################################################################&quot;
 
 
-if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+if [ &quot;$CLOUDMODE&quot; == &quot;true&quot; ]; then
+	echo &quot;LAUNCHING : make cloud_base&quot;
 	make cloud_base
 	if [ $RC -eq 0 ]; then
   		echo &quot;Cloud_base returned RC=0&quot;
