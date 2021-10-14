@@ -216,6 +216,11 @@ hdclp026.boeblingen.de.ibm.com</defaultValue>
           <description>Check if users are connected at working hours</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>CLOUDMODE</name>
+          <description>Enable to launch a base and action separate build, and get a bin of the combination</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
@@ -752,9 +757,32 @@ cd \$OCACCEL_ROOT
 make clean                   # to make sure we restart from a blank snap
 
 echo; echo &quot;###########################################################################################&quot;
-echo Command: make image
 
-make image
+
+if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+	make cloud_base
+	if [ $RC -eq 0 ]; then
+  		echo &quot;Cloud_base returned RC=0&quot;
+    	make cloud_action
+    	if [ $RC -eq 0 ]; then
+  			echo &quot;make cloud_action returned RC=0&quot;
+    	else
+       		echo &quot;Cloud_base returned RC=0&quot;
+    		exit 1
+		fi
+        
+	else
+    	echo &quot;Cloud_base returned RC=0&quot;
+		exit 1
+	fi  
+else
+	echo Command: make image
+	make image
+	if [ $RC -eq 0 ]
+		echo &quot;make image returned RC=0&quot;
+	fi
+  
+fi
 
 EOF
 
