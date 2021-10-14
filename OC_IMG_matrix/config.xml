@@ -300,6 +300,7 @@ H 22-23/1 * * *</spec>
       <values>
         <string>OC-AD9V3_nCL</string>
         <string>OC-AD9H3_nCL</string>
+        <string>OC-AD9H3_CL</string>
         <string>OC-AD9H335_nCL</string>
         <string>OC-AD9H7_nCL</string>
         <string>OC-BW250SOC_nCL</string>
@@ -759,29 +760,30 @@ make clean                   # to make sure we restart from a blank snap
 echo; echo &quot;###########################################################################################&quot;
 
 
-if [ &quot;$CLOUDMODE&quot; == &quot;true&quot; ]; then
-	echo &quot;LAUNCHING : make cloud_base&quot;
-	make cloud_base
-	if [ $RC -eq 0 ]; then
-  		echo &quot;Cloud_base returned RC=0&quot;
-    	make cloud_action
-    	if [ $RC -eq 0 ]; then
-  			echo &quot;make cloud_action returned RC=0&quot;
-    	else
-       		echo &quot;Cloud_base returned RC=0&quot;
-    		exit 1
-		fi
-        
+if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
+	if [ &quot;$CLOUDMODE&quot; == &quot;true&quot; ]; then
+		echo &quot;LAUNCHING : make cloud_base&quot;
+		make cloud_base
+		if [ $RC -eq 0 ]; then
+  			echo &quot;Cloud_base returned RC=0&quot;
+    		make cloud_action
+    		if [ $RC -eq 0 ]; then
+	  			echo &quot;make cloud_action returned RC=0&quot;
+    		else	
+	       		echo &quot;Cloud_base returned RC=0&quot;
+	    		exit 1
+			fi        
+		else
+    		echo &quot;Cloud_base returned RC=0&quot;
+			exit 1
+		fi  
 	else
-    	echo &quot;Cloud_base returned RC=0&quot;
-		exit 1
-	fi  
-else
-	echo Command: make image
-	make image
-	if [ $RC -eq 0 ]
-		echo &quot;make image returned RC=0&quot;
-	fi
+		echo Command: make image
+		make image
+		if [ $RC -eq 0 ]
+			echo &quot;make image returned RC=0&quot;
+		fi
+    fi
   
 fi
 
@@ -1184,17 +1186,19 @@ else # case of Cloud Build
   echo &quot;J: Build Cloud Image ...&quot;
   echo &quot;export DCP_ROOT=${OCACCEL_ROOT}/hardware/DCPs/&quot;              &gt;&gt; snap_env.sh
   echo &quot;ENABLE_PRFLOW=y&quot;                                          &gt;&gt; .snap_config
-  echo &quot;ENABLE_CLOUD_USER_FLOW=n&quot;                                 &gt;&gt; .snap_config
-  echo &quot;ENABLE_CLOUD_BUILD_BITFILE=n&quot;                             &gt;&gt; .snap_config
+#  echo &quot;ENABLE_CLOUD_USER_FLOW=n&quot;                                 &gt;&gt; .snap_config
+#  echo &quot;ENABLE_CLOUD_BUILD_BITFILE=n&quot;                             &gt;&gt; .snap_config
   make -s oldconfig
   echo &quot;J: Build Static Region ...&quot;
-  bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_base&quot; || exit
+#  bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_base&quot; || exit
+  make cloud_base
   echo &quot;J: Build Action Region ...&quot;
-  bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_action&quot; || exit
-  echo &quot;J: Merge Static and Action Region ...&quot;
-  echo &quot;ENABLE_CLOUD_BUILD_BITFILE=y&quot;                             &gt;&gt; .snap_config
-  make -s oldconfig
-  bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_merge&quot; || exit
+#  bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_action&quot; || exit
+#  make cloud_action
+#  echo &quot;J: Merge Static and Action Region ...&quot;
+#  echo &quot;ENABLE_CLOUD_BUILD_BITFILE=y&quot;                             &gt;&gt; .snap_config
+#  make -s oldconfig
+#  bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_merge&quot; || exit
 fi
 
 
