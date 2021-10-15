@@ -299,10 +299,12 @@ H 22-23/1 * * *</spec>
       <name>CRD_CL</name>
       <values>
         <string>OC-AD9V3_nCL</string>
+        <string>OC-AD9V3nCL</string>
         <string>OC-AD9H3_nCL</string>
         <string>OC-AD9H3_CL</string>
         <string>OC-AD9H335_nCL</string>
         <string>OC-AD9H7_nCL</string>
+        <string>OC-AD9H7_CL</string>
         <string>OC-BW250SOC_nCL</string>
       </values>
     </hudson.matrix.TextAxis>
