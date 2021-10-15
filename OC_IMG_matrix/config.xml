@@ -1779,9 +1779,12 @@ if [ $RC_RUN -eq 0 ] &amp;&amp; [ $RC_ACT_CHECK -eq 0 ]; then
 
 else
   echo;echo &quot;***************************************************************************************&quot;
-  echo &quot;J: Test FAILED&quot;
-  echo &quot;J: JOB RC_RUN = $RC_RUN&quot;
-  if [ $RC_ACT_CHECK -eq 1 ]; then
+  if [ $RC_RUN -ne 0 ]; then
+  	 echo &quot;J: JOB RC_RUN = $RC_RUN&quot;
+     echo &quot;J: TEST CASE DID NOT WORK!!(`date`)&quot;
+  fi
+  if [ $RC_ACT_CHECK -ne 0 ]; then
+    echo &quot;J: RC_ACT_CHECK = $RC_ACT_CHECK&quot;
   	echo &quot;J: HARDWARE ACTION DOES NOT MATCH ACTION FROM TEST CASE !!(`date`)&quot;
   fi
   echo &quot;  -&gt;  CARD $CRD Hardware test failed...&quot;
