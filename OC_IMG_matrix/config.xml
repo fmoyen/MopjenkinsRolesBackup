@@ -1213,7 +1213,8 @@ echo &quot;J: Checking generated $ACT binaries for $CRD... (`date`)&quot;
 echo
 
 #BINFILES contains binary name (In SPI : &quot;primary and secondary&quot; names)
-BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*.bin|grep -v FACTORY|head -n2`
+# AC : adding ary to prevent falsely collecting the XXX_partial.bin file since PR is introduced
+BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*ary.bin|grep -v FACTORY|head -n2`
 BITFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*.bit|grep -v FACTORY|head -n2`
     
   
