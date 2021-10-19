@@ -83,8 +83,8 @@ This parameter overseedes all VIVADO_XXX parameters below
 If -- then VIVADO_XXX parameters below are taken into account</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
-              <string>2020.1</string>
               <string>2020.2</string>
+              <string>2020.1</string>
               <string>2019.2</string>
               <string>--</string>
               <string>2019.1</string>
@@ -1200,6 +1200,8 @@ else
   echo &quot;J: We enter CLOUD MODE&quot;
   echo &quot;****************************************************************************************&quot;
   echo &quot;&quot;;
+
+
   echo &quot;J: exporting DCP_ROOT=${JenkinsDcpDir} into snap_env.sh&quot;
   #echo &quot;export DCP_ROOT=${OCACCEL_ROOT}/hardware/DCPs/&quot;           &gt;&gt; snap_env.sh
   echo &quot;export DCP_ROOT=${JenkinsDcpDir}&quot;                         &gt;&gt; snap_env.sh
@@ -1234,17 +1236,19 @@ else
     cp ${OCACCEL_ROOT}/hardware/build/Images/* ${JenkinsDcpDir}
     rm ${JenkinsDcpDir}/hello_world_1024_cloud_building
     touch ${JenkinsDcpDir}/hello_world_1024_cloud_done
-    
+   
 
   else 
 	echo &quot;    J: Build Action Region ...&quot;
     # Testing if cloud base has been performed prior to action building
+
     l=0
     while [ ! -f ${JenkinsDcpDir}/hello_world_1024_cloud_done ]
 		do
         	echo &quot;J: Cloud base for helloworld _1024 is not finished, waiting 2&apos; before recheck&quot;
             sleep 120;
-            l=$(( $l + 1 ));
+            #l=$(( $l + 1 ));
+            l=$l+1;
             if [ $l gt 30 ]; then
             	echo &quot;J: ERROR : We have wait for 60&apos; and didn&apos;t get the cloud reference !&quot;;
             	exit 1
@@ -1252,7 +1256,7 @@ else
   		done
 
 	if [ -f ${JenkinsDcpDir}/hello_world_1024_cloud_done ]; then
-           echo &quot;Cloud base for helloworld _1024 has finished,
+           echo &quot;Cloud base for helloworld _1024 has finished&quot;
     fi
         
     make cloud_action
@@ -1260,8 +1264,12 @@ else
     cp ${OCACCEL_ROOT}/hardware/build/Images/* ${JenkinsDcpDir}
   	#  bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_action&quot; || exit
   	
+
+
   fi
   
+
+
 
 fi  # End of CL / nCL test
 
