@@ -696,6 +696,8 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_RUN=$?
     make software
 	set -f
     ulimit -c unlimited               # limit core dumps
+    echo &quot;Resetting card #$cardid&quot;
+    $SudoOrNotSudo oc-reset -C $cardid
     $SudoOrNotSudo ${RUN}
 EOF
 
@@ -744,22 +746,18 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
     echo &quot;r_action_int=    \$r_action_int&quot;
     echo &quot;a_action_int=    \$a_action_int&quot;
             if [ \$r_action_int == 0 ]; then
-            	echo &quot;Can&apos;t find requested action!&quot;
-            	${RMT_RC_ACT_CHECK}=100
-                exit 10
+            	echo &quot;Can&apos;t find requested action!&quot;;
+                exit 10;
             	if [ \$a_action_int == 0 ]; then
-            	echo &quot;Can&apos;t find actual action!&quot;
-                ${RMT_RC_ACT_CHECK}=110
-            	exit 11
+            	echo &quot;Can&apos;t find actual action!;&quot;
+            	exit 11;
             	fi
         	fi
     if [ &quot;\${a_action_int}&quot; == &quot;\${r_action_int}&quot; ]; then
     	echo &quot;actions match&quot;;
-        ${RMT_RC_ACT_CHECK}=500
         exit 0;
     else
     	echo &quot;actions do NOT match =&gt; KO!&quot;;
-        ${RMT_RC_ACT_CHECK}=200
         exit 1;
     fi
 EOF
