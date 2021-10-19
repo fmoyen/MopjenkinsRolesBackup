@@ -1076,7 +1076,7 @@ case $ACT in          # select config &amp; compile action
     ;;
     
   *)
-    echo &quot;J: Generic case ==&gt; Just configuring image thanks to $CRD.$ACT.defconfig file...&quot;;echo
+    echo &quot;J: Regular test case ==&gt; We use $CRD.$ACT.defconfig file to prepare the config ...&quot;;echo
     make -s $CRD.$ACT.defconfig
     ;;
 esac
@@ -1084,9 +1084,12 @@ esac
 
 #==============================================================================================
 # Building image (make image/ make cloud...)
-
-if [ &quot;$CL&quot; == &quot;nCL&quot; ]
-then
+echo &quot;DEBUG : var CL = $CL&quot;
+if [ &quot;$CL&quot; == &quot;nCL&quot; ];then
+  echo;echo &quot;****************************************************************************************&quot;
+  echo &quot;J: We enter NON-CLOUD MODE&quot;
+  echo &quot;****************************************************************************************&quot;
+  echo
 
   if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
     
@@ -1124,7 +1127,7 @@ then
   for loop in `seq 1 $maxloop`
   do  
     echo;echo &quot;****************************************************************************************&quot;
-    echo &quot;J: Build Non-Cloud Image (make image) for $CRD, Loop ${loop}/$maxloop (`date`)&quot;
+    echo &quot;J: Build a NON-CLOUD Image (make image) for $CRD, Loop ${loop}/$maxloop (`date`)&quot;
 
     if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
       echo;echo &quot;  -&gt; Building the Image (make image) with LSF Cluster&quot;
@@ -1159,7 +1162,7 @@ then
   # Checking the result of the make image operation
   
   echo;echo &quot;****************************************************************************************&quot;
-  echo &quot;J: RESULT for Non-Cloud Image build (make image) for $CRD, Loop ${loop}/$maxloop (`date`)&quot;  
+  echo &quot;J: RESULT for NON CLOUD Image build (make image) for $CRD, Loop ${loop}/$maxloop (`date`)&quot;  
 
   if [ $RC -eq 0 ] &amp;&amp; [ $loop -eq 1 ]; then 
     echo &quot;OK : ${CRD}_${ACT}_image :-make image- : TIMING SUCCEEDED at the first try (loop=$loop)&quot;
@@ -1183,15 +1186,24 @@ then
     exit 1
   fi
 
-else # case of Cloud Build
+
+else 
+# .....................
+# case of Cloud Build
+# .....................
+
 # FAB never for the moment but if needed, needs to adapt (BSUB, etc)
 # AC : Introducing cloud mode. Simple case for the moment : just replacing make image by make cloud_base
 #      This generates the same files as usual + a xxx_partial.bin
   mkdir -p ${OCACCEL_ROOT}/hardware/DCPs
   echo;echo &quot;****************************************************************************************&quot;
-  echo &quot;J: We enter Cloud Mode&quot;
+  echo &quot;J: We enter CLOUD MODE&quot;
+  echo &quot;****************************************************************************************&quot;
+  echo &quot;&quot;;
+  echo &quot;J: exporting DCP_ROOT=${JenkinsDcpDir} into snap_env.sh&quot;
   #echo &quot;export DCP_ROOT=${OCACCEL_ROOT}/hardware/DCPs/&quot;           &gt;&gt; snap_env.sh
   echo &quot;export DCP_ROOT=${JenkinsDcpDir}&quot;                         &gt;&gt; snap_env.sh
+  echo &quot;J: Tuning ENABLE_PRFLOW &amp; ERASE_BASE_BINFILES to y into snap_env.sh&quot;
   echo &quot;ENABLE_PRFLOW=y&quot;                                          &gt;&gt; .snap_config
   echo &quot;ERASE_BASE_BINFILES=y&quot;                                    &gt;&gt; .snap_config
   make -s oldconfig
@@ -1208,9 +1220,9 @@ else # case of Cloud Build
     fi
     
     echo &quot;J: Removing pre existing files from ${JenkinsDcpDir}&quot;    	
-  	rm -rf ${JenkinsDcpDir}/*
-    echo &quot;J: Creating a temp file : hello_world_1024_cloud_building&quot;
-    touch ${JenkinsDcpDir}/hello_world_1024_cloud_building
+  	rm -rf ${JenkinsDcpDir}/*;
+    echo &quot;J: Creating a temp file : hello_world_1024_cloud_building&quot;;
+    touch ${JenkinsDcpDir}/hello_world_1024_cloud_building;
 
 	#  bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_base&quot; || exit
   	make cloud_base
@@ -1225,7 +1237,7 @@ else # case of Cloud Build
     
 
   else 
-	echo &quot;J: Build Action Region ...&quot;
+	echo &quot;    J: Build Action Region ...&quot;
     # Testing if cloud base has been performed prior to action building
     l=0
     while [ ! -f ${JenkinsDcpDir}/hello_world_1024_cloud_done ]
@@ -1250,21 +1262,8 @@ else # case of Cloud Build
   	
   fi
   
-  
-  make cloud_base
-  echo &quot;J: Listing $DCP_ROOT dir :&quot;
-  ls -al $DCP_ROOT
-  echo &quot;J: Listing ${OCACCEL_ROOT}build/Image dir :&quot;
-  ls ${OCACCEL_ROOT}/hardware/build/Images/
-  JenkinsDcpDir
-#  echo &quot;J: Build Action Region ...&quot;
-#  bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_action&quot; || exit
-#  make cloud_action
-#  echo &quot;J: Merge Static and Action Region ...&quot;
-#  echo &quot;ENABLE_CLOUD_BUILD_BITFILE=y&quot;                             &gt;&gt; .snap_config
-#  make -s oldconfig
-#  bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_merge&quot; || exit
-fi
+
+fi  # End of CL / nCL test
 
 
 #==============================================================================================
