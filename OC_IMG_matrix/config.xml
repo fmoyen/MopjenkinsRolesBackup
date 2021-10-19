@@ -1209,6 +1209,8 @@ else # case of Cloud Build
     
     echo &quot;J: Removing pre existing files from ${JenkinsDcpDir}&quot;    	
   	rm -rf ${JenkinsDcpDir}/*
+    echo &quot;J: Creating a temp file : hello_world_1024_cloud_building&quot;
+    touch ${JenkinsDcpDir}/hello_world_1024_cloud_building
 
 	#  bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_base&quot; || exit
   	make cloud_base
@@ -1218,10 +1220,29 @@ else # case of Cloud Build
     ls ${OCACCEL_ROOT}/hardware/build/Images/
     echo &quot;J: Copying ${OCACCEL_ROOT}/hardware/build/Images/* into ${JenkinsDcpDir}&quot;
     cp ${OCACCEL_ROOT}/hardware/build/Images/* ${JenkinsDcpDir}
+    rm ${JenkinsDcpDir}/hello_world_1024_cloud_building
+    touch ${JenkinsDcpDir}/hello_world_1024_cloud_done
     
 
   else 
 	echo &quot;J: Build Action Region ...&quot;
+    # Testing if cloud base has been performed prior to action building
+    l=0
+    while [ ! -f ${JenkinsDcpDir}/hello_world_1024_cloud_done ]
+		do
+        	echo &quot;J: Cloud base for helloworld _1024 is not finished, waiting 2&apos; before recheck&quot;
+            sleep 120;
+            l=$(( $l + 1 ));
+            if [ $l gt 30 ]; then
+            	echo &quot;J: ERROR : We have wait for 60&apos; and didn&apos;t get the cloud reference !&quot;;
+            	exit 1
+            fi
+  		done
+
+	if [ -f ${JenkinsDcpDir}/hello_world_1024_cloud_done ]; then
+           echo &quot;Cloud base for helloworld _1024 has finished,
+    fi
+        
     make cloud_action
     echo &quot;J: Copying ${OCACCEL_ROOT}/hardware/build/Images/* into ${JenkinsDcpDir}&quot;
     cp ${OCACCEL_ROOT}/hardware/build/Images/* ${JenkinsDcpDir}
