@@ -1183,18 +1183,20 @@ then
 
 else # case of Cloud Build
 # FAB never for the moment but if needed, needs to adapt (BSUB, etc)
+# AC : Introducing cloud mode. Simple case for the moment : just replacing make image by make cloud_base
+#      This generates the same files as usual + a xxx_partial.bin
   mkdir -p ${OCACCEL_ROOT}/hardware/DCPs
   echo;echo &quot;****************************************************************************************&quot;
   echo &quot;J: Build Cloud Image ...&quot;
   echo &quot;export DCP_ROOT=${OCACCEL_ROOT}/hardware/DCPs/&quot;              &gt;&gt; snap_env.sh
   echo &quot;ENABLE_PRFLOW=y&quot;                                          &gt;&gt; .snap_config
-#  echo &quot;ENABLE_CLOUD_USER_FLOW=n&quot;                                 &gt;&gt; .snap_config
-#  echo &quot;ENABLE_CLOUD_BUILD_BITFILE=n&quot;                             &gt;&gt; .snap_config
+#  echo &quot;ENABLE_CLOUD_USER_FLOW=n&quot;                                 &gt;&gt; .snap_config  # was only used in CAPI2
+  echo &quot;ENABLE_CLOUD_BUILD_BITFILE=n&quot;                             &gt;&gt; .snap_config   # to be discussed with BM, set to avoid empty field.
   make -s oldconfig
   echo &quot;J: Build Static Region ...&quot;
 #  bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_base&quot; || exit
   make cloud_base
-  echo &quot;J: Build Action Region ...&quot;
+#  echo &quot;J: Build Action Region ...&quot;
 #  bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_action&quot; || exit
 #  make cloud_action
 #  echo &quot;J: Merge Static and Action Region ...&quot;
@@ -1514,7 +1516,10 @@ if [ $loop -eq $maxloop ];then
   echo
   
   LinkDir=${RootSaveDir}/${CRD}/${CRD}_not_available
-  SRCFILES=&quot;$BINFILES $BITFILES&quot;
+  # We do not keep the .bit file as it is huge .It is useful only if we want to avoid the flash.
+  # Bit file needs to be luanch into the FPGA just after its power up.
+  #  SRCFILES=&quot;$BINFILES $BITFILES&quot;
+  SRCFILES=&quot;$BINFILES&quot;
   CopyToDir -c $CRD -f &quot;$SRCFILES&quot; -d $SaveDir -l $LinkDir -s &quot;$IMGServers&quot; -u $HWUser
   echo &quot;  -&gt; EXITING !&quot;
   exit 100
