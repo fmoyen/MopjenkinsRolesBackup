@@ -643,10 +643,12 @@ export PATH=$PATH:/usr/local/bin  # python3 needs this path setup
 export USERHOME=`pwd`
 export OCACCEL_ROOT=$USERHOME/oc-accel
 
+
 TESTBOXES=( ${mopBoxes[*]} ${austinBoxes[*]} ) # init array of systems
 echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
 
 RootSaveDir=/data/Images
+JenkinsDcpDir=${RootSaveDir}/${CRD}/${CRD}_DCP   # This directory will collect cloud base images from helloworld_1024 for a given card
 SaveDir=${RootSaveDir}/${CRD}/${CRD}_IMAGES
 RootLogsDir=/data/LogsWhenFailed
 LogsDir=$RootLogsDir/${BUILD_NUMBER}-${JOB_NAME}-${GIT_BRANCH}/hardware
@@ -1187,15 +1189,53 @@ else # case of Cloud Build
 #      This generates the same files as usual + a xxx_partial.bin
   mkdir -p ${OCACCEL_ROOT}/hardware/DCPs
   echo;echo &quot;****************************************************************************************&quot;
-  echo &quot;J: Build Cloud Image ...&quot;
-  echo &quot;export DCP_ROOT=${OCACCEL_ROOT}/hardware/DCPs/&quot;              &gt;&gt; snap_env.sh
+  echo &quot;J: We enter Cloud Mode&quot;
+  #echo &quot;export DCP_ROOT=${OCACCEL_ROOT}/hardware/DCPs/&quot;           &gt;&gt; snap_env.sh
+  echo &quot;export DCP_ROOT=${JenkinsDcpDir}&quot;                         &gt;&gt; snap_env.sh
   echo &quot;ENABLE_PRFLOW=y&quot;                                          &gt;&gt; .snap_config
-#  echo &quot;ENABLE_CLOUD_USER_FLOW=n&quot;                                 &gt;&gt; .snap_config  # was only used in CAPI2
-  echo &quot;ENABLE_CLOUD_BUILD_BITFILE=n&quot;                             &gt;&gt; .snap_config   # to be discussed with BM, set to avoid empty field.
+  echo &quot;ERASE_BASE_BINFILES=y&quot;                                    &gt;&gt; .snap_config
   make -s oldconfig
-  echo &quot;J: Build Static Region ...&quot;
-#  bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_base&quot; || exit
+
+  
+  if [ &quot;$ACT&quot; == &quot;hls_helloworld_1024&quot;  ]; then
+  	echo &quot;    J: Building Cloud Base for hls_helloworld_1024 for card $CRD&quot;
+    echo &quot;    J: DCP temp files will be stored in ${JenkinsDcpDir}&quot;
+    echo &quot;&quot;
+	# AC: Create dcpdir if not existing !!
+    if [ -d ${JenkinsDcpDir} ];then
+    	echo &quot;J: Creating non existing ${JenkinsDcpDir}&quot;
+    	mkdir ${JenkinsDcpDir};
+    fi
+    
+    echo &quot;J: Removing pre existing files from ${JenkinsDcpDir}&quot;    	
+  	rm -rf ${JenkinsDcpDir}/*
+
+	#  bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_base&quot; || exit
+  	make cloud_base
+    echo &quot;J: Listing $DCP_ROOT dir :&quot;
+    ls -al $DCP_ROOT
+    echo &quot;J: Listing ${OCACCEL_ROOT}build/Image dir :&quot;
+    ls ${OCACCEL_ROOT}/hardware/build/Images/
+    echo &quot;J: Copying ${OCACCEL_ROOT}/hardware/build/Images/* into ${JenkinsDcpDir}&quot;
+    cp ${OCACCEL_ROOT}/hardware/build/Images/* ${JenkinsDcpDir}
+    
+
+  else 
+	echo &quot;J: Build Action Region ...&quot;
+    make cloud_action
+    echo &quot;J: Copying ${OCACCEL_ROOT}/hardware/build/Images/* into ${JenkinsDcpDir}&quot;
+    cp ${OCACCEL_ROOT}/hardware/build/Images/* ${JenkinsDcpDir}
+  	#  bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_action&quot; || exit
+  	
+  fi
+  
+  
   make cloud_base
+  echo &quot;J: Listing $DCP_ROOT dir :&quot;
+  ls -al $DCP_ROOT
+  echo &quot;J: Listing ${OCACCEL_ROOT}build/Image dir :&quot;
+  ls ${OCACCEL_ROOT}/hardware/build/Images/
+  JenkinsDcpDir
 #  echo &quot;J: Build Action Region ...&quot;
 #  bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_action&quot; || exit
 #  make cloud_action
