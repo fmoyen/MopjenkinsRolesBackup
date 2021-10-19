@@ -1683,8 +1683,25 @@ RC_RUN=0;ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_RUN=$?
 	cd ${TARGET_DIR}
     pwd
 	set -f  # the set -f command disables file name generation (&quot;path name expansion&quot;), meaning &quot;*.zip&quot; stays &quot;*.zip&quot;
+    echo &quot;J: Resetting card #$cardid&quot;
+    $SudoOrNotSudo oc-reset -C $cardid
     $SudoOrNotSudo ${RUN}
 EOF
+
+
+#------------------------------------------------------------------------------------------------------------------------------
+# CHECKING $RUN Return code
+
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Checking TEST RUN return code (`date`)...&quot;
+echo
+
+echo &quot;TEST RC_RUN code=$RC_RUN
+  if [ $RC_RUN -eq 0 ]; then
+  	echo &quot;J: TEST $RUN SUCCEEDED&quot;
+  else
+  	echo &quot;J: TEST $RUN FAILED&quot;
+  fi
 
 
 

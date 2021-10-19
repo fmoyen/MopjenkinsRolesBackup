@@ -696,7 +696,7 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_RUN=$?
     make software
 	set -f
     ulimit -c unlimited               # limit core dumps
-    echo &quot;Resetting card #$cardid&quot;
+    echo &quot;J : Resetting card #$cardid&quot;
     $SudoOrNotSudo oc-reset -C $cardid
     $SudoOrNotSudo ${RUN}
 EOF
