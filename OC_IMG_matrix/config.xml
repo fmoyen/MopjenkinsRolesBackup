@@ -1783,7 +1783,7 @@ loc_requested_action=$(grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{prin
 echo &quot;J: Expected action ID is:         $loc_requested_action&quot;
 cd -
 
-echo &quot;J: searching for existing action on $box (`date`) for card ${CRD} on position (-C) $cardid&quot;
+echo &quot;J: searching for existing action on $box for card ${CRD} on position $cardid&quot;
 
 RC_ACT_CHECK=0
 #RMT_RC_ACT_CHECK=0
