@@ -303,7 +303,7 @@ H 22-23/1 * * *</spec>
         <string>OC-AD9H3_nCL</string>
         <string>OC-AD9H3_CL</string>
         <string>OC-AD9H335_nC</string>
-        <string>LOC-AD9H335_CL</string>
+        <string>OC-AD9H335_CL</string>
         <string>OC-AD9H7_nCL</string>
         <string>OC-AD9H7_CL</string>
         <string>OC-BW250SOC_nCL</string>
@@ -1246,7 +1246,7 @@ else
     echo &quot;    J: Build Action Region ...&quot;
     echo;echo &quot;    ****************************************************************************************&quot;
     echo &quot;&quot;
-    cho &quot;    J: Waiting 1&apos; to allow reference test to clean up DCP temporary dir&quot;
+    echo &quot;    J: Waiting 1&apos; to allow reference test to clean up DCP temporary dir&quot;
     sleep 60	# to allow main helloword reference test case to clean the directory, otherwise we see the
 				# previous file hello_world_1024_cloud_done (from the previous jenkins run)
 		
@@ -1257,11 +1257,13 @@ else
     while [ ! -f ${JenkinsDcpDir}/hello_world_1024_cloud_done ]
 		do
         	echo &quot;J: $l&apos; : Cloud base for helloworld _1024 is not finished, waiting two more minutes before recheck. Wait last $m&quot;
-            sleep 120;
+            #sleep 120;
+            sleep 10
             #l=$(( $l + 1 ));
-            (l+)
+            ((l++))
             m=(l/2)
-            if [ $l gt 30 ]; then
+            #if [ $l gt 30 ]; then
+            if [ $l gt 3 ]; then
             	echo &quot;J: ERROR : We have wait for 60&apos; and didn&apos;t get the cloud reference !&quot;;
             	exit 1
             fi
