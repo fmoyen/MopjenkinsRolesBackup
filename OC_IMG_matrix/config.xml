@@ -1241,6 +1241,9 @@ else
   else 
 	echo &quot;    J: Build Action Region ...&quot;
     # Testing if cloud base has been performed prior to action building
+    
+    sleep 60  # to allow main helloword reference test case to clean the directory, otherwise we see the
+    			# previous file hello_world_1024_cloud_done (from the previous jenkins run)
 
     l=0
     while [ ! -f ${JenkinsDcpDir}/hello_world_1024_cloud_done ]
@@ -1286,8 +1289,13 @@ echo
 
 #BINFILES contains binary name (In SPI : &quot;primary and secondary&quot; names)
 # AC : adding ary to prevent falsely collecting the XXX_partial.bin file since PR is introduced
-BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*ary.bin|grep -v FACTORY|head -n2`
-BITFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*.bit|grep -v FACTORY|head -n2`
+
+if [ &quot;$CL&quot; == &quot;nCL&quot; ];then
+	BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*ary.bin|grep -v FACTORY|head -n2`
+    BITFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*.bit|grep -v FACTORY|head -n2`
+   else
+   	BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*partial.bin|grep -v FACTORY|head -n2`
+fi   
     
   
 if [ &quot;$BINFILES&quot; == &quot;&quot; ]; then echo &quot;  --&gt; cannot find binary files&quot;;exit 1
