@@ -1252,7 +1252,7 @@ else
 		
     # Testing if cloud base has been performed prior to action building
 
-maxloopwaitrefdone=30
+maxloopwaitrefdone=30 # with sleep 120 command this will wait for 1 hour
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Waiting for Reference PR test helloworld_1024 to be finished&quot;
     
@@ -1263,6 +1263,7 @@ echo &quot;J: Waiting for Reference PR test helloworld_1024 to be finished&quot;
     
     	if [ ! -f ${JenkinsDcpDir}/hello_world_1024_cloud_done ]; then
         	echo &quot;J: Cloud base for helloworld _1024 is not finished, waiting two more minutes before recheck&quot;
+            sleep 120
         else break
 		fi
 	done #for loop
@@ -1273,7 +1274,7 @@ echo &quot;J: Waiting for Reference PR test helloworld_1024 to be finished&quot;
     fi
 
 	if [ -f ${JenkinsDcpDir}/hello_world_1024_cloud_done ]; then
-           echo &quot;Cloud base for helloworld _1024 has finished&quot;
+           echo &quot;Cloud base for helloworld _1024 has finished =&gt; launching Build Action step ...&quot;
     fi
         
     make cloud_action
