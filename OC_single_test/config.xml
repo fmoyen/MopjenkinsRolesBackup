@@ -122,6 +122,17 @@ Eg: OC-AD9H3xxxxx.bin provided =&gt; an OC-AD9H3 card will be tested</descriptio
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>PR</name>
+          <description>Partial reflow mode, requires a PR code</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PRcode</name>
+          <description>Provide the PR code of the file you&apos;re testing, to avoid collecting it into the file name.</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
