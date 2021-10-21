@@ -1240,18 +1240,21 @@ else
 
   else 
 	echo &quot;    J: Build Action Region ...&quot;
+    echo &quot;    J: Waiting 1&apos; to allow reference test to clean up DCP temporary dir&quot;
+    sleep 60	# to allow main helloword reference test case to clean the directory, otherwise we see the
+				# previous file hello_world_1024_cloud_done (from the previous jenkins run)
+		
     # Testing if cloud base has been performed prior to action building
-    
-    sleep 60  # to allow main helloword reference test case to clean the directory, otherwise we see the
-    			# previous file hello_world_1024_cloud_done (from the previous jenkins run)
 
     l=0
+    m=0
     while [ ! -f ${JenkinsDcpDir}/hello_world_1024_cloud_done ]
 		do
-        	echo &quot;J: Cloud base for helloworld _1024 is not finished, waiting 2&apos; before recheck&quot;
+        	echo &quot;J: $l&apos; : Cloud base for helloworld _1024 is not finished, waiting two more minutes before recheck. Wait last $m&quot;
             sleep 120;
             #l=$(( $l + 1 ));
             l=$l+1;
+            m=$l/2;
             if [ $l gt 30 ]; then
             	echo &quot;J: ERROR : We have wait for 60&apos; and didn&apos;t get the cloud reference !&quot;;
             	exit 1
