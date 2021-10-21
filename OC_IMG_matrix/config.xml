@@ -1241,7 +1241,7 @@ else
     touch ${JenkinsDcpDir}/hello_world_1024_cloud_done
    
 
-  else 
+  else # case of a --non helloworld_1024 reference-- action (any other)
 	echo;echo &quot;    ****************************************************************************************&quot;
     echo &quot;    J: Build Action Region ...&quot;
     echo;echo &quot;    ****************************************************************************************&quot;
@@ -1262,7 +1262,7 @@ echo &quot;J: Waiting for Reference PR test helloworld_1024 to be finished&quot;
  		echo &quot;J: LOOP $loopdone/$maxloopwaitrefdone (`date`)&quot;
     
     	if [ ! -f ${JenkinsDcpDir}/hello_world_1024_cloud_done ]; then
-        	echo &quot;J: $l&apos; : Cloud base for helloworld _1024 is not finished, waiting two more minutes before recheck. Wait last $m&quot;
+        	echo &quot;J: Cloud base for helloworld _1024 is not finished, waiting two more minutes before recheck&quot;
         else break
 		fi
 	done #for loop
@@ -1270,6 +1270,7 @@ echo &quot;J: Waiting for Reference PR test helloworld_1024 to be finished&quot;
 	if [ $loopdone -eq $maxloopwaitrefdone ];then
 		echo &quot;J: ERROR : We have wait for 60&apos; and didn&apos;t get the cloud reference !&quot;;
         exit 1
+    fi
 
 	if [ -f ${JenkinsDcpDir}/hello_world_1024_cloud_done ]; then
            echo &quot;Cloud base for helloworld _1024 has finished&quot;
