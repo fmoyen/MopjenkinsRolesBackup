@@ -1252,22 +1252,24 @@ else
 		
     # Testing if cloud base has been performed prior to action building
 
-    l=0
-    m=0
-    while [ ! -f ${JenkinsDcpDir}/hello_world_1024_cloud_done ]
-		do
+maxloopwaitrefdone=30
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Waiting for Reference PR test helloworld_1024 to be finished&quot;
+    
+	for loopdone in `seq 1 $maxloopwaitrefdone`;do
+
+  		echo;echo &quot;*************************************************&quot;
+ 		echo &quot;J: LOOP $loopdone/$maxloopwaitrefdone (`date`)&quot;
+    
+    	if [ ! -f ${JenkinsDcpDir}/hello_world_1024_cloud_done ]; then
         	echo &quot;J: $l&apos; : Cloud base for helloworld _1024 is not finished, waiting two more minutes before recheck. Wait last $m&quot;
-            #sleep 120;
-            sleep 10
-            #l=$(( $l + 1 ));
-            ((l++))
-            m=(l/2)
-            #if [ $l gt 30 ]; then
-            if [ $l gt 3 ]; then
-            	echo &quot;J: ERROR : We have wait for 60&apos; and didn&apos;t get the cloud reference !&quot;;
-            	exit 1
-            fi
-  		done
+        else break
+		fi
+	done #for loop
+
+	if [ $loopdone -eq $maxloopwaitrefdone ];then
+		echo &quot;J: ERROR : We have wait for 60&apos; and didn&apos;t get the cloud reference !&quot;;
+        exit 1
 
 	if [ -f ${JenkinsDcpDir}/hello_world_1024_cloud_done ]; then
            echo &quot;Cloud base for helloworld _1024 has finished&quot;
