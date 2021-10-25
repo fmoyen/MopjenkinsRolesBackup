@@ -1247,12 +1247,12 @@ else
     echo;echo &quot;    ****************************************************************************************&quot;
     echo &quot;&quot;
     echo &quot;    J: Waiting 1&apos; to allow reference test to clean up DCP temporary dir&quot;
-    sleep 60	# to allow main helloword reference test case to clean the directory, otherwise we see the
+    sleep 120	# to allow main helloword reference test case to clean the directory, otherwise we see the
 				# previous file hello_world_1024_cloud_done (from the previous jenkins run)
 		
     # Testing if cloud base has been performed prior to action building
 
-maxloopwaitrefdone=30 # with sleep 120 command this will wait for 1 hour
+maxloopwaitrefdone=30 # with sleep 120 command this will wait for 2 hours
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Waiting for Reference PR test helloworld_1024 to be finished&quot;
     
@@ -1269,7 +1269,7 @@ echo &quot;J: Waiting for Reference PR test helloworld_1024 to be finished&quot;
 	done #for loop
 
 	if [ $loopdone -eq $maxloopwaitrefdone ];then
-		echo &quot;J: ERROR : We have wait for 60&apos; and didn&apos;t get the cloud reference !&quot;;
+		echo &quot;J: ERROR : We have wait for 120&apos; and didn&apos;t get the cloud reference !&quot;;
         exit 1
     fi
 
@@ -1284,7 +1284,7 @@ echo &quot;J: Waiting for Reference PR test helloworld_1024 to be finished&quot;
   	
 
 
-  fi
+  fi  # End of &quot;hello_1024&quot; vs &quot;other action&quot; test
   
 
 
@@ -1791,7 +1791,7 @@ echo;echo &quot;****************************************************************
 echo &quot;J: Checking TEST RUN return code (`date`)...&quot;
 echo
 
-echo &quot;TEST RC_RUN code=$RC_RUN
+echo &quot;TEST RC_RUN code=$RC_RUN&quot;
   if [ $RC_RUN -eq 0 ]; then
   	echo &quot;J: TEST $RUN SUCCEEDED&quot;
   else
