@@ -1252,7 +1252,7 @@ else
 		
     # Testing if cloud base has been performed prior to action building
 
-maxloopwaitrefdone=30 # with sleep 120 command this will wait for 2 hours
+maxloopwaitrefdone=60 # with sleep 120 command this will wait for 2 hours
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Waiting for Reference PR test helloworld_1024 to be finished&quot;
     
