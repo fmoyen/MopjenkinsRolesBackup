@@ -1309,7 +1309,11 @@ if [ &quot;$CL&quot; == &quot;nCL&quot; ];then
 	BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*ary.bin|grep -v FACTORY|head -n2`
     BITFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*.bit|grep -v FACTORY|head -n2`
    else
-   	BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*partial.bin|grep -v FACTORY|head -n2`
+   		  if [ &quot;$ACT&quot; == &quot;hls_helloworld_1024&quot;  ];then
+          	BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*ary.bin|grep -v FACTORY|head -n2`
+          else
+          	BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*partial.bin|grep -v FACTORY|head -n2`
+          fi
 fi   
     
   
