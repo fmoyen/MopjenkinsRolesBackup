@@ -105,7 +105,7 @@ Eg: OC-AD9H3xxxxx.bin provided =&gt; an OC-AD9H3 card will be tested</descriptio
           <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
-          <name>ACT</name>
+          <name>ACT_U</name>
           <description>Only If previous FLASH variable is not selected, please provide the test action name to check</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
@@ -191,6 +191,22 @@ HWUser=&quot;capimop&quot;
 
 mopIMGRootDir=&quot;/data/Images&quot;
 IMGFileName=$(basename $mopIMGFile)
+
+#Recherche automatique du nom de l&apos;action
+ACTION_LIST=&quot;hdl_example hdl_single_engine hls_helloworld_512 hls_helloworld_1024 hls_memcopy_512 hls_memcopy_1024 hls_hbm_memcopy_1024 hls_image_filter hls_decimal_mult hls_udp_512&quot;
+
+#by default action name is provided by user unless we find one into the name
+ACT=ACT_U
+
+for n in $ACTION_LIST; do
+        #printf &quot;searching for $n&quot;
+        if [[ $IMGFileName =~ .*&quot;$n&quot;.* ]]; then
+                echo &quot;==&gt;&gt; J: found action name $n into provided bin filename/n&quot;
+                ACT=$n   # we force $ACT to be the one we found
+        fi
+done
+echo &quot;J: Action name is set to : $ACT&quot;
+
 mopIMGDir=$(dirname $mopIMGRootDir/$mopIMGFile)
 IMGServers=&quot;jtagx86&quot; # List of servers where to push generated images.
 
@@ -728,7 +744,10 @@ echo &quot;J: Expected action is:            $ACT&quot;
 cd oc-accel/actions/$ACT/
 ls -al
 echo &quot;J: looking for requested action&quot;
-loc_requested_action=$(grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print $NF}&apos;)
+loc_requested_action=$ACT
+# the followning one is when we have built an image
+# loc_requested_action=$(grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print $NF}&apos;)
+
 echo &quot;J: Expected action ID is:         $loc_requested_action&quot;
 cd -
 
@@ -746,7 +765,8 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
     pwd
     echo &quot;J: Collecting remote ${box} actions:&quot;
 
-	requested_action=\$(grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print \$NF}&apos;)
+	requested_action=$ACT
+    #requested_action=\$(grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print \$NF}&apos;)
 	actual_action=0x\$(snap_peek -C$cardid -w32 0x0010 | awk &apos;{print \$NF}&apos;)
     
     r_action_int=\$(printf &apos;%x&apos; &quot;\${requested_action}&quot;)
