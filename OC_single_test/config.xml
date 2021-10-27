@@ -765,8 +765,7 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
     pwd
     echo &quot;J: Collecting remote ${box} actions:&quot;
 
-	requested_action=$ACT
-    #requested_action=\$(grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print \$NF}&apos;)
+	requested_action=\$(grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print \$NF}&apos;)
 	actual_action=0x\$(snap_peek -C$cardid -w32 0x0010 | awk &apos;{print \$NF}&apos;)
     
     r_action_int=\$(printf &apos;%x&apos; &quot;\${requested_action}&quot;)
