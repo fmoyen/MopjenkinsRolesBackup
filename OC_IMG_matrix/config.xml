@@ -1212,9 +1212,11 @@ else
   make -s oldconfig
 
   
-  if [ &quot;$ACT&quot; == &quot;hls_helloworld_1024&quot;  ]; then
+#  if [ &quot;$ACT&quot; == &quot;hls_helloworld_1024&quot;  ]; then
+  if [ &quot;$ACT&quot; == &quot;hls_hbm_memcopy_1024&quot;  ]; then
   	echo;echo &quot;    ****************************************************************************************&quot;
-    echo &quot;    J: Building Cloud Base for hls_helloworld_1024 for card $CRD&quot;
+#    echo &quot;    J: Building Cloud Base for hls_helloworld_1024 for card $CRD&quot;
+    echo &quot;    J: Building Cloud Base for hls_hbm_memcopy_1024 for card $CRD&quot;    
     echo &quot;    J: DCP temp files will be stored in ${JenkinsDcpDir}&quot;
     echo;echo &quot;    ****************************************************************************************&quot;
     echo &quot;&quot;
@@ -1226,7 +1228,8 @@ else
     
     echo &quot;J: Removing pre existing files from ${JenkinsDcpDir}&quot;    	
   	rm -rf ${JenkinsDcpDir}/*;
-    echo &quot;J: Creating a temp file : hello_world_1024_cloud_building&quot;;
+#    echo &quot;J: Creating a temp file : hello_world_1024_cloud_building&quot;;
+    echo &quot;J: Creating a temp file : hls_hbm_memcopy_1024&quot;;
     touch ${JenkinsDcpDir}/hello_world_1024_cloud_building;
 
 	#  bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_base&quot; || exit
