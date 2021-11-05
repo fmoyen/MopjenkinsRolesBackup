@@ -30,7 +30,8 @@
 echo &quot;######################################################&quot;
 echo &quot;My Build Executor is : $NODE_NAME&quot;
 uname -a
-echo &quot;######################################################&quot;</command>
+echo &quot;######################################################&quot;
+sleep 20</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
