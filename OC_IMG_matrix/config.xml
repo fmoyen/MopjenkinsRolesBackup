@@ -299,7 +299,7 @@ H 22-23/1 * * *</spec>
       <name>CRD_CL</name>
       <values>
         <string>OC-AD9V3_nCL</string>
-        <string>OC-AD9V3nCL</string>
+        <string>OC-AD9V3_CL</string>
         <string>OC-AD9H3_nCL</string>
         <string>OC-AD9H3_CL</string>
         <string>OC-AD9H335_nCL</string>
