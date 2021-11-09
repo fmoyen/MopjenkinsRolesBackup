@@ -1221,9 +1221,9 @@ else
     echo;echo &quot;    ****************************************************************************************&quot;
     echo &quot;&quot;
 	# AC: Create dcpdir if not existing !!
-    if [ -d ${JenkinsDcpDir} ];then
+    if [ ! -d ${JenkinsDcpDir} ];then
     	echo &quot;J: Creating non existing ${JenkinsDcpDir}&quot;
-    	mkdir ${JenkinsDcpDir};
+    	mkdir -p ${JenkinsDcpDir};
     fi
     
     echo &quot;J: Removing pre existing files from ${JenkinsDcpDir}&quot;    	
