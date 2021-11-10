@@ -1,5 +1,5 @@
 <?xml version='1.1' encoding='UTF-8'?>
-<matrix-project plugin="matrix-project@1.14">
+<matrix-project plugin="matrix-project@1.18">
   <actions/>
   <description>Builds bitstreams with different configurations and tests images on real HW if possible.&#xd;
 In case of problems: please contact fabrice_moyen@fr.ibm.com or alexandre.castellane@fr.ibm.com&#xd;
@@ -94,7 +94,6 @@ If -- then VIVADO_XXX parameters below are taken into account</description>
         </hudson.model.ChoiceParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>VIVADO_OC_AD9V3</name>
-          <description></description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
               <string>2020.1</string>
@@ -107,7 +106,6 @@ If -- then VIVADO_XXX parameters below are taken into account</description>
         </hudson.model.ChoiceParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>VIVADO_OC_AD9H3</name>
-          <description></description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
               <string>2020.1</string>
@@ -120,7 +118,6 @@ If -- then VIVADO_XXX parameters below are taken into account</description>
         </hudson.model.ChoiceParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>VIVADO_OC_AD9H335</name>
-          <description></description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
               <string>2020.1</string>
@@ -133,7 +130,6 @@ If -- then VIVADO_XXX parameters below are taken into account</description>
         </hudson.model.ChoiceParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>VIVADO_OC_AD9H7</name>
-          <description></description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
               <string>2020.1</string>
@@ -146,7 +142,6 @@ If -- then VIVADO_XXX parameters below are taken into account</description>
         </hudson.model.ChoiceParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>VIVADO_OC_BW250SOC</name>
-          <description></description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
               <string>2020.1</string>
@@ -208,7 +203,6 @@ hdclp026.boeblingen.de.ibm.com</defaultValue>
           <description>List of Austin systems available for testing :
 (Assuming no VPN or jump server is needed to access Austin servers, 9.X.X.X addresses)
 (it needs to define capimop user with authorized_keys)</description>
-          <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
@@ -236,6 +230,10 @@ hdclp026.boeblingen.de.ibm.com</defaultValue>
       </matrixOptions>
       <paramsToUseForLimit></paramsToUseForLimit>
     </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
+    <jenkins.advancedqueue.jobinclusion.strategy.JobInclusionJobProperty plugin="PrioritySorter@4.0.0">
+      <useJobGroup>true</useJobGroup>
+      <jobGroupName>PR_REF</jobGroupName>
+    </jenkins.advancedqueue.jobinclusion.strategy.JobInclusionJobProperty>
   </properties>
   <scm class="hudson.plugins.git.GitSCM" plugin="git@4.0.0">
     <configVersion>2</configVersion>
@@ -299,7 +297,6 @@ H 22-23/1 * * *</spec>
       <name>CRD_CL</name>
       <values>
         <string>OC-AD9V3_nCL</string>
-        <string>OC-AD9V3_CL</string>
         <string>OC-AD9H3_nCL</string>
         <string>OC-AD9H3_CL</string>
         <string>OC-AD9H335_nCL</string>
@@ -605,6 +602,7 @@ echo &quot;properties forwarded to next shell:&quot;
 cat export_props.properties
 echo;echo &quot;*******************************************************************************&quot;
 echo</command>
+      <configuredLocalRules/>
     </hudson.tasks.Shell>
     <EnvInjectBuilder plugin="envinject@2.1.6">
       <info>
@@ -1919,10 +1917,11 @@ else
   exit 1
 fi 
 </command>
+      <configuredLocalRules/>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.29">
+    <hudson.tasks.Mailer plugin="mailer@1.34">
       <recipients>fabrice_moyen@fr.ibm.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
