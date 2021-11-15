@@ -5,7 +5,7 @@
 for Questions: please contact  A.Castellane or F.Moyen</description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <hudson.plugins.jira.JiraProjectProperty plugin="jira@3.0.11"/>
+    <hudson.plugins.jira.JiraProjectProperty plugin="jira@3.6"/>
     <jenkins.model.BuildDiscarderProperty>
       <strategy class="hudson.tasks.LogRotator">
         <daysToKeep>3</daysToKeep>
@@ -14,13 +14,13 @@ for Questions: please contact  A.Castellane or F.Moyen</description>
         <artifactNumToKeep>-1</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
-    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.5">
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.34.1">
       <projectUrl>https://github.com/OpenCAPI/oc-accel/</projectUrl>
       <displayName></displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
-        <jp.ikedam.jenkins.plugins.extensible__choice__parameter.ExtensibleChoiceParameterDefinition plugin="extensible-choice-parameter@1.6.0">
+        <jp.ikedam.jenkins.plugins.extensible__choice__parameter.ExtensibleChoiceParameterDefinition plugin="extensible-choice-parameter@1.8.0">
           <name>mopIMGFile</name>
           <description>which image to load</description>
           <editable>false</editable>
@@ -64,7 +64,6 @@ Orpington and Lewen05 are P9</description>
           <description>List of Austin systems available for testing :
 (Assuming no VPN or jump server is needed to access Austin servers, 9.X.X.X addresses)
 (it needs to define capimop user with authorized_keys)</description>
-          <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -130,12 +129,11 @@ Eg: OC-AD9H3xxxxx.bin provided =&gt; an OC-AD9H3 card will be tested</descriptio
         <hudson.model.StringParameterDefinition>
           <name>PRcode</name>
           <description>Provide the PR code of the file you&apos;re testing, to avoid collecting it into the file name.</description>
-          <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
-    <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
+    <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.4">
       <maxConcurrentPerNode>0</maxConcurrentPerNode>
       <maxConcurrentTotal>0</maxConcurrentTotal>
       <categories class="java.util.concurrent.CopyOnWriteArrayList"/>
@@ -144,8 +142,12 @@ Eg: OC-AD9H3xxxxx.bin provided =&gt; an OC-AD9H3 card will be tested</descriptio
       <limitOneJobWithMatchingParams>false</limitOneJobWithMatchingParams>
       <paramsToUseForLimit></paramsToUseForLimit>
     </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
+    <jenkins.advancedqueue.jobinclusion.strategy.JobInclusionJobProperty plugin="PrioritySorter@4.0.0">
+      <useJobGroup>false</useJobGroup>
+      <jobGroupName>PR_REF</jobGroupName>
+    </jenkins.advancedqueue.jobinclusion.strategy.JobInclusionJobProperty>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.0.0">
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.10.0">
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
@@ -158,11 +160,15 @@ Eg: OC-AD9H3xxxxx.bin provided =&gt; an OC-AD9H3 card will be tested</descriptio
       </hudson.plugins.git.BranchSpec>
     </branches>
     <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
-    <submoduleCfg class="list"/>
+    <submoduleCfg class="empty-list"/>
     <extensions>
       <hudson.plugins.git.extensions.impl.PruneStaleBranch/>
-      <hudson.plugins.git.extensions.impl.CleanCheckout/>
-      <hudson.plugins.git.extensions.impl.CleanBeforeCheckout/>
+      <hudson.plugins.git.extensions.impl.CleanCheckout>
+        <deleteUntrackedNestedRepositories>false</deleteUntrackedNestedRepositories>
+      </hudson.plugins.git.extensions.impl.CleanCheckout>
+      <hudson.plugins.git.extensions.impl.CleanBeforeCheckout>
+        <deleteUntrackedNestedRepositories>false</deleteUntrackedNestedRepositories>
+      </hudson.plugins.git.extensions.impl.CleanBeforeCheckout>
       <hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
         <relativeTargetDir>oc-accel</relativeTargetDir>
       </hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
@@ -581,8 +587,10 @@ for loop in `seq 1 $maxloop`;do
       ;;
       
     esac
-    
+
   done # for box
+  
+  sleep 2
   
 done #for loop
 
@@ -727,6 +735,9 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_RUN=$?
     $SudoOrNotSudo which oc-reset
     $SudoOrNotSudo oc-reset -V
     $SudoOrNotSudo oc-reset -C $cardid
+        if [ $? == 10 ]; then
+    	echo &quot;card is already used&quot;;
+        exit 10;
     $SudoOrNotSudo ${RUN}
 EOF
 
@@ -864,10 +875,11 @@ fi   #end of if FLASH=true
 else 
   die 100 &quot;Job return code indicates FAILURE RC = $RC (`date`) =&gt; exit UNSTABLE&quot;
 fi</command>
+      <configuredLocalRules/>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <org.jenkinsci.plugins.github.status.GitHubCommitStatusSetter plugin="github@1.29.5">
+    <org.jenkinsci.plugins.github.status.GitHubCommitStatusSetter plugin="github@1.34.1">
       <commitShaSource class="org.jenkinsci.plugins.github.status.sources.BuildDataRevisionShaSource"/>
       <reposSource class="org.jenkinsci.plugins.github.status.sources.AnyDefinedRepositorySource"/>
       <contextSource class="org.jenkinsci.plugins.github.status.sources.ManuallyEnteredCommitContextSource">
@@ -894,13 +906,16 @@ fi</command>
       <statusBackrefSource class="org.jenkinsci.plugins.github.status.sources.BuildRefBackrefSource"/>
       <errorHandlers/>
     </org.jenkinsci.plugins.github.status.GitHubCommitStatusSetter>
-    <jenkins.plugins.slack.SlackNotifier plugin="slack@2.18">
+    <jenkins.plugins.slack.SlackNotifier plugin="slack@2.48">
       <baseUrl></baseUrl>
       <teamDomain></teamDomain>
       <authToken></authToken>
       <tokenCredentialId></tokenCredentialId>
       <botUser>false</botUser>
       <room></room>
+      <sendAsText>false</sendAsText>
+      <iconEmoji></iconEmoji>
+      <username></username>
       <startNotification>false</startNotification>
       <notifySuccess>false</notifySuccess>
       <notifyAborted>false</notifyAborted>
@@ -908,10 +923,13 @@ fi</command>
       <notifyUnstable>false</notifyUnstable>
       <notifyRegression>false</notifyRegression>
       <notifyFailure>false</notifyFailure>
+      <notifyEveryFailure>false</notifyEveryFailure>
       <notifyBackToNormal>false</notifyBackToNormal>
       <notifyRepeatedFailure>false</notifyRepeatedFailure>
       <includeTestSummary>false</includeTestSummary>
       <includeFailedTests>false</includeFailedTests>
+      <uploadFiles>false</uploadFiles>
+      <artifactIncludes></artifactIncludes>
       <commitInfoChoice>NONE</commitInfoChoice>
       <includeCustomMessage>false</includeCustomMessage>
       <customMessage></customMessage>
@@ -921,7 +939,7 @@ fi</command>
       <customMessageUnstable></customMessageUnstable>
       <customMessageFailure></customMessageFailure>
     </jenkins.plugins.slack.SlackNotifier>
-    <hudson.plugins.ws__cleanup.WsCleanup plugin="ws-cleanup@0.37">
+    <hudson.plugins.ws__cleanup.WsCleanup plugin="ws-cleanup@0.39">
       <patterns class="empty-list"/>
       <deleteDirs>false</deleteDirs>
       <skipWhenFailed>false</skipWhenFailed>
@@ -937,13 +955,13 @@ fi</command>
     </hudson.plugins.ws__cleanup.WsCleanup>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.19">
+    <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.20">
       <strategy class="hudson.plugins.build_timeout.impl.NoActivityTimeOutStrategy">
         <timeoutSecondsString>600</timeoutSecondsString>
       </strategy>
       <operationList/>
     </hudson.plugins.build__timeout.BuildTimeoutWrapper>
-    <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.3">
+    <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.2.0">
       <template>${PROJECT_NAME} #${BUILD_NUMBER} OC-ACCEL=${GIT_BRANCH} OC-UTILS=${OCUTILS_URL}/${OCUTILS_BRANCH}</template>
       <descriptionTemplate></descriptionTemplate>
       <runAtStart>true</runAtStart>
