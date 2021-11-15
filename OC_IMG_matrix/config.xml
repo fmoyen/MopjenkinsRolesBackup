@@ -1,5 +1,5 @@
 <?xml version='1.1' encoding='UTF-8'?>
-<matrix-project plugin="matrix-project@1.18">
+<matrix-project plugin="matrix-project@1.19">
   <actions/>
   <description>Builds bitstreams with different configurations and tests images on real HW if possible.&#xd;
 In case of problems: please contact fabrice_moyen@fr.ibm.com or alexandre.castellane@fr.ibm.com&#xd;
@@ -22,8 +22,8 @@ If required TEMPORARILY CHANGE TO fleon&apos;s : git  https://github.com/fleon-p
 instead of : git@github.com:/OpenCAPI/oc-accel.git </description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <hudson.plugins.jira.JiraProjectProperty plugin="jira@3.0.11"/>
-    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.5">
+    <hudson.plugins.jira.JiraProjectProperty plugin="jira@3.6"/>
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.34.1">
       <projectUrl>https://github.com/OpenCAPI/oc-accel/</projectUrl>
       <displayName></displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
@@ -217,7 +217,7 @@ hdclp026.boeblingen.de.ibm.com</defaultValue>
         </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
-    <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
+    <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.4">
       <maxConcurrentPerNode>1</maxConcurrentPerNode>
       <maxConcurrentTotal>10</maxConcurrentTotal>
       <categories class="java.util.concurrent.CopyOnWriteArrayList"/>
@@ -235,7 +235,7 @@ hdclp026.boeblingen.de.ibm.com</defaultValue>
       <jobGroupName>PR_REF</jobGroupName>
     </jenkins.advancedqueue.jobinclusion.strategy.JobInclusionJobProperty>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.0.0">
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.10.0">
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
@@ -248,7 +248,7 @@ hdclp026.boeblingen.de.ibm.com</defaultValue>
       </hudson.plugins.git.BranchSpec>
     </branches>
     <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
-    <submoduleCfg class="list"/>
+    <submoduleCfg class="empty-list"/>
     <extensions>
       <hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
         <relativeTargetDir>oc-accel</relativeTargetDir>
@@ -604,13 +604,13 @@ echo;echo &quot;****************************************************************
 echo</command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
-    <EnvInjectBuilder plugin="envinject@2.1.6">
+    <EnvInjectBuilder plugin="envinject@2.4.0">
       <info>
         <propertiesFilePath>export_props.properties</propertiesFilePath>
       </info>
     </EnvInjectBuilder>
-    <org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder plugin="conditional-buildstep@1.3.6">
-      <condition class="org.jenkins_ci.plugins.run_condition.core.BooleanCondition" plugin="run-condition@1.2">
+    <org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder plugin="conditional-buildstep@1.4.1">
+      <condition class="org.jenkins_ci.plugins.run_condition.core.BooleanCondition" plugin="run-condition@1.5">
         <token>$SKIP</token>
       </condition>
       <buildStep class="org.jenkins_ci.plugins.fail_the_build.FixResultBuilder" plugin="fail-the-build-plugin@1.0">
@@ -620,7 +620,7 @@ echo</command>
         <failure></failure>
         <aborted></aborted>
       </buildStep>
-      <runner class="org.jenkins_ci.plugins.run_condition.BuildStepRunner$Fail" plugin="run-condition@1.2"/>
+      <runner class="org.jenkins_ci.plugins.run_condition.BuildStepRunner$Fail" plugin="run-condition@1.5"/>
     </org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
@@ -1200,10 +1200,10 @@ else
   echo &quot;****************************************************************************************&quot;
   echo &quot;&quot;;
 
-
-  echo &quot;J: exporting DCP_ROOT=${JenkinsDcpDir} into snap_env.sh&quot;
-  #echo &quot;export DCP_ROOT=${OCACCEL_ROOT}/hardware/DCPs/&quot;           &gt;&gt; snap_env.sh
-  echo &quot;export DCP_ROOT=${JenkinsDcpDir}&quot;                         &gt;&gt; snap_env.sh
+ # WARNING DCP_ROOT has changed to BASE_DCP_DIR when appling PR
+  echo &quot;J: exporting BASE_DCP_DIR=${JenkinsDcpDir} into snap_env.sh&quot;
+  echo &quot;export BASE_DCP_DIR=${JenkinsDcpDir}&quot;                         &gt;&gt; snap_env.sh
+  
   echo &quot;J: Tuning ENABLE_PRFLOW &amp; ERASE_BASE_BINFILES to y into snap_env.sh&quot;
   echo &quot;ENABLE_PRFLOW=y&quot;                                          &gt;&gt; .snap_config
   echo &quot;ERASE_BASE_BINFILES=y&quot;                                    &gt;&gt; .snap_config
@@ -1926,7 +1926,7 @@ fi
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.ws__cleanup.WsCleanup plugin="ws-cleanup@0.37">
+    <hudson.plugins.ws__cleanup.WsCleanup plugin="ws-cleanup@0.39">
       <patterns class="empty-list"/>
       <deleteDirs>false</deleteDirs>
       <skipWhenFailed>false</skipWhenFailed>
@@ -1942,13 +1942,13 @@ fi
     </hudson.plugins.ws__cleanup.WsCleanup>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.37">
+    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.39">
       <deleteDirs>false</deleteDirs>
       <cleanupParameter></cleanupParameter>
       <externalDelete></externalDelete>
       <disableDeferredWipeout>false</disableDeferredWipeout>
     </hudson.plugins.ws__cleanup.PreBuildCleanup>
-    <org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper plugin="credentials-binding@1.20">
+    <org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper plugin="credentials-binding@1.27">
       <bindings>
         <org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
           <credentialsId>LSFUser</credentialsId>
@@ -1957,7 +1957,7 @@ fi
         </org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
       </bindings>
     </org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper>
-    <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.19">
+    <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.20">
       <strategy class="hudson.plugins.build_timeout.impl.NoActivityTimeOutStrategy">
         <timeoutSecondsString>14400</timeoutSecondsString>
       </strategy>
@@ -1965,8 +1965,8 @@ fi
         <hudson.plugins.build__timeout.operations.FailOperation/>
       </operationList>
     </hudson.plugins.build__timeout.BuildTimeoutWrapper>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.10"/>
-    <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.3">
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.13"/>
+    <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.2.0">
       <template>#${BUILD_NUMBER} ${GIT_BRANCH} Vivado=${ENV,var=&quot;VIVADO_GLOBAL&quot;} HWTest=${ENV,var=&quot;TEST_ON_HW&quot;} NOHWCards= ${ENV,var=&quot;NO_TEST_CARDS&quot;}</template>
       <descriptionTemplate></descriptionTemplate>
       <runAtStart>true</runAtStart>
