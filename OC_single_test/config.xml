@@ -738,10 +738,13 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_RUN=$?
     $SudoOrNotSudo which oc-reset
     $SudoOrNotSudo oc-reset -V
     $SudoOrNotSudo oc-reset -C $cardid
-        if [ $? == 10 ]; then
+    echo &quot;J on ${box}:RC after oc-reset is : $?&quot;
+        if [ ! $? == 10 ]; then
+        	$SudoOrNotSudo ${RUN};
+            exit 11;
+        else
     		echo &quot;J on ${box}:RC=10, card is already used&quot;;
         	exit 10;
-        else     $SudoOrNotSudo ${RUN}
         fi
 EOF
 echo &quot;apres le remote oc-reset RC_RUN is : $RC_RUN&quot;
@@ -796,18 +799,18 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
     echo &quot;a_action_int=    \$a_action_int&quot;
             if [ \$r_action_int == 0 ]; then
             	echo &quot;Can&apos;t find requested action!&quot;;
-                exit 10;
+                exit 20;
             	if [ \$a_action_int == 0 ]; then
             	echo &quot;Can&apos;t find actual action!;&quot;
-            	exit 11;
+            	exit 21;
             	fi
         	fi
     if [ &quot;\${a_action_int}&quot; == &quot;\${r_action_int}&quot; ]; then
     	echo &quot;actions match&quot;;
-        exit 0;
+        exit 30;
     else
     	echo &quot;actions do NOT match =&gt; KO!&quot;;
-        exit 1;
+        exit 31;
     fi
 EOF
 
