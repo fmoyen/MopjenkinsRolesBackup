@@ -738,16 +738,19 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_RUN=$?
     $SudoOrNotSudo which oc-reset
     $SudoOrNotSudo oc-reset -V
     $SudoOrNotSudo oc-reset -C $cardid
-    echo &quot;J on ${box}:RC after oc-reset is : $?&quot;
-        if [ ! $? == 10 ]; then
-        	$SudoOrNotSudo ${RUN};
-            exit 11;
-        else
-    		echo &quot;J on ${box}:RC=10, card is already used&quot;;
+    RC_OCR=\$?
+    echo &quot;J on ${box}:RC after oc-reset is : \$RC_OCR&quot;
+        if [ \$RC_OCR == 10 ]; then
+            echo &quot;J on ${box}:RC=10, card is already used&quot;;
         	exit 10;
+        else
+    		$SudoOrNotSudo ${RUN};
         fi
 EOF
 echo &quot;apres le remote oc-reset RC_RUN is : $RC_RUN&quot;
+if [ $RC_RUN == 10 ]; then
+        	die 100 &quot;OC-RESET step return code indicates FAILURE RC = $RC_RUN (`date`) =&gt; exit UNSTABLE&quot;
+fi
 
 
 #------------------------------------------------------------------------------------------------------------------------------
