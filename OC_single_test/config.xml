@@ -723,6 +723,9 @@ echo;echo &quot;****************************************************************
 echo &quot;J: Executing Test: $SudoOrNotSudo ${RUN}&quot;
 echo &quot;   on $box (`date`)&quot;
 
+echo &quot;sleep 10 pour permettre de lancer le oc-reset et tester le exit 10&quot;
+sleep 10
+
 RC_RUN=0
 ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_RUN=$?
 	export TERM=xterm
@@ -740,6 +743,8 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_RUN=$?
         exit 10;
     $SudoOrNotSudo ${RUN}
 EOF
+echo &quot;apres le remote oc-reset RC_RUN is : $RC_RUN&quot;
+
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Updating remote Power server local logs
