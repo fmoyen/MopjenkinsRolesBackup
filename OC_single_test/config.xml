@@ -741,6 +741,7 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_RUN=$?
         if [ $? == 10 ]; then
     	echo &quot;card is already used&quot;;
         exit 10;
+        fi
     $SudoOrNotSudo ${RUN}
 EOF
 echo &quot;apres le remote oc-reset RC_RUN is : $RC_RUN&quot;
