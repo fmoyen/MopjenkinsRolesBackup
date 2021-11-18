@@ -86,7 +86,7 @@ CARDS=(OC-AD9V3 OC-AD9H3 OC-AD9H7)</description>
         <hudson.model.BooleanParameterDefinition>
           <name>USE_OC_UTILS_CHECKOUT</name>
           <description>To allow usage of a different git level of oc-utils</description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>OC_UTILS_COMMIT</name>
