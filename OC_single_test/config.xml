@@ -86,7 +86,7 @@ CARDS=(OC-AD9V3 OC-AD9H3 OC-AD9H7)</description>
         <hudson.model.BooleanParameterDefinition>
           <name>USE_OC_UTILS_CHECKOUT</name>
           <description>To allow usage of a different git level of oc-utils</description>
-          <defaultValue>true</defaultValue>
+          <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>OC_UTILS_COMMIT</name>
@@ -694,7 +694,7 @@ echo &quot;J: Git cloning oc-Utils tools into $box:/home/$HWUser...&quot;
 echo &quot;  (oc-flash-script.sh used by command `echo $RUN | cut -d&apos; &apos; -f1` )&quot;
 ssh ${HWUser}@${box} rm -rf oc-utils
 echo &quot;echo OCUtils URL = $OCUTILS_URL&quot;
-echo &quot;Running : ${HWUser}@${box} git clone -b $OCUTILS_BRANCH $OCUTILS_URL oc-utils&quot;
+echo &quot;Running : ${HWUser}@${box} : git clone -b $OCUTILS_BRANCH $OCUTILS_URL oc-utils&quot;
 ssh ${HWUser}@${box} git clone -b $OCUTILS_BRANCH $OCUTILS_URL oc-utils
 
 #AC: use of a previous branch
@@ -723,8 +723,8 @@ echo;echo &quot;****************************************************************
 echo &quot;J: Executing Test: $SudoOrNotSudo ${RUN}&quot;
 echo &quot;   on $box (`date`)&quot;
 
-echo &quot;sleep 5 pour permettre de lancer le oc-reset et tester le exit 10&quot;
-sleep 5
+#echo &quot;sleep 5 pour permettre de lancer le oc-reset et tester le exit 10&quot;
+#sleep 5
 
 RC_RUN=0
 ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_RUN=$?
@@ -779,7 +779,7 @@ cd -
 echo &quot;J: searching for existing action on $box (`date`) for card ${CRD} on position (-C) $cardid&quot;
 
 RC_ACT_CHECK=0
-RMT_RC_ACT_CHECK=0
+#RMT_RC_ACT_CHECK=0
 ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
 	pwd
     cd ${TARGET_DIR}/
@@ -810,7 +810,7 @@ ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_ACT_CHECK=$?
         	fi
     if [ &quot;\${a_action_int}&quot; == &quot;\${r_action_int}&quot; ]; then
     	echo &quot;actions match&quot;;
-        exit 30;
+        exit 0;
     else
     	echo &quot;actions do NOT match =&gt; KO!&quot;;
         exit 31;
@@ -825,7 +825,7 @@ echo &quot;J: Checking Action match and job RUN return codes (`date`)...&quot;
 echo
 
 echo &quot;RC_ACT_CHECK=$RC_ACT_CHECK&quot;
-echo &quot;RMT_RC_ACT_CHECK=$RMT_RC_ACT_CHECK&quot;
+#echo &quot;RMT_RC_ACT_CHECK=$RMT_RC_ACT_CHECK&quot;
 
 if [ $RC_ACT_CHECK -eq 0 ]; then
   mopIMGGoodDir=${mopIMGRootDir}/${CRD}/${CRD}_test_OK
