@@ -131,6 +131,11 @@ Eg: OC-AD9H3xxxxx.bin provided =&gt; an OC-AD9H3 card will be tested</descriptio
           <description>Provide the PR code of the file you&apos;re testing, to avoid collecting it into the file name.</description>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>SANITY_RESET</name>
+          <description>Request a sanity reset before using the card</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.4">
@@ -500,13 +505,15 @@ for loop in `seq 1 $maxloop`;do
     
     find_loop=0
     max_find_loops=5
-    while [ $i -le $max_find_loops ]
+    while [ $find_loop -le $max_find_loops ]
     do
-    	found=0;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} &gt; /dev/null 2&gt;&amp;1 ||found=$?
-    	if [ found eq 0];then
-        	sleep 10
+    	echo &quot;     -&gt; $find_loop/$max_find_loops find card loop:&quot;
+        echo &quot;&quot;
+        found=0;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} &gt; /dev/null 2&gt;&amp;1 ||found=$?
+    	if [ found eq 0 ];then
             ((find_loop++))
-            echo &quot;     -&gt; $find_loop/$max_find_loops loop: nocard found by $find_card in $boxwe try another time ...&quot;;
+            echo &quot;     -&gt; $find_loop/$max_find_loops loop: nocard found by $find_card in $boxwe try another time in 10 secondes...&quot;;
+			sleep 10
         else break
         fi
     done
@@ -738,30 +745,34 @@ echo &quot;   on $box (`date`)&quot;
 #echo &quot;sleep 5 pour permettre de lancer le oc-reset et tester le exit 10&quot;
 #sleep 5
 
-RC_RUN=0
-ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_RUN=$?
-	export TERM=xterm
-	cd ${TARGET_DIR}
-    #AC
-    make software
-	set -f
-    ulimit -c unlimited               # limit core dumps
-    echo &quot;J on ${box}: Resetting card #$cardid&quot;
-    $SudoOrNotSudo which oc-reset
-    $SudoOrNotSudo oc-reset -V
-    $SudoOrNotSudo oc-reset -C $cardid
-    RC_OCR=\$?
-    echo &quot;J on ${box}:RC after oc-reset is : \$RC_OCR&quot;
-        if [ \$RC_OCR == 10 ]; then
-            echo &quot;J on ${box}:RC=10, card is already used&quot;;
-        	exit 10;
-        else
-    		$SudoOrNotSudo ${RUN};
-        fi
-EOF
-echo &quot;apres le remote oc-reset RC_RUN is : $RC_RUN&quot;
-if [ $RC_RUN == 10 ]; then
-        	die 100 &quot;OC-RESET step return code indicates FAILURE RC = $RC_RUN (`date`) =&gt; exit UNSTABLE&quot;
+if [ &quot;$SANITY_RESET&quot; == &quot;true&quot; ]; then
+	RC_RUN=0
+	ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_RUN=$?
+		export TERM=xterm
+		cd ${TARGET_DIR}
+	    #AC
+	    make software
+		set -f
+	    ulimit -c unlimited               # limit core dumps
+    	echo &quot;J on ${box}: Resetting card #$cardid&quot;
+    	$SudoOrNotSudo which oc-reset
+	    $SudoOrNotSudo oc-reset -V
+	    $SudoOrNotSudo oc-reset -C $cardid
+	    RC_OCR=\$?
+	    echo &quot;J on ${box}:RC after oc-reset is : \$RC_OCR&quot;
+	        if [ \$RC_OCR == 10 ]; then
+	            echo &quot;J on ${box}:RC=10, card is already used&quot;;
+	        	exit 10;
+	        else
+	    		$SudoOrNotSudo ${RUN};
+	        fi
+	EOF
+	echo &quot;apres le remote oc-reset RC_RUN is : $RC_RUN&quot;
+	if [ $RC_RUN == 10 ]; then
+	        	die 100 &quot;OC-RESET step return code indicates FAILURE RC = $RC_RUN (`date`) =&gt; exit UNSTABLE&quot;
+	fi
+
+else echo &quot;J : NO SANITY RESET REQUESTED: bypassing oc-reset step&quot;
 fi
 
 
