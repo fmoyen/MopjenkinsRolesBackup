@@ -493,11 +493,23 @@ for loop in `seq 1 $maxloop`;do
     # Previous line doesn&apos;t provide version, and following generates errors, but at least we can check the version
     echo &quot;Oc_find_card version is :&quot;;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -V
     
-    #found=0;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} &gt; /dev/null 2&gt;&amp;1 ||found=$?
-    found=0;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} &gt; /dev/null 2&gt;&amp;1 ||found=$?
+    ## COMMAND REPLACED BY LOOP : found=0;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} &gt; /dev/null 2&gt;&amp;1 ||found=$?
     # ($find_card gives the number of found cards inside $?)
     # we use $find_card without the -v option. Be careful that any modification of oc_find_card report affects this step
     # make sure oc_find_card only report the cards numbers.
+    
+    find_loop=0
+    max_find_loops=5
+    while [ $i -le $max_find_loops ]
+    do
+    	found=0;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} &gt; /dev/null 2&gt;&amp;1 ||found=$?
+    	if [ found eq 0];then
+        	sleep 10
+            ((find_loop++))
+            echo &quot;     -&gt; $find_loop/$max_find_loops loop: nocard found by $find_card in $boxwe try another time ...&quot;;
+        else break
+        fi
+    done
     
     if [ $found -ne 0 ];then
       cards=`ssh -ttq ${HWUser}@${box} &quot;/home/${HWUser}/$find_card -A ${CRD} 2&gt;/dev/null&quot; | head -n1`   
