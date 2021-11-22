@@ -503,14 +503,14 @@ for loop in `seq 1 $maxloop`;do
     # we use $find_card without the -v option. Be careful that any modification of oc_find_card report affects this step
     # make sure oc_find_card only report the cards numbers.
     
-    find_loop=0
-    max_find_loops=5
+    find_loop=1
+    max_find_loops=3
     while [ $find_loop -le $max_find_loops ]
     do
-    	echo &quot;     -&gt; $find_loop/$max_find_loops find card loop:&quot;
+    	echo &quot;     -&gt; Find card loop to allow a card to be in reset when we check:&quot;
         echo &quot;&quot;
         found=0;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} &gt; /dev/null 2&gt;&amp;1 ||found=$?
-    	if [ found eq 0 ];then
+    	if [ $found -eq 0 ];then
             ((find_loop++))
             echo &quot;     -&gt; $find_loop/$max_find_loops loop: nocard found by $find_card in $boxwe try another time in 10 secondes...&quot;;
 			sleep 10
