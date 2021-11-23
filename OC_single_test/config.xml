@@ -740,7 +740,30 @@ if [ &quot;$SANITY_RESET&quot; == &quot;true&quot; ]; then
     echo;echo &quot;***************************************************************************************&quot;
     echo &quot;J: Executing    $SudoOrNotSudo oc-reset -C $cardid&quot;
     echo &quot;   on $box (`date`)&quot;
+    resetloop=1
+    maxresetloop=3
+    while [ $resetloop -le $maxresetloop ]
+    do
+        echo;echo &quot;*************************************************&quot;
+        echo &quot;J: RESET LOOP $loop/$maxresetloop (`date`)&quot;
+        RC_SAN_OCR=0
 
+            ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_SAN_OCR=$?
+            export TERM=xterm
+            echo &quot;J remote on ${box}: Resetting card #$cardid&quot;
+            $SudoOrNotSudo which oc-reset
+            $SudoOrNotSudo oc-reset -V
+            $SudoOrNotSudo oc-reset -C $cardid
+EOF
+        
+        if [ $RC_SAN_OCR -ne 10 ]; then
+            break
+        else
+            ((resetloop++))
+            echo &quot;     -&gt; $resetloop/$maxresetloop loop: card $cardid was locked =&gt; try another time in 10 seconds...&quot;;
+            sleep 10
+        fi
+    done
 
 else
     echo  &quot;J: No Sanity Check required by user&quot;
@@ -760,12 +783,13 @@ RC_RUN=0
 	    make software
 		set -f
 	    ulimit -c unlimited               # limit core dumps
-   		$SudoOrNotSudo ${RUN};
-	EOF
+   		$SudoOrNotSudo ${RUN}
+EOF
+echo
 echo &quot;Apres l&apos;étape de test la variable RC_RUN vaut : $RC_RUN&quot;
-
+echo
 #------------------------------------------------------------------------------------------------------------------------------
-# Updating remote Power server local logs
+echo &quot;Updating remote Power server local logs&quot;
 ssh ${HWUser}@${box} &quot;echo Exit: $JOB_NAME RC = $RC_RUN at:\  &gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;date                                    &gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;echo ------ EXIT -----------------------&gt;&gt; jenkins.log&quot;
@@ -774,7 +798,8 @@ if [ $RC_RUN -ne 0 ]; then
         	die 100 &quot;RUN step return code indicates FAILURE RC = $RC_RUN (`date`) =&gt; exit UNSTABLE&quot;
 fi
 
-
+echo;echo &quot;***************************************************************************************&quot;
+echo &quot;J: Checking tested ACTION was the one we expected&quot;
 #------------------------------------------------------------------------------------------------------------------------------
 #Knowing what the ACT should be, we check if the hardware contains this action
 # be careful in NO_FLASH mode it will depend on existing action
@@ -785,7 +810,7 @@ cd oc-accel/actions/$ACT/
 ls -al
 echo &quot;J: looking for requested action&quot;
 loc_requested_action=$ACT
-# the followning one is when we have built an image
+# the following one is when we have built an image
 # loc_requested_action=$(grep -r &quot;define ACTION_TYPE&quot; *| awk &apos;{print $NF}&apos;)
 
 echo &quot;J: Expected action ID is:         $loc_requested_action&quot;
