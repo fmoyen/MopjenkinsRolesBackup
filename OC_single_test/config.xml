@@ -860,7 +860,7 @@ if [ $RC_ACT_CHECK -eq 0 ]; then
   echo &quot;ACTION MATCH return code is good&quot;
   else echo &quot;ACTION DO NOT MATCH ==&gt;&gt;&gt; to do : deal with the cleaning to come&quot;
   fi
-
+fi
 #------------------------------------------------------------------------------------------------------------------------------
 # Do Clean-up work: $TARGET_DIR on the $box, and image files at MOPJENKINS site
 
