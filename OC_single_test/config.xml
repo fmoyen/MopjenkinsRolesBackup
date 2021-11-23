@@ -375,7 +375,7 @@ echo &quot;J: Searching for the card name in the image file name ($IMGFileName).
 
 for CRD in &quot;${SortedCARDSList[@]}&quot;;do
   if [[ &quot;$IMGFileName&quot; =~ &quot;$CRD&quot; ]];then echo &quot;  -&gt; Found card=$CRD for image=$IMGFileName size=$size&quot;;break;fi
-  # ici il faut tester si on &quot;oc&quot; en debut de fichier ET à partir de Oc-CARD si on a CARD
+  # ici il faut tester si on voit &quot;oc&quot; en debut de fichier ET à partir de Oc-CARD si on a CARD
   # if [[ &quot;$IMGFileName&quot; =~ &quot;oc&quot; ]];then echo &quot;  -&gt; Found card=$CRD for image=$IMGFileName size=$size&quot;;break;fi
   if [ $CRD == ${SortedCARDSList[*]: -1} ];then die 100 &quot;  -&gt; Cannot find card for image=$IMGFileName in cards=${CARDSList[*]}&quot;;fi
 done
@@ -734,6 +734,39 @@ echo &quot;J: Building the oc-utils software on $box in /home/$HWUser/oc-utils..
 echo &quot; oc-utils is compiled locally to prevent over-writing the server default config (/lib/capi-utils preserved)&quot;
 ssh ${HWUser}@${box} make -C /home/$HWUser/oc-utils
 
+#------------------------------------------------------------------------------------------------------------------------------
+# Execute a sanity oc-reset on card $cardid if required on the $box
+if [ &quot;$SANITY_RESET&quot; == &quot;true&quot; ]; then
+    echo;echo &quot;***************************************************************************************&quot;
+    echo &quot;J: Executing    $SudoOrNotSudo oc-reset -C $cardid&quot;
+    echo &quot;   on $box (`date`)&quot;
+
+    resetloop=1
+    maxresetloop=3
+    while [ $resetloop -le $maxresetloop ]
+    do
+        echo;echo &quot;*************************************************&quot;
+        echo &quot;J: RESET LOOP $loop/$maxresetloop (`date`)&quot;
+        RC_SAN_OCR=0
+        ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_SAN_OCR=$?
+            export TERM=xterm
+    	   echo &quot;J remote on ${box}: Resetting card #$cardid&quot;
+    	   $SudoOrNotSudo which oc-reset
+	       $SudoOrNotSudo oc-reset -V
+	       $SudoOrNotSudo oc-reset -C $cardid
+	    EOF
+        
+        if [ $RC_SAN_OCR -ne 10 ]; then
+            break
+        else
+            ((resetloop++))
+            echo &quot;     -&gt; $resetloop/$maxresetloop loop: card $cardid was locked =&gt; try another time in 10 seconds...&quot;;
+            sleep 10
+        fi
+    done
+else
+    echo  &quot;J: No Sanity Check required by user&quot;
+fi    
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Execute the $RUN command on the $box
@@ -741,12 +774,7 @@ ssh ${HWUser}@${box} make -C /home/$HWUser/oc-utils
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Executing Test: $SudoOrNotSudo ${RUN}&quot;
 echo &quot;   on $box (`date`)&quot;
-
-#echo &quot;sleep 5 pour permettre de lancer le oc-reset et tester le exit 10&quot;
-#sleep 5
-
-if [ &quot;$SANITY_RESET&quot; == &quot;true&quot; ]; then
-	RC_RUN=0
+RC_RUN=0
 	ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_RUN=$?
 		export TERM=xterm
 		cd ${TARGET_DIR}
@@ -758,29 +786,19 @@ if [ &quot;$SANITY_RESET&quot; == &quot;true&quot; ]; then
     	$SudoOrNotSudo which oc-reset
 	    $SudoOrNotSudo oc-reset -V
 	    $SudoOrNotSudo oc-reset -C $cardid
-	    RC_OCR=\$?
-	    echo &quot;J on ${box}:RC after oc-reset is : \$RC_OCR&quot;
-	        if [ \$RC_OCR == 10 ]; then
-	            echo &quot;J on ${box}:RC=10, card is already used&quot;;
-	        	exit 10;
-	        else
-	    		$SudoOrNotSudo ${RUN};
-	        fi
+   		$SudoOrNotSudo ${RUN};
 	EOF
-	echo &quot;apres le remote oc-reset RC_RUN is : $RC_RUN&quot;
-	if [ $RC_RUN == 10 ]; then
-	        	die 100 &quot;OC-RESET step return code indicates FAILURE RC = $RC_RUN (`date`) =&gt; exit UNSTABLE&quot;
-	fi
-
-else echo &quot;J : NO SANITY RESET REQUESTED: bypassing oc-reset step&quot;
-fi
-
+echo &quot;apres le remote oc-reset RC_RUN is : $RC_RUN&quot;
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Updating remote Power server local logs
 ssh ${HWUser}@${box} &quot;echo Exit: $JOB_NAME RC = $RC_RUN at:\  &gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;date                                    &gt;&gt; jenkins.log&quot;
 ssh ${HWUser}@${box} &quot;echo ------ EXIT -----------------------&gt;&gt; jenkins.log&quot;
+
+if [ $RC_RUN -ne 0 ]; then
+        	die 100 &quot;RUN step return code indicates FAILURE RC = $RC_RUN (`date`) =&gt; exit UNSTABLE&quot;
+fi
 
 
 #------------------------------------------------------------------------------------------------------------------------------
@@ -844,29 +862,29 @@ EOF
 # CHECKING Return codes, to check tested action is the proper one
 
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Checking Action match and job RUN return codes (`date`)...&quot;
+echo &quot;J: SUMMARIZING return codes (`date`)...&quot;
 echo
 
+echo &quot;RC_RUN=$RC_RUN&quot;
 echo &quot;RC_ACT_CHECK=$RC_ACT_CHECK&quot;
-#echo &quot;RMT_RC_ACT_CHECK=$RMT_RC_ACT_CHECK&quot;
 
-if [ $RC_ACT_CHECK -eq 0 ]; then
+if [ $RC_RUN -eq 0 ]; then
   mopIMGGoodDir=${mopIMGRootDir}/${CRD}/${CRD}_test_OK
   #if mkdir $mopIMGGoodDir 2&gt;/dev/null; then chmod g+w $mopIMGGoodDir; fi
   
   echo &quot;Job return code is good&quot;
   
   if [ $RC_ACT_CHECK -eq 0 ]; then
-  echo &quot;ACTION MATCH return code is good&quot;
-  else echo &quot;ACTION DO NOT MATCH ==&gt;&gt;&gt; to do : deal with the cleaning to come&quot;
+    echo &quot;ACTION MATCH return code is good&quot;
+    else echo &quot;ACTION DO NOT MATCH !&quot;
   fi
-fi
-#------------------------------------------------------------------------------------------------------------------------------
-# Do Clean-up work: $TARGET_DIR on the $box, and image files at MOPJENKINS site
 
-echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Cleaning step if required (`date`)...&quot;
-echo
+    #------------------------------------------------------------------------------------------------------------------------------
+    # Do Clean-up work: $TARGET_DIR on the $box, and image files at MOPJENKINS site
+
+    echo;echo &quot;***************************************************************************************&quot;
+    echo &quot;J: Cleaning step if required (`date`)...&quot;
+    echo
 
 
     if [ &quot;$CLEAN&quot; == &quot;false&quot; ]; then
@@ -883,28 +901,28 @@ echo
   		ssh ${HWUser}@${box} rm -rf ${TARGET_DIR};
     fi
 
-# we don&apos;t want to manage files as we used it just to pick up the card name $CRD
-if [ &quot;$FLASH&quot; == &quot;true&quot; ]; then  
+    # we don&apos;t want to manage files as we used it just to pick up the card name $CRD
+    if [ &quot;$FLASH&quot; == &quot;true&quot; ]; then  
 
-  if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
-    echo;echo &quot;+ Renaming primary/secondary files to good.* on ${box}&quot;
-    echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGPrimaryName&quot;
-    ssh ${HWUser}@${box} &quot;mv \`ls $ExecutorIMGRootDir/$CRD/${IMGPrimaryName}*\` $ExecutorIMGRootDir/$CRD/good.$IMGPrimaryName&quot;
-    echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGSecondaryName&quot;
-    ssh ${HWUser}@${box} &quot;mv \`ls $ExecutorIMGRootDir/$CRD/${IMGSecondaryName}*\` $ExecutorIMGRootDir/$CRD/good.$IMGSecondaryName&quot;
+    if [ &quot;$SPI8&quot; -eq &quot;1&quot; ];then
+        echo;echo &quot;+ Renaming primary/secondary files to good.* on ${box}&quot;
+        echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGPrimaryName&quot;
+        ssh ${HWUser}@${box} &quot;mv \`ls $ExecutorIMGRootDir/$CRD/${IMGPrimaryName}*\` $ExecutorIMGRootDir/$CRD/good.$IMGPrimaryName&quot;
+        echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGSecondaryName&quot;
+        ssh ${HWUser}@${box} &quot;mv \`ls $ExecutorIMGRootDir/$CRD/${IMGSecondaryName}*\` $ExecutorIMGRootDir/$CRD/good.$IMGSecondaryName&quot;
 
-    MoveToDir -c $CRD -b &quot;$mopIMGDir/$IMGPrimaryName $mopIMGDir/$IMGSecondaryName&quot; -B &quot;$mopIMGDir/$IMGBitName&quot; -d $mopIMGGoodDir -s &quot;$IMGServers&quot; -u $HWUser
+        MoveToDir -c $CRD -b &quot;$mopIMGDir/$IMGPrimaryName $mopIMGDir/$IMGSecondaryName&quot; -B &quot;$mopIMGDir/$IMGBitName&quot; -d $mopIMGGoodDir -s &quot;$IMGServers&quot; -u $HWUser
 
-  else
-    echo;echo &quot;+ Renaming binary file to good.* on ${box}&quot;
-    echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGFileName&quot;
-    ssh ${HWUser}@${box} &quot;mv \`ls $ExecutorIMGRootDir/$CRD/${IMGFileName}*\` $ExecutorIMGRootDir/$CRD/good.$IMGFileName&quot;
+    else
+        echo;echo &quot;+ Renaming binary file to good.* on ${box}&quot;
+        echo &quot;  -&gt; $ExecutorIMGRootDir/$CRD/good.$IMGFileName&quot;
+        ssh ${HWUser}@${box} &quot;mv \`ls $ExecutorIMGRootDir/$CRD/${IMGFileName}*\` $ExecutorIMGRootDir/$CRD/good.$IMGFileName&quot;
 
-    MoveToDir -c $CRD -b &quot;$mopIMGDir/$IMGFileName&quot; -B &quot;$mopIMGDir/$IMGBitName&quot; -d $mopIMGGoodDir -s &quot;$IMGServers&quot; -u $HWUser
+        MoveToDir -c $CRD -b &quot;$mopIMGDir/$IMGFileName&quot; -B &quot;$mopIMGDir/$IMGBitName&quot; -d $mopIMGGoodDir -s &quot;$IMGServers&quot; -u $HWUser
 
-  fi #end of if $SPI8&quot; -eq &quot;1&quot;
+    fi #end of if $SPI8&quot; -eq &quot;1&quot;
   
-fi   #end of if FLASH=true
+    fi   #end of if FLASH=true
   echo
   
 else 
