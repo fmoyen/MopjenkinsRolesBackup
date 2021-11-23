@@ -504,16 +504,16 @@ for loop in `seq 1 $maxloop`;do
     # make sure oc_find_card only report the cards numbers.
     
     find_loop=1
-    max_find_loops=3
+    max_find_loops=2
     while [ $find_loop -le $max_find_loops ]
     do
-    	echo &quot;     -&gt; Find card loop to allow a card to be in reset when we check:&quot;
+    	echo &quot;  -&gt; Find card loop to allow a card to be in reset when we check:&quot;
         echo &quot;&quot;
         found=0;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} &gt; /dev/null 2&gt;&amp;1 ||found=$?
     	if [ $found -eq 0 ];then
-            ((find_loop++))
             echo &quot;     -&gt; $find_loop/$max_find_loops loop: nocard found by $find_card in $boxwe try another time in 10 secondes...&quot;;
-			sleep 10
+            ((find_loop++))
+            sleep 10
         else break
         fi
     done
@@ -741,29 +741,7 @@ if [ &quot;$SANITY_RESET&quot; == &quot;true&quot; ]; then
     echo &quot;J: Executing    $SudoOrNotSudo oc-reset -C $cardid&quot;
     echo &quot;   on $box (`date`)&quot;
 
-    resetloop=1
-    maxresetloop=3
-    while [ $resetloop -le $maxresetloop ]
-    do
-        echo;echo &quot;*************************************************&quot;
-        echo &quot;J: RESET LOOP $loop/$maxresetloop (`date`)&quot;
-        RC_SAN_OCR=0
-        ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_SAN_OCR=$?
-            export TERM=xterm
-    	   echo &quot;J remote on ${box}: Resetting card #$cardid&quot;
-    	   $SudoOrNotSudo which oc-reset
-	       $SudoOrNotSudo oc-reset -V
-	       $SudoOrNotSudo oc-reset -C $cardid
-	    EOF
-        
-        if [ $RC_SAN_OCR -ne 10 ]; then
-            break
-        else
-            ((resetloop++))
-            echo &quot;     -&gt; $resetloop/$maxresetloop loop: card $cardid was locked =&gt; try another time in 10 seconds...&quot;;
-            sleep 10
-        fi
-    done
+
 else
     echo  &quot;J: No Sanity Check required by user&quot;
 fi    
@@ -782,13 +760,9 @@ RC_RUN=0
 	    make software
 		set -f
 	    ulimit -c unlimited               # limit core dumps
-    	echo &quot;J on ${box}: Resetting card #$cardid&quot;
-    	$SudoOrNotSudo which oc-reset
-	    $SudoOrNotSudo oc-reset -V
-	    $SudoOrNotSudo oc-reset -C $cardid
    		$SudoOrNotSudo ${RUN};
 	EOF
-echo &quot;apres le remote oc-reset RC_RUN is : $RC_RUN&quot;
+echo &quot;Apres l&apos;étape de test la variable RC_RUN vaut : $RC_RUN&quot;
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Updating remote Power server local logs
