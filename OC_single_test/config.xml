@@ -774,6 +774,7 @@ sleep 5
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Execute the $RUN command on the $box
+# NOTE : there is a slight chance that card is locked.
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Executing Test: $SudoOrNotSudo ${RUN}&quot;
