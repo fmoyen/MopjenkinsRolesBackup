@@ -768,6 +768,9 @@ EOF
 else
     echo  &quot;J: No Sanity Check required by user&quot;
 fi    
+echo &quot;sleep added to allow reseting card at this level&quot;
+echo &quot;.............&quot;
+sleep 5
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Execute the $RUN command on the $box
