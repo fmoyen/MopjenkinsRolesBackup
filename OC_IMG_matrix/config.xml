@@ -215,6 +215,14 @@ hdclp026.boeblingen.de.ibm.com</defaultValue>
           <description>Enable to launch a base and action separate build, and get a bin of the combination</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>SANITY_RESET</name>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>SANITY_RELOAD</name>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.4">
@@ -1505,17 +1513,31 @@ for loop in `seq 1 $maxloop`;do
     # Previous line doesn&apos;t provide version, and follwing generates errors, but at least we can check the version
     echo &quot;Oc_find_card version is :&quot;;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -V
     
+    ## COMMAND REPLACED BY LOOP :
     #found=0;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} &gt; /dev/null 2&gt;&amp;1 ||found=$?
-    found=0;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} &gt; /dev/null 2&gt;&amp;1 ||found=$?
     # ($find_card gives the number of found cards inside $?)
     # we use $find_card without the -v option. Be careful that any modification of oc_find_card report affects this step
     # make sure oc_find_card only report the cards numbers.
   
+    
+    find_loop=1
+    max_find_loops=2
+    while [ $find_loop -le $max_find_loops ]
+    do
+    	echo &quot;  -&gt; Find card loop to allow a card to be in reset when we check:&quot;
+        echo &quot;&quot;
+        found=0;ssh -ttq ${HWUser}@${box} /home/${HWUser}/$find_card -A ${CRD} &gt; /dev/null 2&gt;&amp;1 ||found=$?
+    	if [ $found -eq 0 ];then
+            echo &quot;     -&gt; $find_loop/$max_find_loops loop: nocard found by $find_card in $boxwe try another time in 10 secondes...&quot;;
+            ((find_loop++))
+            sleep 10
+        else break
+        fi
+    done
     if [ $found -ne 0 ];then
-      echo -e &quot;OK: $found CARD(S) FOUND &quot;
       global_found=$((global_found+found))
       cards=`ssh -ttq ${HWUser}@${box} &quot;/home/${HWUser}/$find_card -A ${CRD} 2&gt;/dev/null&quot; | head -n1`   
-      echo &quot;(card-IDs= $cards)&quot;
+      echo -e &quot;OK: $found CARD(S) FOUND (card-IDs= $cards)&quot;
       # (head is needed because if more than 1 card, $find_card returns something like &quot;0 0&quot; and second line with &quot;Total 2 cards detected&quot;)
     else
       echo &quot;FAILED: NO CARD FOUND&quot;
@@ -1538,7 +1560,7 @@ for loop in `seq 1 $maxloop`;do
       #------------------------------------
       # no card available =&gt; try other box
       0:*)
-        for i in &quot;${TESTBOXES[@]}&quot;; do [[ $i != $box ]] &amp;&amp; new+=($i);done   # generate new test array without this bow with no card
+        for i in &quot;${TESTBOXES[@]}&quot;; do [[ $i != $box ]] &amp;&amp; new+=($i);done   # generate new test array without this box with no card
         unset TESTBOXES;TESTBOXES=(&quot;${new[@]}&quot;);unset new                   # reassign to original array name
         echo &quot;  --&gt; No $CRD card available in $box =&gt; removed from Boxes testing list, remaining list= ${TESTBOXES[@]}&quot;        
         echo &quot;  --&gt; Trying next box / loop...&quot;        
@@ -1769,22 +1791,107 @@ if [ $RC -ne 0 ]; then
   exit 100
 fi
 
+#------------------------------------------------------------------------------------------------------------------------------
+# Execute a sanity oc-reset on card $cardid if required on the $box
+if [ &quot;$SANITY_RESET&quot; == &quot;true&quot; ]; then
+    echo;echo &quot;***************************************************************************************&quot;
+    echo &quot;J: Executing    $SudoOrNotSudo oc-reset -C $cardid&quot;
+    echo &quot;   on $box (`date`)&quot;
+    resetloop=1
+    maxresetloop=3
+    while [ $resetloop -le $maxresetloop ]
+    do
+        echo;echo &quot;*************************************************&quot;
+        echo &quot;J: RESET LOOP $loop/$maxresetloop (`date`)&quot;
+        RC_SAN_OCR=0
+
+            ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_SAN_OCR=$?
+            export TERM=xterm
+            echo &quot;J remote on ${box}: Resetting card #$cardid&quot;
+            $SudoOrNotSudo which oc-reset
+            $SudoOrNotSudo oc-reset -V
+            $SudoOrNotSudo oc-reset -C $cardid
+EOF
+        
+        if [ $RC_SAN_OCR -ne 10 ]; then
+            break
+        else
+            ((resetloop++))
+            echo &quot;     -&gt; $resetloop/$maxresetloop OC-RESET loop: card $cardid was locked =&gt; try another time in 10 seconds...&quot;;
+            sleep 10
+        fi
+    done
+
+else
+    echo  &quot;J: No Sanity RESET required by user&quot;
+fi    
+
+#------------------------------------------------------------------------------------------------------------------------------
+# Execute a sanity oc-reload on card $cardid if required on the $box
+if [ &quot;$SANITY_RELOAD&quot; == &quot;true&quot; ]; then
+    echo;echo &quot;***************************************************************************************&quot;
+    echo &quot;J: Executing    $SudoOrNotSudo oc-reload -C $cardid&quot;
+    echo &quot;   on $box (`date`)&quot;
+    reloadloop=1
+    maxreloadloop=3
+    while [ $reloadloop -le $maxreloadloop ]
+    do
+        echo;echo &quot;*************************************************&quot;
+        echo &quot;J: RELOAD LOOP $loop/$maxreloadloop (`date`)&quot;
+        RC_SAN_OCRL=0
+
+            ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_SAN_OCRL=$?
+            export TERM=xterm
+            echo &quot;J remote on ${box}: Resetting card #$cardid&quot;
+            $SudoOrNotSudo which oc-reload
+            $SudoOrNotSudo oc-reload -V
+            $SudoOrNotSudo oc-reload -C $cardid
+EOF
+        
+        if [ $RC_SAN_OCRL -ne 10 ]; then
+            break
+        else
+            ((reloadloop++))
+            echo &quot;     -&gt; $reloadloop/$maxreloadloop OC-RELOAD loop: card $cardid was locked =&gt; try another time in 10 seconds...&quot;;
+            sleep 10
+        fi
+    done
+
+else
+    echo  &quot;J: No Sanity RELOAD required by user&quot;
+fi    
+
+
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Executing below OC-ACCEL Jenkins test on $box from ${TARGET_DIR} directory (`date`):&quot;
+echo &quot;J: Executing OC-ACCEL Jenkins test on $box from ${TARGET_DIR} directory (`date`):&quot;
 echo &quot;  -&gt; $SudoOrNotSudo ${RUN}&quot;
 echo
-echo &quot;Expected test is:         $ACT&quot;
-  
 
-RC_RUN=0;ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_RUN=$?
-	export TERM=xterm
-	cd ${TARGET_DIR}
-    pwd
-	set -f  # the set -f command disables file name generation (&quot;path name expansion&quot;), meaning &quot;*.zip&quot; stays &quot;*.zip&quot;
-    echo &quot;J: Resetting card #$cardid&quot;
-    $SudoOrNotSudo oc-reset -C $cardid
-    $SudoOrNotSudo ${RUN}
+echo &quot;Expected test is:         $ACT&quot;
+runloop=1
+maxrunloop=3
+while [ $runloop -le $maxrunloop ]
+do
+	RC_RUN=0
+	ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_RUN=$?
+		export TERM=xterm
+		cd ${TARGET_DIR}
+		set -f  # the set -f command disables file name generation (&quot;path name expansion&quot;), meaning &quot;*.zip&quot; stays &quot;*.zip&quot;
+	    ulimit -c unlimited               # limit core dumps
+	    $SudoOrNotSudo ${RUN}
 EOF
+       
+        if [ $RC_RUN -ne 10 ]; then
+            break
+        else
+            ((runloop++))
+            echo &quot;     -&gt; $runloop/$maxrunloop RUN loop: card $cardid was locked =&gt; try another time in 10 seconds...&quot;;
+            sleep 10
+        fi
+    done
+echo
+echo &quot;Apres l&apos;étape de test la variable RC_RUN vaut : $RC_RUN&quot;
+echo
 
 
 #------------------------------------------------------------------------------------------------------------------------------
