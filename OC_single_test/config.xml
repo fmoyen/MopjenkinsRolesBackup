@@ -103,37 +103,14 @@ The card is selected based on the provided file name.
 Eg: OC-AD9H3xxxxx.bin provided =&gt; an OC-AD9H3 card will be tested</description>
           <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
-        <hudson.model.ChoiceParameterDefinition>
-          <name>ACT_U</name>
-          <description>Only If previous FLASH variable is not selected, please provide the test action name to check</description>
-          <choices class="java.util.Arrays$ArrayList">
-            <a class="string-array">
-              <string>hdl_example</string>
-              <string>hdl_single_engine</string>
-              <string>hls_helloworld_512</string>
-              <string>hls_helloworld_1024</string>
-              <string>hls_memcopy_512</string>
-              <string>hls_memcopy_1024</string>
-              <string>hls_hbm_memcopy_1024</string>
-              <string>hls_image_filter</string>
-              <string>hls_decimal_mult</string>
-              <string>hls_udp_512</string>
-            </a>
-          </choices>
-        </hudson.model.ChoiceParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>PR</name>
-          <description>Partial reflow mode, requires a PR code</description>
-          <defaultValue>false</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>PRcode</name>
-          <description>Provide the PR code of the file you&apos;re testing, to avoid collecting it into the file name.</description>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>SANITY_RESET</name>
           <description>Request a sanity reset before using the card</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>SANITY_RELOAD</name>
+          <description>Request a sanity reload before using the card</description>
           <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
@@ -205,9 +182,6 @@ IMGFileName=$(basename $mopIMGFile)
 
 #Recherche automatique du nom de l&apos;action
 ACTION_LIST=&quot;hdl_example hdl_single_engine hls_helloworld_512 hls_helloworld_1024 hls_memcopy_512 hls_memcopy_1024 hls_hbm_memcopy_1024 hls_image_filter hls_decimal_mult hls_udp_512&quot;
-
-#by default action name is provided by user unless we find one into the name
-ACT=ACT_U
 
 for n in $ACTION_LIST; do
         #printf &quot;searching for $n&quot;
@@ -519,8 +493,9 @@ for loop in `seq 1 $maxloop`;do
     done
     
     if [ $found -ne 0 ];then
+
       cards=`ssh -ttq ${HWUser}@${box} &quot;/home/${HWUser}/$find_card -A ${CRD} 2&gt;/dev/null&quot; | head -n1`   
-      echo -e &quot;OK: $found CARD(S) FOUND (card-IDs= $cards)&quot;
+
       # (head is needed because if more than 1 card, $find_card returns something like &quot;0 0&quot; and second line with &quot;Total 2 cards detected&quot;)
     else
       echo &quot;FAILED: NO CARD FOUND&quot;
@@ -543,7 +518,7 @@ for loop in `seq 1 $maxloop`;do
       #------------------------------------
       # no card available =&gt; try other box
       0:*)
-        for i in &quot;${TESTBOXES[@]}&quot;; do [[ $i != $box ]] &amp;&amp; new+=($i);done   # generate new test array without unreachable box
+        for i in &quot;${TESTBOXES[@]}&quot;; do [[ $i != $box ]] &amp;&amp; new+=($i);done   # generate new test array without this box with no card
         unset TESTBOXES;TESTBOXES=(&quot;${new[@]}&quot;);unset new                   # reassign to original array name
         echo &quot;card not avail in $box =&gt; removed from Boxes testing list, remaining=${TESTBOXES[@]}&quot;        
         continue # next box or next loop (if it was the last box of the list)
@@ -766,19 +741,50 @@ EOF
     done
 
 else
-    echo  &quot;J: No Sanity Check required by user&quot;
+    echo  &quot;J: No Sanity RESET required by user&quot;
 fi    
-echo &quot;sleep added to allow reseting card at this level&quot;
-echo &quot;.............&quot;
-sleep 5
 
 #------------------------------------------------------------------------------------------------------------------------------
-# Execute the $RUN command on the $box
-# NOTE : there is a slight chance that card is locked by another process.
+# Execute a sanity oc-reload on card $cardid if required on the $box
+if [ &quot;$SANITY_RELOAD&quot; == &quot;true&quot; ]; then
+    echo;echo &quot;***************************************************************************************&quot;
+    echo &quot;J: Executing    $SudoOrNotSudo oc-reload -C $cardid&quot;
+    echo &quot;   on $box (`date`)&quot;
+    reloadloop=1
+    maxreloadloop=3
+    while [ $reloadloop -le $maxreloadloop ]
+    do
+        echo;echo &quot;*************************************************&quot;
+        echo &quot;J: RELOAD LOOP $loop/$maxreloadloop (`date`)&quot;
+        RC_SAN_OCRL=0
+
+            ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_SAN_OCRL=$?
+            export TERM=xterm
+            echo &quot;J remote on ${box}: Resetting card #$cardid&quot;
+            $SudoOrNotSudo which oc-reload
+            $SudoOrNotSudo oc-reload -V
+            $SudoOrNotSudo oc-reload -C $cardid
+EOF
+        
+        if [ $RC_SAN_OCRL -ne 10 ]; then
+            break
+        else
+            ((reloadloop++))
+            echo &quot;     -&gt; $reloadloop/$maxreloadloop OC-RELOAD loop: card $cardid was locked =&gt; try another time in 10 seconds...&quot;;
+            sleep 10
+        fi
+    done
+
+else
+    echo  &quot;J: No Sanity RELOAD required by user&quot;
+fi    
+
 
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Executing Test: $SudoOrNotSudo ${RUN}&quot;
-echo &quot;   on $box (`date`)&quot;
+echo &quot;J: Executing OC-ACCEL Jenkins test on $box from ${TARGET_DIR} directory (`date`):&quot;
+echo &quot;  -&gt; $SudoOrNotSudo ${RUN}&quot;
+echo
+echo;echo &quot;***************************************************************************************&quot;
 
 runloop=1
 maxrunloop=3
@@ -789,7 +795,7 @@ do
 		export TERM=xterm
 		cd ${TARGET_DIR}
 	    #AC
-	    make software
+	    make clean software actions
 		set -f
 	    ulimit -c unlimited               # limit core dumps
    		$SudoOrNotSudo ${RUN}
@@ -944,7 +950,7 @@ if [ $RC_RUN -eq 0 ]; then
   
 else 
   die 100 &quot;Job return code indicates FAILURE RC = $RC (`date`) =&gt; exit UNSTABLE&quot;
-fi</command>
+fi  </command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
   </builders>
