@@ -609,7 +609,7 @@ for loop in `seq 1 $maxloop`;do
 
   done # for box
   
-  sleep 2
+  sleep 5   # increased the pause, as we need to have the previous test ended before retrying
   
 done #for loop
 
