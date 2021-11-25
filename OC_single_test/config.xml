@@ -760,7 +760,7 @@ EOF
             break
         else
             ((resetloop++))
-            echo &quot;     -&gt; $resetloop/$maxresetloop loop: card $cardid was locked =&gt; try another time in 10 seconds...&quot;;
+            echo &quot;     -&gt; $resetloop/$maxresetloop OC-RESET loop: card $cardid was locked =&gt; try another time in 10 seconds...&quot;;
             sleep 10
         fi
     done
@@ -774,12 +774,17 @@ sleep 5
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Execute the $RUN command on the $box
-# NOTE : there is a slight chance that card is locked.
+# NOTE : there is a slight chance that card is locked by another process.
 
 echo;echo &quot;***************************************************************************************&quot;
 echo &quot;J: Executing Test: $SudoOrNotSudo ${RUN}&quot;
 echo &quot;   on $box (`date`)&quot;
-RC_RUN=0
+
+runloop=1
+maxrunloop=3
+while [ $runloop -le $maxrunloop ]
+do
+	RC_RUN=0
 	ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_RUN=$?
 		export TERM=xterm
 		cd ${TARGET_DIR}
@@ -789,6 +794,15 @@ RC_RUN=0
 	    ulimit -c unlimited               # limit core dumps
    		$SudoOrNotSudo ${RUN}
 EOF
+        
+        if [ $RC_RUN -ne 10 ]; then
+            break
+        else
+            ((runloop++))
+            echo &quot;     -&gt; $runloop/$maxrunloop RUN loop: card $cardid was locked =&gt; try another time in 10 seconds...&quot;;
+            sleep 10
+        fi
+    done
 echo
 echo &quot;Apres l&apos;étape de test la variable RC_RUN vaut : $RC_RUN&quot;
 echo
