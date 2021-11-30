@@ -713,7 +713,7 @@ ssh ${HWUser}@${box} make -C /home/$HWUser/oc-utils
 # Execute a sanity oc-reset on card $cardid if required on the $box
 if [ &quot;$SANITY_RESET&quot; == &quot;true&quot; ]; then
     echo;echo &quot;***************************************************************************************&quot;
-    echo &quot;J: Executing    $SudoOrNotSudo oc-reset -C $cardid&quot;
+    echo &quot;J: Executing    $SudoOrNotSudo /home/$HWUser/oc-utils/oc-reset -C $cardid&quot;
     echo &quot;   on $box (`date`)&quot;
     resetloop=1
     maxresetloop=3
@@ -726,9 +726,9 @@ if [ &quot;$SANITY_RESET&quot; == &quot;true&quot; ]; then
             ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_SAN_OCR=$?
             export TERM=xterm
             echo &quot;J remote on ${box}: Resetting card #$cardid&quot;
-            $SudoOrNotSudo which oc-reset
-            $SudoOrNotSudo oc-reset -V
-            $SudoOrNotSudo oc-reset -C $cardid
+            #$SudoOrNotSudo which oc-reset
+            $SudoOrNotSudo /home/$HWUser/oc-utils/oc-reset -V
+            $SudoOrNotSudo /home/$HWUser/oc-utils/oc-reset -C $cardid
 EOF
         
         if [ $RC_SAN_OCR -ne 10 ]; then
@@ -748,7 +748,7 @@ fi
 # Execute a sanity oc-reload on card $cardid if required on the $box
 if [ &quot;$SANITY_RELOAD&quot; == &quot;true&quot; ]; then
     echo;echo &quot;***************************************************************************************&quot;
-    echo &quot;J: Executing    $SudoOrNotSudo oc-reload -C $cardid&quot;
+    echo &quot;J: Executing    $SudoOrNotSudo /home/$HWUser/oc-utils/oc-reload -C $cardid&quot;
     echo &quot;   on $box (`date`)&quot;
     reloadloop=1
     maxreloadloop=3
@@ -761,9 +761,9 @@ if [ &quot;$SANITY_RELOAD&quot; == &quot;true&quot; ]; then
             ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_SAN_OCRL=$?
             export TERM=xterm
             echo &quot;J remote on ${box}: Resetting card #$cardid&quot;
-            $SudoOrNotSudo which oc-reload
-            $SudoOrNotSudo oc-reload -V
-            $SudoOrNotSudo oc-reload -C $cardid
+            #$SudoOrNotSudo which oc-reload
+            $SudoOrNotSudo /home/$HWUser/oc-utils/oc-reload -V
+            $SudoOrNotSudo /home/$HWUser/oc-utils/oc-reload -C $cardid
 EOF
         
         if [ $RC_SAN_OCRL -ne 10 ]; then
@@ -950,7 +950,7 @@ if [ $RC_RUN -eq 0 ]; then
   
 else 
   die 100 &quot;Job return code indicates FAILURE RC = $RC (`date`) =&gt; exit UNSTABLE&quot;
-fi  </command>
+fi  /oc-relo</command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
   </builders>
