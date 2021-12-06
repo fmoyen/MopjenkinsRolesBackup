@@ -297,7 +297,6 @@ H 22-23/1 * * *</spec>
         <string>hls_hbm_memcopy_1024</string>
         <string>hls_image_filter</string>
         <string>hls_decimal_mult</string>
-        <string>hls_udp_512</string>
         <string>test</string>
       </values>
     </hudson.matrix.TextAxis>
