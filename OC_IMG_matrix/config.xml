@@ -1243,8 +1243,8 @@ else
     
     echo &quot;J: Removing pre existing files from ${JenkinsDcpDir}&quot;    	
   	rm -rf ${JenkinsDcpDir}/*;
-    echo &quot;J: Creating a temp file : $CLOUD_BASE_cloud_building&quot;;
-    touch ${JenkinsDcpDir}/$CLOUD_BASE_cloud_building;
+    echo &quot;J: Creating a temp file : ${CLOUD_BASE}_cloud_building&quot;;
+    touch ${JenkinsDcpDir}/${CLOUD_BASE}_cloud_building;
 
 	#  bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_base&quot; || exit
   	make cloud_base
@@ -1254,8 +1254,8 @@ else
     ls ${OCACCEL_ROOT}/hardware/build/Images/
     echo &quot;J: Copying ${OCACCEL_ROOT}/hardware/build/Images/* into ${JenkinsDcpDir}&quot;
     cp ${OCACCEL_ROOT}/hardware/build/Images/* ${JenkinsDcpDir}
-    rm ${JenkinsDcpDir}/$CLOUD_BASE_cloud_building
-    touch ${JenkinsDcpDir}/$CLOUD_BASE_cloud_done
+    rm ${JenkinsDcpDir}/${CLOUD_BASE}_cloud_building
+    touch ${JenkinsDcpDir}/${CLOUD_BASE}_cloud_done
    
 
   else # case of a --non $CLOUD_BASE reference-- action (any other)
@@ -1278,8 +1278,8 @@ echo &quot;J: Waiting for Reference PR test $CLOUD_BASE to be finished&quot;
   		echo;echo &quot;*************************************************&quot;
  		echo &quot;J: LOOP $loopdone/$maxloopwaitrefdone (`date`)&quot;
     
-    	if [ ! -f ${JenkinsDcpDir}/$CLOUD_BASE_cloud_done ]; then
-        	echo &quot;J: Cloud base for $CLOUD_BASE is not finished, waiting two more minutes before recheck&quot;
+    	if [ ! -f ${JenkinsDcpDir}/${CLOUD_BASE}_cloud_done ]; then
+        	echo &quot;J: Cloud base for ${CLOUD_BASE} is not finished, waiting two more minutes before recheck&quot;
             sleep 120
         else break
 		fi
@@ -1290,8 +1290,8 @@ echo &quot;J: Waiting for Reference PR test $CLOUD_BASE to be finished&quot;
         exit 1
     fi
 
-	if [ -f ${JenkinsDcpDir}/$CLOUD_BASE_cloud_done ]; then
-           echo &quot;Cloud base for $CLOUD_BASE has finished =&gt; launching Build Action step ...&quot;
+	if [ -f ${JenkinsDcpDir}/${CLOUD_BASE}_cloud_done ]; then
+           echo &quot;Cloud base for ${CLOUD_BASE} has finished =&gt; launching Build Action step ...&quot;
     fi
         
     make cloud_action
