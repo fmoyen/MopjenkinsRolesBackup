@@ -443,19 +443,27 @@ echo;echo &quot;****************************************************************
 echo &quot;J: Do not run (abort) non-desired cases (action types, actions, cards, partial)&quot;
 
 PSKIP=0
+echo &quot;J:PSKIP initialized with 0, PARTIAL_ONLY=$PARTIAL_ONLY and CL=${CL}&quot;
 # in partial mode skip all non cloud cases
-if [ &quot;$PARTIAL_ONLY&quot; == &quot;true&quot; ] &amp;&amp; [ &quot;${CL} == &quot;nCL&quot; ];then
+if [ &quot;$ACT&quot; != &quot;test&quot; ] &amp;&amp;[ &quot;$PARTIAL_ONLY&quot; == &quot;true&quot; ] &amp;&amp; [ &quot;${CL}&quot; == &quot;nCL&quot; ];then
 	echo &quot;Skipping non cloud cases in partial mode =&gt; PSKIP=1&quot;
 	PSKIP=1
 fi
 
 # in partial mode skip Reference Cloud case
-if [ &quot;$PARTIAL_ONLY&quot; == &quot;true&quot; ] &amp;&amp; [ &quot;${CL} == &quot;CL&quot; ];then
+if [ &quot;$ACT&quot; != &quot;test&quot; ] &amp;&amp; [ &quot;$PARTIAL_ONLY&quot; == &quot;true&quot; ] &amp;&amp; [ &quot;${CL}&quot; == &quot;CL&quot; ];then
 	if [ &quot;$ACT&quot; == &quot;${CLOUD_BASE}&quot;  ]; then
     	echo &quot;Skipping Reference case in partial mode =&gt; PSKIP=1&quot;
     	PSKIP=1
     fi
-	
+fi
+    
+# in non partial mode skip partial (non ref) Cloud case
+if [ &quot;$ACT&quot; != &quot;test&quot; ] &amp;&amp; [ &quot;$PARTIAL_ONLY&quot; == &quot;false&quot; ] &amp;&amp; [ &quot;${CL}&quot; == &quot;CL&quot; ];then
+	if [ &quot;$ACT&quot; != &quot;${CLOUD_BASE}&quot;  ]; then
+    	echo &quot;Skipping partial (non Reference)case in non partial mode =&gt; PSKIP=1&quot;
+    	PSKIP=1
+    fi	
 fi
 
 
@@ -1113,7 +1121,8 @@ esac
 #==============================================================================================
 # Building image (make image/ make cloud...)
 echo &quot;J: DEBUG : var CL = $CL&quot;
-if [ &quot;$CL&quot; == &quot;nCL&quot; ] &amp;&amp; [ &quot;$PARTIAL_ONLY&quot; != &quot;true&quot; ];then
+#if [ &quot;$CL&quot; == &quot;nCL&quot; ] &amp;&amp; [ &quot;$PARTIAL_ONLY&quot; != &quot;true&quot; ];then
+if [ &quot;$CL&quot; == &quot;nCL&quot; ];then
   echo;echo &quot;****************************************************************************************&quot;
   echo &quot;J: We enter NON-CLOUD MODE&quot;
   echo;echo &quot;****************************************************************************************&quot;
