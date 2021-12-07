@@ -1116,9 +1116,8 @@ case $ACT in          # select config &amp; compile action
     
   *)
     echo &quot;J: Regular test case ==&gt; We use $CRD.$ACT.defconfig file to prepare the config ...&quot;;echo
-        echo &quot;J: ACT=*NVME* ==&gt; SIMULATOR=nosim &amp; Configuring image thanks to $CRD.$ACT.defconfig file ...&quot;;echo
-    echo &quot;export SIMULATOR=nosim&quot; &gt;&gt; snap_env.sh
-    echo &quot;J: DEBUG:  pwd provides :&quot; pwd
+    echo &quot;J: DEBUG:  pwd provides :&quot;
+    pwd
     ls -al
     echo &quot;J:DEBUG : RUNNING make -s $CRD.$ACT.defconfig&quot;
     make -s $CRD.$ACT.defconfig
