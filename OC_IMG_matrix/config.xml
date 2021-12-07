@@ -323,12 +323,6 @@ H 22-23/1 * * *</spec>
         <string>OC-BW250SOC_nCL</string>
       </values>
     </hudson.matrix.TextAxis>
-    <hudson.matrix.LabelAxis>
-      <name>label</name>
-      <values>
-        <string>X86_UBUNTU</string>
-      </values>
-    </hudson.matrix.LabelAxis>
   </axes>
   <combinationFilter>  (ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;OC-AD9V3_nCL&quot;)    ||   (    ACT!=&quot;test&quot; &amp;&amp;  (  (CRD_CL=~&quot;OC-AD9H&quot; &amp;&amp; !(ACT=~&quot;hls_memcopy_&quot;) )      ||    ( (CRD_CL=~&quot;OC-AD9V3&quot; || CRD_CL=~&quot;OC-BW250SOC&quot; ) &amp;&amp; !(ACT=~&quot;hls_hbm_memcopy_&quot;) &amp;&amp; !(ACT=~&quot;hls_udp&quot;) )        )       )</combinationFilter>
   <builders>
@@ -358,7 +352,7 @@ CRD=$(echo $CRD_CL| cut -d&apos;_&apos; -f 1)    # chars up to  first &apos;_&ap
 CRDSuffix=$(echo $CRD | cut -d&apos;-&apos; -f 2)
 CL=$(echo $CRD_CL| cut -d&apos;_&apos; -f 2)     # chars behind first &apos;_&apos; identify Cloud build
 
-echo &quot;Build with Card=$CRD Action=$ACT Action_type=$ACTION_TYPE CLOUD_build=$CL branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX LSFCluster=$LSF_CLUSTER test_on_hw=$TEST_ON_HW&quot;
+echo &quot;Build with Card=$CRD Action=$ACT Action_type=$ACTION_TYPE CLOUD_build=$CL branch_selected=$BRANCH git_branch=$NAME prefix=$PREFIX CRDSuffix=$CRDSuffix LSFCluster=$LSF_CLUSTER test_on_hw=$TEST_ON_HW&quot;
 
 EmailDestinationList=( fabrice_moyen@fr.ibm.com )
 EmailOrNotEmail=0 # 0 means do not send emails; 1 means send email
@@ -446,7 +440,24 @@ function SendAnEmail
 # BSKIP stands for board skip
 
 echo;echo &quot;*******************************************************************************&quot;
-echo &quot;J: Do not run (abort) non-desired cases (action types, actions, cards)&quot;
+echo &quot;J: Do not run (abort) non-desired cases (action types, actions, cards, partial)&quot;
+
+PSKIP=0
+# in partial mode skip all non cloud cases
+if [ &quot;$PARTIAL_ONLY&quot; == &quot;true&quot; ] &amp;&amp; [ &quot;${CL} == &quot;nCL&quot; ];then
+	echo &quot;Skipping non cloud cases in partial mode =&gt; PSKIP=1&quot;
+	PSKIP=1
+fi
+
+# in partial mode skip Reference Cloud case
+if [ &quot;$PARTIAL_ONLY&quot; == &quot;true&quot; ] &amp;&amp; [ &quot;${CL} == &quot;CL&quot; ];then
+	if [ &quot;$ACT&quot; == &quot;${CLOUD_BASE}&quot;  ]; then
+    	echo &quot;Skipping Reference case in partial mode =&gt; PSKIP=1&quot;
+    	PSKIP=1
+    fi
+	
+fi
+
 
 
 BSKIP=0
@@ -593,7 +604,7 @@ fi # end of if ASKIP
 #==============================================================================================
 # Aborting if something went wrong
 
-if [ &quot;$ASKIP&quot; == &quot;1&quot; ] || [ &quot;$DSKIP&quot; == &quot;1&quot; ] || [ &quot;$BSKIP&quot; == &quot;1&quot; ] || [ &quot;$SSKIP&quot; == &quot;1&quot; ];then SKIP=1;else SKIP=0;fi
+if [ &quot;$ASKIP&quot; == &quot;1&quot; ] || [ &quot;$DSKIP&quot; == &quot;1&quot; ] || [ &quot;$BSKIP&quot; == &quot;1&quot; ] || [ &quot;$SSKIP&quot; == &quot;1&quot; ] || [ &quot;$PSKIP&quot; == &quot;1&quot; ];then SKIP=1;else SKIP=0;fi
 
 
 #==============================================================================================
