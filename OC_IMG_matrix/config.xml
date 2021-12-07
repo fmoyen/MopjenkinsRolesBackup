@@ -220,7 +220,8 @@ Not selected : it means a CLOUD_BASE image will be build by default</description
           <name>CLOUD_BASE</name>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
-              <string>hls_hbm_memcopy_1024 hls_helloworld_1024</string>
+              <string>hls_hbm_memcopy_1024</string>
+              <string>hls_helloworld_1024</string>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
@@ -781,7 +782,7 @@ echo; echo &quot;###############################################################
 # AC : ATTENTION LA PARTIE SUIVANTE AVEC LSF EST BIDON, non TESTEE !!!
 
 if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
-	if [ &quot;$PARTIAL_ONLY&quot; == &quot;flase&quot; ]; then
+	if [ &quot;$PARTIAL_ONLY&quot; == &quot;false&quot; ]; then
 		echo &quot;LAUNCHING : make cloud_base&quot;
 		make cloud_base
 		if [ $RC -eq 0 ]; then
@@ -1101,7 +1102,7 @@ esac
 #==============================================================================================
 # Building image (make image/ make cloud...)
 echo &quot;J: DEBUG : var CL = $CL&quot;
-if [ &quot;$CL&quot; == &quot;nCL&quot; &amp;&amp; $PARTIAL_ONLY != &quot;true&quot; ];then
+if [ &quot;$CL&quot; == &quot;nCL&quot; ] &amp;&amp; [ &quot;$PARTIAL_ONLY&quot; != &quot;true&quot; ];then
   echo;echo &quot;****************************************************************************************&quot;
   echo &quot;J: We enter NON-CLOUD MODE&quot;
   echo;echo &quot;****************************************************************************************&quot;
