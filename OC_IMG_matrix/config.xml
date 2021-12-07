@@ -32,7 +32,7 @@ instead of : git@github.com:/OpenCAPI/oc-accel.git </description>
         <hudson.model.StringParameterDefinition>
           <name>BRANCH</name>
           <description>Choose the branch for https://github.com/OpenCAPI/oc-accel you want to test.</description>
-          <defaultValue>master</defaultValue>
+          <defaultValue>enable_PR</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -1279,6 +1279,7 @@ else
    
 
   else # case of a --non $CLOUD_BASE reference-- action (any other)
+  		# If we did not select PARTIAL_ONLY, there is no reason to come here as test should have been skipped
 	echo;echo &quot;    ****************************************************************************************&quot;
     echo &quot;    J: Build Action Region ...&quot;
     echo;echo &quot;    ****************************************************************************************&quot;
