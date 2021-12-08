@@ -43,17 +43,19 @@
     <hudson.matrix.TextAxis>
       <name>LIGNE</name>
       <values>
-        <string>L1</string>
         <string>L2</string>
         <string>L3</string>
+        <string>L4</string>
+        <string>L5</string>
+        <string>L1</string>
       </values>
     </hudson.matrix.TextAxis>
-    <hudson.matrix.LabelExpAxis>
+    <hudson.matrix.LabelAxis>
       <name>label</name>
       <values>
         <string>POWER9</string>
       </values>
-    </hudson.matrix.LabelExpAxis>
+    </hudson.matrix.LabelAxis>
   </axes>
   <builders>
     <hudson.tasks.Shell>
