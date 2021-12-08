@@ -70,7 +70,8 @@ echo &quot;######################################################&quot;
 sleep 2
 
 #AC ajout d&apos;un fail pour voir
-if [ LIGNE == L3 ] &amp;&amp; [ COLONNE == C3 ]; then
+if [ $LIGNE == L3 ] &amp;&amp; [ $COLONNE == C3 ]; then
+	echo &quot;exiting with 1&quot;
 	exit 1
 fi</command>
       <configuredLocalRules/>
