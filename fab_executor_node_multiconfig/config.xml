@@ -48,6 +48,12 @@
         <string>L3</string>
       </values>
     </hudson.matrix.TextAxis>
+    <hudson.matrix.LabelExpAxis>
+      <name>label</name>
+      <values>
+        <string>POWER9</string>
+      </values>
+    </hudson.matrix.LabelExpAxis>
   </axes>
   <builders>
     <hudson.tasks.Shell>
