@@ -49,7 +49,7 @@ for Questions: please contact  A.Castellane or F.Moyen</description>
         <hudson.model.StringParameterDefinition>
           <name>OCUTILS_BRANCH</name>
           <description>Choose the branch for $OCUTILS_URL (typically https://github.com/OpenCAPI/oc-utils) you want to test. Please do not use wildcards!!</description>
-          <defaultValue>oc-reset</defaultValue>
+          <defaultValue>master</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
