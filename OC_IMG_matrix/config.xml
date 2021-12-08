@@ -413,6 +413,25 @@ if [ &quot;$LSF_CLUSTER&quot; == &quot;true&quot; ]; then
 fi
 
 
+#==============================================================================================
+# PR case: Check if CLOUD_BASE contains memcopy_1024 to assign the proper name according to the card
+# 9V3 =&gt; hls_memcopy_1024
+# 9Hx =&gt; hls_hbm_memcopy_1024
+case $CLOUD_BASE
+	memcopy_1024)
+    	if [ &quot;$CRD&quot; == &quot;OC-AD9V3&quot;  ]; then
+    		CLOUD_BASE_ACTUAL=&quot;hls_memcopy_1024&quot;
+        elif [ &quot;$CRD&quot; =~ &quot;OC-AD9H&quot;  ]; then
+    		CLOUD_BASE_ACTUAL=&quot;hls_hbm_memcopy_1024&quot;
+		fi
+    hls_helloworld_1024)
+    	CLOUD_BASE_ACTUAL=&quot;${CLOUD_BASE}&quot;
+       
+esac
+echo &quot;J: $CRD CLOUD_BASE_ACTUAL is $CLOUD_BASE_ACTUAL&quot;
+
+
+
 
 #==============================================================================================
 # Functions
