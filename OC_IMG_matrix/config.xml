@@ -218,9 +218,10 @@ Not selected : it means a CLOUD_BASE image will be build by default</description
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>CLOUD_BASE</name>
+          <description>mem_copy will end up with memcopy_1024 if 9V3 or hbm_memcopy_1024 if 9Hx</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
-              <string>hls_hbm_memcopy_1024</string>
+              <string>memcopy_1024</string>
               <string>hls_helloworld_1024</string>
             </a>
           </choices>
@@ -323,12 +324,12 @@ H 22-23/1 * * *</spec>
         <string>OC-BW250SOC_nCL</string>
       </values>
     </hudson.matrix.TextAxis>
-    <hudson.matrix.LabelExpAxis>
+    <hudson.matrix.LabelAxis>
       <name>label</name>
       <values>
         <string>X86_UBUNTU</string>
       </values>
-    </hudson.matrix.LabelExpAxis>
+    </hudson.matrix.LabelAxis>
   </axes>
   <combinationFilter>  (ACT==&quot;test&quot; &amp;&amp; CRD_CL==&quot;OC-AD9V3_nCL&quot;)    ||   (    ACT!=&quot;test&quot; &amp;&amp;  (  (CRD_CL=~&quot;OC-AD9H&quot; &amp;&amp; !(ACT=~&quot;hls_memcopy_&quot;) )      ||    ( (CRD_CL=~&quot;OC-AD9V3&quot; || CRD_CL=~&quot;OC-BW250SOC&quot; ) &amp;&amp; !(ACT=~&quot;hls_hbm_memcopy_&quot;) &amp;&amp; !(ACT=~&quot;hls_udp&quot;) )        )       )</combinationFilter>
   <builders>
