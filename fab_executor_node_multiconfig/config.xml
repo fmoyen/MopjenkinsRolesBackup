@@ -67,7 +67,12 @@ uname -a
 echo &quot;Ligne=   $LIGNE&quot;
 echo &quot;Colonne= $COLONNE&quot;
 echo &quot;######################################################&quot;
-sleep 2</command>
+sleep 2
+
+#AC ajout d&apos;un fail pour voir
+if [ LIGNE == L3 ] &amp;&amp; [ COLONNE == C3 ]; then
+	exit 1
+fi</command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
   </builders>

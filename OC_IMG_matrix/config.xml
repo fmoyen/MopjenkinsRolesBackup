@@ -213,12 +213,13 @@ hdclp026.boeblingen.de.ibm.com</defaultValue>
         <hudson.model.BooleanParameterDefinition>
           <name>PARTIAL_ONLY</name>
           <description>If Partialmode is requested make sure a base has been build first
-Not selected : it means a CLOUD_BASE image will be build by default</description>
+Not selected : it means a CLOUD_BASE_ACTUAL image will be build by default</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>CLOUD_BASE</name>
-          <description>mem_copy will end up with memcopy_1024 if 9V3 or hbm_memcopy_1024 if 9Hx</description>
+          <description>mem_copy will end up with memcopy_1024 if 9V3 or hbm_memcopy_1024 if 9Hx
+No pb for helloworld.</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
               <string>memcopy_1024</string>
@@ -419,9 +420,9 @@ fi
 # 9Hx =&gt; hls_hbm_memcopy_1024
 case $CLOUD_BASE in
 	memcopy_1024)
-    	if [ $CRD == &quot;OC-AD9V3&quot;  ]; then
+    	if [[ $CRD == &quot;OC-AD9V3&quot; ]]; then
     		CLOUD_BASE_ACTUAL=&quot;hls_memcopy_1024&quot;
-        elif [ $CRD =~ &quot;OC-AD9H&quot;  ]; then
+        elif [[ $CRD =~ &quot;OC-AD9H&quot;  ]]; then
     		CLOUD_BASE_ACTUAL=&quot;hls_hbm_memcopy_1024&quot;
 		fi
         ;;
@@ -479,7 +480,7 @@ fi
 
 # in partial mode skip Reference Cloud case
 if [ &quot;$ACT&quot; != &quot;test&quot; ] &amp;&amp; [ &quot;$PARTIAL_ONLY&quot; == &quot;true&quot; ] &amp;&amp; [ &quot;${CL}&quot; == &quot;CL&quot; ];then
-	if [ &quot;$ACT&quot; == &quot;${CLOUD_BASE}&quot;  ]; then
+	if [ &quot;$ACT&quot; == &quot;${CLOUD_BASE_ACTUAL}&quot;  ]; then
     	echo &quot;Skipping Reference case in partial mode =&gt; PSKIP=1&quot;
     	PSKIP=1
     fi
@@ -487,7 +488,7 @@ fi
     
 # in non partial mode skip partial (non ref) Cloud case
 if [ &quot;$ACT&quot; != &quot;test&quot; ] &amp;&amp; [ &quot;$PARTIAL_ONLY&quot; == &quot;false&quot; ] &amp;&amp; [ &quot;${CL}&quot; == &quot;CL&quot; ];then
-	if [ &quot;$ACT&quot; != &quot;${CLOUD_BASE}&quot;  ]; then
+	if [ &quot;$ACT&quot; != &quot;${CLOUD_BASE_ACTUAL}&quot;  ]; then
     	echo &quot;Skipping partial (non Reference)case in non partial mode =&gt; PSKIP=1&quot;
     	PSKIP=1
     fi	
@@ -660,6 +661,7 @@ echo &quot;LocalWorkspace=${LocalWorkspace}&quot; &gt;&gt; export_props.properti
 echo &quot;LSFRoot=${LSFRoot}&quot; &gt;&gt; export_props.properties
 echo &quot;LSFRootWorkspace=${LSFRootWorkspace}&quot; &gt;&gt; export_props.properties
 echo &quot;LSFWorkspace=${LSFWorkspace}&quot; &gt;&gt; export_props.properties
+echo &quot;CLOUD_BASE_ACTUAL=${CLOUD_BASE_ACTUAL}&quot; &gt;&gt; export_props.properties
 
 echo &quot;properties forwarded to next shell:&quot;
 cat export_props.properties
@@ -695,7 +697,7 @@ echo;echo &quot;****************************************************************
 echo &quot;EXECUTING SECOND OpenCAPI SHELL FROM MOPJENKINS (`date`)&quot;
 echo &quot;****************************************************************************************&quot;
 
-echo &quot;Building with Card=$CRD Action=$ACT CLOUD=$CL CLOUD_BASE=$CLOUD_BASE ) &quot;
+echo &quot;Building with Card=$CRD Action=$ACT CLOUD=$CL CLOUD_BASE_ACTUAL=$CLOUD_BASE_ACTUAL ) &quot;
 
 
 #==============================================================================================
@@ -710,7 +712,7 @@ TESTBOXES=( ${mopBoxes[*]} ${austinBoxes[*]} ) # init array of systems
 echo &quot;testboxes now = ${TESTBOXES[@]}&quot;
 
 RootSaveDir=/data/Images
-JenkinsDcpDir=${RootSaveDir}/${CRD}/${CRD}_DCP   # This directory will collect cloud base images from $CLOUD_BASE for a given card
+JenkinsDcpDir=${RootSaveDir}/${CRD}/${CRD}_DCP   # This directory will collect cloud base images from $CLOUD_BASE_ACTUAL for a given card
 SaveDir=${RootSaveDir}/${CRD}/${CRD}_IMAGES
 RootLogsDir=/data/LogsWhenFailed
 LogsDir=$RootLogsDir/${BUILD_NUMBER}-${JOB_NAME}-${GIT_BRANCH}/hardware
@@ -1283,9 +1285,9 @@ else
   make -s oldconfig
 
   
-  if [ &quot;$ACT&quot; == $CLOUD_BASE  ]; then
+  if [ &quot;$ACT&quot; == $CLOUD_BASE_ACTUAL  ]; then
   	echo;echo &quot;    ****************************************************************************************&quot;
-    echo &quot;    J: Building Cloud Base for $CLOUD_BASE for card $CRD&quot;    
+    echo &quot;    J: Building Cloud Base for $CLOUD_BASE_ACTUAL for card $CRD&quot;    
     echo &quot;    J: DCP temp files will be stored in ${JenkinsDcpDir}&quot;
     echo;echo &quot;    ****************************************************************************************&quot;
     echo &quot;&quot;
@@ -1297,8 +1299,8 @@ else
     
     echo &quot;J: Removing pre existing files from ${JenkinsDcpDir}&quot;    	
   	rm -rf ${JenkinsDcpDir}/*;
-    echo &quot;J: Creating a temp file : ${CLOUD_BASE}_cloud_building&quot;;
-    touch ${JenkinsDcpDir}/${CLOUD_BASE}_cloud_building;
+    echo &quot;J: Creating a temp file : ${CLOUD_BASE_ACTUAL}_cloud_building&quot;;
+    touch ${JenkinsDcpDir}/${CLOUD_BASE_ACTUAL}_cloud_building;
 
 	#  bsub $LSF -J &quot;${CRD}_${ACT}_image&quot; &quot;make cloud_base&quot; || exit
   	make cloud_base
@@ -1308,8 +1310,8 @@ else
     ls ${OCACCEL_ROOT}/hardware/build/Images/
     echo &quot;J: Copying ${OCACCEL_ROOT}/hardware/build/Images/* into ${JenkinsDcpDir}&quot;
     cp ${OCACCEL_ROOT}/hardware/build/Images/* ${JenkinsDcpDir}
-    rm ${JenkinsDcpDir}/${CLOUD_BASE}_cloud_building
-    touch ${JenkinsDcpDir}/${CLOUD_BASE}_cloud_done
+    rm ${JenkinsDcpDir}/${CLOUD_BASE_ACTUAL}_cloud_building
+    touch ${JenkinsDcpDir}/${CLOUD_BASE_ACTUAL}_cloud_done
    
 
   else # case of a --non $CLOUD_BASE reference-- action (any other)
@@ -1320,21 +1322,21 @@ else
     echo &quot;&quot;
     echo &quot;    J: Waiting 1&apos; to allow reference test to clean up DCP temporary dir&quot;
     sleep 120	# to allow main helloword reference test case to clean the directory, otherwise we see the
-				# previous file $CLOUD_BASE_cloud_done (from the previous jenkins run)
+				# previous file $CLOUD_BASE_ACTUAL_cloud_done (from the previous jenkins run)
 		
     # Testing if cloud base has been performed prior to action building
 
 maxloopwaitrefdone=60 # with sleep 120 command this will wait for 2 hours
 echo;echo &quot;***************************************************************************************&quot;
-echo &quot;J: Waiting for Reference PR test $CLOUD_BASE to be finished&quot;
+echo &quot;J: Waiting for Reference PR test $CLOUD_BASE_ACTUAL to be finished&quot;
     
 	for loopdone in `seq 1 $maxloopwaitrefdone`;do
 
   		echo;echo &quot;*************************************************&quot;
  		echo &quot;J: LOOP $loopdone/$maxloopwaitrefdone (`date`)&quot;
     
-    	if [ ! -f ${JenkinsDcpDir}/${CLOUD_BASE}_cloud_done ]; then
-        	echo &quot;J: Cloud base for ${CLOUD_BASE} is not finished, waiting two more minutes before recheck&quot;
+    	if [ ! -f ${JenkinsDcpDir}/${CLOUD_BASE_ACTUAL}_cloud_done ]; then
+        	echo &quot;J: Cloud base for ${CLOUD_BASE_ACTUAL} is not finished, waiting two more minutes before recheck&quot;
             sleep 120
         else break
 		fi
@@ -1345,8 +1347,8 @@ echo &quot;J: Waiting for Reference PR test $CLOUD_BASE to be finished&quot;
         exit 1
     fi
 
-	if [ -f ${JenkinsDcpDir}/${CLOUD_BASE}_cloud_done ]; then
-           echo &quot;Cloud base for ${CLOUD_BASE} has finished =&gt; launching Build Action step ...&quot;
+	if [ -f ${JenkinsDcpDir}/${CLOUD_BASE_ACTUAL}_cloud_done ]; then
+           echo &quot;Cloud base for ${CLOUD_BASE_ACTUAL} has finished =&gt; launching Build Action step ...&quot;
     fi
         
     make cloud_action
@@ -1381,7 +1383,7 @@ if [ &quot;$CL&quot; == &quot;nCL&quot; ];then
 	BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*ary.bin|grep -v FACTORY|head -n2`
     BITFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*.bit|grep -v FACTORY|head -n2`
    else
-   		  if [ &quot;$ACT&quot; == &quot;$CLOUD_BASE&quot;  ];then
+   		  if [ &quot;$ACT&quot; == &quot;$CLOUD_BASE_ACTUAL&quot;  ];then
           	BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*ary.bin|grep -v FACTORY|head -n2`
           else
           	BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*partial.bin|grep -v FACTORY|head -n2`
