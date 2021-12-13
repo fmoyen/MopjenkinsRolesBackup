@@ -34,7 +34,7 @@ instead of : git@github.com:/OpenCAPI/oc-accel.git </description>
         <hudson.model.StringParameterDefinition>
           <name>BRANCH</name>
           <description>Choose the branch for https://github.com/OpenCAPI/oc-accel you want to test.</description>
-          <defaultValue>enable_PR</defaultValue>
+          <defaultValue>master</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -224,8 +224,8 @@ Not selected : it means a CLOUD_BASE_ACTUAL image will be build by default</desc
 No pb for helloworld.</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
-              <string>memcopy_1024</string>
               <string>hls_helloworld_1024</string>
+              <string>memcopy_1024</string>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
@@ -293,7 +293,7 @@ No pb for helloworld.</description>
   <triggers>
     <hudson.triggers.SCMTrigger>
       <spec>H 0-8/1 * * *
-H 22-23/1 * * *</spec>
+H 19-23/1 * * *</spec>
       <ignorePostCommitHooks>false</ignorePostCommitHooks>
     </hudson.triggers.SCMTrigger>
   </triggers>
