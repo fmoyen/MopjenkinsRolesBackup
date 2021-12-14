@@ -212,6 +212,11 @@ hdclp026.boeblingen.de.ibm.com</defaultValue>
           <description>Check if users are connected at working hours</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MAXLOOP</name>
+          <defaultValue>5</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>PARTIAL_ONLY</name>
           <description>If Partialmode is requested make sure a base has been build first
@@ -1196,8 +1201,9 @@ if [ &quot;$CL&quot; == &quot;nCL&quot; ];then
   fi
 
   # $maxloop number of tentative to try and make the image
+  maxloop = $((MAXLOOP))
   
-  maxloop=5;
+#  maxloop=5; AC : I choose to set this param by user with default value 5
   for loop in `seq 1 $maxloop`
   do  
     echo;echo &quot;****************************************************************************************&quot;
@@ -1381,7 +1387,7 @@ echo
 # AC : adding ary to prevent falsely collecting the XXX_partial.bin file since PR is introduced
 
 if [ &quot;$CL&quot; == &quot;nCL&quot; ];then
-	if [ $CRD == &quot;OC_BW250SOC&quot; ];then
+	if [ $CRD == &quot;OC-BW250SOC&quot; ];then
     	BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*.bin|grep -v FACTORY|head -n2`
     else
     	BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*ary.bin|grep -v FACTORY|head -n2`
