@@ -1370,7 +1370,7 @@ fi  # End of CL / nCL test
 #==============================================================================================
 # Checking generated binaries
 
-# when using a parallel flash we have only 1 binary file
+# when using a parallel flash we have only 1 binary file (OC-BW250SOC case)
 # when using a SPI8 flash we have 2 binary files to deal with
 
 echo;echo &quot;****************************************************************************************&quot;
@@ -1381,14 +1381,18 @@ echo
 # AC : adding ary to prevent falsely collecting the XXX_partial.bin file since PR is introduced
 
 if [ &quot;$CL&quot; == &quot;nCL&quot; ];then
-	BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*ary.bin|grep -v FACTORY|head -n2`
-    BITFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*.bit|grep -v FACTORY|head -n2`
-   else
-   		  if [ &quot;$ACT&quot; == &quot;$CLOUD_BASE_ACTUAL&quot;  ];then
-          	BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*ary.bin|grep -v FACTORY|head -n2`
-          else
-          	BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*partial.bin|grep -v FACTORY|head -n2`
-          fi
+	if [ $CRD == &quot;OC_BW250SOC&quot; ]
+    	BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*.bin|grep -v FACTORY|head -n2`
+    elif
+    	BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*ary.bin|grep -v FACTORY|head -n2`
+	    BITFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*.bit|grep -v FACTORY|head -n2`
+    fi
+else
+	if [ &quot;$ACT&quot; == &quot;$CLOUD_BASE_ACTUAL&quot;  ];then
+    	BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*ary.bin|grep -v FACTORY|head -n2`
+	else
+       	BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*partial.bin|grep -v FACTORY|head -n2`
+	fi
 fi   
     
   
