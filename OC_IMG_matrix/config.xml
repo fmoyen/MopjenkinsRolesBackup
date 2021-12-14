@@ -1385,15 +1385,20 @@ echo
 
 #BINFILES contains binary name (In SPI : &quot;primary and secondary&quot; names)
 # AC : adding ary to prevent falsely collecting the XXX_partial.bin file since PR is introduced
-
+    echo &quot;DEBUG: CL = $CL and CRD = $CRD&quot;
 if [ &quot;$CL&quot; == &quot;nCL&quot; ];then
+	# AC DEBUG
+    echo &quot;DEBUG: we are in nCL mode : CL = $CL and CRD = $CRD&quot;
 	if [ $CRD == &quot;OC-BW250SOC&quot; ];then
+    	echo &quot;DEBUG: BW250SOC case&quot;
     	BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*.bin|grep -v FACTORY|head -n2`
     else
+    	echo &quot;DEBUG: NON BW250SOC case&quot;
     	BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*ary.bin|grep -v FACTORY|head -n2`
 	    BITFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*.bit|grep -v FACTORY|head -n2`
     fi
 else
+	eco &quot;DEBUG: we are in cloud mode&quot;
 	if [ &quot;$ACT&quot; == &quot;$CLOUD_BASE_ACTUAL&quot;  ];then
     	BINFILES=`ls ${OCACCEL_ROOT}/hardware/build/Images/oc_[0-9]*ary.bin|grep -v FACTORY|head -n2`
 	else
