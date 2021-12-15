@@ -213,7 +213,7 @@ hdclp026.boeblingen.de.ibm.com</defaultValue>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>MAXLOOP</name>
+          <name>MAX_LOOP</name>
           <defaultValue>5</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
@@ -1201,7 +1201,8 @@ if [ &quot;$CL&quot; == &quot;nCL&quot; ];then
   fi
 
   # $maxloop number of tentative to try and make the image
-  maxloop = $((MAXLOOP))
+  maxloop = $((MAX_LOOP))
+  echo &quot;J: maxloop is: $maxloop, we will try to build an image $maxloop times (in case of timing failure)&quot;
   
 #  maxloop=5; AC : I choose to set this param by user with default value 5
   for loop in `seq 1 $maxloop`
