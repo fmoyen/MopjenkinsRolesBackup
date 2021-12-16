@@ -761,7 +761,9 @@ if [ &quot;$SANITY_RELOAD&quot; == &quot;true&quot; ]; then
             ssh -T ${HWUser}@${box} &lt;&lt; EOF || RC_SAN_OCRL=$?
             export TERM=xterm
             echo &quot;J remote on ${box}: Resetting card #$cardid&quot;
+            #echo &quot;J:DEBUG : launching local oc!&quot;
             #$SudoOrNotSudo which oc-reload
+            #$SudoOrNotSudo oc-reload -C $cardid
             $SudoOrNotSudo /home/$HWUser/oc-utils/oc-reload -V
             $SudoOrNotSudo /home/$HWUser/oc-utils/oc-reload -C $cardid
 EOF
@@ -899,7 +901,9 @@ if [ $RC_RUN -eq 0 ]; then
   
   if [ $RC_ACT_CHECK -eq 0 ]; then
     echo &quot;ACTION MATCH return code is good&quot;
-    else echo &quot;ACTION DO NOT MATCH !&quot;
+    else 
+    	echo &quot;ACTION DO NOT MATCH !&quot;
+        exit 31
   fi
 
     #------------------------------------------------------------------------------------------------------------------------------
