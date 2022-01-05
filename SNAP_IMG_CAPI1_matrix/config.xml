@@ -75,8 +75,8 @@ WARNING !!!&#xd;
 Warning: -200ps is not easy to reach and needs several attempts (sometimes 5 attempts are not enough).</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
-              <string>-100</string>
               <string>-300</string>
+              <string>-100</string>
               <string>-1000</string>
             </a>
           </choices>
@@ -641,8 +641,8 @@ echo &quot; --&gt; For all CAPI1 cards we run Vivado 2018.1 and extend Timing tr
 cd ${SNAP_ROOT}
 
 # for all CAPI1 cards              we run 2018.1 
-# export VIV_VERSION=&quot;2018.1&quot;
-export VIV_VERSION=&quot;2020.2&quot;
+export VIV_VERSION=&quot;2018.1&quot;
+# export VIV_VERSION=&quot;2020.2&quot;
 echo &quot;  -&gt; VIVADO version initially set to $VIV_VERSION&quot;
 
 echo &quot;export TIMING_LABLIMIT=\&quot;${TIMING_LABLIMIT_CHOICE}\&quot;&quot; &gt;&gt; snap_env.sh
